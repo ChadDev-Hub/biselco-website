@@ -1,10 +1,10 @@
-"use client"
 interface Props {
     subtitle: string;
     description: string;
 }
 import Image from "next/image";
 import SignupButton from "./signupbutton";
+import LoginButton from "./loginbutton";
 export default function Hero({ subtitle, description }: Props) {
     return (
         <div className="
@@ -13,14 +13,20 @@ export default function Hero({ subtitle, description }: Props) {
             <div className="flex flex-col gap-16 lg:items-start text-center sm:text-center md:text-start lg:text-start order-2 lg:order-1">
                 <h1 className="text-2xl lg:text-4xl">{subtitle}</h1>
                 <p>{description}</p>
-                <div>
-                    <SignupButton/>
+                <div className="
+                flex justify-center sm:justify-center md:justify-end lg:justify-end
+                 w-full gap-4">
+                    <SignupButton />
+                    <LoginButton>
+                        Login
+                    </LoginButton> 
                 </div>
             </div>
             <div className="flex justify-center rounded-full order-1 lg:order-2">
                 <div className="hover-3d rounded-full">
                     <figure className="max-w-100 rounded-full">
                         <Image
+                            loading="eager"
                             src="/biselco-icon.png"
                             alt="biselco-icon"
                             width={400}

@@ -38,8 +38,15 @@ export default function NavBar({ title }: Props) {
     }, [currentTheme])
 
     return (
-        <div className="navbar fixed top-0 left-0 bg-base-100 shadow-sm">
+        <div className="navbar fixed top-0 left-0 bg-base-100 shadow-sm z-50">
+            <Image
+                src="/biselco-icon.png"
+                alt="biselco"
+                width={20}
+                height={20}
+                />
             <div className="flex-1">
+                
                 <a className="btn btn-ghost text-xl">{title}</a>
             </div>
             <div className="flex-none">
