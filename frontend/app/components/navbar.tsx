@@ -38,7 +38,7 @@ export default function NavBar({ title }: Props) {
     }, [currentTheme])
 
     return (
-        <div className="navbar fixed top-0 left-0 bg-base-100 shadow-sm z-50">
+        <div className="navbar fixed top-0 left-0 bg-base-100/45 shadow-md  backdrop-blur-3xl z-50">
             <Image
                 src="/biselco-icon.png"
                 alt="biselco"
@@ -47,7 +47,7 @@ export default function NavBar({ title }: Props) {
                 />
             <div className="flex-1">
                 
-                <a className="btn btn-ghost text-xl">{title}</a>
+                <a className="btn btn-ghost text-xl text-blue-700">{title}</a>
             </div>
             <div className="flex-none">
                     <button type="button" aria-label="Search" className="btn btn-ghost btn-circle">
