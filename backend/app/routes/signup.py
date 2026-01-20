@@ -1,13 +1,14 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, status
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from ..models import Users, MeterAccount
 from ..schema.form import SignUpUser
 from ..dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy import select, and_
 from ..utils.hashing import hash_password
+from sqlalchemy.exc import IntegrityError
 router = APIRouter(prefix="/auth", tags=['Auth'])
 
 session_depends = Depends(get_session)
@@ -25,11 +26,12 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
         - password: User Password
     
     '''
-    results = await db.execute(select(Users).where(Users.email == data.email))
-    existing_user = results.mappings().first()
+    # results = await db.execute(select(Users).where(Users.email == data.email))
+    # existing_user = results.mappings().first()
     
-    if existing_user:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+    # if existing_user:
+    #     raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+        
     try: 
         user = Users(
             user_name=data.username,
@@ -42,11 +44,16 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
         db.add(user)
         await db.commit()
         await db.close()
-        return  {
-            "detail": "Signup Sucessfull"
-        }
-    except Exception as e:
-        print(e)
+        return JSONResponse(content={"detail": "Signup Successful"}, status_code=status.HTTP_200_OK)
+    except IntegrityError as e:
+        await db.rollback()
+        if "users_account_user_name_key" in  str(e.orig):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Username Already Registered")
+        elif "users_account_email_key" in str(e.orig):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+        else:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database Error")
+
         
 
 @router.post("/admin/signup")

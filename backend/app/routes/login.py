@@ -18,33 +18,36 @@ session_depends= Depends(get_session)
 @router.post("/token", response_model=TokenData)
 async def login_for_access_token(
                                 response: Response,
-                                form_data:OAuth2PasswordRequestForm = Depends(),
+                                form_data:OAuth2PasswordRequestForm = Depends(LoginUser),
                                 session:AsyncSession = session_depends,
                                  ):
-    user = await authenticate_user(username=form_data.username, password=form_data.password, session=session)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Username or Password")
-    access_token = await create_access_token(
-        data={
-            "sub" :user.user_name, 
-            "id": user.id})
-    refresh_token = await create_refresh_token(
-        data= {
-            "sub": user.user_name,
-            "id": user.id
+    try:
+        user = await authenticate_user(username=form_data.username, password=form_data.password, session=session)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Username or Password")
+        access_token = await create_access_token(
+            data={
+                "sub" :user.user_name, 
+                "id": user.id})
+        refresh_token = await create_refresh_token(
+            data= {
+                "sub": user.user_name,
+                "id": user.id
+            }
+        )
+        response.set_cookie(key="refresh_token",
+                            value=refresh_token,
+                            expires=datetime.now(timezone.utc)+ timedelta(days=7),
+                            httponly=True,
+                            secure=True
+                            )
+        return {
+            "access_token": access_token,
+            "token_type": "bearer"
         }
-    )
-    response.set_cookie(key="refresh_token",
-                        value=refresh_token,
-                        expires=datetime.now(timezone.utc)+ timedelta(days=7),
-                        httponly=True,
-                        secure=True
-                        )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
-    
+    except Exception as e:
+        print(e)
+        
 @router.post("/token/refresh")
 async def refresh_token(request:Request):
     refresh_token = request.cookies.get("refresh_token")
