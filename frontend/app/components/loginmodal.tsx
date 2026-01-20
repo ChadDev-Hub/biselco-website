@@ -1,19 +1,20 @@
 "use client"
 import React from 'react'
+import { Login } from '../actions'
 export default function LoginModal() {
     return (
         <>
             < button type='button' className="btn btn-primary rounded-full w-30" onClick={() => {
-                const modal = document.getElementById('my_modal_3') as HTMLDialogElement | null
+                const modal = document.getElementById('login_modal') as HTMLDialogElement | null
                 if (modal) {
                     modal.showModal()
                 }
             }}> Login </button >
-            <dialog id="my_modal_3" className="modal">
+            <dialog id="login_modal" className="modal">
                 <div className="modal-box bg-black/45 backdrop-blur-xs max-w-sm flex flex-col items-center border ">
-                    <form className='w-full px-2'>
+                    <form action={Login} className='w-full px-2'>
                         <button type='button' onClick={() => {
-                            const modal = document.getElementById('my_modal_3') as HTMLDialogElement | null
+                            const modal = document.getElementById('login_modal') as HTMLDialogElement | null
                             if (modal) {
                                 modal.close()
                             }
@@ -68,6 +69,7 @@ export default function LoginModal() {
                                     </g>
                                 </svg>
                                 <input
+                                    name='password'
                                     type="password"
                                     required
                                     placeholder="Password"
