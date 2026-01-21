@@ -1,7 +1,53 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Login } from '../actions'
+import { redirect } from 'next/navigation'
 export default function LoginModal() {
+    const [loginMessage, setLoginMessage] = useState({
+        message: "",
+        alert_style: "",
+        show: false,
+        loginsucessfull: false
+    })
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formdata = new FormData(e.currentTarget)
+        const res = await Login(formdata)
+        if (res?.error) {
+            setLoginMessage({
+                message: res.error,
+                alert_style: "alert-warning",
+                show: true,
+                loginsucessfull: false
+            })
+            return
+        }
+        setLoginMessage({
+            message:"Login Sucessfully",
+            alert_style: "alert-success",
+            show: true,
+            loginsucessfull: true
+        })
+        redirect('/')
+    }
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoginMessage(prev => ({
+                ...prev,
+                message: "",
+                alert_style: "",
+                show: false,
+            }))
+            if (loginMessage.loginsucessfull) {
+                const modal = document.getElementById("login_modal") as HTMLDialogElement | null
+                if (modal) {
+                    modal.close()
+                }
+            }
+        }, 3000);
+        return () => clearTimeout(timer)
+    }, [loginMessage.show, loginMessage.loginsucessfull])
     return (
         <>
             < button type='button' className="btn btn-primary rounded-full w-30" onClick={() => {
@@ -10,19 +56,33 @@ export default function LoginModal() {
                     modal.showModal()
                 }
             }}> Login </button >
-            <dialog id="login_modal" className="modal">
+            <dialog id="login_modal" className="modal backdrop-blur-sm">
                 <div className="modal-box bg-black/45 backdrop-blur-xs max-w-sm flex flex-col items-center border ">
-                    <form action={Login} className='w-full px-2'>
+                    <form onSubmit={handleSubmit} className='w-full px-2'>
                         <button type='button' onClick={() => {
                             const modal = document.getElementById('login_modal') as HTMLDialogElement | null
                             if (modal) {
                                 modal.close()
                             }
                         }} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                        <fieldset className='fieldset w-full flex flex-col gap-1.5'>
+                        <fieldset className='fieldset w-full flex flex-col gap-2'>
                             <legend className='fieldset-legend text-2xl '>
                                 Signup Form
                             </legend>
+                            {/* LOGIN MESSAGE */}
+                            {loginMessage.show &&
+                                <div role="alert" className={`alert ${loginMessage.alert_style} rounded-full`}>
+                                    {loginMessage.loginsucessfull ?
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg> :
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    }
+                                    <span>{loginMessage.message}</span>
+                                </div>
+                            }
                             {/* USERNAME INPUT */}
                             <label className="input validator rounded-full">
                                 <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

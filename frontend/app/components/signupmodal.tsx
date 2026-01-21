@@ -10,25 +10,24 @@ export default function SignupModal() {
 
     })
     const handleSubmit = async (formdata: FormData) => {
-        try {
-            const results = await Signup(formdata)
-            console.log(results.detail)
-            if (results.detail == "Signup Successful") {
-                setSignupMessage({
-                    message: results.detail,
-                    alertstyle: "alert-success",
-                    show: true,
-                    signupsuccessull: true
-                })
-            }
-        } catch (error) {
+        const results = await Signup(formdata)
+        if (results?.error) {
             setSignupMessage({
-                message: (error as Error)?.message || "signup failed",
+                message: results.error,
                 alertstyle: "alert-error",
                 show: true,
                 signupsuccessull: false
             })
+            return
         }
+
+
+        setSignupMessage({
+            message: results.detail,
+            alertstyle: "alert-success",
+            show: true,
+            signupsuccessull: true
+        })
     }
 
     useEffect(() => {
