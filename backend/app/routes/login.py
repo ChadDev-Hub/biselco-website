@@ -27,19 +27,19 @@ async def login_for_access_token(
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Username or Password")
     
-        role = [role.name for role in user.roles][0]
+        role = [role.name for role in user.roles]
         if not role:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Invalid Role")
         access_token = await create_access_token(
             data={
                 "sub" :user.user_name, 
                 "id": user.id,
-                "role": role})
+                "role": role[0]})
         refresh_token = await create_refresh_token(
             data= {
                 "sub": user.user_name,
                 "id": user.id,
-                "role" : role
+                "role" : role[0]
             }
         )
         response.set_cookie(key="refresh_token",
@@ -47,7 +47,17 @@ async def login_for_access_token(
                             expires=datetime.now(timezone.utc)+ timedelta(days=7),
                             httponly=True,
                             secure=True
-                            )        
+                            )
+        response.set_cookie(
+             key="access_token",
+             value=access_token,
+             max_age=60*15,
+             httponly=True,
+             samesite="none",
+             secure=False,
+             path="/"
+        )
+
         return {
             "access_token": access_token,
             "token_type": "bearer"  
