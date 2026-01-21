@@ -40,6 +40,7 @@ export default function NavBar({ title }: Props) {
     return (
         <div className="navbar fixed top-0 left-0 bg-base-100/45 shadow-md  backdrop-blur-3xl z-50">
             <Image
+                loading="eager"
                 src="/biselco-icon.png"
                 alt="biselco"
                 width={20}
@@ -64,6 +65,7 @@ export default function NavBar({ title }: Props) {
                     <div aria-label="Profile" tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
                             <Image
+                                loading="eager"
                                 src="/globe.svg"
                                 alt="svg"
                                 width={5}

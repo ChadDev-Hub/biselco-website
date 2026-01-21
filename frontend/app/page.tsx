@@ -11,7 +11,6 @@ export default async function Home() {
               subtitle={landingPageData.hero.subtitle}
               description={landingPageData.hero.description} />
           }
-       
       </main>
     </div>
   );
