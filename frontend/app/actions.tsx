@@ -28,7 +28,6 @@ const Login = async(formdata:FormData) => {
             method: "POST",
             body: data
         }
-        
     )
 }
 
