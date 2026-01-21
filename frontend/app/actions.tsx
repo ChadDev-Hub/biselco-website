@@ -1,6 +1,8 @@
 "use server";
 import { NextResponse } from "next/server";
 const baseUrl = process.env.BASESERVERURL
+
+// SIGNUP ACTION
 const Signup = async (formdata: FormData) => {
     const data = formdata
     const res = await fetch(`${baseUrl}/auth/signup`,
@@ -19,6 +21,7 @@ const Signup = async (formdata: FormData) => {
 
 }
 
+// LOGIN ACTION 
 const Login = async (formdata: FormData) => {
     const body = new URLSearchParams({
         username: formdata.get("username") as string,
@@ -35,21 +38,13 @@ const Login = async (formdata: FormData) => {
             credentials: "include"
         }
     )
-    const data = await fres.json()
+    
     if (!fres.ok) {
+        const data = await fres.json()
         return { error: data.detail }
     }
-    const nres = NextResponse.json({
-        message: "Token stored"
-    })
-    nres.cookies.set("access_token", data.access_token, {
-        httpOnly: true,
-        path: "/",
-        maxAge: 60 * 60 * 24,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production"
-    })
-    return nres
+    const data = await fres.json()
+    return data
 }
 
 export { Signup, Login };
