@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
-from ..models import Users, MeterAccount
+from ..models import Users, MeterAccount, Roles
 from ..schema.form import SignUpUser
 from ..dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -33,13 +33,14 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
     #     raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
         
     try: 
+        mco_role = await db.scalar(select(Roles).where(Roles.name == "mco"))
         user = Users(
             user_name=data.username,
             first_name = data.firstname,
             last_name = data.lastname,
             email=data.email,
             password=hash_password(data.password),
-
+            roles = [mco_role]
         )
         db.add(user)
         await db.commit()
