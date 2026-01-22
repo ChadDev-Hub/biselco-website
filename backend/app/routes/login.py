@@ -48,16 +48,6 @@ async def login_for_access_token(
                             httponly=True,
                             secure=True
                             )
-        response.set_cookie(
-             key="access_token",
-             value=access_token,
-             max_age=60*15,
-             httponly=True,
-             samesite="none",
-             secure=False,
-             path="/"
-        )
-
         return {
             "access_token": access_token,
             "token_type": "bearer"  

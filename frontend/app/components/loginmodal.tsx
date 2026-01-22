@@ -1,8 +1,9 @@
 "use client"
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { Login } from '../actions'
-import { redirect } from 'next/navigation'
+import { loginfortoken } from '../services/api'
 export default function LoginModal() {
+    const router = useRouter()
     const [loginMessage, setLoginMessage] = useState({
         message: "",
         alert_style: "",
@@ -12,10 +13,10 @@ export default function LoginModal() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formdata = new FormData(e.currentTarget)
-        const res = await Login(formdata)
-        if (res?.error) {
+        const res = loginfortoken(formdata);
+        if ((await res).error) {
             setLoginMessage({
-                message: res.error,
+                message: "Invalid User or Password",
                 alert_style: "alert-warning",
                 show: true,
                 loginsucessfull: false
@@ -28,7 +29,7 @@ export default function LoginModal() {
             show: true,
             loginsucessfull: true
         })
-        redirect('/')
+        router.push("/news")
     }
 
     useEffect(() => {
