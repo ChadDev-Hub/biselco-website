@@ -27,13 +27,14 @@ export async function loginfortoken(formdata: FormData) {
             error: data.detail
         }
     }
-    (await cookies()).set("access_token", data.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 15,
-        path: "/",
-    })
+    
+    // (await cookies()).set("access_token", data.access_token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === "production",
+    //     sameSite: "lax",
+    //     maxAge: 60 * 15,
+    //     path: "/",
+    // })
     return {
         success: true
     }

@@ -6,6 +6,7 @@ import { refreshToken } from '../services/api'
 const baseUrl = process.env.BASESERVERURL
 const News = async() => {
   const token = (await cookies()).get("access_token")?.value;
+  console.log(token)
   if (!token){
     redirect("/")
   }
@@ -16,11 +17,7 @@ const News = async() => {
   })
   if (res.status === 401){
     const refreshResult = await refreshToken()
-    if (refreshResult.success){
-      redirect("/news")
-    }else{
-      redirect("/")
-    }
+    redirect("/")
   }
   return (
     <div className='mt-20 border h-full'>
