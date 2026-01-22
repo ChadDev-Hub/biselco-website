@@ -16,7 +16,7 @@ from ..utils.token import create_access_token, create_refresh_token, ALGORITHM, 
 from dotenv import load_dotenv
 import os
 session_depends= Depends(get_session)
-@router.post("/token", response_model=TokenData)
+@router.post("/token")
 async def login_for_access_token(
                                 response: Response,
                                 form_data:OAuth2PasswordRequestForm = Depends(),
@@ -46,11 +46,19 @@ async def login_for_access_token(
                             value=refresh_token,
                             expires=datetime.now(timezone.utc)+ timedelta(days=7),
                             httponly=True,
-                            secure=True
+                            secure=False,
+                            samesite="lax"
                             )
+        response.set_cookie(
+             key="access_token",
+             value=access_token,
+             max_age=60*15,
+             httponly=True,
+             secure=False,
+             samesite="lax"
+        )
         return {
-            "access_token": access_token,
-            "token_type": "bearer"  
+            "success": True  
         }
 
         
