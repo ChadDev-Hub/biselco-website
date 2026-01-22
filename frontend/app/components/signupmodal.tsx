@@ -9,6 +9,7 @@ export default function SignupModal() {
         signupsuccessull: false
 
     })
+
     const handleSubmit = async (formdata: FormData) => {
         const results = await Signup(formdata)
         if (results?.error) {
@@ -22,7 +23,7 @@ export default function SignupModal() {
         }
 
 
-        setSignupMessage({
+    setSignupMessage({
             message: results.detail,
             alertstyle: "alert-success",
             show: true,

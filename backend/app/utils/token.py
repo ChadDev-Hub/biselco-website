@@ -9,8 +9,8 @@ load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
 REFRESH_TOKEN_EXPIRE_DAYS = 7 
 
 
@@ -32,13 +32,14 @@ async def create_refresh_token(data:dict):
 async def get_current_user(token:str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect username or password",
+        detail="Invalid Credential",
         headers={"WWW-Authenticate" : "Bearer"}
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         user_name = payload.get("sub")
         user_id = payload.get("id")
+        print(user_name)
         if user_name is None or user_id is None:
             raise credential_exception
         return {
