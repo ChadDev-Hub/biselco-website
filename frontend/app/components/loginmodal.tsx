@@ -29,7 +29,7 @@ export default function LoginModal() {
             show: true,
             loginsucessfull: true
         })
-        router.push("/news")
+        router.push("/")
     }
 
     useEffect(() => {

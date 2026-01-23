@@ -1,7 +1,6 @@
 "use server"
 
 import { cookies } from "next/headers"
-
 // GET LANDING PAGE DATA
 const baseUrl = process.env.BASESERVERURL
 export async function getLandingPageData() {
@@ -13,6 +12,23 @@ export async function getLandingPageData() {
     return data
 }
 
+export async function getNewsPage(){
+    const res = await fetch(`${baseUrl}/news/`,
+        {
+            method: "GET",
+            cache: "no-store",
+            credentials:"include"
+        }
+    )
+    const data = await res.json()
+    console.log(data)
+    if (!res.ok){
+        return{
+            error: true
+        }
+    }
+    return data
+}
 
 export async function loginfortoken(formdata: FormData) {
     const res = await fetch(`${baseUrl}/auth/token`, {
@@ -20,21 +36,12 @@ export async function loginfortoken(formdata: FormData) {
         body: formdata,
         credentials: "include"
     })
-    console.log(res)
     const data = await res.json()
     if (!res.ok) {
         return {
             error: data.detail
         }
     }
-    
-    // (await cookies()).set("access_token", data.access_token, {
-    //     httpOnly: true,
-    //     secure: process.env.NODE_ENV === "production",
-    //     sameSite: "lax",
-    //     maxAge: 60 * 15,
-    //     path: "/",
-    // })
     return {
         success: true
     }
