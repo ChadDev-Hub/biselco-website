@@ -1,8 +1,13 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { loginfortoken } from '../services/api'
-export default function LoginModal() {
+import { loginfortoken } from '../services/clientApi'
+
+interface Props {
+    baseurl?: string;
+}
+
+export default function LoginModal({ baseurl }: Props) {
     const router = useRouter()
     const [loginMessage, setLoginMessage] = useState({
         message: "",
@@ -13,7 +18,7 @@ export default function LoginModal() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formdata = new FormData(e.currentTarget)
-        const res = loginfortoken(formdata);
+        const res = loginfortoken(formdata, baseurl);
         if ((await res).error) {
             setLoginMessage({
                 message: "Invalid User or Password",
@@ -24,7 +29,7 @@ export default function LoginModal() {
             return
         }
         setLoginMessage({
-            message:"Login Sucessfully",
+            message: "Login Sucessfully",
             alert_style: "alert-success",
             show: true,
             loginsucessfull: true
@@ -49,6 +54,15 @@ export default function LoginModal() {
         }, 3000);
         return () => clearTimeout(timer)
     }, [loginMessage.show, loginMessage.loginsucessfull])
+
+    const handleClose = () => {
+        const modal = document.getElementById('login_modal') as HTMLDialogElement | null
+        if (modal) {
+            modal.close()
+        }
+        const form = document.getElementById("login-form") as HTMLFormElement | null
+        form?.reset()
+    }
     return (
         <>
             < button type='button' className="btn btn-primary rounded-full w-30" onClick={() => {
@@ -59,13 +73,8 @@ export default function LoginModal() {
             }}> Login </button >
             <dialog id="login_modal" className="modal backdrop-blur-sm">
                 <div className="modal-box bg-black/45 backdrop-blur-xs max-w-sm flex flex-col items-center border ">
-                    <form onSubmit={handleSubmit} className='w-full px-2'>
-                        <button type='button' onClick={() => {
-                            const modal = document.getElementById('login_modal') as HTMLDialogElement | null
-                            if (modal) {
-                                modal.close()
-                            }
-                        }} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <form id='login-form' onSubmit={handleSubmit} className='w-full px-2'>
+                        <button type='button' onClick={handleClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                         <fieldset className='fieldset w-full flex flex-col gap-2'>
                             <legend className='fieldset-legend text-2xl '>
                                 Signup Form
