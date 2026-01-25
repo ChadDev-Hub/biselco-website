@@ -6,7 +6,10 @@ interface Props {
 import Image from "next/image";
 import LoginModal from "./loginmodal";
 import SignupModal from "./signupmodal";
+
+
 export default async function  Hero({ subtitle, description }: Props) {
+    const baseUrl = process.env.BASESERVERURL
     return (
         <div className="
           grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2
@@ -22,7 +25,7 @@ export default async function  Hero({ subtitle, description }: Props) {
                 flex justify-center sm:justify-center md:justify-end lg:justify-end
                  w-full gap-4">
                     <SignupModal/>
-                    <LoginModal/>
+                    <LoginModal baseurl={baseUrl}/>
                 </div>
             </div>
             <div className="flex justify-center rounded-full order-1 lg:order-2">

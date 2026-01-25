@@ -23,7 +23,7 @@ export default function SignupModal() {
         }
 
 
-    setSignupMessage({
+        setSignupMessage({
             message: results.detail,
             alertstyle: "alert-success",
             show: true,
@@ -49,6 +49,17 @@ export default function SignupModal() {
         return () => clearTimeout(timer)
     }, [signupMessage.show, signupMessage.signupsuccessull])
 
+
+    const handleClose = () => {
+        const modal = document.getElementById('signup_modal') as HTMLDialogElement | null
+        if (modal) {
+            modal.close()
+        }
+        const form = document.getElementById('signup-form') as HTMLFormElement | null
+        if (form){
+            form.reset()
+        }
+    }
     return (
         <>
             < button type='button' className="btn btn-secondary w-30 rounded-full" onClick={() => {
@@ -59,13 +70,8 @@ export default function SignupModal() {
             }}> Signup</button >
             <dialog id="signup_modal" className="modal backdrop-blur-sm">
                 <div className="modal-box bg-black/45 border backdrop-blur-xs max-w-sm flex flex-col items-center ">
-                    <form action={handleSubmit} className='w-full px-2'>
-                        <button type='button' onClick={() => {
-                            const modal = document.getElementById('signup_modal') as HTMLDialogElement | null
-                            if (modal) {
-                                modal.close()
-                            }
-                        }} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <form id='signup-form' action={handleSubmit} className='w-full px-2'>
+                        <button type='button' onClick={handleClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                         <fieldset className='fieldset w-full'>
                             <legend className='fieldset-legend text-2xl '>
                                 Signup Form

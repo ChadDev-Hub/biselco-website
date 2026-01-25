@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "./components/navbar";
 import "./globals.css";
-import { getLandingPageData } from "./services/api";
+import { getLandingPageData } from "./services/serverapi";
+import DocNavigation from "./components/doc";
+import Drawer from "./components/drawer";
+const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,8 +32,11 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavBar title={data.hero.title}/>
-        {children}
+         <Drawer>
+            {children}
+            <DocNavigation/>
+         </Drawer>
+        
       </body>
     </html>
   );

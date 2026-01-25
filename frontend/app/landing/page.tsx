@@ -1,5 +1,5 @@
 "use server"
-import { getLandingPageData } from "../services/api";
+import { getLandingPageData } from "../services/serverapi";
 import Hero from "../components/hero";
 const News = async() => {
   const landingPageData = await getLandingPageData()
