@@ -29,62 +29,46 @@ async def create_refresh_token(data:dict):
     return refresh_token
 
 
-async def get_current_user(
-        response:Response,
-        requests:Request
-):
+async def get_current_user(requests:Request, response:Response):
+    token = requests.cookies.get("access_token")
+    refresh_token = requests.cookies.get("access_token")
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid Credential",
         headers={"WWW-Authenticate" : "Bearer"}
     )
-
-    token = requests.cookies.get("access_token")
-    refresh_token = requests.cookies.get("refresh_token")
     if not token:
         raise credential_exception
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_name = payload.get("sub")
         user_id = payload.get("id")
-        role = payload.get("role")
-
-        print(payload)
         return {
             "username": user_name,
             "userid": user_id,
-
-
         }
-    
     except jwt.ExpiredSignatureError:
-        if not refresh_token:
-            raise credential_exception
-        
         try:
-            refresh_payload = jwt.decode(refresh_token,SECRET_KEY, algorithms=[ALGORITHM])
-            user = refresh_payload.get("sub")
-            user_id = refresh_payload.get("id")
-            role = refresh_payload.get("role")
-            new_token_data = {
-                "sub": user,
-                "id": user_id,
-                "role": role
-            }
-            new_access = await create_access_token(new_token_data)
-            response.set_cookie(
-                key="access_token",
-                max_age=900,
-                value=new_access,
-                httponly=True,
-                secure=True,
-                samesite="lax",
-                path="/"
-            )
-            print(user)
-            return user
+            payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
+            if payload.get("type") != "refresh_token":
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         except InvalidTokenError:
-            raise credential_exception
-        except jwt.PyJWTError:
-            raise credential_exception
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token")
+        new_token = await create_access_token(
+        data={
+            "sub" : payload.get("sub"),
+            "id": payload.get("id"),
+            "role" : payload.get("role")
+        })
+        response.set_cookie(
+            key="access_token",
+            value=new_token,
+            max_age= 60 * 60 * 24 * 7,
+            httponly=True,
+            secure=True,
+            samesite="lax"
+        )
+    except InvalidTokenError:
+        raise credential_exception
+    except jwt.PyJWTError:
+        raise credential_exception

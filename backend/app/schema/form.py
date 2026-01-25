@@ -12,6 +12,7 @@ class SignUpUser(BaseModel):
     email: EmailStr
     password: str 
 
+# LOGIN MODEL
 class LoginUser(BaseModel):
     username:str
     password:str
@@ -19,7 +20,8 @@ class LoginUser(BaseModel):
 class TokenData(BaseModel):
     access_token:str
     token_type:str
-    
+
+#  METER ACCOUNT MODEL
 class CreatMeterAccount(BaseModel):
     accountno: int
     consumername: str
@@ -27,3 +29,9 @@ class CreatMeterAccount(BaseModel):
     village:str
     municipality:str
     mobileno: str
+
+# NEWS MODEL
+class CreateNews(BaseModel):
+    title:str
+    description:str
+    
