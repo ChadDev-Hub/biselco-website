@@ -4,7 +4,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+service-account.json
 # Virtual environments
 .env
 .venv
