@@ -1,13 +1,12 @@
 "use client"
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 interface Props {
     title?: string,
 
 }
 export default function NavBar({ title }: Props) {
-    const router = useRouter()
     const currentRouter = usePathname()
     const [currentTheme, setTheme] = useState(() => {
         if (typeof window == "undefined") {
@@ -44,10 +43,22 @@ export default function NavBar({ title }: Props) {
     // LOGOUT
 
     return (
-        <div className="navbar  top-0 left-0 right-0 z-50 fixed p-4 bg-base-200/45 backdrop-blur-sm ">
-            <label htmlFor="my-drawer-4" aria-label="open sidebar" className={`btn btn-square btn-ghost md:inline-flex hidden ${currentRouter === "/landing"? "hidden" : "visible"}`}>
+        <div className="navbar navbar-center  top-0 left-0 right-0 z-50 fixed p-4 bg-base-200/45 backdrop-blur-sm ">
+            <label htmlFor="my-drawer-4" aria-label="open sidebar" className={`swap swap-rotate btn btn-square btn-ghost md:inline-flex hidden ${currentRouter === "/landing" ? "hidden" : ""} `}>
                 {/* Sidebar toggle icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="my-1.5 inline-block size-4"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    strokeWidth="2"
+                    fill="none"
+                    stroke="currentColor"
+                    className="swap-off my-1.5 inline-block size-4">
+                    <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path>
+                    <path d="M9 4v16"></path>
+                    <path d="M14 10l2 2l-2 2"></path>
+                </svg>
             </label>
             <Image
                 loading="eager"

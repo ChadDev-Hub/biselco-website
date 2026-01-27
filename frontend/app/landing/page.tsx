@@ -4,7 +4,7 @@ import Hero from "../components/hero";
 const News = async() => {
   const landingPageData = await getLandingPageData()
   return (
-    <Hero
+      <Hero
             subtitle={landingPageData.hero.subtitle}
             description={landingPageData.hero.description} />
   )

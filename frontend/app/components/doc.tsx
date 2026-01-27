@@ -1,15 +1,12 @@
 
 "use client"
+import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
 
-type Props = {
-  activeTab?: "home" | "inbox" | "settings"
-}
 
-
-const DocNavigation = ({ activeTab }: Props) => {
-  const [active, setActive] = useState<typeof activeTab>("home")
-
+const DocNavigation = () => {
+  const [active, setActive] = useState<"home" | "inbox" | "settings">("home")
+  const currentPath = usePathname()
   const handleHomeClick = () => {
     setActive("home")
   }
@@ -17,12 +14,8 @@ const DocNavigation = ({ activeTab }: Props) => {
   const handleInboxClick = () => {
     setActive("inbox")
   }
-  console.log(active)
   return (
-    <div className="dock dock-sm lg:hidden">
-
-      
-
+    <div className={`dock dock-sm  lg:hidden ${currentPath === "/landing"? "hidden" : "visible"}`}>
       <button type='button' onClick={handleHomeClick} className={`${active === "home" ? "dock-active" : ""}`}>
         <svg className="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="currentColor" strokeLinejoin="miter" strokeLinecap="butt"><polyline points="1 11 12 2 23 11" fill="none" stroke="currentColor" strokeMiterlimit="10" strokeWidth="2"></polyline><path d="m5,13v7c0,1.105.895,2,2,2h10c1.105,0,2-.895,2-2v-7" fill="none" stroke="currentColor" strokeLinecap="square" strokeMiterlimit="10" strokeWidth="2"></path><line x1="12" y1="22" x2="12" y2="18" fill="none" stroke="currentColor" strokeLinecap="square" strokeMiterlimit="10" strokeWidth="2"></line></g></svg>
         <span className="dock-label">Home</span>
@@ -40,7 +33,6 @@ const DocNavigation = ({ activeTab }: Props) => {
 
 
       <label htmlFor="my-drawer-4" aria-label="open sidebar" className={``}>
-        {/* Sidebar toggle icon */}
         <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="2" fill="none" stroke="currentColor" className="size-[1.2em]"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
         <span className="dock-label">Menu</span>
       </label>

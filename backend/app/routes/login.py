@@ -47,7 +47,7 @@ async def login_for_access_token(
                             value=refresh_token,
                             expires=datetime.now(timezone.utc)+ timedelta(days=7),
                             httponly=True,
-                            secure=True,
+                            secure=False,
                             samesite="lax"
                             )
         response.set_cookie(
@@ -55,7 +55,7 @@ async def login_for_access_token(
             value=refresh_token,
             expires=datetime.now(timezone.utc)+ timedelta(days=7),
             httponly=True,
-            secure=True,
+            secure=False,
             samesite="lax"
                             )
         return {
