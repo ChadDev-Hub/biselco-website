@@ -8,7 +8,7 @@ import Image from "next/image";
 const NewsCard = ({ title, description }: Props) => {
     return (
         <div className="card flex lg:flex-row bg-base-100 w-90 lg:w-200 p-4 mx-4 shadow-sm" >
-            <figure className="h-[350px] sm:h-[350px] lg:h-[500px]">
+            <figure className="h-87.5 sm:h-87.5 lg:h-125">
                 <Image
                     loading="eager"
                     src="https://drive.google.com/uc?export=view&id=1SnsFPQdQ1Z3Je-zj4JfUPGD_6MwL7m84"

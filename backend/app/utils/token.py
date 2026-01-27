@@ -49,7 +49,8 @@ async def get_current_user(requests:Request, response:Response):
         }
     except jwt.ExpiredSignatureError:
         try:
-            payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
+            if refresh_token:
+                payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
             if payload.get("type") != "refresh_token":
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         except InvalidTokenError:

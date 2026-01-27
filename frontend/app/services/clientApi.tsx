@@ -1,9 +1,9 @@
 "use client"
-const baseUrl = process.env.BASESERVERURL
 
 
 // LOGIN
 export async function loginfortoken(formdata: FormData, baseurl?: string) {
+    console.log(baseurl)
     const res = await fetch(`${baseurl}/auth/token`, {
         method: "POST",
         body: formdata,
@@ -21,21 +21,21 @@ export async function loginfortoken(formdata: FormData, baseurl?: string) {
 }
 
 // REFRESH TOKEN
-export async function refreshToken() {
-    const res = await fetch(`${baseUrl}/auth/token/refresh`, {
-        method: "POST",
-        credentials: "include"
-    })
-    const data = await res.json()
-    if (!res.ok) {
-        return {
-            error: data.detail
-        }
-    }
-    return {
-        success: true
-    }
-}
+// export async function refreshToken() {
+//     const res = await fetch(`${baseUrl}/auth/token/refresh`, {
+//         method: "POST",
+//         credentials: "include"
+//     })
+//     const data = await res.json()
+//     if (!res.ok) {
+//         return {
+//             error: data.detail
+//         }
+//     }
+//     return {
+//         success: true
+//     }
+// }
 
 
 // LOGOUT
