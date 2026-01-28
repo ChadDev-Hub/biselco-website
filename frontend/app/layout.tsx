@@ -4,6 +4,7 @@ import "./globals.css";
 import { getLandingPageData } from "./services/serverapi";
 import DocNavigation from "./components/doc";
 import Drawer from "./components/drawer";
+import ThemeController from "./components/themeController";
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,10 +25,12 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>)
+ {
   const data = await getLandingPageData()
   return (
     <html lang="en">
+      <ThemeController/>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
