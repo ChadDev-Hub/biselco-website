@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-
-import React from 'react'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
-
-
-const PostImageModal = () => {
-=======
 "use client"
 import React, { useState } from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
@@ -29,9 +21,12 @@ const PostImageModal = () => {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const result = await PostNews(formData)
-        console.log(result)
+        if (result.status === 200) {
+            console.log(result.detail)
+            handleCloseModal()
+        }
+        
     }
->>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
     // OPEN MODAL
     const handleOpenModal = () => {
         const modal = document.getElementById("postphoto-modal") as HTMLDialogElement
@@ -46,8 +41,6 @@ const PostImageModal = () => {
             modal.close()
         }
     }
-<<<<<<< HEAD
-=======
 
     // REMOVE IMAGE
     const handleRemoveImage = (imageIndex: number) => {
@@ -55,7 +48,6 @@ const PostImageModal = () => {
             prev.filter((name, index) => index !== imageIndex)
         )
     }
->>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
     return (
         <>
             <button aria-label='photos' onClick={handleOpenModal} type='button' className='btn btn-circle btn-ghost tooltip tooltip-bottom sm:tooltip sm:tooltip-right' data-tip="Post Photos">
@@ -66,34 +58,6 @@ const PostImageModal = () => {
                 />
             </button>
             <dialog id='postphoto-modal' className='modal'>
-<<<<<<< HEAD
-                <form action="" className='modal-box bg-base-200 min-w-fit'>
-                    <fieldset className='fieldset flex flex-col w-full'>
-                        <div className='flex justify-between'>
-                            <legend className='text-lg font-bold text-shadow-2xs text-blue-700'>
-                                New News
-                            </legend>
-                            <button className='btn btn-circle shadow-lg' onClick={handleCloseModal}>x</button>
-                        </div>
-
-                        <label className='label text-orange-400'>Title</label>
-                        <input type="text" className='input w-full' placeholder='Title' />
-                        <div className='grid grid-cols-6 gap-2'>
-                            <div className='col-span-4'>
-                                <label className=' label text-orange-400'>About</label>
-                            <textarea className="textarea h-24" placeholder="About"></textarea>
-                            </div>
-                            
-                            <div className='col-span-2 flex flex-col  items-center justify-center'>
-                                <label className="label text-orange-400"> Upload Photos</label>
-                                <input type="file" accept='image/*' />
-                            </div>
-                        </div>
-
-                    </fieldset>
-                </form>
-
-=======
                 <fieldset  className='form fieldset flex flex-col modal-box bg-base-200 min-w-fit max-w-100 p-4'>
                     <legend className='fieldset-legend w-full flex justify-between text-lg font-bold text-shadow-2xs text-blue-700'>
                         <p>
@@ -151,7 +115,6 @@ const PostImageModal = () => {
                     </button>
                     </form>     
                 </fieldset>
->>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
             </dialog>
         </>
 

@@ -1,5 +1,4 @@
 "use client"
-import { useEffect, useState } from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 interface Props {
@@ -8,40 +7,6 @@ interface Props {
 }
 export default function NavBar({ title }: Props) {
     const currentRouter = usePathname()
-<<<<<<< HEAD
-    const [currentTheme, setTheme] = useState(() => {
-        if (typeof window == "undefined") {
-            return "cupcake"
-        }
-        const current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "luxury" : "cupcake"
-        document.documentElement.setAttribute("data-theme", current)
-        return current
-    })
-    useEffect(() => {
-        if (typeof window === "undefined") return
-
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-
-        const handleThemeChange = (event: MediaQueryListEvent) => {
-            setTheme(event.matches ? "luxury" : "cupcake")
-        }
-
-        // Modern browsers
-        mediaQuery.addEventListener("change", handleThemeChange)
-
-        // Cleanup
-        return () => {
-            mediaQuery.removeEventListener("change", handleThemeChange)
-        }
-    }, [])
-
-    //  Automatica Theme Change
-    useEffect(() => {
-        document.documentElement.setAttribute("data-theme", currentTheme)
-    }, [currentTheme])
-
-=======
->>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 
     // LOGOUT
 

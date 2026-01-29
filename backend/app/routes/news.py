@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Form
-from sqlalchemy import select, asc, and_, desc
+from sqlalchemy import select, asc, and_, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..models import Users, News
 from ..schema.form import CreateNews
@@ -35,3 +35,18 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     return {
         "detail" : "Sucessully Created"
     }
+
+@router.delete("/delete/{post_id}")
+async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session)):
+    try:
+        delete_stmt = delete(News).where(News.id == post_id)
+        await session.execute(delete_stmt)
+        await session.commit()
+        await session.close()
+    except Exception as e:
+        print(e)
+    return {
+        "detail" : "Delete Successfull"
+    }
+    
+    

@@ -41,8 +41,6 @@ export async function getNewsPage(){
 
 export async function logout(){
     (await cookies()).delete("access_token")
-<<<<<<< HEAD
-=======
 }
 
 
@@ -58,12 +56,15 @@ export async function PostNews(form:FormData){
             }
         }
     )
+    const status =  res.status
     const data = await res.json()
     if (!res.ok){
         return{
             error: true
         }
     }
-    return data
->>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
+    return {
+        status: status,
+        detail:data.detail
+    }
 }

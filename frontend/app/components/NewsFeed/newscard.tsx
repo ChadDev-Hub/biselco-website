@@ -4,14 +4,15 @@ type Props = {
     title: string;
     description: string;
 }
-import Image from "next/image";
+import NewsContents from "./NewsContents";
 import NewsHeader from "./NewsHeader";
-import { SingleImagePost } from "./Image";
+import Divider from "./CustomDivider";
 const NewsCard = async ({ title, description }: Props) => {
     return (
-        <div className="card flex flex-col lg:h-full bg-base-100 lg:w-200 p-4  shadow-sm" >
+        <div className="card flex flex-col lg:h-full bg-base-100 lg:w-200 p-4  drop-shadow-2xl" >
 
             <div className="card-border p-4 rounded-box">
+                {/* HEADER */}
                 <NewsHeader
                     author="Richard"
                     profileUrl="https://lh3.googleusercontent.com/a/ACg8ocL4MtgkdVBQWMcjROm0OfbTaPWBS1Lqbah9zcbjr6TB9W0JYsgO=s396-c-no"
@@ -19,20 +20,34 @@ const NewsCard = async ({ title, description }: Props) => {
                     time="11:40 pm"
                 />
 
+                <Divider/>
 
-                <SingleImagePost />
+                {/* CONTENT */}
+                <NewsContents
+                contentType="image"
+                content={
+                    [
+                    "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                    "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                    "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                    "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                    "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA"
+                ]}
+                />
 
-
-                <div className="px-6 py-5">
-                    <h2 className="text-xl font-extrabold text-blue-900 mb-2 leading-snug">
-                        The 2026 Quantum Leap: How AI is Reshaping Urban Infrastructure
+             
+                <Divider/>
+                {/* TITLE AND MESSAGE */}
+                <div className="px-6 py-2">
+                    <h2 className="text-2xl font-extrabold text-blue-900 mb-2 leading-snug">
+                        {title}
                     </h2>
-                    <p className="text-yellow-600 text-sm line-clamp-2">
-                        Cities are beginning to breathe. New data suggests that autonomous traffic management has reduced carbon emissions by nearly 18% in major hubs...
+                    <p className="text-yellow-600  text-sm line-clamp-4">
+                        {description}
                     </p>
                 </div>
-
             </div>
+            {/* FOOTER LIKES AND REACTIONS */}
             <div className="px-6 pb-6 flex items-center justify-between">
                 <div className="flex -space-x-2">
                     <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200"></div>

@@ -1,7 +1,13 @@
 "use server"
 import { getLandingPageData } from "../services/serverapi";
 import Hero from "../components/hero";
-const News = async() => {
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+const Landing = async() => {
+  const cookie = (await cookies()).get("refresh_token")
+  if (cookie){
+    redirect("/")
+  }
   const landingPageData = await getLandingPageData()
   return (
       <Hero
@@ -10,4 +16,4 @@ const News = async() => {
   )
 }
 
-export default News
+export default Landing

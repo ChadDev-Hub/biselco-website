@@ -1,8 +1,8 @@
 
 
-type Props = {}
+
 import Image from "next/image"
-const carousel = (props: Props) => {
+const carousel = () => {
     return (
         <>
             <div className="carousel w-full">
