@@ -4,7 +4,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+<<<<<<< HEAD
 
+=======
+service-account.json
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 # Virtual environments
 .env
 .venv

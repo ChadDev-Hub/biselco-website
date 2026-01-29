@@ -4,6 +4,10 @@ import "./globals.css";
 import { getLandingPageData } from "./services/serverapi";
 import DocNavigation from "./components/doc";
 import Drawer from "./components/drawer";
+<<<<<<< HEAD
+=======
+import ThemeController from "./components/themeController";
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,10 +28,19 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
+<<<<<<< HEAD
 }>) {
   const data = await getLandingPageData()
   return (
     <html lang="en">
+=======
+}>)
+ {
+  const data = await getLandingPageData()
+  return (
+    <html lang="en">
+      <ThemeController/>
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

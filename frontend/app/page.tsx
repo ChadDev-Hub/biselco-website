@@ -2,7 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { getNewsPage } from "./services/serverapi";
+<<<<<<< HEAD
 import NewsCard from "./components/newscard";
+=======
+import NewsCard from "./components/NewsFeed/newscard";
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 import NewsNavBar from "./components/newsNavBar";
 export default async function Home() {
   const res = await getNewsPage()
@@ -15,7 +19,10 @@ export default async function Home() {
           <NewsNavBar/>
             {res.map((n:any,)=>(
           <NewsCard
+<<<<<<< HEAD
           
+=======
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
           key={n.id}
           title={n.title}
           description={n.description}

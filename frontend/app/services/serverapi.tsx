@@ -41,4 +41,29 @@ export async function getNewsPage(){
 
 export async function logout(){
     (await cookies()).delete("access_token")
+<<<<<<< HEAD
+=======
+}
+
+
+export async function PostNews(form:FormData){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/news/create`,
+        {
+            method: "POST",
+            body: form,
+            credentials: "include",
+            headers:{
+                "Cookie": cookieHeader
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return{
+            error: true
+        }
+    }
+    return data
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 }

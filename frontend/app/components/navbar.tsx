@@ -8,6 +8,7 @@ interface Props {
 }
 export default function NavBar({ title }: Props) {
     const currentRouter = usePathname()
+<<<<<<< HEAD
     const [currentTheme, setTheme] = useState(() => {
         if (typeof window == "undefined") {
             return "cupcake"
@@ -39,6 +40,8 @@ export default function NavBar({ title }: Props) {
         document.documentElement.setAttribute("data-theme", currentTheme)
     }, [currentTheme])
 
+=======
+>>>>>>> c18c9ea4afe98a60fc56bb6b6a63110dd0735ee5
 
     // LOGOUT
 
