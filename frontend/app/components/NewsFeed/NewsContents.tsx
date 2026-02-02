@@ -7,12 +7,15 @@ type Props = {
     content: string | string[];
 }
 
-const NewsContents = async({ contentType, content }: Props) => {
+const NewsContents = async ({ contentType, content }: Props) => {
     switch (contentType) {
         case "image":
             return (
                 <>
-                {content.length > 1 ? <MultipleImage images={content}/> : <SingleImagePost src={content}/> }
+                    {Array.isArray(content)
+                        ? <MultipleImage images={content} />
+                        : <SingleImagePost src={content} />}
+
                 </>
             );
         default:
