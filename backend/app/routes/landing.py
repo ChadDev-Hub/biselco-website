@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,status
 from ..utils.token import get_current_user
 
 
 router = APIRouter(tags=["Landing Page"])
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK)
 async def landing_page():
         return{
                 "hero" : {

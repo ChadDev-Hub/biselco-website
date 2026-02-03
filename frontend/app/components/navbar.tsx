@@ -11,7 +11,7 @@ export default function NavBar({ title }: Props) {
     // LOGOUT
 
     return (
-        <div className="navbar navbar-center  top-0 left-0 right-0 z-50 fixed p-4 bg-base-200/45 backdrop-blur-sm ">
+        <div className="navbar navbar-center  top-0 left-0 right-0 z-50 fixed md:fixed lg:fixed p-4 bg-base-200/45 backdrop-blur-sm ">
             <label htmlFor="my-drawer-4" aria-label="open sidebar" className={`swap swap-rotate btn btn-square btn-ghost md:inline-flex hidden ${currentRouter === "/landing" ? "hidden" : ""} `}>
                 {/* Sidebar toggle icon */}
                 <svg

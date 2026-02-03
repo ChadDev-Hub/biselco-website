@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 import os
 session_depends= Depends(get_session)
 
-@router.post("/token")
+@router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
                                 response: Response,
                                 form_data:OAuth2PasswordRequestForm = Depends(),
@@ -63,7 +63,7 @@ async def login_for_access_token(
         }
 
         
-@router.post("/token/refresh")
+@router.post("/token/refresh", status_code=status.HTTP_100_CONTINUE)
 async def refresh_token(request:Request):
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:

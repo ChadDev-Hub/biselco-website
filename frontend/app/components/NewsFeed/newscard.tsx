@@ -1,6 +1,7 @@
 
 "use server"
 type Props = {
+    postId: number;
     title: string;
     description: string;
     date_posted: string;
@@ -15,7 +16,7 @@ import NewsHeader from "./NewsHeader";
 import Divider from "./CustomDivider";
 import NewsText from "./NewsText";
 const NewsCard = async (
-    {
+    {   postId,
         title,
         description,
         date_posted,
@@ -26,9 +27,8 @@ const NewsCard = async (
         period
     }: Props) => {
     return (
-        <div className="card flex flex-col lg:h-full bg-base-100 lg:w-200 p-4  drop-shadow-2xl" >
-
-            <div className="card-border p-4 rounded-box">
+        <div className="card rounded-md  flex flex-col lg:h-full bg-base-100/45 lg:w-200 p-4  drop-shadow-md backdrop-blur-md shadow-lg" >
+            <div className="shadow-lg mb-2 p-4 rounded-md">
                 {/* HEADER */}
                 <NewsHeader
                     author={user_name}
@@ -43,17 +43,15 @@ const NewsCard = async (
 
                 {/* CONTENT */}
                 <NewsContents
+                    postId={postId}
                     contentType="image"
                     content={
                         [
                             "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
                             "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
-                            "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA"
+                             "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                             "https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA",
+                             
                         ]}
                 />
 

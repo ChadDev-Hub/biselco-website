@@ -27,12 +27,26 @@ export default async function Home() {
     redirect("/landing")
   }
   return (
-    <div className="flex min-h-screen items-center w-full  justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen gap-4 w-full flex-col items-stretch lg:items-center justify-between mt-20 pb-20">
+    <div className="flex min-h-screen items-center w-full  justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
+      <main className="
+      flex 
+      min-h-screen 
+      gap-4 
+      w-full 
+      flex-col 
+      items-stretch 
+      lg:items-center 
+      justify-between
+      mt-20 
+      sm:mt-20 
+      md:mt-20
+      lg:mt-20 
+      pb-20">
         <NewsNavBar />
         {res.map((n: News) => (
           <NewsCard
             key={n.id}
+            postId={n.id}
             title={n.title}
             description={n.description}
             date_posted={n.date_posted}

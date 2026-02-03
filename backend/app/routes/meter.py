@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/meter", tags=["Electric Meter"])
 
-@router.post("/create")
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_meter(
     user:dict = Depends(get_current_user),
     session:AsyncSession = Depends(get_session),
@@ -44,7 +44,7 @@ async def create_meter(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Account No Already Exists")
 
-@router.post("/get")
+@router.post("/get", status_code=status.HTTP_200_OK)
 async def get_meter_info(user:dict = Depends(get_current_user)):
     if not user:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")

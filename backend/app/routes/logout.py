@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, status
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/logout")
+@router.post("/logout", status_code=status.HTTP_202_ACCEPTED)
 async def logout(response:Response):
     response.delete_cookie(
         "refresh_token",
