@@ -4,9 +4,11 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
 import { PostNews } from '../services/serverapi'
 
+
 const PostImageModal = () => {
     const [uploadedImage, setUploadedImage] = useState<File[]>([])
 
+    // HANDLE UPLOAD OF PHOTOS
     const handleUploadedImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
         if (!files) {
@@ -17,13 +19,16 @@ const PostImageModal = () => {
 
     }
 
+    // HANDLE SUBMIT
     const handleSubmit = async(event:React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const formData = new FormData(event.currentTarget)
+        const form = event.currentTarget
+        const formData = new FormData(form)
         const result = await PostNews(formData)
         if (result.status === 200) {
-            console.log(result.detail)
-            handleCloseModal()
+            form.reset();
+            handleCloseModal();
+            
         }
         
     }
@@ -58,7 +63,7 @@ const PostImageModal = () => {
                 />
             </button>
             <dialog id='postphoto-modal' className='modal'>
-                <fieldset  className='form fieldset flex flex-col modal-box bg-base-200 min-w-fit max-w-100 p-4'>
+                <fieldset  className='form fieldset  flex flex-col modal-box bg-base-200 min-w-fit max-w-100 p-4'>
                     <legend className='fieldset-legend w-full flex justify-between text-lg font-bold text-shadow-2xs text-blue-700'>
                         <p>
                             New News
@@ -67,12 +72,11 @@ const PostImageModal = () => {
                     </legend>
                     <form onSubmit={handleSubmit}>
                         <label className='label text-orange-400'>Title</label>
-                    <input name='title' type="text" className='input w-full' placeholder='Title' />
+                    <input name='title' type="text" className='input w-full' placeholder="What's on your mind" />
                     <label className=' label text-orange-400'>About</label>
                     <div className='grid grid-cols-6 gap-2'>
                         <div className='col-span-4 w-full'>
-
-                            <textarea name='description' className="textarea h-24" placeholder="About"></textarea>
+                            <textarea name='description' className="textarea h-80" placeholder="Your story"></textarea>
                         </div>
 
                         <div className='col-span-2 flex flex-col items-center justify-center'>

@@ -87,7 +87,6 @@ const QuiltedStyle = ({ images, postId }: MultipleImageProps) => {
     const displayImage = images.slice(0, 5)
     const image6th = images[images.length - 1]
     const [showAllImages, setShowAllImages] = useState(false);
-    console.log(image6th)
     const handleShowAllImages = () => {
         setShowAllImages(true);
     }

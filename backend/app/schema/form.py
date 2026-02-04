@@ -34,4 +34,11 @@ class CreatMeterAccount(BaseModel):
 class CreateNews(BaseModel):
     title:str
     description:str
-    
+
+
+# COMPLAINTS MODEL
+class CreateComplaints(BaseModel):
+    subject:str
+    description:str
+    latitude:float
+    longitude:float

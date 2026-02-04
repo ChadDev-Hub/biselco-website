@@ -1,4 +1,4 @@
-"use server"
+"use client"
 
 import Image from 'next/image';
 import React from 'react'
@@ -12,7 +12,7 @@ type Props = {
   period: string;
 }
 
-const NewsHeader = async ({ author, profileUrl, date, time, first_name, last_name, period }: Props) => {
+const NewsHeader = ({ author, profileUrl, date, time, first_name, last_name, period }: Props) => {
   return (
     <div>
       <div className="flex items-center justify-between px-2">
@@ -25,11 +25,11 @@ const NewsHeader = async ({ author, profileUrl, date, time, first_name, last_nam
             height={30}
           />
           <div>
-            <h4 className="text-2xl font-bold text-blue-800 leading-tight">
+            <h4 className="text-2xl font-bold text-yellow-300 leading-tight">
               <abbr className='cursor-help no-underline' title={`${first_name} ${last_name}`}>
                 {author}
               </abbr></h4>
-            <p className="text-xs text-red-600 italic">Date Posted: {date} • {time}</p>
+            <p className="text-xs text-shadow-blue-500 italic">Date Posted: {date} • {time}</p>
             <div className="badge badge-sm badge-info">
               <svg className="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <g fill="currentColor" strokeLinejoin="miter" strokeLinecap="butt">
@@ -44,7 +44,6 @@ const NewsHeader = async ({ author, profileUrl, date, time, first_name, last_nam
               {period}
             </div>
           </div>
-
         </div>
         <button aria-label='PostOptions' type='button' className=" btn btn-ghost btn-circle">
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>

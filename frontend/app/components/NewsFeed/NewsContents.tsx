@@ -1,4 +1,4 @@
-"use server"
+"use client"
 
 import React from 'react'
 import { SingleImagePost, QuiltedStyle } from './Image'
@@ -8,7 +8,7 @@ type Props = {
     content: string | string[];
 }
 
-const NewsContents = async ({ postId, contentType, content }: Props) => {
+const NewsContents = ({ postId, contentType, content }: Props) => {
     switch (contentType) {
         case "image":
             return (
