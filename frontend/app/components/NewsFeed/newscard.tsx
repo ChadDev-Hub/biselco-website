@@ -27,7 +27,7 @@ const NewsCard = async (
         period
     }: Props) => {
     return (
-        <div className="card rounded-md  flex flex-col lg:h-full bg-base-100/45 lg:w-200 p-4  drop-shadow-md backdrop-blur-md shadow-lg" >
+        <div className="card rounded-md flex flex-col lg:h-full bg-base-100/45 lg:w-200 p-4  drop-shadow-md backdrop-blur-md shadow-lg" >
             <div className="shadow-lg mb-2 p-4 rounded-md">
                 {/* HEADER */}
                 <NewsHeader

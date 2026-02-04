@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getNewsPage } from "./services/serverapi";
 import NewsCard from "./components/NewsFeed/newscard";
 import NewsNavBar from "./components/newsNavBar";
+import { div } from "framer-motion/client";
 
 interface News {
   id: number
@@ -27,16 +28,13 @@ export default async function Home() {
     redirect("/landing")
   }
   return (
-    <div className="flex min-h-screen items-center w-full  justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
+    <div className="flex min-h-screen items-center w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
       flex 
-      min-h-screen 
       gap-4 
-      w-full 
       flex-col 
       items-stretch 
       lg:items-center 
-      justify-between
       mt-20 
       sm:mt-20 
       md:mt-20
@@ -44,7 +42,7 @@ export default async function Home() {
       pb-20">
         <NewsNavBar />
         {res.map((n: News) => (
-          <NewsCard
+             <NewsCard
             key={n.id}
             postId={n.id}
             title={n.title}

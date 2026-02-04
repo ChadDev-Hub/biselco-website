@@ -32,7 +32,7 @@ export default async function RootLayout({
     <html lang="en" className="scroll-smooth">
       <ThemeController/>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
          <Drawer baseurl={baseurl} title={data.hero.title}>
             {children}
