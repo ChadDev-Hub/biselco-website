@@ -28,11 +28,10 @@ const Carousel = ({ postId, imageList }: Props) => {
                         className="w-full h-full"
                     >
                         <Image
-                            loading="eager"
                             src={imageList[current]}
                             alt="carousel"
-                            width={50}
-                            height={50}
+                            width={100}
+                            height={100}
                             sizes="(min-width: 1024px) 200px, 100vw"
                             className="w-full h-125 object-cover rounded-md"
                         />

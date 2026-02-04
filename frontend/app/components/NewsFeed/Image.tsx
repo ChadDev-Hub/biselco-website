@@ -1,7 +1,14 @@
 "use client"
 import React, { useState } from 'react'
 import Image from 'next/image'
-import Carousel from '../carousel'
+import dynamic from "next/dynamic";
+
+const Carousel = dynamic(() => import("../carousel"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-110 w-full bg-base-200 animate-pulse rounded-md" />
+  ),
+});
 
 
 
@@ -29,7 +36,6 @@ const SingleImagePost = ({ src }: Props) => {
     return (
         <div className="relative group cursor-pointer" onClick={handleOpen}>
             <Image
-                loading="eager"
                 src={src}
                 alt="Image"
                 width={50}
@@ -47,7 +53,6 @@ const SingleImagePost = ({ src }: Props) => {
                         onClick={(e) => e.stopPropagation()} // prevent closing when clicking the image
                     >
                         <Image
-                            loading='eager'
                             src="https://drive.google.com/uc?export=view&id=1TuZkm86d71k_mhJ_0nrIJQrxvA02wCSA"
                             alt="Full Image"
                             width={500}
@@ -87,7 +92,6 @@ const QuiltedStyle = ({ images, postId }: MultipleImageProps) => {
     const displayImage = images.slice(0, 5)
     const image6th = images[images.length - 1]
     const [showAllImages, setShowAllImages] = useState(false);
-    console.log(image6th)
     const handleShowAllImages = () => {
         setShowAllImages(true);
     }
@@ -166,9 +170,11 @@ const QuiltedStyle = ({ images, postId }: MultipleImageProps) => {
                 `}>
                     <Image
                         src={im}
+                        loading={index === 0 ? "eager" : "lazy"}
                         alt={`PostImage #${index}`}
                         width={50}
                         height={50}
+                        fetchPriority={index === 0 ? "high" : "auto"}
                         sizes="(min-width: 1024px) 200px, 100vw"
                         className='w-full h-full object-cover' />
                 </div>

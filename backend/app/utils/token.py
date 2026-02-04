@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import Depends, HTTPException, status, Response, Request
+from fastapi import Depends, HTTPException, status, Response, Request, WebSocket
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -43,9 +43,11 @@ async def get_current_user(requests:Request, response:Response):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_name = payload.get("sub")
         user_id = payload.get("id")
+        role = payload.get("role")
         return {
             "username": user_name,
             "userid": user_id,
+            "role": role
         }
     except jwt.ExpiredSignatureError:
         try:
@@ -69,7 +71,51 @@ async def get_current_user(requests:Request, response:Response):
             secure=True,
             samesite="lax"
         )
+        return {
+            "username": payload.get("sub"),
+            "userid": payload.get("id"),
+            "role": payload.get("role")
+        }
     except InvalidTokenError:
         raise credential_exception
     except jwt.PyJWTError:
         raise credential_exception
+
+async def get_current_user_ws(websocket:WebSocket):
+    token = websocket.cookies.get("access_token")
+    refresh_token = websocket.cookies.get("refresh_token")
+    credential_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid Credential",
+        headers={"WWW-Authenticate" : "Bearer"}
+    )
+    if not token:
+        raise credential_exception
+    try:
+        paload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
+        return {
+            "username": paload.get("sub"),
+            "userid": paload.get("id"), 
+            "role": paload.get("role")
+        }
+    except jwt.ExpiredSignatureError:
+        if not refresh_token:
+            raise credential_exception
+        try:
+            payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
+            if payload.get("type") != "refresh_token":
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        except InvalidTokenError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token")
+        new_token =await create_access_token(
+        {
+            "sub" : payload.get("sub"),
+            "id": payload.get("id"),
+            "role" : payload.get("role")
+        }
+        )
+        return {
+            "username": payload.get("sub"),
+            "userid": payload.get("id"),
+            "role": payload.get("role")
+        }

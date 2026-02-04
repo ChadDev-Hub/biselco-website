@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routes import signup, user_routes, login, meter, landing, news, logout
+from .routes import signup, user_routes, login, meter, landing, news, logout, complaints
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
@@ -20,4 +20,4 @@ app.include_router(login.router)
 app.include_router(meter.router)
 app.include_router(news.router)
 app.include_router(logout.router)
-
+app.include_router(complaints.router)

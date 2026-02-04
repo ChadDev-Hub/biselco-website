@@ -1,5 +1,4 @@
-
-"use server"
+"use clientr"
 type Props = {
     postId: number;
     title: string;
@@ -15,7 +14,7 @@ import NewsContents from "./NewsContents";
 import NewsHeader from "./NewsHeader";
 import Divider from "./CustomDivider";
 import NewsText from "./NewsText";
-const NewsCard = async (
+const NewsCard =  (
     {   postId,
         title,
         description,

@@ -42,7 +42,7 @@ class Complaints(BaseModel):
     municipality: Mapped[str] = mapped_column(type_=Text)
     date: Mapped[date] = mapped_column(type_=Date)
     time_started: Mapped[time] = mapped_column(type_=Time)
-    time_completed: Mapped[time] = mapped_column(type_=Time)
+    time_completed: Mapped[time] = mapped_column(type_=Time, nullable=True)
     status: Mapped[str] = mapped_column(type_=Text) 
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     

@@ -1,17 +1,30 @@
-from fastapi import APIRouter, Depends, Request, Form, status
+from fastapi import APIRouter, Depends, Request, Form, status, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select, asc, and_, desc, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ..models import Users, News
 from ..schema.form import CreateNews
-from ..utils.token import get_current_user
+from ..utils.token import get_current_user, get_current_user_ws
 from ..dependencies.db_session import get_session
 from ..dependencies.time_ago import TimeAgo
 from datetime import datetime
+from ..core.websocket_manager import ConnectionManager
+
 router = APIRouter(prefix="/news", tags=["News"])
+manager = ConnectionManager()
 
 
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    user_id = await get_current_user_ws(websocket)    
+    await manager.connect(websocket,user_id=user_id['userid'])
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+    
 
 @router.get("/")
 async def get_news(current_user = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
@@ -33,7 +46,7 @@ async def get_news(current_user = Depends(get_current_user),session:AsyncSession
     
 
     return [
-        {
+        {   
             "id": n.id,
             "title": n.title,
             "description": n.description,    
@@ -78,7 +91,26 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     )
     session.add(new_news)
     await session.commit()
-    await session.close()
+    await session.refresh(new_news, attribute_names=["user", "news_images"])
+    news_json = {
+        "id": new_news.id,
+        "title": new_news.title,
+        "description": new_news.description,
+        "date_posted": new_news.date_posted.isoformat(),
+        "time_posted": new_news.time_posted.strftime("%I:%M %p"),
+        "period": TimeAgo(date_posted=new_news.date_posted, time_posted=new_news.time_posted),
+        "user": {
+            "user_name": new_news.user.user_name,
+            "first_name": new_news.user.first_name,
+            "last_name": new_news.user.last_name,
+        },
+        "images": new_news.news_images[0] if len(new_news.news_images) > 0 else None
+    }
+    
+    await manager.broadcast_news({
+        "detail": "news",
+        "data" : news_json
+    })
     return {
         "detail" : "Sucessully Created"
     }

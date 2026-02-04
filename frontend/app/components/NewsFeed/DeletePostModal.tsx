@@ -21,7 +21,7 @@ const DeletePostModal = (props: Props) => {
     <>
     <button type='button' onClick={handleopenModal} className='btn btn-circle'>x</button>
     <dialog id="delete-post" className='modal'>
-        <div className='modal-box'>
+        <div className='modal-box min-h-100'>
             <div className='modal-start'>
                 <p>Delete This Post?</p>
             </div>
