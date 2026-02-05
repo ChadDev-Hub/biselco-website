@@ -2,12 +2,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
-from ..models import Users, MeterAccount, Roles
-from ..schema.form import SignUpUser
-from ..dependencies.db_session import get_session
+from ....models import Users, MeterAccount, Roles
+from ....schema.form import SignUpUser
+from ....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy import select, and_
-from ..utils.hashing import hash_password
+from ....utils.hashing import hash_password
 from sqlalchemy.exc import IntegrityError
 router = APIRouter(prefix="/auth", tags=['Auth'])
 

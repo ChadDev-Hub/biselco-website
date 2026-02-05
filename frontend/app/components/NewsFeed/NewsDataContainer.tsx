@@ -20,7 +20,7 @@ type Props = {
 const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
     const [NewsData, setNewsData] = useState(initialData)
     useEffect(()=>{
-        const socket = new WebSocket("ws://localhost:8000/news/ws");
+        const socket = new WebSocket("ws://localhost:8000/socket/ws");
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
             if (message.detail === "news"){

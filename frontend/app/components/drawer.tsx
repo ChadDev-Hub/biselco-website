@@ -13,9 +13,9 @@ type Props = {
 const Drawer = ({ children, baseurl , title }: Props) => {
     const currentRoute = usePathname()
     const router = useRouter()
-    const handleLogout = () => {
-        Logout(baseurl)
-        router.push("/landing")
+    const handleLogout = async () => {
+        await Logout(baseurl)
+        router.replace("/landing")
     }
     return (
         <div className="drawer absolute z-40 lg:drawer-open">

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert
 import app.models
-from app.models import Permissions, Roles
+from app.models import Permissions, Roles, ComplaintsStatusName
 
 async def create_permission_and_rules():
     roles_permission= {
@@ -36,10 +36,45 @@ async def create_permission_and_rules():
                     permissions = perms
                 )
                 sess.add(new_role)
-            
+
+
+async def create_complaints_name():
+    status = [
+        {
+            "status_name": "Received",
+            "description": "We Received your Complaints. Thank you for Submitting.",
+        },
+        {
+            "status_name": "Pending",
+            "description": "Your Complaints is in Pending State. We will update you if we have any update. Please Stand by.",
+        },
+        {
+            "status_name": "Working",
+            "description" : "We are working on your Complaints. Please wait for a while and we will do our best to solve it in short time.",
+        },
+        {
+            "status_name": "Complete",
+            "description": "We have completed your Complaints. Thank you for your patience."
+        }]
+    
+    
+    
+    async with async_sessionmaker(engine).begin() as session:
+        insert_stmt = insert(ComplaintsStatusName).values(status)
+        upsert_stmt = insert_stmt.on_conflict_do_update(
+            index_elements=["status_name"], 
+            set_={
+                'description' : insert_stmt.excluded.description
+            })
+        await session.execute(upsert_stmt)
+        await session.commit()
+    
+    
+    
 async def mainfunc():
     await create_table()
     await create_permission_and_rules()
+    await create_complaints_name()
     
     
 if __name__ == "__main__":

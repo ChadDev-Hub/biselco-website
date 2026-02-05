@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from .routes import signup, user_routes, login, meter, landing, news, logout, complaints
+from .api.http.routes import signup, user_routes, login, meter, landing, news, logout, complaints
+from .api.websocket.routes import websocket
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
@@ -21,3 +22,4 @@ app.include_router(meter.router)
 app.include_router(news.router)
 app.include_router(logout.router)
 app.include_router(complaints.router)
+app.include_router(websocket.router)

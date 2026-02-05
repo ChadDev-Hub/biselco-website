@@ -3,16 +3,16 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from ..dependencies.db_session import get_session
-from ..models import Users
-from ..schema.form import LoginUser, TokenData
+from ....dependencies.db_session import get_session
+from ....models import Users
+from ....schema.form import LoginUser, TokenData
 from datetime import timedelta, datetime, timezone
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi.security import OAuth2PasswordRequestForm
-from ..utils.authentication import authenticate_user
+from ....utils.authentication import authenticate_user
 router = APIRouter(prefix="/auth", tags=['Auth'])
-from ..utils.token import create_access_token, create_refresh_token, ALGORITHM, SECRET_KEY
+from ....utils.token import create_access_token, create_refresh_token, ALGORITHM, SECRET_KEY
 from dotenv import load_dotenv
 import os
 session_depends= Depends(get_session)

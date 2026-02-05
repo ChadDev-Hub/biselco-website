@@ -21,5 +21,4 @@ const NewsText = ({title,description}: Props) => {
         </div>
   )
 }
-
 export default NewsText

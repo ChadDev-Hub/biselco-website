@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .users import Users
 
 
+# COMPLAINTS MODEL
 class Complaints(BaseModel):
     """
     Complaints Model This Table/Model collect consumers complaints regarding 
@@ -40,15 +41,42 @@ class Complaints(BaseModel):
     location: Mapped[str] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326), nullable=True)
     village: Mapped[str] = mapped_column(type_=Text)
     municipality: Mapped[str] = mapped_column(type_=Text)
-    date: Mapped[date] = mapped_column(type_=Date)
-    time_started: Mapped[time] = mapped_column(type_=Time)
-    time_completed: Mapped[time] = mapped_column(type_=Time, nullable=True)
-    status: Mapped[str] = mapped_column(type_=Text) 
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     
     # relationships
     user: Mapped["Users"] = relationship(back_populates="complaints")
     complaints_image: Mapped[List["ComplaintsImage"]] = relationship(back_populates="complaints")
+    completed_images: Mapped[List["ComplaintsImageCompleted"]] = relationship(back_populates="complaints")
+    status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
+        back_populates="complaints",
+        cascade="all, delete-orphan",
+        order_by="ComplaintsStatusUpdates.date, ComplaintsStatusUpdates.time")
+
+
+# COMPLAINTS STATUS NAME TABLE 
+class ComplaintsStatusName(BaseModel):
+    __tablename__ = "complaints_status_name"
+    id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
+    status_name:Mapped[str] = mapped_column(type_=Text, unique=True)
+    description:Mapped[str] = mapped_column(type_=Text, nullable=True)
+    # relationships
+    status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
+        back_populates="status")
+   
+class ComplaintsStatusUpdates(BaseModel):
+    __tablename__ = "complaints_status"
+    id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
+    complaint_id: Mapped[int] = mapped_column(
+        ForeignKey("consumer_complaints.id", ondelete="CASCADE", onupdate="CASCADE"),
+        type_=Integer, primary_key=True)
+    status_id: Mapped[int] = mapped_column(
+        ForeignKey("complaints_status_name.id", ondelete="CASCADE", onupdate="CASCADE"),
+        type_=Integer, primary_key=True)
+    date: Mapped[date] = mapped_column(type_=Date)
+    time: Mapped[time] = mapped_column(type_=Time)
+    # relationships
+    complaints: Mapped["Complaints"] = relationship(back_populates="status_updates")
+    status: Mapped["ComplaintsStatusName"] = relationship(back_populates="status_updates")
 
 class ComplaintsImage(BaseModel):
     __tablename__ = "complaints_images"
@@ -65,3 +93,5 @@ class ComplaintsImageCompleted(BaseModel):
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
     complaint_id: Mapped[int] = mapped_column(ForeignKey("consumer_complaints.id"), type_=Integer)
     image_url: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    # relationships
+    complaints: Mapped["Complaints"] = relationship(back_populates="completed_images")

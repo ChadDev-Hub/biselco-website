@@ -1,6 +1,6 @@
 from .meters import MeterAccount
 from .users import Users
-from .complaints import Complaints, ComplaintsImage, ComplaintsImageCompleted
+from .complaints import Complaints, ComplaintsImage, ComplaintsImageCompleted, ComplaintsStatusName, ComplaintsStatusUpdates
 from .roles import Roles
 from .permissions import Permissions
 from .user_roles import UsersRoles

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends,status
-from ..utils.token import get_current_user
+from ....utils.token import get_current_user
 
 
 router = APIRouter(tags=["Landing Page"])

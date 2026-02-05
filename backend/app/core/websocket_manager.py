@@ -18,7 +18,16 @@ class ConnectionManager:
         websocket = self.active_connections.get(user_id)
         if websocket:
             await websocket.send_text(message)
+            
+    async def broad_cast_personal_json(self, user_id:int, data:dict):
+        websocket = self.active_connections.get(user_id)
+        if websocket:
+            await websocket.send_json(data)
 
-    async def broadcast_news(self, json:dict):
+    async def broadcast(self, json:dict):
         for websockets in self.active_connections.values():
             await websockets.send_json(json)
+        
+    
+            
+manager = ConnectionManager()
