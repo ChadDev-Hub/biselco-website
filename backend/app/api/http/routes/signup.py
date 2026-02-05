@@ -26,11 +26,9 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
         - password: User Password
     
     '''
-    # results = await db.execute(select(Users).where(Users.email == data.email))
-    # existing_user = results.mappings().first()
-    
-    # if existing_user:
-    #     raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+    results = (await db.execute(select(Users).where(Users.email == data.email))).scalar_one_or_none()
+    if results:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
         
     try: 
         mco_role = await db.scalar(select(Roles).where(Roles.name == "mco"))

@@ -68,10 +68,10 @@ class ComplaintsStatusUpdates(BaseModel):
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
     complaint_id: Mapped[int] = mapped_column(
         ForeignKey("consumer_complaints.id", ondelete="CASCADE", onupdate="CASCADE"),
-        type_=Integer, primary_key=True)
+        type_=Integer)
     status_id: Mapped[int] = mapped_column(
         ForeignKey("complaints_status_name.id", ondelete="CASCADE", onupdate="CASCADE"),
-        type_=Integer, primary_key=True)
+        type_=Integer)
     date: Mapped[date] = mapped_column(type_=Date)
     time: Mapped[time] = mapped_column(type_=Time)
     # relationships

@@ -52,10 +52,9 @@ async def create_complaints(
     # GET RECEIVED COMPLAINTS
     received = (await session.execute(
         select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
-    ).scalars().one_or_none()
+    ).scalars().first()
     if not received:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaints Status Not Found")
-    
     # CREATE COMPLAINT
     location = ST_Point(form.longitude, form.latitude, srid=4326)
     new_complaints = Complaints(
@@ -65,38 +64,48 @@ async def create_complaints(
         location = location,
         village = "Bintuan",
         municipality = "Coron",
-        user = current_user,
-        status = ComplaintsStatusUpdates(
+        user = current_user
+    )
+
+    status_updates = ComplaintsStatusUpdates(
             date = datetime.now().date(),
             time = datetime.now().time(),
             status = received)
-    )
+    new_complaints.status_updates.append(status_updates)
+
+    status_list = [{
+        "status": s.status.status_name,
+        "date": s.date,
+        "time": s.time
+    } for s in new_complaints.status_updates]
+
     session.add(new_complaints)
     await session.commit()
-    await session.refresh(new_complaints, attribute_names=["user", "status_update"])
-    return new_complaints
-    # # SEND TO SPECIFIC CLIENT
-    # data = {
-    #     "detail" : "Complaints Submitted",
-    #     "id" : new_complaints.id,
-    #     "subject" : new_complaints.subject,
-    #     "description" : new_complaints.description,
-    #     "village" : new_complaints.village,
-    #     "municipality" : new_complaints.municipality,
-    # }
-    # await manager.broad_cast_personal_json(user_id=user_id, data=data)
+    await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
     
-    
-    
-    # # SEND TO ADMIN CLIENT
-    #  # ADMIN USER
-    # admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalar()
-    # if not admins:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Admin Found")
-    # admin_ids = [admin_user.id for admin_user in admins.users]
-    # for admin_id in admin_ids:
-    #     await manager.broad_cast_personal_json(user_id=admin_id, data=data)
-    # await session.close()
+    data = {
+        "detail" : "Complaints Submitted",
+        "id" : new_complaints.id,
+        "subject" : new_complaints.subject,
+        "description" : new_complaints.description,
+        "village" : new_complaints.village,
+        "municipality" : new_complaints.municipality,
+        "location" : {
+            "latitude" : form.latitude,
+            "longitude" : form.longitude,
+            "srid" : 4326},
+        "status" : status_list
+    }
+
+    # SEND TO ADMIN AND SPECIFIC  CLIENT
+     # ADMIN USER
+    admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
+    admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+    admin_ids.append(user_id)
+    print(admin_ids)
+    for admin_id in admin_ids:
+        await manager.broad_cast_personal_json(user_id=admin_id, data=data)
+    await session.close()
     return {
         "detail" : "Complaints Submitted"
     }
