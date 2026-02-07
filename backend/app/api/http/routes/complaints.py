@@ -7,6 +7,9 @@ from ....utils.token import get_current_user, get_current_user_ws
 from ....schema.form import CreateComplaints
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_X, ST_Y, ST_SRID
+from shapely.geometry import Point
+from ....dependencies.get_complaints import complaints, new_complaint, user_complaints
+from geoalchemy2.shape import to_shape
 from ....models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
 from datetime import date, datetime
 from ....core.websocket_manager import manager
@@ -14,32 +17,27 @@ from ....core.websocket_manager import manager
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
+# GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK)
-async def get_complaints(user:dict = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
-    exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+async def get_user_complaints(user:dict = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
     if not user:
-        raise exception
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     user_id = user.get("userid")
-    complaints = (await session.execute(
-        select(
-            Complaints.id,
-            Complaints.subject,
-            Complaints.description,
-            Complaints.village,
-            Complaints.municipality,
-            ST_Y(Complaints.location).label("latitude"),
-            ST_X(Complaints.location).label("longitude"),
-            ST_SRID(Complaints.location).label("srid")
-            ).where(Complaints.user_id == user_id))).mappings().all()
-    return complaints
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
+    complaint =  await user_complaints(session=session, user_id=user_id)
+    return complaint
 
 
+# GET ALL COMPLAINTS
+
+# CREATE ALL COMPLAINTS
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
     user:dict = Depends(get_current_user), 
     session:AsyncSession = Depends(get_session), 
     form:CreateComplaints = Form()):
-    
+    # USER VERIFICATION
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     user_id = user.get("userid")
@@ -72,42 +70,28 @@ async def create_complaints(
             time = datetime.now().time(),
             status = received)
     new_complaints.status_updates.append(status_updates)
-
-    status_list = [{
-        "status": s.status.status_name,
-        "date": s.date,
-        "time": s.time
-    } for s in new_complaints.status_updates]
-
     session.add(new_complaints)
     await session.commit()
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
+
+    # QUERY THE LATEST COMPLAINT
+    data = await new_complaint(session=session, complaint_id=new_complaints.id, user_id=user_id)
     
-    data = {
-        "detail" : "Complaints Submitted",
-        "id" : new_complaints.id,
-        "subject" : new_complaints.subject,
-        "description" : new_complaints.description,
-        "village" : new_complaints.village,
-        "municipality" : new_complaints.municipality,
-        "location" : {
-            "latitude" : form.latitude,
-            "longitude" : form.longitude,
-            "srid" : 4326},
-        "status" : status_list
-    }
 
     # SEND TO ADMIN AND SPECIFIC  CLIENT
      # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
     admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
     admin_ids.append(user_id)
-    print(admin_ids)
+
     for admin_id in admin_ids:
         await manager.broad_cast_personal_json(user_id=admin_id, data=data)
     await session.close()
+    
     return {
         "detail" : "Complaints Submitted"
     }
+    
+    
     
     

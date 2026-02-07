@@ -20,23 +20,6 @@ export async function loginfortoken(formdata: FormData, baseurl?: string) {
     }
 }
 
-// REFRESH TOKEN
-// export async function refreshToken() {
-//     const res = await fetch(`${baseUrl}/auth/token/refresh`, {
-//         method: "POST",
-//         credentials: "include"
-//     })
-//     const data = await res.json()
-//     if (!res.ok) {
-//         return {
-//             error: data.detail
-//         }
-//     }
-//     return {
-//         success: true
-//     }
-// }
-
 
 // LOGOUT
 export async function Logout(baseurl?: string) {

@@ -3,7 +3,7 @@ from sqlalchemy import Integer, BIGINT, Text, ForeignKey, DateTime, Date, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db.base import BaseModel
 from typing import TYPE_CHECKING, List
-from geoalchemy2 import Geometry
+from geoalchemy2 import Geometry, WKBElement
 from datetime import datetime, time, date
 if TYPE_CHECKING:
     from .users import Users
@@ -38,7 +38,7 @@ class Complaints(BaseModel):
     subject: Mapped[str] = mapped_column(type_=Text, nullable=True)
     description: Mapped[str] = mapped_column(type_=Text, nullable=True)
     reference_pole: Mapped[str] = mapped_column(type_=Text)
-    location: Mapped[str] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326), nullable=True)
+    location: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326), nullable=True)
     village: Mapped[str] = mapped_column(type_=Text)
     municipality: Mapped[str] = mapped_column(type_=Text)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)

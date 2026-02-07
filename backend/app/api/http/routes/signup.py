@@ -14,7 +14,7 @@ router = APIRouter(prefix="/auth", tags=['Auth'])
 session_depends = Depends(get_session)
 
 
-@router.post("/signup")
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
     '''
     This function represent the Signup route and store user information in a database.
@@ -43,7 +43,9 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
         db.add(user)
         await db.commit()
         await db.close()
-        return JSONResponse(content={"detail": "Signup Successful"}, status_code=status.HTTP_200_OK)
+        return {
+            "detail" : "Signup Successful"
+        }
     except IntegrityError as e:
         await db.rollback()
         if "users_account_user_name_key" in  str(e.orig):
@@ -55,7 +57,7 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
 
         
 
-@router.post("/admin/signup")
+@router.post("/admin/signup", status_code=status.HTTP_201_CREATED)
 async def signadmin(data:SignUpUser=Form(), db:AsyncSession = session_depends):
     '''
     This function represent the Signup route and store user information in a database
@@ -68,23 +70,31 @@ async def signadmin(data:SignUpUser=Form(), db:AsyncSession = session_depends):
         - password: User Password
     
     '''
-    results = await db.execute(select(Users).where(Users.email == data.email))
-    existing_user = results.mappings().first()
-    
-    if existing_user:
-        return HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
-    user = Users(
-        user_name=data.username,
-        first_name = data.firstname,
-        last_name = data.lastname,
-        email=data.email,
-        password=data.password,
-        is_admin=True
-    )
-    
-    db.add(user)
-    await db.commit()
-    await db.close()
-    return  {
-        "signup_status": "Signup Sucessfull"
-    }
+    results = (await db.execute(select(Users).where(Users.email == data.email))).scalar_one_or_none()
+    if results:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+    try:
+        roles = await db.scalar(select(Roles).where(Roles.name == "admin"))
+        user = Users(
+            user_name=data.username,
+            first_name = data.firstname,
+            last_name = data.lastname,
+            email=data.email,
+            password=hash_password(data.password),
+            roles=[roles]
+        )
+        db.add(user)
+        await db.commit()
+        await db.close()
+        return {
+            "detail" : "Signup Successful"
+        }
+    except IntegrityError as e:
+        await db.rollback()
+        if "users_account_user_name_key" in  str(e.orig):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Username Already Registered")
+        elif "users_account_email_key" in str(e.orig):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Email Already Registered")
+        else:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database Error")
+        

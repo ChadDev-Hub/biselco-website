@@ -14,6 +14,9 @@ export async function getLandingPageData() {
     return data
 }
 
+
+
+// GET NEWS PAGE DATA
 export async function getNewsPage(){
     const cookieHeader = (await cookies()).toString();
     const res = await fetch(`${baseUrl}/news/`,
@@ -38,12 +41,10 @@ export async function getNewsPage(){
 
 
 
-
-export async function logout(){
-    (await cookies()).delete("access_token")
-}
+// LOGOUT FUNCTION
 
 
+// POST NEWS
 export async function PostNews(form:FormData){
     const cookieHeader = (await cookies()).toString();
     const res = await fetch(`${baseUrl}/news/create`,
@@ -67,4 +68,28 @@ export async function PostNews(form:FormData){
         status: status,
         detail:data.detail
     }
+}
+
+
+// GET COMPLAINTS
+
+export async function UserComplaints(){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/`,
+        {
+            method: "GET",
+            cache: "no-store",
+            credentials:"include",
+            headers:{
+                "Cookie": cookieHeader
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return{
+            error: true
+        }
+    }
+    return data
 }

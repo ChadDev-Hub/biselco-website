@@ -1,6 +1,5 @@
 
 "use client"
-import { div } from 'framer-motion/client'
 import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
 
