@@ -93,3 +93,26 @@ export async function UserComplaints(){
     }
     return data
 }
+
+
+// GET COMPLAINT STATUS NAME
+export async function ComplaintStatusName(){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/status/name`,
+        {
+            method: "GET",
+            cache: "no-store",
+            credentials:"include",
+            headers:{
+                "Cookie": cookieHeader
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return{
+            error: true
+        }
+    }
+    return data
+}

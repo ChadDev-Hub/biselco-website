@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, desc, asc
 from sqlalchemy.orm import selectinload
 from ..models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
 from shapely.geometry import Point
@@ -34,9 +34,8 @@ async def complaints(session:AsyncSession, user_id:int):
                 "location": {
                     "latitude": geom.y,
                     "longitude": geom.x,
-                    "srid": srid,
-                "status": status_list
-            }}
+                    "srid": srid},
+            "status": status_list}
         data.append(complaint)
     return data
 
@@ -81,8 +80,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
             "village" : n_complaint.village,
             "municipality" : n_complaint.municipality,
             "location" : location,
-            "status" : status_list
-        }
+            "status" : status_list}
     }
     await session.close()
     return data
@@ -96,6 +94,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
         .options(selectinload(Complaints.status_updates)
                  .selectinload(ComplaintsStatusUpdates.status))
         .where(Complaints.user_id == user_id)
+        .order_by(desc(Complaints.id))
     )).scalars().all()
     data = []
     for c in complaints:
@@ -118,8 +117,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
                 "location": {
                     "latitude": geom.y,
                     "longitude": geom.x,
-                    "srid": srid,
-                "status": status_list
-            }}
+                    "srid": srid},
+                "status": status_list}
         data.append(complaint)
     return data

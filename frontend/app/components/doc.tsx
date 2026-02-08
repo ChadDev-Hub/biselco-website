@@ -20,7 +20,6 @@ const DocNavigation = () => {
   }
 
 
-
   const handleSettingsClick = () =>{
     setActive("settings")
   }

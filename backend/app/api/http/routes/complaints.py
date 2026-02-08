@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, asc, desc
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....utils.token import get_current_user, get_current_user_ws
@@ -29,7 +29,11 @@ async def get_user_complaints(user:dict = Depends(get_current_user),session:Asyn
     return complaint
 
 
-# GET ALL COMPLAINTS
+# GET ALL COMPLAINTS STATUS NAME
+@router.get("/status/name", status_code=status.HTTP_200_OK)
+async def get_complaints_status_name(session:AsyncSession = Depends(get_session)):
+    status_name = (await session.execute(select(ComplaintsStatusName).order_by(desc(ComplaintsStatusName.id)))).scalars().all()
+    return status_name
 
 # CREATE ALL COMPLAINTS
 @router.post("/create", status_code=status.HTTP_201_CREATED)
