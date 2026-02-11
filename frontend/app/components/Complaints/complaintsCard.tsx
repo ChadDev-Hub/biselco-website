@@ -1,12 +1,19 @@
 import React from 'react'
 import ComplaintsTimeLine from './complaintsTimeLine'
-import Divider from '../NewsFeed/CustomDivider'
+import ComplaintCardHeader from './complaintsCardHeader'
 import Accordion from '../Accordion'
+import Options from '../OptionsLists'
+import DeletConfirmation from './deleteComplaintsConfirmation'
+
+
+
+
 type Props = {
     subject: string;
-    description: string;
+    description: string;    
     status: [];
     complaintsStatusName: [];
+    serverurl?: string
 }
 type status = {
     id: number;
@@ -19,23 +26,21 @@ type status = {
 const ComplaintsCard = ({ subject, description, complaintsStatusName, status }: Props) => {
     const statusnameLists = status.map((item: status) => item.name);
     return (
-        <div className="card bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl px-2 w-89 md:w-96 lg:w-180">
-            <div className='card-title px-4 py-4'>
-                <h2 className='text-2xl font-bold text-shadow-2xs'>{subject}</h2>
-            </div>
+        <div className="card card-sm bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl px-2 w-full ">
+            <ComplaintCardHeader>
+                <h2 className='text-lg font-bold text-shadow-2xs'>{subject}</h2>
+                <Options deletecomplaint={(onclose) => (<DeletConfirmation onClose={onclose}/>)}/>
+            </ComplaintCardHeader>
             <div className="card-body">
-                <p className='text-xl'>{description}</p>
+                <p className='text-md'>{description}</p>
             </div>
-            <Divider />
-
-                <Accordion>
-                    <ComplaintsTimeLine
-                        data={complaintsStatusName}
-                        statuslist={statusnameLists}
-                    />
+            <hr className='bg-gray-400/20' />
+            <Accordion>
+                <ComplaintsTimeLine
+                    data={complaintsStatusName}
+                    statuslist={statusnameLists}
+                />
             </Accordion>
-
-            
         </div>
     )
 }

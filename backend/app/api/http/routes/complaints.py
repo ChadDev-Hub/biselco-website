@@ -86,7 +86,7 @@ async def create_complaints(
      # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
     admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
-    admin_ids.append(user_id)
+    admin_ids.append(user_id)   
 
     for admin_id in admin_ids:
         await manager.broad_cast_personal_json(user_id=admin_id, data=data)

@@ -6,17 +6,18 @@ import { useRouter } from 'next/navigation'
 
 type Props = {
     svgfill:string;
-    strokeColor:string
+    strokeColor:string;
+    orientation:string;
 }
 
-const HomeRouteButton = ({strokeColor, svgfill}: Props) => {
+const HomeRouteButton = ({strokeColor, svgfill, orientation}: Props) => {
     const router = useRouter()
     const handleClick = () => {
         router.push("/")
     }
     return (
 
-        <button name='home' onClick={handleClick} type='button' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Homepage">
+        <button name='home' onClick={handleClick} type='button' className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center`} data-tip="Homepage">
             {/* Home icon */}
             <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="1.5"  stroke="currentColor">
             <path 

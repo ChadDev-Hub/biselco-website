@@ -55,15 +55,15 @@ const PostImageModal = () => {
     }
     return (
         <>
-            <button aria-label='photos' onClick={handleOpenModal} type='button' className='btn btn-circle btn-ghost tooltip tooltip-bottom sm:tooltip sm:tooltip-right' data-tip="Post Photos">
+            <button aria-label='photos' onClick={handleOpenModal} type='button' className='btn btn-circle btn-ghost tooltip tooltip-bottom sm:tooltip-bottom' data-tip="Post Photos">
                 <DotLottieReact
                     src="https://lottie.host/1064b7b9-4381-4331-b3c3-24b57d656bdf/Iirp8XKZBu.lottie"
                     loop
                     autoplay
                 />
             </button>
-            <dialog id='postphoto-modal' className='modal'>
-                <fieldset  className='form fieldset  flex flex-col modal-box bg-base-200 min-w-fit max-w-100 p-4'>
+            <dialog id='postphoto-modal' className='modal backdrop-blur-lg'>
+                <fieldset  className='fieldset  flex flex-col modal-box bg-base-200  w-full p-4'>
                     <legend className='fieldset-legend w-full flex justify-between text-lg font-bold text-shadow-2xs text-blue-700'>
                         <p>
                             New News

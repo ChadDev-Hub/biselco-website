@@ -1,5 +1,6 @@
 "use server"
 
+import axios from "axios"
 import { cookies } from "next/headers"
 
 // GET LANDING PAGE DATA
@@ -115,4 +116,28 @@ export async function ComplaintStatusName(){
         }
     }
     return data
+}
+
+
+// POST COMPLAINTS
+export async function PostComplaints(form:FormData){
+    const cookieHeader = (await cookies()).toString();
+    const res = await axios.post(`${baseUrl}/complaints/create`,
+        form,
+        {  
+            onUploadProgress(progressEvent) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1));
+                return {progress: percentCompleted}
+            },
+            withCredentials: true,
+            headers: {
+                "Cookie": cookieHeader,
+                "content-type": "multipart/form-data"
+            }
+        }
+    )
+    return {
+        status: res.status,
+        data: res.data
+    };
 }

@@ -19,20 +19,21 @@ type Props = {
 
 const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
     const [NewsData, setNewsData] = useState(initialData)
-    useEffect(()=>{
+    useEffect(() => {
         const socket = new WebSocket("ws://localhost:8000/socket/ws");
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
-            if (message.detail === "news"){
-                setNewsData((prev)=>[message.data,...prev])
+            if (message.detail === "news") {
+                setNewsData((prev) => [message.data, ...prev])
             }
         };
-        return () =>{
+        return () => {
             socket.close();
         }
     }, []);
     return (
-        <>
+
+        <section className='flex flex-col gap-4 w-full items-center'>
             {NewsData.map((n: Props) => (
                 <NewsCard
                     key={n.id}
@@ -48,7 +49,10 @@ const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
                 />
             ))}
 
-        </>
+        </section>
+
+
+
 
     )
 }

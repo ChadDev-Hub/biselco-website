@@ -17,21 +17,21 @@ const ComplaintsTimeLine = ({ data, statuslist }: Props) => {
                 <li key={item.id}>
                     {item.id % 2 === 0 ? (
                         <div className={`timeline-end timeline-box   ${statuslist.includes(item.status_name) ? "bg-base-100 drop-shadow-2xl" : "bg-base-100/10"}`}>
-                            <h2 className={`text-xl text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            <h2 className={`text-md lg:text-lg text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
                             </h2>
                             <hr className={`${statuslist.includes(item.status_name) ? "" : "bg-transparent"}`}/>
-                            <p className={`text-lg italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            <p className={`tex-sm lg:text-md italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.description}
                             </p>
                         </div>
                     ) : (
                         <div className={`timeline-start timeline-box  ${statuslist.includes(item.status_name) ? "bg-base-100  drop-shadow-2xl" : "bg-base-100/10"}`}>
-                            <h2 className={`text-xl text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            <h2 className={`text-md lg:text-lg text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
                             </h2>
                             <hr className={`${statuslist.includes(item.status_name) ? "" : "bg-transparent"}`}/>
-                            <p className={`text-lg italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            <p className={`tex-sm lg:text-md italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.description}
                             </p>
                         </div>
