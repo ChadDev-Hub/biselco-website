@@ -6,7 +6,7 @@ router = APIRouter(prefix="/socket", tags=['Socket'])
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     user_id = await get_current_user_ws(websocket)    
-    await manager.connect(websocket,user_id=user_id['userid'])
+    await manager.connect(websocket,user_id=user_id['userid'])  
     try:
         while True:
             text = await websocket.receive_text()
