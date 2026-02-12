@@ -49,7 +49,7 @@ const MapButton = ({ location }: Props) => {
                 </svg>
             </button >
             <dialog ref={modalRef} className="modal backdrop-blur-sm">
-                <div className="modal-box min-h-200 w-full">
+                <div className="modal-box h-fit w-full bg-base-100/30">
                     <h3 className="font-bold text-lg flex gap-2 items-center">
                         <span>
                             <svg
@@ -81,7 +81,6 @@ const MapButton = ({ location }: Props) => {
                         </span>
                         Complaint Locations
                     </h3>
-                    <p className="py-4">Press ESC key or click the button below to close</p>
                     <div className='modal-middle'>
                         <ComplaintMap
                         latitude={location.latitude}

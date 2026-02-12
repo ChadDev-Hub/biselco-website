@@ -25,9 +25,15 @@ class ConnectionManager:
             await websocket.send_json(data)
 
     async def broadcast(self, json:dict):
-        for websockets in self.active_connections.values():
-            await websockets.send_json(json)
-        
+        disconnected = []
+        try: 
+            for user_id,websockets in self.active_connections.items():
+                await websockets.send_json(json)
+        except Exception:
+            disconnected.append(user_id)
+        for user_id in disconnected:
+            self.disconnect(user_id)
+    
     
             
 manager = ConnectionManager()

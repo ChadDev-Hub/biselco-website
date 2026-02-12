@@ -32,7 +32,7 @@ const CreateComplaints = () => {
 
                     viewBox="-51.2 -51.2 614.40 614.40"
                     stroke="currentColor" stroke-width="0.00512">
-                    <g stroke-width={0.1}>
+                    <g strokeWidth={0.1}>
                     </g>
                     <g id="SVGRepo_tracerCarrier"
                         strokeLinecap="round" strokeLinejoin="round"

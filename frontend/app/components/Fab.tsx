@@ -38,9 +38,9 @@ const FabIcon = ({ children }: Props) => {
                         viewBox="-8.5 0 32 32"
                         xmlns="http://www.w3.org/2000/svg"
                         transform="matrix(1, 0, 0, 1, 0, 0)rotate(270)">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0">
+                        <g id="SVGRepo_bgCarrier" strokeWidth={0.1}>
                         </g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                        <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round">
                         </g>
                         <g id="SVGRepo_iconCarrier">
                             <path d="M15.281 7.188v17.594l-15.281-8.781z">

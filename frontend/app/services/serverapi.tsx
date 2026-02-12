@@ -129,7 +129,7 @@ export async function ComplaintStatusName(){
             }
         }
     )
-    const data = await res.json()
+    const data = res.json()
     if (!res.ok){
         return{
             error: true
