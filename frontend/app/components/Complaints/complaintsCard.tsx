@@ -9,11 +9,13 @@ import DeletConfirmation from './deleteComplaintsConfirmation'
 
 
 type Props = {
+    id: number;
     subject: string;
     description: string;    
-    status: [];
-    complaintsStatusName: [];
-    serverurl?: string
+    status: status[];
+    complaintsStatusName:[];
+    serverurl?: string;
+    deleteComplaint: (id: number) => void;
 }
 type status = {
     id: number;
@@ -23,13 +25,18 @@ type status = {
     time: string
 }
 
-const ComplaintsCard = ({ subject, description, complaintsStatusName, status }: Props) => {
-    const statusnameLists = status.map((item: status) => item.name);
+const ComplaintsCard = ({ subject, description, complaintsStatusName, status,deleteComplaint, id }: Props) => {
     return (
         <div className="card card-sm bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl px-2 w-full ">
             <ComplaintCardHeader>
                 <h2 className='text-lg font-bold text-shadow-2xs'>{subject}</h2>
-                <Options deletecomplaint={(onclose) => (<DeletConfirmation onClose={onclose}/>)}/>
+                <Options deletecomplaint={
+                    (onclose) => (
+                    <DeletConfirmation 
+                    onClose={onclose} 
+                    deleteComplaint={deleteComplaint}
+                    complaintId={id}/>)
+                    }/>
             </ComplaintCardHeader>
             <div className="card-body">
                 <p className='text-md'>{description}</p>
@@ -38,7 +45,7 @@ const ComplaintsCard = ({ subject, description, complaintsStatusName, status }: 
             <Accordion>
                 <ComplaintsTimeLine
                     data={complaintsStatusName}
-                    statuslist={statusnameLists}
+                    status={status}
                 />
             </Accordion>
         </div>

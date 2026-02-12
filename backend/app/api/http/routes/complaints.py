@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, asc, desc
+from sqlalchemy import select, asc, desc, delete
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....utils.token import get_current_user, get_current_user_ws
@@ -17,6 +17,9 @@ from ....core.websocket_manager import manager
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
+
+
+
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_user_complaints(user:dict = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
@@ -27,6 +30,12 @@ async def get_user_complaints(user:dict = Depends(get_current_user),session:Asyn
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     complaint =  await user_complaints(session=session, user_id=user_id)
     return complaint
+
+
+#GET ALL COMPLAINTS
+@router.get("/all", status_code=status.HTTP_200_OK)
+async def get_all_complaint(session:AsyncSession = Depends(get_session)):
+    return await complaints(session=session)
 
 
 # GET ALL COMPLAINTS STATUS NAME
@@ -96,6 +105,46 @@ async def create_complaints(
         "detail" : "Complaints Submitted"
     }
     
-    
+@router.delete("/delete/{complaint_id}", status_code=status.HTTP_200_OK)
+async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_session), user:dict = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+    try:
+        select_stmt = select(Complaints).where(Complaints.id == complaint_id)
+        data = (await session.execute(select_stmt)).scalar_one_or_none()
+        
+        if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+        
+        deleted_complaint = {
+            "id": data.id,
+            "subject": data.subject,
+            "description": data.description,
+            "reference_pole": data.reference_pole,
+            "location": {
+                'latitude': Point(to_shape(data.location).coords).y,
+                'longitude': Point(to_shape(data.location).coords).x,
+                },
+            "village": data.village,
+            "municipality": data.municipality
+        }
+        print(deleted_complaint)
+        delete_stmt = delete(Complaints).where(Complaints.id == complaint_id)
+        await session.execute(delete_stmt)
+        await session.commit()
+        await session.close()
+        admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
+        admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+        for admin in admin_ids:
+            to_send = {
+                "detail": "deleted complaint",
+                "data": deleted_complaint,
+            }
+            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
+    except Exception as e:
+        return e
+    return {
+        "detail" : "Successfully Deleted"
+    }
     
     

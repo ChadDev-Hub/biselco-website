@@ -71,8 +71,28 @@ export async function PostNews(form:FormData){
     }
 }
 
+// GET ALL COMPLAINTS 
+export async function GetAllComplaints(){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/`,
+        {
+            method: "GET",
+            cache: "no-store",
+            credentials:"include",
+            headers:{
+                "Cookie": cookieHeader
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return data
+    }
+    return data
+}
 
-// GET COMPLAINTS
+
+// GET COMPLAINTS ON SEPECIFIC USER 
 
 export async function UserComplaints(){
     const cookieHeader = (await cookies()).toString();
@@ -140,4 +160,24 @@ export async function PostComplaints(form:FormData){
         status: res.status,
         data: res.data
     };
+}
+
+// DELETE COMPLAINT
+
+export async function DeleteComplaint(id:number){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/delete/${id}`,
+        {
+            method: "DELETE",
+            credentials:"include",
+            headers:{
+                "Cookie": cookieHeader
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return data
+    }
+    return data
 }

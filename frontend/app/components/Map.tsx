@@ -17,11 +17,11 @@ import { Geolocation } from 'ol'
 
 
 type Props = {
-    onSelectLocation: (lat: number, lon: number) => void
-    onOpenModal?: () => void
+    onSelectLocation?: (lat: number, lon: number) => void
+    coordinates?: [number, number]
 }
 
-const BiselcoMap = ({ onSelectLocation }: Props) => {
+const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
     const mapRef = useRef<Map | null>(null)
     const mapDivRef = useRef<HTMLDivElement | null>(null)
     const markerSourceRef = useRef<VectorSource | null>(null)
@@ -101,7 +101,7 @@ const BiselcoMap = ({ onSelectLocation }: Props) => {
                 markerLayer,
                 userLayer,
             ],
-            view,
+            view:view,
         })
         // CREATE AN ACTION ON THE MAP FOR Pointing on the specific location
         mapRef.current.on('singleclick', (evt) => {
@@ -112,8 +112,16 @@ const BiselcoMap = ({ onSelectLocation }: Props) => {
             markerSourceRef.current?.addFeature(
                 new Feature({ geometry: new Point(coord) })
             )
-            onSelectLocationRef.current(lat, lon)
+            onSelectLocationRef.current?.(lat, lon)
         })
+
+        // CREATE A COMPLAINT MARKER IF COORDINATES IS AVAILABLE
+        if (coordinates) {
+            markerSourceRef.current?.clear()
+            markerSourceRef.current?.addFeature(
+                new Feature({ geometry: new Point(fromLonLat(coordinates)) })
+            )
+        }
 
         // INTIALIZE NEW GEOLOCATION
         geoLocationRef.current = new Geolocation({
@@ -142,7 +150,7 @@ const BiselcoMap = ({ onSelectLocation }: Props) => {
             mapRef.current?.setTarget(undefined)
             mapRef.current = null
         }
-    }, [])
+    }, [coordinates])
     // HANDLE THE REALTIME-LOCATION
     const handleClick = () => {
         geoLocationRef.current?.setTracking(true)

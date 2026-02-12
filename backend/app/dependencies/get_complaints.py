@@ -6,12 +6,13 @@ from sqlalchemy.orm import selectinload
 from ..models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
-async def complaints(session:AsyncSession, user_id:int):
+async def complaints(session:AsyncSession):
     complaints = (await session.execute(
         select(Complaints)
+        .join(ComplaintsStatusUpdates)
         .options(selectinload(Complaints.status_updates)
                  .selectinload(ComplaintsStatusUpdates.status))
-        .where(Complaints.user_id == user_id)
+        .order_by(desc(ComplaintsStatusUpdates.time ))
     )).scalars().all()
     data = []
     for c in complaints:
@@ -39,6 +40,7 @@ async def complaints(session:AsyncSession, user_id:int):
         data.append(complaint)
     return data
 
+# NEW COMPLAINT
 async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
     n_complaint = await session.scalar(
     select(Complaints)

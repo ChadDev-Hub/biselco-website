@@ -30,8 +30,8 @@ const ComplaintsContainer = (
         serverurl
     }:Props
 ) => {
-    const [complaints, setComplaints] = useState(complaintsData);
 
+    const [complaints, setComplaints] = useState(complaintsData);
     useEffect(()=>{
         const socketUrl = process.env.NEXT_PUBLIC_WEBSOCKETURL
         const socket = new WebSocket(`${socketUrl}/socket/ws`);
@@ -45,16 +45,23 @@ const ComplaintsContainer = (
             socket.close();
         };
     },[]);
+
+    const handleDelete = (id: number) => {
+        const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
+        setComplaints(updatedComplaints);
+    };
   return (
     <section className='flex flex-col gap-4 w-full items-center'>
          {complaints.map((complaint: Complaints) => (
         <ComplaintsCard 
-        key={complaint.id} 
+        key={complaint.id}
+        id ={complaint.id}
         subject={complaint.subject} 
         description={complaint.description}
         status={complaint.status}
         complaintsStatusName={complaintsStatusName}
-        serverurl={serverurl}/>
+        serverurl={serverurl}
+        deleteComplaint={handleDelete}/>
     ))}
 
     </section>

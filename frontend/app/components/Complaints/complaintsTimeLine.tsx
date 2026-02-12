@@ -6,11 +6,25 @@ type statusItem = {
     status_name: string;
     description: string;
 }
+
+type status = {
+    id: number; 
+    name: string;
+    description: string;
+    date: string; 
+    time: string;
+    
+}
 type Props = {
     data: statusItem[]
-    statuslist: string[];
+    status: status[];
 }
-const ComplaintsTimeLine = ({ data, statuslist }: Props) => {
+const ComplaintsTimeLine = ({ data, status }: Props) => {
+    const statuslist = status.map((item) => item.name);
+    const filterDate = (status_name:string) => {
+        const filteredStatus =  status.filter((item) => item.name === status_name);
+        return filteredStatus
+    }
     return (
         <ul className="timeline mt-6 timeline-snap-icon timeline-vertical ">
             {data.map((item) => (
@@ -19,6 +33,7 @@ const ComplaintsTimeLine = ({ data, statuslist }: Props) => {
                         <div className={`timeline-end timeline-box   ${statuslist.includes(item.status_name) ? "bg-base-100 drop-shadow-2xl" : "bg-base-100/10"}`}>
                             <h2 className={`text-md lg:text-lg text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
+                                <span className="text-gray-400/45 text-[0.60rem] italic "> {filterDate(item.status_name)[0]?.date} • {filterDate(item.status_name)[0]?.time}</span>
                             </h2>
                             <hr className={`${statuslist.includes(item.status_name) ? "" : "bg-transparent"}`}/>
                             <p className={`tex-sm lg:text-md italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
@@ -26,9 +41,10 @@ const ComplaintsTimeLine = ({ data, statuslist }: Props) => {
                             </p>
                         </div>
                     ) : (
-                        <div className={`timeline-start timeline-box  ${statuslist.includes(item.status_name) ? "bg-base-100  drop-shadow-2xl" : "bg-base-100/10"}`}>
-                            <h2 className={`text-md lg:text-lg text-shadow-2xs font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                        <div className={`timeline-start timeline-box ${statuslist.includes(item.status_name) ? "bg-base-100  drop-shadow-2xl" : "bg-base-100/10"}`}>
+                            <h2 className={`text-md lg:text-lg text-shadow-2xs flex flex-col font-bold ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
+                                <span className="text-gray-400/45 text-[0.60rem] italic "> {filterDate(item.status_name)[0]?.date} • {filterDate(item.status_name)[0]?.time}</span>
                             </h2>
                             <hr className={`${statuslist.includes(item.status_name) ? "" : "bg-transparent"}`}/>
                             <p className={`tex-sm lg:text-md italic ${statuslist.includes(item.status_name) ? "" : "text-gray-400/20"}`}>

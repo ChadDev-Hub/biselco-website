@@ -4,13 +4,15 @@ import React from 'react'
 import { UserComplaints } from '../services/serverapi'
 import ComplaintsContainer from '../components/Complaints/complaintContainer'
 import { ComplaintStatusName } from '../services/serverapi'
+import { ComplaintsDashboardRouteButton} from '../components/buttons/complaints'
+import CreateComplaints from '../components/Complaints/CreateComplaintsModal'
 import FabIcon from '../components/Fab'
 const ComplaintsPage = async () => {
   const baseurl = process.env.BASESERVERURL;
   const complaints = await UserComplaints();
   const complaintsStatusName = await ComplaintStatusName();
   return (
-    <div className="flex min-h-screen items-center w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
+    <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
       container
       max-w-190
@@ -52,7 +54,15 @@ const ComplaintsPage = async () => {
             serverurl={baseurl}
             complaintsData={complaints}
             complaintsStatusName={complaintsStatusName} />
-          <FabIcon />
+          <FabIcon>
+            <div data-tip = "Create Complaint" className='tooltip tooltip-left'>
+              <CreateComplaints/>
+            </div>
+            <div data-tip = "Navigate Dashboard" className='tooltip tooltip-left'>
+              <ComplaintsDashboardRouteButton/>
+            </div>
+            
+          </FabIcon>
       </main>
     </div>
   )
