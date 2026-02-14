@@ -2,6 +2,7 @@
 import React from 'react'
 import DashBoardTable from '../table'
 import MapButton from './mapbutton'
+import ComplaintStatusButton from './statusButton'
 type Props = {
     data: Complaint[]
 }
@@ -24,6 +25,7 @@ type Location = {
 
 type status = {
     id: number;
+    complaint_id: number;
     name: string;
     description: string;
     date: string;
@@ -32,7 +34,6 @@ type status = {
 const ComplaintsContainer = ({
     data
 }: Props) => {
-console.log(data)
     return (
         <DashBoardTable>
             <thead className='text-md font-bold text-center text-yellow-400'>
@@ -58,9 +59,9 @@ console.log(data)
                             <MapButton location={complaint.location}/>
                         </td>
                         <td>
-                            <button className='btn'>
-                                view status
-                            </button>
+                            <ComplaintStatusButton 
+                            status={complaint.status}
+                            complaints_id={complaint.id}/>
                         </td>
                     </tr>
                 ))}

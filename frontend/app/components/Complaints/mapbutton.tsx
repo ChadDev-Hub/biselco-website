@@ -20,7 +20,7 @@ const MapButton = ({ location }: Props) => {
     const handleCloseModal = () => modalRef.current?.close();
     return (
         <>
-            <button aria-label='open-modal' type='button' onClick={handleOpenModal} className="btn rounded-full bg-blue-600 drop-shadow-sm">
+            <button aria-label='open-modal' type='button' onClick={handleOpenModal} className="btn rounded-full btn-sm bg-blue-600 drop-shadow-sm">
                 <svg
                     version="1.1"
                     id="Icons"
@@ -49,7 +49,7 @@ const MapButton = ({ location }: Props) => {
                 </svg>
             </button >
             <dialog ref={modalRef} className="modal backdrop-blur-sm">
-                <div className="modal-box h-fit w-full bg-base-100/30">
+                <div className="modal-box h-fit w-full bg-base-100/75">
                     <h3 className="font-bold text-lg flex gap-2 items-center">
                         <span>
                             <svg
@@ -80,15 +80,16 @@ const MapButton = ({ location }: Props) => {
                             </svg>
                         </span>
                         Complaint Locations
+                        
                     </h3>
+                    <div className="modal-action">
+                        <button type='button' onClick={handleCloseModal} className="btn btn-circle absolute btn-sm right-3 top-2">X</button>
+                    </div>
                     <div className='modal-middle'>
                         <ComplaintMap
                         latitude={location.latitude}
                         longitude={location.longitude}
                         srid={location.srid}/>
-                    </div>
-                    <div className="modal-action ">
-                        <button type='button' onClick={handleCloseModal} className="btn">Close</button>
                     </div>
                 </div>
             </dialog>

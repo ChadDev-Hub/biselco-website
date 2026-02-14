@@ -74,7 +74,7 @@ export async function PostNews(form:FormData){
 // GET ALL COMPLAINTS 
 export async function GetAllComplaints(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/`,
+    const res = await fetch(`${baseUrl}/complaints/all`,
         {
             method: "GET",
             cache: "no-store",

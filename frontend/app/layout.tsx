@@ -29,7 +29,7 @@ export default async function RootLayout({
  {
   const data = await getLandingPageData()
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <ThemeController/>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}

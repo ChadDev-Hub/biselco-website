@@ -6,7 +6,6 @@ import ComplaintsContainer from '@/app/components/Complaints/complaintsDashboard
 
 const DashBoardPage = async() => {
   const result = await GetAllComplaints()
-  
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="

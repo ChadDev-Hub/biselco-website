@@ -10,7 +10,6 @@ from sqlalchemy import select, and_
 from ....utils.hashing import hash_password
 from sqlalchemy.exc import IntegrityError
 router = APIRouter(prefix="/auth", tags=['Auth'])
-
 session_depends = Depends(get_session)
 
 

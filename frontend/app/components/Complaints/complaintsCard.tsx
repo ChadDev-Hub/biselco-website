@@ -19,6 +19,7 @@ type Props = {
 }
 type status = {
     id: number;
+    complaint_id: number;
     name: string;
     description: string;
     date: string;

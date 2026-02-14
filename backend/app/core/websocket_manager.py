@@ -27,7 +27,7 @@ class ConnectionManager:
     async def broadcast(self, json:dict):
         disconnected = []
         try: 
-            for user_id,websockets in self.active_connections.items():
+            for user_id, websockets in self.active_connections.items():
                 await websockets.send_json(json)
         except Exception:
             disconnected.append(user_id)

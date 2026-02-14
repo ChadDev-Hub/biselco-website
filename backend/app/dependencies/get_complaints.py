@@ -20,6 +20,7 @@ async def complaints(session:AsyncSession):
         srid = c.location.srid
         status_list = [{
             "id": s.id,
+            "complaint_id": s.complaint_id,
             "name": s.status.status_name,
             "description": s.status.description,
             "date": s.date.isoformat(),
@@ -56,6 +57,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
     status_list = [
     {
         "id": s.id,
+        "complaint_id": s.complaint_id,
         "name": s.status.status_name,
         "description": s.status.description,
         "date": s.date.isoformat(),
@@ -104,6 +106,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
         srid = c.location.srid
         status_list = [{
             "id": s.id,
+            "complaint_id": s.complaint_id,
             "name": s.status.status_name,
             "description": s.status.description,
             "date": s.date.isoformat(),

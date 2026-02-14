@@ -31,12 +31,12 @@ const CreateComplaints = () => {
                     xmlns="http://www.w3.org/2000/svg"
 
                     viewBox="-51.2 -51.2 614.40 614.40"
-                    stroke="currentColor" stroke-width="0.00512">
+                    stroke="currentColor" strokeWidth="0.00512">
                     <g strokeWidth={0.1}>
                     </g>
                     <g id="SVGRepo_tracerCarrier"
                         strokeLinecap="round" strokeLinejoin="round"
-                        stroke="currentColor" stroke-width="1.024">
+                        stroke="currentColor" strokeWidth="1.024">
                     </g>
                     <g strokeLinecap='round' strokeLinejoin='round'>
                         <g>
