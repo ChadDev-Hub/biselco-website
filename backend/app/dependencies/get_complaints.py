@@ -91,6 +91,8 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
 
 
 
+
+
 # GET COMPLAINTS FOR SPECIFIC USER
 async def user_complaints(session:AsyncSession, user_id:int):
     complaints = (await session.execute(

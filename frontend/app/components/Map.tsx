@@ -13,7 +13,7 @@ import Style from 'ol/style/Style'
 import Icon from 'ol/style/Icon'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { Geolocation } from 'ol'
-
+import { defaults as defaultControls } from 'ol/control'
 
 
 type Props = {
@@ -101,6 +101,12 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 markerLayer,
                 userLayer,
             ],
+            controls: defaultControls({ 
+                attribution: false ,
+                zoom: false,
+                rotate: false,
+
+            }),
             view:view,
         })
         // CREATE AN ACTION ON THE MAP FOR Pointing on the specific location

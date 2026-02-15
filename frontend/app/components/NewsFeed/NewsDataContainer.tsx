@@ -1,5 +1,6 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useWebsocket } from '@/app/services/websocketprovider'
 import NewsCard from './newscard'
 type Props = {
     id: number
@@ -18,21 +19,18 @@ type Props = {
 }
 
 const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
-    const [NewsData, setNewsData] = useState(initialData)
+    const [NewsData, setNewsData] = useState<Props[]>(initialData)
+    const message = useWebsocket();
     useEffect(() => {
-        const socket = new WebSocket("ws://localhost:8000/socket/ws");
-        socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            if (message.detail === "news") {
-                setNewsData((prev) => [message.data, ...prev])
-            }
-        };
-        return () => {
-            socket.close();
+        if (!message) return
+        if (message.detail === "news") {
+            queueMicrotask(() => {
+                setNewsData(prev => [message.data, ...prev]);
+            });
         }
-    }, []);
-    return (
+    }, [message])
 
+    return (
         <section className='flex flex-col gap-4 w-full items-center'>
             {NewsData.map((n: Props) => (
                 <NewsCard
@@ -48,12 +46,7 @@ const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
                     period={n.period}
                 />
             ))}
-
         </section>
-
-
-
-
     )
 }
 

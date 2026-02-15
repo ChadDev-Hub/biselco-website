@@ -8,7 +8,6 @@ import { ComplaintsDashboardRouteButton} from '../components/buttons/complaints'
 import CreateComplaints from '../components/Complaints/CreateComplaintsModal'
 import FabIcon from '../components/Fab'
 const ComplaintsPage = async () => {
-  const baseurl = process.env.BASESERVERURL;
   const complaints = await UserComplaints();
   const complaintsStatusName = await ComplaintStatusName();
   return (
@@ -51,7 +50,6 @@ const ComplaintsPage = async () => {
           </nav>
         </header>
           <ComplaintsContainer
-            serverurl={baseurl}
             complaintsData={complaints}
             complaintsStatusName={complaintsStatusName} />
           <FabIcon>
@@ -61,7 +59,6 @@ const ComplaintsPage = async () => {
             <div data-tip = "Navigate Dashboard" className='tooltip tooltip-left'>
               <ComplaintsDashboardRouteButton/>
             </div>
-            
           </FabIcon>
       </main>
     </div>

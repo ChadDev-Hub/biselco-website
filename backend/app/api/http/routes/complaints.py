@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....utils.token import get_current_user, get_current_user_ws
 from ....schema.form import CreateComplaints
+from ....schema.requests_body import ComplaintsStatus
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_X, ST_Y, ST_SRID
 from shapely.geometry import Point
@@ -102,7 +103,8 @@ async def create_complaints(
     return {
         "detail" : "Complaints Submitted"
     }
-    
+
+# DELETE COMPLAINT
 @router.delete("/delete/{complaint_id}", status_code=status.HTTP_200_OK)
 async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_session), user:dict = Depends(get_current_user)):
     if not user:
@@ -143,6 +145,42 @@ async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_
         return e
     return {
         "detail" : "Successfully Deleted"
-    }
+    }    
     
+# UPDATE COMPLAINT STATUS
+@router.put("/update/status/{complaint_id}", status_code=status.HTTP_201_CREATED)
+async def update_complaint_status(
+    complaint_id:int,
+    data:ComplaintsStatus,
+    session:AsyncSession = Depends(get_session),
+    user:dict = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+    print(data)
+    try:
+        select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
+        if not select_complaint:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+        select_status = (await session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == data.status_name))).scalar_one_or_none()
+        if not select_status:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+        new_status = ComplaintsStatusUpdates(
+            date = datetime.now().date(),
+            time = datetime.now().time(),
+            complaints = select_complaint,
+            status = select_status
+        )
+        select_complaint.status_updates.append(new_status)
+        await session.commit()
+        await session.refresh(select_complaint, attribute_names=["status_updates"])
+        await session.close()
+    except Exception as e:
+        return e
+    return {
+        "detail" : f"{data.status_name} Successfully Updated"
+    }
+        
+        
     

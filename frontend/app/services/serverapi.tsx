@@ -162,8 +162,8 @@ export async function PostComplaints(form:FormData){
     };
 }
 
-// DELETE COMPLAINT
 
+// DELETE COMPLAINT
 export async function DeleteComplaint(id:number){
     const cookieHeader = (await cookies()).toString();
     const res = await fetch(`${baseUrl}/complaints/delete/${id}`,
@@ -180,4 +180,32 @@ export async function DeleteComplaint(id:number){
         return data
     }
     return data
+}
+
+// UPDATE COMPLAINT STATUS
+export async function UpdateComplaintStatus(complaint_id:number, status_name:string){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/update/status/${complaint_id}`,
+        {
+            method: "PUT",
+            credentials:"include",
+            body: JSON.stringify({
+                status_name: status_name
+            }),
+            headers:{
+                "Cookie": cookieHeader,
+                "content-type": "application/json"
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            detail: data.detail}
+    }
+    return {
+        status: res.status,
+        detail: data.detail
+    }
 }

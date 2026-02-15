@@ -5,6 +5,7 @@ import { getLandingPageData } from "./services/serverapi";
 import DocNavigation from "./components/doc";
 import Drawer from "./components/drawer";
 import ThemeController from "./components/themeController";
+import { WebsocketProvider } from "./services/websocketprovider";
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,15 +32,16 @@ export default async function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <ThemeController/>
-      <body
+      <WebsocketProvider>
+        <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
          <Drawer baseurl={baseurl} title={data.hero.title}>
             {children}
             <DocNavigation/>
          </Drawer>
-        
       </body>
+      </WebsocketProvider>
     </html>
   );
 }

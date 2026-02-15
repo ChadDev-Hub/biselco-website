@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
-
+import { useWebsocket } from '@/app/services/websocketprovider'
 
 type Props = {
     complaintsData:Complaints[];
@@ -30,21 +30,16 @@ const ComplaintsContainer = (
         serverurl
     }:Props
 ) => {
-
-    const [complaints, setComplaints] = useState(complaintsData);
+    const [complaints, setComplaints] = useState<Complaints[]>(complaintsData);
+    const message = useWebsocket();
     useEffect(()=>{
-        const socketUrl = process.env.NEXT_PUBLIC_WEBSOCKETURL
-        const socket = new WebSocket(`${socketUrl}/socket/ws`);
-        socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            if (message.detail === "complaints") {
-                setComplaints((prev)=> [message.data,...prev]);
-            }
-        };
-        return () => {
-            socket.close();
-        };
-    },[]);
+        if (!message) return
+        if (message.detail === "complaints") {
+            queueMicrotask(() => {
+                setComplaints((prev) =>[message.data, ...prev]);
+            })
+        }
+    },[message]);
 
     const handleDelete = (id: number) => {
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);

@@ -1,8 +1,10 @@
 "use client"
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import DashBoardTable from '../table'
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
+import AlertComponent from '../alert'
+import { time } from 'console'
 type Props = {
     data: Complaint[]
 }
@@ -31,10 +33,32 @@ type status = {
     date: string;
     time: string;
 }
+
+
+type AlertType = "error" | "success"
+type Alerts = {
+    type: AlertType,
+    message: string,
+
+}
+
 const ComplaintsContainer = ({
     data
 }: Props) => {
+    const [complaints, setComplaints] = useState<Complaint[]>(data);
+    const [showAlert, setShowAlert] = useState<Alerts | null>(null);
+    useEffect(() => {
+        if (!showAlert) return
+        const timeout = setTimeout(() => {
+                setShowAlert(null)
+            }, 3000)
+        return () => clearTimeout(timeout)
+    }, [showAlert])
     return (
+        <>
+        {showAlert && <AlertComponent
+        alertstyle={showAlert?.type}
+        message={showAlert?.message}/>}
         <DashBoardTable>
             <thead className='text-md font-bold text-center text-yellow-400'>
                 <tr >
@@ -48,7 +72,7 @@ const ComplaintsContainer = ({
                 </tr>
             </thead>
             <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
-                {data.map((complaint) => (
+                {complaints.map((complaint) => (
                     <tr key={complaint.id}>
                         <th>{complaint.id}</th>
                         <td>{complaint.subject}</td>
@@ -61,13 +85,16 @@ const ComplaintsContainer = ({
                         <td>
                             <ComplaintStatusButton 
                             status={complaint.status}
-                            complaints_id={complaint.id}/>
+                            complaints_id={complaint.id}
+                            setShowAlert={setShowAlert}/>
                         </td>
                     </tr>
                 ))}
             </tbody>
         </DashBoardTable>
+        
+        </>
+        
     )
 }
-
 export default ComplaintsContainer
