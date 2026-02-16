@@ -1,6 +1,6 @@
-from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket
+from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket,Body
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, asc, desc, delete
+from sqlalchemy import select, asc, desc, delete, and_
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....utils.token import get_current_user, get_current_user_ws
@@ -9,7 +9,7 @@ from ....schema.requests_body import ComplaintsStatus
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_X, ST_Y, ST_SRID
 from shapely.geometry import Point
-from ....dependencies.get_complaints import complaints, new_complaint, user_complaints
+from ....dependencies.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
 from geoalchemy2.shape import to_shape
 from ....models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
 from datetime import date, datetime
@@ -90,7 +90,7 @@ async def create_complaints(
     
 
     # SEND TO ADMIN AND SPECIFIC  CLIENT
-     # ADMIN USER
+    # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
     admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
     if user_id not in admin_ids:
@@ -128,7 +128,6 @@ async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_
             "village": data.village,
             "municipality": data.municipality
         }
-        print(deleted_complaint)
         delete_stmt = delete(Complaints).where(Complaints.id == complaint_id)
         await session.execute(delete_stmt)
         await session.commit()
@@ -151,14 +150,13 @@ async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_
 @router.put("/update/status/{complaint_id}", status_code=status.HTTP_201_CREATED)
 async def update_complaint_status(
     complaint_id:int,
-    data:ComplaintsStatus,
+    data:ComplaintsStatus = Body(),
     session:AsyncSession = Depends(get_session),
     user:dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     if user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
-    print(data)
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
         if not select_complaint:
@@ -172,15 +170,87 @@ async def update_complaint_status(
             complaints = select_complaint,
             status = select_status
         )
-        select_complaint.status_updates.append(new_status)
+        session.add(new_status)
         await session.commit()
         await session.refresh(select_complaint, attribute_names=["status_updates"])
         await session.close()
+        
+        # SEND TO ADMIN AND TO SPECIFIC CLIENT 
+        # ADMINS
+        admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
+        admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+        new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
+        
+        # CLIENT
+        user_id = data.user_id
+        # APPEND USER ID IF IT IS NOT IN ADMIN
+        new_complaints_data = {
+            "detail": "complaints",
+            "data": new_status
+        }
+        await manager.broad_cast_personal_json(user_id=user_id, data=new_complaints_data)
+        
+        # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
+        for admin in admin_ids:
+            to_send = {
+                "detail": "complaints status",
+                "data": new_status,
+            }
+            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
     except Exception as e:
         return e
     return {
         "detail" : f"{data.status_name} Successfully Updated"
     }
         
+
+# DELETE STATUS 
+@router.delete("/delete/status/{complaint_id}", status_code=status.HTTP_200_OK)
+async def delete_complaint_status(
+    complaint_id:int,
+    session:AsyncSession = Depends(get_session), 
+    data:ComplaintsStatus = Body(),
+    user:dict = Depends(get_current_user),
+    ):
+    if not user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+    if user.get("role") != "admin":
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+    try:
+        select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
+        if not select_complaint:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+        select_status = (await session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == data.status_name))).scalar_one_or_none()
+        if not select_status:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+        delete_stmt = delete(ComplaintsStatusUpdates).where(
+            and_(
+            ComplaintsStatusUpdates.complaints == select_complaint, 
+            ComplaintsStatusUpdates.status == select_status)
+            )
+        await session.execute(delete_stmt)
+        await session.commit()
+        await session.close()
         
-    
+        # BROADCAST
+        admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
+        admin_ids = [user.id for  admin_user in  admin  for  user in admin_user.users]
+        user_id = data.user_id
+        new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
+        
+        new_complaint_data = {
+            "detail": "complaints",
+            "data": new_status
+        }
+        await manager.broad_cast_personal_json(user_id=user_id, data=new_complaint_data)
+        for admin in admin_ids:
+            to_send = {
+                "detail": "complaints status",
+                "data": new_status,
+            }
+            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
+    except Exception as e:
+        return e
+    return {
+        "detail" : f"{data.status_name} Successfully Updated"
+    }

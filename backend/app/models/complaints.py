@@ -4,7 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db.base import BaseModel
 from typing import TYPE_CHECKING, List
 from geoalchemy2 import Geometry, WKBElement
-from datetime import datetime, time, date
+from sqlalchemy import func
+from datetime import datetime, time, date, timezone
 if TYPE_CHECKING:
     from .users import Users
 
@@ -42,6 +43,7 @@ class Complaints(BaseModel):
     village: Mapped[str] = mapped_column(type_=Text)
     municipality: Mapped[str] = mapped_column(type_=Text)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    time_stamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True, default=func.now())
     
     # relationships
     user: Mapped["Users"] = relationship(back_populates="complaints")

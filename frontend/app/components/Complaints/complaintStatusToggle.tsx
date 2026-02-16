@@ -1,9 +1,10 @@
 "use client"
 
 import React, { useState } from 'react'
-import { UpdateComplaintStatus } from '@/app/services/serverapi';
+import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/app/services/serverapi';
 
 type Props = {
+    user_id: number;
     name?: string;
     id?: number;
     enabled?: boolean;
@@ -17,23 +18,42 @@ type Alerts = {
 
 }
 
-const EnableButton = ({ id, name, enabled, setShowAlert }: Props) => {
+const EnableButton = ({ id, name, enabled, setShowAlert, user_id }: Props) => {
     const [checked, setChecked] = useState(enabled);
     const handleUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const check = event.target.checked
-        console.log(check)
-        console.log(id, name)
         if (check) {
             if (!id || !name) return
-            const res = await UpdateComplaintStatus(id, name)
+            const res = await UpdateComplaintStatus(id, name, user_id)
             if (res.status === 401) {
                 setChecked(false)
                 setShowAlert({
                     type: "error",
                     message: res.detail
-                })
+                }) 
             } else {
+                setShowAlert({
+                    type: "success",
+                    message: res.detail
+                })
                 setChecked(true)
+            }
+        } 
+        if (!check) {
+            if (!id || !name) return
+            const res = await DeleteComplaintStatus(id,name, user_id)
+            if (res.status === 401) {
+                setChecked(true)
+                setShowAlert({
+                    type: "error",
+                    message: res.detail
+                }) 
+            } else {
+                setShowAlert({
+                    type: "success",
+                    message: res.detail
+                })
+                setChecked(false)
             }
         }
     }

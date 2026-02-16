@@ -12,6 +12,9 @@ type WSMessage = {
 } | {
   detail: "complaints"
   data: ComplaintData
+} | {
+  detail: "complaints status"
+  data: ComplaintData
 }
 
 type NewsData = {
@@ -32,6 +35,9 @@ type NewsData = {
 
 type ComplaintData = {
     id: number;
+    user_id : number;
+    first_name:string;
+    last_name:string;
     subject: string;
     description: string;
     village: string; 
@@ -44,6 +50,9 @@ type ComplaintData = {
     status: [];
 
 }
+
+
+
 const WebsocketContext = createContext<WSMessage | null>(null)
 
 const WebsocketProvider = ({children}: Props) => {

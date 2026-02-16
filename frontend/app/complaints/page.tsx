@@ -8,7 +8,7 @@ import { ComplaintsDashboardRouteButton} from '../components/buttons/complaints'
 import CreateComplaints from '../components/Complaints/CreateComplaintsModal'
 import FabIcon from '../components/Fab'
 const ComplaintsPage = async () => {
-  const complaints = await UserComplaints();
+  const complaints = await UserComplaints();;
   const complaintsStatusName = await ComplaintStatusName();
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">

@@ -1,6 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 
 class ComplaintsStatus(BaseModel):
-    status_name:str
+    """
+    Complaints Status
+    
+    :params:
+    
+       status_name: str
+        
+        user_id: int
+    """
+    status_name: str
+    user_id: int

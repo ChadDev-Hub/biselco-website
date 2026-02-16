@@ -3,6 +3,7 @@
 import axios from "axios"
 import { cookies } from "next/headers"
 
+
 // GET LANDING PAGE DATA
 const baseUrl = process.env.BASESERVERURL
 export async function getLandingPageData() {
@@ -183,14 +184,15 @@ export async function DeleteComplaint(id:number){
 }
 
 // UPDATE COMPLAINT STATUS
-export async function UpdateComplaintStatus(complaint_id:number, status_name:string){
+export async function UpdateComplaintStatus(complaint_id:number, status_name:string, user_id:number){
     const cookieHeader = (await cookies()).toString();
     const res = await fetch(`${baseUrl}/complaints/update/status/${complaint_id}`,
         {
             method: "PUT",
             credentials:"include",
             body: JSON.stringify({
-                status_name: status_name
+                status_name: status_name,
+                user_id: user_id
             }),
             headers:{
                 "Cookie": cookieHeader,
@@ -208,4 +210,28 @@ export async function UpdateComplaintStatus(complaint_id:number, status_name:str
         status: res.status,
         detail: data.detail
     }
+}
+
+// DELETE COMPLAINT STATUS
+export async function DeleteComplaintStatus(complaint_id:number, status_name:string, user_id:number){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/complaints/delete/status/${complaint_id}`,
+        {
+            method: "DELETE",
+            credentials:"include",
+            body: JSON.stringify({
+                status_name: status_name,
+                user_id: user_id
+            }),
+            headers:{
+                "Cookie": cookieHeader,
+                "content-type": "application/json"
+            }
+        }
+    )
+    const data = await res.json()
+    if (!res.ok){
+        return data
+    }
+    return data
 }

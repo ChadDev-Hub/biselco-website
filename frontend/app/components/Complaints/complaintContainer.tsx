@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/services/websocketprovider'
 
+
 type Props = {
     complaintsData:Complaints[];
     complaintsStatusName:[];
@@ -11,6 +12,9 @@ type Props = {
 
 type Complaints = {
     id: number;
+    user_id : number;
+    first_name:string;
+    last_name:string;
     subject: string;
     description: string;
     village: string; 
@@ -36,10 +40,13 @@ const ComplaintsContainer = (
         if (!message) return
         if (message.detail === "complaints") {
             queueMicrotask(() => {
-                setComplaints((prev) =>[message.data, ...prev]);
+                setComplaints((prev) => {
+                    const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);                   
+                    return [message.data, ...existing_complaint];});
             })
         }
     },[message]);
+
 
     const handleDelete = (id: number) => {
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
