@@ -23,12 +23,12 @@ class Users(BaseModel):
     '''
     
     __tablename__ = "users_account"
-    id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
+    id:Mapped[int] = mapped_column(type_=Integer, primary_key=True, unique=True)
     first_name:Mapped[str] = mapped_column(type_=Text)
     last_name:Mapped[str] = mapped_column(type_=Text)
-    user_name:Mapped[str] = mapped_column(type_=Text, unique=True)
+    user_name:Mapped[str] = mapped_column(type_=Text, unique=True, nullable=True)
     email: Mapped[str] = mapped_column(type_=Text, unique=True)
-    password: Mapped[str] = mapped_column(type_=Text)
+    password: Mapped[str] = mapped_column(type_=Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(type_=Boolean, default=True)
     
     meters: Mapped[List['MeterAccount']] = relationship(back_populates="user", cascade="all, delete-orphan")

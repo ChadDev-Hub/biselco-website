@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getNewsPage } from "./services/serverapi";
 import NewsDataContainer from "./components/NewsFeed/NewsDataContainer";
-import NewsNavBar from "./components/newsNavBar";
+import NewsNavBar from "./components/common/newsNavBar";
 
 
 

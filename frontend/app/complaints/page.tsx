@@ -6,7 +6,7 @@ import ComplaintsContainer from '../components/Complaints/complaintContainer'
 import { ComplaintStatusName } from '../services/serverapi'
 import { ComplaintsDashboardRouteButton} from '../components/buttons/complaints'
 import CreateComplaints from '../components/Complaints/CreateComplaintsModal'
-import FabIcon from '../components/Fab'
+import FabIcon from '../components/common/Fab'
 const ComplaintsPage = async () => {
   const complaints = await UserComplaints();;
   const complaintsStatusName = await ComplaintStatusName();

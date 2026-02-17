@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, Depends, HTTPException, status, Response, Request
+from fastapi import APIRouter, Form, Depends, HTTPException, status, Response, Request, Body
 from fastapi.exceptions import ResponseValidationError
 from fastapi import Response
 from sqlalchemy import select
@@ -11,17 +11,23 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi.security import OAuth2PasswordRequestForm
 from ....utils.authentication import authenticate_user
-router = APIRouter(prefix="/auth", tags=['Auth'])
+from ....schema.response_model import UserModel
 from ....utils.token import create_access_token, create_refresh_token, ALGORITHM, SECRET_KEY
+from ....utils.token import get_current_user
 from dotenv import load_dotenv
+from sqlalchemy.orm import selectinload
+from ....utils.token import verify_google_login
 import os
-session_depends= Depends(get_session)
+
+
+router = APIRouter(prefix="/auth", tags=['Auth'])
+
 
 @router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
                                 response: Response,
                                 form_data:OAuth2PasswordRequestForm = Depends(),
-                                session:AsyncSession = session_depends,
+                                session:AsyncSession = Depends(get_session),
                                  ):
 
         user = await authenticate_user(username=form_data.username, password=form_data.password, session=session)
@@ -52,14 +58,14 @@ async def login_for_access_token(
                             )
         response.set_cookie(
             key="access_token",
-            value=refresh_token,
+            value=access_token,
             expires=datetime.now(timezone.utc)+ timedelta(days=7),
             httponly=True,
             secure=False,
-            samesite="lax"
-                            )
+            samesite="lax")
+        
         return {
-            "success": True
+             "detail": "Login Success",
         }
 
         
@@ -85,3 +91,23 @@ async def refresh_token(request:Request):
         "access_token" : new_token,
         "token_type": "bearer"
     }
+@router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
+async def get_user(user:dict = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+    user_stmt = (await session.execute(
+        select(Users)
+        .options(selectinload(Users.roles))
+        .where(Users.id == user.get("userid")))).scalar_one_or_none()
+    if not user_stmt:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+ 
+    return UserModel(username=user_stmt.user_name, user_id=user_stmt.id, role=user_stmt.roles[0].name)\
+    
+
+# GOOGLE LOGIN
+@router.post("/google")
+async def google_login(data:dict=Body()):
+    token =data.get("token")
+    verified_token = await verify_google_login(token)
+    return verified_token

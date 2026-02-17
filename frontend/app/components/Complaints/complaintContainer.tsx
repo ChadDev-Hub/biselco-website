@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
-import { useWebsocket } from '@/app/services/websocketprovider'
+import { useWebsocket } from '@/app/utils/websocketprovider'
 
 
 type Props = {

@@ -2,8 +2,8 @@
 "use client"
 import { usePathname } from 'next/navigation'
 import React, { } from 'react'
-import { ComplaintsRouteButton } from './buttons/complaints'
-import { HomeRouteButton } from './buttons/home'
+import { ComplaintsRouteButton } from '../buttons/complaints'
+import { HomeRouteButton } from '../buttons/home'
 const DocNavigation = () => {
   const currentRoute = usePathname()
   const isActive = currentRoute === "/" ? "home"

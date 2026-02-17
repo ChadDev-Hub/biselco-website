@@ -1,18 +1,16 @@
 "use server"
 import { getLandingPageData } from "../services/serverapi";
-import Hero from "../components/hero";
+import Hero from "../components/common/hero";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getCurrentUser } from "../services/serverapi";
 const Landing = async () => {
-  const cookie = (await cookies()).get("refresh_token")
-  if (cookie) {
+  const user = await getCurrentUser()
+  if (user.status  === 200){
     redirect("/")
   }
   const landingPageData = await getLandingPageData()
   return (
-
-
-
     <div className="bg-base-100 text-base-content min-h-screen font-sans">
       <Hero
         subtitle={landingPageData.hero.subtitle}

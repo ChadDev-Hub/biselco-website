@@ -3,9 +3,37 @@
 import axios from "axios"
 import { cookies } from "next/headers"
 
+const baseUrl = process.env.BASESERVERURL
+
+
+//  GET CURRENT USER
+export async function getCurrentUser(){
+    const cookieHeader = (await cookies()).toString();
+    const res = await fetch(`${baseUrl}/auth/user/me`, {
+        method: "GET",
+        cache: "no-store",
+        credentials: "include",
+        headers: {
+            "Cookie": cookieHeader
+        }
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            detail: data.detail
+
+        }
+    }
+    return {
+        status: res.status,
+        detail: data
+    }
+}
+
 
 // GET LANDING PAGE DATA
-const baseUrl = process.env.BASESERVERURL
+
 export async function getLandingPageData() {
     const res = await fetch("http://127.0.0.1:8000/", {
         method: "GET",
@@ -231,7 +259,13 @@ export async function DeleteComplaintStatus(complaint_id:number, status_name:str
     )
     const data = await res.json()
     if (!res.ok){
-        return data
+        return {
+            status: res.status,
+            detail: data.detail
+        }
     }
-    return data
+    return {
+        status: res.status,
+        detail: data.detail
+    }
 }

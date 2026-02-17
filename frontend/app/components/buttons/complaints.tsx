@@ -2,13 +2,15 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-
+import { useAuth } from '@/app/utils/authProvider'
 
 type Props = {
     svgfill: string;
     strokeColor: string;
     orientation: string;
 }
+
+
 const ComplaintsRouteButton = ({ svgfill, strokeColor, orientation }: Props) => {
     const router = useRouter()
     const handleClick = () => {
@@ -46,6 +48,7 @@ const ComplaintsRouteButton = ({ svgfill, strokeColor, orientation }: Props) => 
 
 
 const ComplaintsDashboardRouteButton = () => {
+    const {user, setUser} = useAuth()
     const router = useRouter()
     const handleClick = () => {
         router.push("/complaints/dashboard")
@@ -56,7 +59,7 @@ const ComplaintsDashboardRouteButton = () => {
         aria-label='complaint dashboard' 
        
          type='button' 
-         className='btn  btn-circle btn-lg '>
+         className={`btn  btn-circle btn-lg ${user?.role === "mco"? "hidden": "visible"}`}>
             <svg
                 fill="currentColor"
                 height={25}

@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getLandingPageData } from "./services/serverapi";
-import DocNavigation from "./components/doc";
-import Drawer from "./components/drawer";
-import ThemeController from "./components/themeController";
-import { WebsocketProvider } from "./services/websocketprovider";
+import DocNavigation from "./components/common/doc";
+import Drawer from "./components/common/drawer";
+import ThemeController from "./components/common/themeController";
+import { WebsocketProvider } from "./utils/websocketprovider";
+import { AuthProvider } from "./utils/authProvider";
+import { getCurrentUser } from "./services/serverapi";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,22 +31,29 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>)
- {
+}>) {
   const data = await getLandingPageData()
+  const user = await getCurrentUser()
+  const googleClient = process.env.GOOGLE_CLIENT_ID
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
-      <ThemeController/>
-      <WebsocketProvider>
-        <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
-      >
-         <Drawer baseurl={baseurl} title={data.hero.title}>
-            {children}
-            <DocNavigation/>
-         </Drawer>
-      </body>
-      </WebsocketProvider>
+      <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
+        <GoogleOAuthProvider clientId={googleClient?googleClient:""}>
+          <WebsocketProvider>
+          <ThemeController />
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+          >
+            <Drawer baseurl={baseurl} title={data.hero.title}>
+              {children}
+              <DocNavigation />
+            </Drawer>
+          </body>
+        </WebsocketProvider>
+        </GoogleOAuthProvider>
+      </AuthProvider>
+
+
     </html>
   );
 }

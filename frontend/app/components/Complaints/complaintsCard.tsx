@@ -1,8 +1,8 @@
 import React from 'react'
 import ComplaintsTimeLine from './complaintsTimeLine'
 import ComplaintCardHeader from './complaintsCardHeader'
-import Accordion from '../Accordion'
-import Options from '../OptionsLists'
+import Accordion from '../common/Accordion'
+import Options from '../common/OptionsLists'
 import DeletConfirmation from './deleteComplaintsConfirmation'
 
 

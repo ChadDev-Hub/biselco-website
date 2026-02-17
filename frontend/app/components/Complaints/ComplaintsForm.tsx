@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import BiselcoMap from '../Map'
+import BiselcoMap from '../common/Map'
 import { PostComplaints } from '@/app/services/serverapi'
 
 
@@ -19,7 +19,6 @@ const ComplaintsForm = () => {
         formdata.append('latitude', lat.toFixed(10));
         formdata.append('longitude', long.toFixed(10));
         const result = await PostComplaints(formdata);
-        console.log(result)
         if (result.status === 201) {
             form.reset();
             const modal = document.getElementById('complaints-modal') as HTMLDialogElement;

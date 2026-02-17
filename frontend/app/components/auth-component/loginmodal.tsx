@@ -1,14 +1,16 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { loginfortoken } from '../services/clientApi'
-
+import { loginfortoken } from '../../services/clientApi'
+import { getCurrentUser } from '../../services/serverapi'
+import { useAuth } from '../../utils/authProvider'
 interface Props {
     baseurl?: string;
 }
 
 export default function LoginModal({ baseurl }: Props) {
     const router = useRouter()
+    const {user, setUser} = useAuth()
     const [loginMessage, setLoginMessage] = useState({
         message: "",
         alert_style: "",
@@ -34,7 +36,17 @@ export default function LoginModal({ baseurl }: Props) {
             show: true,
             loginsucessfull: true
         })
+
+        // Get Current User After Successfull Login
+        const user = await getCurrentUser()
+        if (user.status === 401){
+            setUser(null)
+        }
+        if (user.status === 200) {
+            setUser(user.detail)
+        }
         router.push("/")
+        
     }
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 "use server"
 import React from 'react'
-import Stats from '@/app/components/status'
+import Stats from '@/app/components/common/status'
 import { GetAllComplaints } from '@/app/services/serverapi'
 import ComplaintsContainer from '@/app/components/Complaints/complaintsDashboardContainer'
 

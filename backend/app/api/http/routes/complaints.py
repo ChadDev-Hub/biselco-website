@@ -134,6 +134,8 @@ async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_
         await session.close()
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
         admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+        if user.get("userid") not in admin_ids:
+            admin_ids.append(user.get("userid"))
         for admin in admin_ids:
             to_send = {
                 "detail": "deleted complaint",
@@ -213,9 +215,9 @@ async def delete_complaint_status(
     user:dict = Depends(get_current_user),
     ):
     if not user:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     if user.get("role") != "admin":
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
         if not select_complaint:

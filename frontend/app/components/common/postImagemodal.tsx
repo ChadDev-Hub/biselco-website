@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
-import { PostNews } from '../services/serverapi'
+import { PostNews } from '../../services/serverapi'
 
 
 const PostImageModal = () => {

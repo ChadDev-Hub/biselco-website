@@ -5,13 +5,18 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 import os
 from dotenv import load_dotenv
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
 load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 1
-REFRESH_TOKEN_EXPIRE_DAYS = 7 
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+G_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+G_SECRET = os.getenv("GOOGLE_CLIENT_SECRET") 
 
 
 async def create_access_token(data:dict):
@@ -31,7 +36,7 @@ async def create_refresh_token(data:dict):
 
 async def get_current_user(requests:Request, response:Response):
     token = requests.cookies.get("access_token")
-    refresh_token = requests.cookies.get("access_token")
+    refresh_token = requests.cookies.get("refresh_token")
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid Credential",
@@ -83,7 +88,6 @@ async def get_current_user(requests:Request, response:Response):
 
 async def get_current_user_ws(websocket:WebSocket):
     token = websocket.cookies.get("access_token")
-    refresh_token = websocket.cookies.get("refresh_token")
     credential_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid Credential",
@@ -98,24 +102,28 @@ async def get_current_user_ws(websocket:WebSocket):
             "userid": paload.get("id"), 
             "role": paload.get("role")
         }
-    except jwt.ExpiredSignatureError:
-        if not refresh_token:
-            raise credential_exception
-        try:
-            payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
-            if payload.get("type") != "refresh_token":
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        except InvalidTokenError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token")
-        new_token =await create_access_token(
-        {
-            "sub" : payload.get("sub"),
-            "id": payload.get("id"),
-            "role" : payload.get("role")
-        }
-        )
-        return {
-            "username": payload.get("sub"),
-            "userid": payload.get("id"),
-            "role": payload.get("role")
-        }
+    except jwt.PyJWTError:
+        return None
+    
+async def verify_google_login(token:str):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found")
+    try:
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), G_CLIENT_ID)
+        name = idinfo["name"]
+        email = idinfo["email"]
+        first_name = idinfo["given_name"]
+        last_name = idinfo["family_name"]
+        google_sub = idinfo["sub"]
+        pricture = idinfo['picture']
+        print(idinfo)
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
+    return {
+        "name": name,
+        "email": email,
+        "first_name": first_name,
+        "last_name": last_name,
+        "google_sub": google_sub,
+        "picture": pricture
+    }

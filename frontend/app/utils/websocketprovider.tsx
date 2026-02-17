@@ -1,6 +1,6 @@
 'use client'
 import React, {createContext, useContext,useEffect,useState} from 'react'
-
+import { useAuth } from './authProvider'
 type Props = {
     children: React.ReactNode;
 }
@@ -57,7 +57,9 @@ const WebsocketContext = createContext<WSMessage | null>(null)
 
 const WebsocketProvider = ({children}: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
+  const {user, setUser} = useAuth()
   useEffect(()=>{
+    if(!user) return
     const ws = new WebSocket('ws://localhost:8000/socket/ws')
     ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
@@ -66,7 +68,7 @@ const WebsocketProvider = ({children}: Props) => {
     return () => {
         ws.close()
     }
-  },[])
+  },[user])
   return (
     <WebsocketContext.Provider value={message}>
         {children}
