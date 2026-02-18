@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio.session import async_sessionmaker
 import os
 
 
-async_session = async_sessionmaker(bind=engine)
+async_session = async_sessionmaker(
+    bind=engine,
+    expire_on_commit=False)
     
     

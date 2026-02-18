@@ -9,7 +9,7 @@ const baseUrl = process.env.BASESERVERURL
 //  GET CURRENT USER
 export async function getCurrentUser(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/auth/user/me`, {
+    const res = await fetch(`${baseUrl}/v1/auth/user/me`, {
         method: "GET",
         cache: "no-store",
         credentials: "include",
@@ -35,7 +35,7 @@ export async function getCurrentUser(){
 // GET LANDING PAGE DATA
 
 export async function getLandingPageData() {
-    const res = await fetch("http://127.0.0.1:8000/", {
+    const res = await fetch(`${baseUrl}/v1/`, {
         method: "GET",
         cache: "no-store",
 
@@ -49,7 +49,7 @@ export async function getLandingPageData() {
 // GET NEWS PAGE DATA
 export async function getNewsPage(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/news/`,
+    const res = await fetch(`${baseUrl}/v1/news/`,
         {
             method: "GET",
             cache: "no-store",
@@ -77,7 +77,7 @@ export async function getNewsPage(){
 // POST NEWS
 export async function PostNews(form:FormData){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/news/create`,
+    const res = await fetch(`${baseUrl}/v1/news/create`,
         {
             method: "POST",
             body: form,
@@ -103,7 +103,7 @@ export async function PostNews(form:FormData){
 // GET ALL COMPLAINTS 
 export async function GetAllComplaints(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/all`,
+    const res = await fetch(`${baseUrl}/v1/complaints/all`,
         {
             method: "GET",
             cache: "no-store",
@@ -125,7 +125,7 @@ export async function GetAllComplaints(){
 
 export async function UserComplaints(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/`,
+    const res = await fetch(`${baseUrl}/v1/complaints/`,
         {
             method: "GET",
             cache: "no-store",
@@ -148,7 +148,7 @@ export async function UserComplaints(){
 // GET COMPLAINT STATUS NAME
 export async function ComplaintStatusName(){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/status/name`,
+    const res = await fetch(`${baseUrl}/v1/complaints/status/name`,
         {
             method: "GET",
             cache: "no-store",
@@ -171,7 +171,7 @@ export async function ComplaintStatusName(){
 // POST COMPLAINTS
 export async function PostComplaints(form:FormData){
     const cookieHeader = (await cookies()).toString();
-    const res = await axios.post(`${baseUrl}/complaints/create`,
+    const res = await axios.post(`${baseUrl}/v1/complaints/create`,
         form,
         {  
             onUploadProgress(progressEvent) {
@@ -195,7 +195,7 @@ export async function PostComplaints(form:FormData){
 // DELETE COMPLAINT
 export async function DeleteComplaint(id:number){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/delete/${id}`,
+    const res = await fetch(`${baseUrl}/v1/complaints/delete/${id}`,
         {
             method: "DELETE",
             credentials:"include",
@@ -214,7 +214,7 @@ export async function DeleteComplaint(id:number){
 // UPDATE COMPLAINT STATUS
 export async function UpdateComplaintStatus(complaint_id:number, status_name:string, user_id:number){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/update/status/${complaint_id}`,
+    const res = await fetch(`${baseUrl}/v1/complaints/update/status/${complaint_id}`,
         {
             method: "PUT",
             credentials:"include",
@@ -243,7 +243,7 @@ export async function UpdateComplaintStatus(complaint_id:number, status_name:str
 // DELETE COMPLAINT STATUS
 export async function DeleteComplaintStatus(complaint_id:number, status_name:string, user_id:number){
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/complaints/delete/status/${complaint_id}`,
+    const res = await fetch(`${baseUrl}/v1/complaints/delete/status/${complaint_id}`,
         {
             method: "DELETE",
             credentials:"include",

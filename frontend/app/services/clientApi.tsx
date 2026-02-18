@@ -3,7 +3,7 @@
 // LOGIN
 export async function loginfortoken(formdata: FormData, baseurl?: string) {
     console.log(baseurl)
-    const res = await fetch(`${baseurl}/auth/token`, {
+    const res = await fetch(`${baseurl}/v1/auth/token`, {
         method: "POST",
         body: formdata,
         credentials: "include"
@@ -22,7 +22,7 @@ export async function loginfortoken(formdata: FormData, baseurl?: string) {
 
 // LOGOUT
 export async function Logout(baseurl?: string) {
-    const res = await fetch(`${baseurl}/auth/logout`, {
+    const res = await fetch(`${baseurl}/v1/auth/logout`, {
         method: "POST",
         credentials: "include"
     })

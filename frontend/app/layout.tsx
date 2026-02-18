@@ -37,8 +37,9 @@ export default async function RootLayout({
   const googleClient = process.env.GOOGLE_CLIENT_ID
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
-      <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
+      
         <GoogleOAuthProvider  clientId={googleClient ?? ""}>
+          <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
           <WebsocketProvider>
           <ThemeController />
           <body
@@ -50,8 +51,9 @@ export default async function RootLayout({
             </Drawer>
           </body>
         </WebsocketProvider>
+        </AuthProvider>
         </GoogleOAuthProvider>
-      </AuthProvider>
+      
 
 
     </html>

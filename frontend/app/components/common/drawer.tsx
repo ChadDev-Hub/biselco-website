@@ -4,7 +4,7 @@ import NavBar from './navbar'
 import { usePathname } from 'next/navigation'
 import { ComplaintsRouteButton } from '../buttons/complaints'
 import { HomeRouteButton } from '../buttons/home'
-import LogoutButton from '../buttons/logout'
+import LogoutButton from '../auth-component/logout'
 type Props = {
     children: React.ReactNode;
     baseurl?: string;

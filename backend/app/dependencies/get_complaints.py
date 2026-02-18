@@ -3,7 +3,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select, and_, desc, asc
 from sqlalchemy.orm import selectinload
-from ..models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
+from ..modules.complaints import *
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from uuid import UUID

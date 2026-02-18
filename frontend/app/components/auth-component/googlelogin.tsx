@@ -9,7 +9,7 @@ export default function GoogleLoginButton() {
       
       onSuccess={async (credentialResponse) => {
         // Send token to your backend
-        const res = await fetch("http://localhost:8000/auth/google", {
+        const res = await fetch("http://localhost:8000/v1/auth/google", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
