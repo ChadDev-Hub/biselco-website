@@ -4,6 +4,7 @@ from sqlalchemy import Text, Integer, Boolean, ForeignKey, DateTime, BIGINT
 from ..db.base import BaseModel
 from typing import List, TYPE_CHECKING
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
 if TYPE_CHECKING:
     from .users import Users
 
@@ -50,7 +51,7 @@ class MeterAccount(BaseModel):
     __tablename__ = "meter_account"
     id:Mapped[int] = mapped_column(type_=Integer,primary_key=True)
     account_no:Mapped[int] = mapped_column(type_=BIGINT,unique=True)
-    user_id:Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer)
+    user_id:Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=UUID())
     consumer_name: Mapped[str] = mapped_column(type_=Text)
     consumer_type: Mapped[str] = mapped_column(type_=Text)
     meter_location: Mapped[str] = mapped_column(type_=Text)

@@ -32,7 +32,6 @@ async def signupuser(data:SignUpUser=Form(), db:AsyncSession = session_depends):
     try: 
         mco_role = await db.scalar(select(Roles).where(Roles.name == "mco"))
         user = Users(
-            user_name=data.username,
             first_name = data.firstname,
             last_name = data.lastname,
             email=data.email,
@@ -75,7 +74,6 @@ async def signadmin(data:SignUpUser=Form(), db:AsyncSession = session_depends):
     try:
         roles = await db.scalar(select(Roles).where(Roles.name == "admin"))
         user = Users(
-            user_name=data.username,
             first_name = data.firstname,
             last_name = data.lastname,
             email=data.email,

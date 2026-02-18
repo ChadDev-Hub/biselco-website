@@ -38,7 +38,7 @@ export default async function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
-        <GoogleOAuthProvider clientId={googleClient?googleClient:""}>
+        <GoogleOAuthProvider  clientId={googleClient ?? ""}>
           <WebsocketProvider>
           <ThemeController />
           <body

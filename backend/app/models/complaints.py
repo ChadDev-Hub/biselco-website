@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, List
 from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import func
 from datetime import datetime, time, date, timezone
+from sqlalchemy.dialects.postgresql import UUID
 if TYPE_CHECKING:
     from .users import Users
 
@@ -35,7 +36,7 @@ class Complaints(BaseModel):
     """
     __tablename__ = "consumer_complaints"
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=UUID())
     subject: Mapped[str] = mapped_column(type_=Text, nullable=True)
     description: Mapped[str] = mapped_column(type_=Text, nullable=True)
     reference_pole: Mapped[str] = mapped_column(type_=Text)

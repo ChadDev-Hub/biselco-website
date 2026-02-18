@@ -1,12 +1,15 @@
 "use client";
 import { GoogleLogin } from "@react-oauth/google";
 
+
 export default function GoogleLoginButton() {
   return (
     <GoogleLogin
+      type="standard"
+      
       onSuccess={async (credentialResponse) => {
         // Send token to your backend
-        await fetch("http://localhost:8000/auth/google", {
+        const res = await fetch("http://localhost:8000/auth/google", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -14,8 +17,11 @@ export default function GoogleLoginButton() {
             token: credentialResponse.credential,
           }),
         });
-
-        window.location.href = "/"; 
+        console.log(res)
+        if (!res.ok) {
+          return;
+        }
+        window.location.href = "/";
       }}
       onError={() => console.log("Login Failed")}
     />

@@ -6,7 +6,6 @@ from fastapi import Form
 
 # SIGN UP PYDANTIC MODEL
 class SignUpUser(BaseModel):
-    username: str
     firstname:str
     lastname:str
     email: EmailStr

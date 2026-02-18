@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 from ..models import Complaints, Users, Roles, ComplaintsStatusName, ComplaintsStatusUpdates
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
+from uuid import UUID
 async def complaints(session:AsyncSession):
     complaints = (await session.execute(
         select(Complaints)
@@ -29,7 +30,7 @@ async def complaints(session:AsyncSession):
         } for s in c.status_updates]
         data.append({
             "id": c.id,
-            "user_id": c.user_id,
+            "user_id": str(c.user_id),
             "first_name": c.user.first_name,
             "last_name": c.user.last_name,
             "subject": c.subject,
@@ -46,7 +47,7 @@ async def complaints(session:AsyncSession):
     return data
 
 # NEW COMPLAINT
-async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
+async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
     n_complaint = await session.scalar(
     select(Complaints)
     .options(
@@ -85,7 +86,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:int):
         "detail" : "complaints",
         "data" : {
              "id" : n_complaint.id,
-             "user_id": n_complaint.user_id,
+             "user_id": str(n_complaint.user_id),
              "first_name" : n_complaint.user.first_name,
              "last_name" : n_complaint.user.last_name,
             "subject" : n_complaint.subject,
@@ -116,7 +117,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,
-            "status_id": s.status_id,
+            "status_id": str(s.status_id),
             "name": s.status.status_name,
             "description": s.status.description,
             "date": s.date.isoformat(),
@@ -163,7 +164,7 @@ async def new_complaints_status(session:AsyncSession, complaint_id):
     } for s in new_complaint_status.status_updates]
     data = {
         "id": new_complaint_status.id,
-        "user_id": new_complaint_status.user_id,
+        "user_id": str  (new_complaint_status.user_id),
         "first_name": new_complaint_status.user.first_name,
         "last_name": new_complaint_status.user.last_name,
         "subject": new_complaint_status.subject,

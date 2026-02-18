@@ -1,26 +1,26 @@
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi import Response
-
+from uuid import UUID
 
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[int,WebSocket] = {}
-        
-    async def connect(self, websocket: WebSocket, user_id:int):
+        self.active_connections: dict[UUID,WebSocket] = {}
+    async def connect(self, websocket: WebSocket, user_id:UUID):
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
     def disconnect(self, user_id):
         self.active_connections.pop(user_id, None)
 
-    async def send_personal_message(self, message: str, user_id:int):
+    async def send_personal_message(self, message: str, user_id:UUID):
         websocket = self.active_connections.get(user_id)
         if websocket:
             await websocket.send_text(message)
             
-    async def broad_cast_personal_json(self, user_id:int, data:dict):
+    async def broad_cast_personal_json(self, user_id:UUID, data:dict):
         websocket = self.active_connections.get(user_id)
+        print(websocket)
         if websocket:
             await websocket.send_json(data)
 

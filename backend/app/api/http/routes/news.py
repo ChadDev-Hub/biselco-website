@@ -68,7 +68,7 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     Returns:
     dict: A dictionary with a detail key containing a message indicating whether the creation was successful
     """
-    user_id = current_user.get("userid")
+    user_id = current_user.get("user_id")
     user = await session.scalar(select(Users).where(Users.id == user_id))
     now = datetime.now()
     date = now.date()

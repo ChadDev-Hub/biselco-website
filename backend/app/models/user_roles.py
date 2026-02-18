@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer,ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from ..db.base import BaseModel
 
 
@@ -16,7 +17,7 @@ class UsersRoles(BaseModel):
     user_id:Mapped[int] = mapped_column(
         ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"),
         primary_key=True,
-        type_= Integer
+        type_= UUID()
     )
     
     role_id:Mapped[int] = mapped_column(

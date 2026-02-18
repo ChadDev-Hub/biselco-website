@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, Text, Boolean, Time, Date, ForeignKey
 from ..db.base import BaseModel
 from datetime import time, date
+from sqlalchemy.dialects.postgresql import UUID
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -21,7 +22,7 @@ class News(BaseModel):
     """
     __tablename__= "news"
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=UUID())
     title:Mapped[str] = mapped_column(type_=Text, nullable=False)
     description:Mapped[str] = mapped_column(type_=Text, nullable=False)
     date_posted:Mapped[date] = mapped_column(type_=Date)

@@ -124,4 +124,4 @@ const ComplaintsContainer = ({
 
     )
 }
-export default ComplaintsContainer
+export default ComplaintsContainer;

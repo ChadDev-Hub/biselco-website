@@ -36,18 +36,18 @@ const ComplaintsContainer = (
 ) => {
     const [complaints, setComplaints] = useState<Complaints[]>(complaintsData);
     const message = useWebsocket();
+    console.log(message)
     useEffect(()=>{
         if (!message) return
         if (message.detail === "complaints") {
-            queueMicrotask(() => {
-                setComplaints((prev) => {
+            const newComplaints = async() => {
+                    setComplaints((prev) => {
                     const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);                   
                     return [message.data, ...existing_complaint];});
-            })
+            }
+            newComplaints();
         }
     },[message]);
-
-
     const handleDelete = (id: number) => {
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
         setComplaints(updatedComplaints);
