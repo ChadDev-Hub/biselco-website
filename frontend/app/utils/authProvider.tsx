@@ -21,12 +21,6 @@ type contextType = {
 const authContext = createContext<contextType | null>(null)
 const AuthProvider = ({children, initialUser}: Props) => {
     const [user, setUser] = useState<User | null>(initialUser)
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            refToken()
-        }, 1*60*1000);
-        return () => clearTimeout(timeout); 
-    },[])
   return (
     <authContext.Provider value={{user, setUser}}>
         {children}

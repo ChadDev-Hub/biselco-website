@@ -12,4 +12,8 @@ class SignUpUser(BaseModel):
 class LoginUser(BaseModel):
     username:str
     password:str
-    
+
+
+# GOOGLE LOGIN REQUESTS
+class GoogleLogin(BaseModel):
+    token: str

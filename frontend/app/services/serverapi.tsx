@@ -1,9 +1,6 @@
 "use server"
 import { cookies } from "next/headers"
-
 const baseUrl = process.env.BASESERVERURL
-
-
 
 // SERVER FETCH WITH AUTO REFRESH
 
@@ -14,10 +11,13 @@ export async function serverFetchAutoRefresh(
   headers: Record<string, string> = {}
 ) {
   const cookieStore = await cookies()
+  let accessToken = null
+  const access_token = cookieStore.get("access_token")?.value
+  if (access_token) {
+    accessToken = access_token
+  }
 
-  let accessToken = cookieStore.get("access_token")?.value
   const refreshToken = cookieStore.get("refresh_token")?.value
-    console.log(accessToken)
   // Serialize body safely
   let requestBody: BodyInit | undefined = undefined
 
@@ -60,12 +60,12 @@ export async function serverFetchAutoRefresh(
         "Cookie": `refresh_token=${refreshToken}`
       },
     })
-    const newRefreshToken = refreshRes.headers.get("Set-Cookie")
+    const newAccessToken = refreshRes.headers.get("Set-Cookie")
       ?.split(";")[0]
       ?.split("=")[1]
 
     
-    accessToken = newRefreshToken
+    accessToken = newAccessToken
     
     // Retry original request with new token
     response = await fetch(url, {
@@ -73,7 +73,7 @@ export async function serverFetchAutoRefresh(
       body: requestBody,
       cache: "no-store",
       headers: {
-        Authorization: `Bearer ${newRefreshToken}`,
+        Authorization: `Bearer ${accessToken}`,
         ...headers,
       },
     })

@@ -72,7 +72,6 @@ async def get_current_user(token:str = Depends(oauth2_scheme)):
         raise credential_exception
     try:
         current_user = await verify_token(token)
-        print(current_user)
         return current_user
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Access token expired")
@@ -99,15 +98,14 @@ async def get_current_user_ws(websocket:WebSocket):
 async def verify_google_login(token:str):
     if not token:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found")
-    try:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), G_CLIENT_ID)
-        username= idinfo["sub"]
-        email = idinfo["email"]
-        first_name = idinfo["given_name"]
-        last_name = idinfo["family_name"]
-        pricture = idinfo['picture']
-    except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
+    
+    idinfo = id_token.verify_oauth2_token(token, requests.Request(), G_CLIENT_ID)
+    username= idinfo["sub"]
+    email = idinfo["email"]
+    first_name = idinfo["given_name"]
+    last_name = idinfo["family_name"]
+    pricture = idinfo['picture']
+
     return {
         "username": f"BIS{username}",
         "email": email,
