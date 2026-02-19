@@ -4,14 +4,16 @@ import { redirect } from "next/navigation";
 import { getNewsPage } from "./services/serverapi";
 import NewsDataContainer from "./components/NewsFeed/NewsDataContainer";
 import NewsNavBar from "./components/common/newsNavBar";
-
+import { getCurrentUser } from "./services/serverapi";
 
 
 export default async function Home() {
-  const res = await getNewsPage()
-  if (res.error) {
+  const currentUser = await getCurrentUser()
+  if (currentUser.status === 401) {
     redirect("/landing")
   }
+  const res = await getNewsPage()
+  console.log(res)
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -37,7 +39,7 @@ export default async function Home() {
           </h1>
         </header>
         <NewsNavBar />
-        <NewsDataContainer initialData={res} />
+        <NewsDataContainer initialData={res.detail} />
       </main>
     </div>
   );

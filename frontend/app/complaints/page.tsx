@@ -50,8 +50,8 @@ const ComplaintsPage = async () => {
           </nav>
         </header>
           <ComplaintsContainer
-            complaintsData={complaints}
-            complaintsStatusName={complaintsStatusName} />
+            complaintsData={complaints.detail}
+            complaintsStatusName={complaintsStatusName.detail} />
           <FabIcon>
             <div data-tip = "Create Complaint" className='tooltip tooltip-left'>
               <CreateComplaints/>

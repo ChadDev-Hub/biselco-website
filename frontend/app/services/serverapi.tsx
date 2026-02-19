@@ -1,34 +1,106 @@
 "use server"
-
-import axios from "axios"
 import { cookies } from "next/headers"
 
 const baseUrl = process.env.BASESERVERURL
 
 
+
+// SERVER FETCH WITH AUTO REFRESH
+
+export async function serverFetchAutoRefresh(
+  url: string,
+  method: string,
+  body?: BodyInit | null,
+  headers: Record<string, string> = {}
+) {
+  const cookieStore = await cookies()
+
+  let accessToken = cookieStore.get("access_token")?.value
+  const refreshToken = cookieStore.get("refresh_token")?.value
+    console.log(accessToken)
+  // Serialize body safely
+  let requestBody: BodyInit | undefined = undefined
+
+  if (body) {
+    if (
+      typeof body === "object" &&
+      !(body instanceof FormData) &&
+      !(body instanceof URLSearchParams)
+    ) {
+      requestBody = JSON.stringify(body)
+      headers["Content-Type"] = "application/json"
+    } else {
+      requestBody = body
+    }
+  }
+
+  // -----------------------
+  // First Attempt
+  // -----------------------
+  let response = await fetch(url, {
+    method,
+    body: requestBody,
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}` || "",
+      ...headers,
+    },
+  })
+
+  // -----------------------
+  // If Unauthorized → Refresh
+  // -----------------------
+  if (response.status === 401 && refreshToken) {
+    // Refresh token
+    const refreshRes = await fetch(`${baseUrl}/v1/auth/token/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": `refresh_token=${refreshToken}`
+      },
+    })
+    const newRefreshToken = refreshRes.headers.get("Set-Cookie")
+      ?.split(";")[0]
+      ?.split("=")[1]
+
+    
+    accessToken = newRefreshToken
+    
+    // Retry original request with new token
+    response = await fetch(url, {
+      method,
+      body: requestBody,
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${newRefreshToken}`,
+        ...headers,
+      },
+    })
+  }
+
+  const data = await response.json().catch(() => null)
+
+  return {
+    status: response.status,
+    detail: data?.detail ?? data,
+  }
+}
+
+
 //  GET CURRENT USER
-export async function getCurrentUser(){
+export async function getCurrentUser() {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/auth/user/me`, {
-        method: "GET",
-        cache: "no-store",
-        credentials: "include",
-        headers: {
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/auth/user/me`,
+        "GET",
+        undefined,
+        {
             "Cookie": cookieHeader
         }
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            detail: data.detail
-
-        }
-    }
-    return {
-        status: res.status,
-        detail: data
-    }
+    )
+    console.log(data.status)
+    return data
 }
 
 
@@ -47,225 +119,141 @@ export async function getLandingPageData() {
 
 
 // GET NEWS PAGE DATA
-export async function getNewsPage(){
+export async function getNewsPage() {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/news/`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/news/`,
+        "GET",
+        undefined,
         {
-            method: "GET",
-            cache: "no-store",
-            credentials:"include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return{
-            error: true
-        }
-    }
     return data
 }
 
 
-
-
-// LOGOUT FUNCTION
-
-
 // POST NEWS
-export async function PostNews(form:FormData){
+export async function PostNews(form: FormData) {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/news/create`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/news/create`,
+        "POST",
+        form,
         {
-            method: "POST",
-            body: form,
-            credentials: "include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const status =  res.status
-    const data = await res.json()
-    if (!res.ok){
-        return{
-            error: true
-        }
-    }
-    return {
-        status: status,
-        detail:data.detail
-    }
+    return data
 }
 
 // GET ALL COMPLAINTS 
-export async function GetAllComplaints(){
+export async function GetAllComplaints() {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/all`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/all`,
+        "GET",
+        undefined,
         {
-            method: "GET",
-            cache: "no-store",
-            credentials:"include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return data
-    }
     return data
 }
 
 
 // GET COMPLAINTS ON SEPECIFIC USER 
 
-export async function UserComplaints(){
+export async function UserComplaints() {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/`,
+        "GET",
+        undefined,
         {
-            method: "GET",
-            cache: "no-store",
-            credentials:"include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return{
-            error: true
-        }
-    }
     return data
 }
 
 
 // GET COMPLAINT STATUS NAME
-export async function ComplaintStatusName(){
+export async function ComplaintStatusName() {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/status/name`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/status/name`,
+        "GET",
+        undefined,
         {
-            method: "GET",
-            cache: "no-store",
-            credentials:"include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const data = res.json()
-    if (!res.ok){
-        return{
-            error: true
-        }
-    }
     return data
 }
 
 
 // POST COMPLAINTS
-export async function PostComplaints(form:FormData){
+export async function PostComplaints(form: FormData) {
     const cookieHeader = (await cookies()).toString();
-    const res = await axios.post(`${baseUrl}/v1/complaints/create`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/create`,
+        "POST",
         form,
-        {  
-            onUploadProgress(progressEvent) {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1));
-                return {progress: percentCompleted}
-            },
-            withCredentials: true,
-            headers: {
-                "Cookie": cookieHeader,
-                "content-type": "multipart/form-data"
-            }
+        {
+            "Cookie": cookieHeader
         }
     )
-    return {
-        status: res.status,
-        data: res.data
-    };
+    return data
 }
 
 
 // DELETE COMPLAINT
-export async function DeleteComplaint(id:number){
+export async function DeleteComplaint(id: number) {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/delete/${id}`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/delete/${id}`,
+        "DELETE",
+        undefined,
         {
-            method: "DELETE",
-            credentials:"include",
-            headers:{
-                "Cookie": cookieHeader
-            }
+            "Cookie": cookieHeader
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return data
-    }
     return data
 }
 
 // UPDATE COMPLAINT STATUS
-export async function UpdateComplaintStatus(complaint_id:number, status_name:string, user_id:number){
+export async function UpdateComplaintStatus(complaint_id: number, status_name: string, user_id: number) {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/update/status/${complaint_id}`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/update/status/${complaint_id}`,
+        "PUT",
+        JSON.stringify({
+            status_name: status_name,
+            user_id: user_id
+        }),
         {
-            method: "PUT",
-            credentials:"include",
-            body: JSON.stringify({
-                status_name: status_name,
-                user_id: user_id
-            }),
-            headers:{
-                "Cookie": cookieHeader,
-                "content-type": "application/json"
-            }
+            "Cookie": cookieHeader,
+            "content-type": "application/json"
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            detail: data.detail}
-    }
-    return {
-        status: res.status,
-        detail: data.detail
-    }
+    return data
 }
 
 // DELETE COMPLAINT STATUS
-export async function DeleteComplaintStatus(complaint_id:number, status_name:string, user_id:number){
+export async function DeleteComplaintStatus(complaint_id: number, status_name: string, user_id: number) {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${baseUrl}/v1/complaints/delete/status/${complaint_id}`,
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/delete/status/${complaint_id}`,
+        "DELETE",
+        JSON.stringify({
+            status_name: status_name,
+            user_id: user_id
+        }),
         {
-            method: "DELETE",
-            credentials:"include",
-            body: JSON.stringify({
-                status_name: status_name,
-                user_id: user_id
-            }),
-            headers:{
-                "Cookie": cookieHeader,
-                "content-type": "application/json"
-            }
+            "Cookie": cookieHeader,
+            "content-type": "application/json"
         }
     )
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            detail: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        detail: data.detail
-    }
+    return data
 }

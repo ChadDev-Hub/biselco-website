@@ -17,6 +17,7 @@ from ....core.security import get_current_user
 from dotenv import load_dotenv
 from sqlalchemy.orm import selectinload
 from ....core.security import verify_google_login
+from ....core.security import verify_token
 import os
 
 
@@ -67,6 +68,28 @@ async def login_for_access_token(
         return {
              "detail": "Login Success",
         }
+        
+@router.post("/token/refresh", status_code=status.HTTP_202_ACCEPTED)
+async def refresh_token(response:Response, request:Request, session:AsyncSession = Depends(get_session)):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+    try:
+        current_user = await verify_token(refresh_token)
+        if not current_user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+        access_token = await create_access_token(data=current_user)
+        response.set_cookie(key="access_token",
+                            value=access_token,
+                            httponly=True,
+                            secure=False,
+                            samesite="lax")
+    except InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Token")
+    return {
+        "detail": "Token Refreshed"
+    }
+
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
 async def get_user(user:dict = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
@@ -91,15 +114,11 @@ async def get_user(user:dict = Depends(get_current_user), session:AsyncSession =
 # GOOGLE LOGIN
 @router.post("/google")
 async def google_login(response:Response,data:dict=Body(), session:AsyncSession = Depends(get_session)):
-    
     token = data.get("token")
-    verified_token = await verify_google_login(token)
-    print(verified_token)
-    
     if not token:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found")
     
-    
+    verified_token = await verify_google_login(token)
     if not verified_token:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
     

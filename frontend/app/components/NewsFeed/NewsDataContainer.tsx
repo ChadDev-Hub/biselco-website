@@ -19,7 +19,7 @@ type Props = {
 }
 
 const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
-    const [NewsData, setNewsData] = useState<Props[]>(initialData)
+    const [NewsData, setNewsData] = useState<Props[]>(initialData || []);
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return

@@ -10,7 +10,7 @@ from google.auth.transport import requests
 
 load_dotenv()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 SECRET_KEY = os.getenv("SECRET_KEY") 
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 1
@@ -39,22 +39,14 @@ async def create_refresh_token(data:dict):
     refresh_token = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return refresh_token
 
-# GET CURRENT USER
-async def get_current_user(requests:Request, response:Response):
+
+# VERIFY TOKEN 
+async def verify_token(token:str):
     if not SECRET_KEY:
         raise ValueError("No secret key")
-    token = requests.cookies.get("access_token")
-    refresh_token = requests.cookies.get("refresh_token")
-    credential_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid Credential",
-        headers={"WWW-Authenticate" : "Bearer"}
-    )
-    if not token:
-        raise credential_exception
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        subject = payload.get("sub")
+        subject = payload.get("subject")
         user_id = payload.get("user_id")
         role = payload.get("role")
         return {
@@ -63,51 +55,37 @@ async def get_current_user(requests:Request, response:Response):
             "role": role
         }
     except jwt.ExpiredSignatureError:
-        try:
-            if refresh_token:
-                payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
-            if payload.get("type") != "refresh_token":
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        except InvalidTokenError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token")
-        new_token = await create_access_token(
-        data={
-            "subject" : payload.get("sub"),
-            "user_id": payload.get("user_id"),
-            "role" : payload.get("role")
-        })
-        response.set_cookie(
-            key="access_token",
-            value=new_token,
-            max_age= 60 * 60 * 24 * 7,
-            httponly=True,
-            secure=True,
-            samesite="lax"
-        )
-        return {
-            "subject": payload.get("sub"),
-            "user_id": payload.get("user_id"),
-            "role": payload.get("role")
-        }
-        
-    except InvalidTokenError:
-        raise credential_exception
+        raise
     except jwt.PyJWTError:
+        return None
+
+# GET CURRENT USER
+async def get_current_user(token:str = Depends(oauth2_scheme)):
+    if not SECRET_KEY:
+        raise ValueError("No secret key")
+    credential_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid Credential",
+        headers={"WWW-Authenticate" : "Bearer"}
+    )
+    if not token:
         raise credential_exception
+    try:
+        current_user = await verify_token(token)
+        print(current_user)
+        return current_user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Access token expired")
+
 
 # WEBSOCKET VERIFY CURRENT USER
 async def get_current_user_ws(websocket:WebSocket):
     if not SECRET_KEY:
         raise ValueError("No secret key")
-    
-    credential_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid Credential"
-    )
     token = websocket.cookies.get("access_token")
     
     if not token:
-        raise credential_exception
+        return None
     try:
         paload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
         return {
@@ -116,46 +94,24 @@ async def get_current_user_ws(websocket:WebSocket):
             "role": paload.get("role")
         }
     except jwt.PyJWTError:
-        try:
-            refresh_token = websocket.cookies.get("refresh_token")
-            if not refresh_token:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= "Missing Token")
-            payload = jwt.decode(jwt=refresh_token,key=SECRET_KEY,algorithms=[str(ALGORITHM)])
-            if payload.get("type") != "refresh_token":
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        except InvalidTokenError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Token")
-        new_token = await create_access_token(
-        data={
-            "subject" : payload.get("sub"),
-            "user_id": payload.get("user_id"),
-            "role" : payload.get("role")
-        })
-        return {
-            "subject": payload.get("sub"),
-             "user_id": payload.get("user_id"),
-            "role": payload.get("role")
-        }
-    
+        return None
     
 async def verify_google_login(token:str):
     if not token:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found")
     try:
         idinfo = id_token.verify_oauth2_token(token, requests.Request(), G_CLIENT_ID)
-        username= idinfo["nbf"]
+        username= idinfo["sub"]
         email = idinfo["email"]
         first_name = idinfo["given_name"]
         last_name = idinfo["family_name"]
-        google_sub = idinfo["sub"]
         pricture = idinfo['picture']
     except:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
     return {
-        "username": f"bis{username}",
+        "username": f"BIS{username}",
         "email": email,
         "first_name": first_name,
         "last_name": last_name,
-        "google_sub": google_sub,
         "picture": pricture
     }

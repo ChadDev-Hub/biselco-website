@@ -34,9 +34,8 @@ const ComplaintsContainer = (
         serverurl
     }:Props
 ) => {
-    const [complaints, setComplaints] = useState<Complaints[]>(complaintsData);
+    const [complaints, setComplaints] = useState<Complaints[]>(complaintsData || []);
     const message = useWebsocket();
-    console.log(message)
     useEffect(()=>{
         if (!message) return
         if (message.detail === "complaints") {

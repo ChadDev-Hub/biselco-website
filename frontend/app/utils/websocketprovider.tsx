@@ -1,5 +1,5 @@
 'use client'
-import React, {createContext, useContext,useEffect,useState} from 'react'
+import React, {createContext, useRef, useContext,useEffect,useState} from 'react'
 import { useAuth } from './authProvider'
 type Props = {
     children: React.ReactNode;
@@ -58,15 +58,53 @@ const WebsocketContext = createContext<WSMessage | null>(null)
 const WebsocketProvider = ({children}: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
   const {user, setUser} = useAuth()
+  const wsRef = useRef<WebSocket | null>(null)
+  const WSURL = 'ws://localhost:8000/v1/socket/ws'
+  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttempts = useRef(0)
   useEffect(()=>{
     if(!user) return
-    const ws = new WebSocket('ws://localhost:8000/socket/ws')
-    ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        setMessage(message)
-    }
-    return () => {
+    let isMounted = true
+    const connect = () => {
+      const ws = new WebSocket(WSURL)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        reconnectAttempts.current = 0
+      }
+
+
+      ws.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          setMessage(message)
+      }
+
+
+       ws.onclose = (event) => {
+        
+        if (!isMounted) return
+        console.log(event)
+        // Exponential backoff (max 10s)
+        const timeout = Math.min(1000 * 2 ** reconnectAttempts.current, 10000)
+        reconnectAttempts.current += 1
+
+        reconnectTimeout.current = setTimeout(() => {
+          connect()
+        }, timeout)}
+      
+      ws.onerror = () => {
+        console.log("WS Error")
         ws.close()
+      }
+
+    }
+    connect()
+    return () => {
+      isMounted = false
+      wsRef.current?.close()
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current)
+      }
     }
   },[user])
   return (

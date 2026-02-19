@@ -7,6 +7,7 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[UUID,WebSocket] = {}
     async def connect(self, websocket: WebSocket, user_id:UUID):
+        print(user_id)
         await websocket.accept()
         self.active_connections[user_id] = websocket
 
@@ -20,7 +21,6 @@ class ConnectionManager:
             
     async def broad_cast_personal_json(self, user_id:UUID, data:dict):
         websocket = self.active_connections.get(user_id)
-        print(websocket)
         if websocket:
             await websocket.send_json(data)
 

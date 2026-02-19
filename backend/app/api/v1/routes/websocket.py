@@ -7,12 +7,13 @@ router = APIRouter(prefix="/socket", tags=['Socket'])
 async def websocket_endpoint(websocket: WebSocket):
     user = await get_current_user_ws(websocket)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
     await manager.connect(websocket=websocket, user_id=user['user_id']) 
     try:
         while True:
             json = await websocket.receive_json()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(user['user_id'])
     
     

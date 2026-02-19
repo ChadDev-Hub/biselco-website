@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import complaints, landing, login, logout, meter, news, signup, websocket
+from .routes import complaints, landing, login, logout, meter, news, signup, websocket
 
 
 

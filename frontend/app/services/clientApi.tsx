@@ -20,6 +20,8 @@ export async function loginfortoken(formdata: FormData, baseurl?: string) {
 }
 
 
+
+
 // LOGOUT
 export async function Logout(baseurl?: string) {
     const res = await fetch(`${baseurl}/v1/auth/logout`, {

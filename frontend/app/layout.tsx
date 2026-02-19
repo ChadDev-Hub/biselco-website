@@ -37,23 +37,23 @@ export default async function RootLayout({
   const googleClient = process.env.GOOGLE_CLIENT_ID
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
-      
-        <GoogleOAuthProvider  clientId={googleClient ?? ""}>
-          <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
+      <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
+        <GoogleOAuthProvider clientId={googleClient ?? ""}>
           <WebsocketProvider>
-          <ThemeController />
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased `}
-          >
-            <Drawer baseurl={baseurl} title={data.hero.title}>
-              {children}
-              <DocNavigation />
-            </Drawer>
-          </body>
-        </WebsocketProvider>
-        </AuthProvider>
+            <ThemeController />
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+            >
+              <Drawer baseurl={baseurl} title={data.hero.title}>
+                {children}
+                <DocNavigation />
+              </Drawer>
+            </body>
+          </WebsocketProvider>
         </GoogleOAuthProvider>
-      
+      </AuthProvider>
+
+
 
 
     </html>
