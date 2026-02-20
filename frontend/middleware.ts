@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+
 export async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
+  console.log(request)
+  console.log(accessToken)
+  console.log(refreshToken)
+
   const baseUrl = process.env.BASESERVERURL
   // 1. If no access token but we have a refresh token, try to rotate
   if (!accessToken && refreshToken) {
@@ -28,3 +33,7 @@ export async function middleware(request: NextRequest) {
   }
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/:path*'],
+};
