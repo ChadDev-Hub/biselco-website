@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
-import { PostNews } from '../../services/serverapi'
+import { PostNews } from '@/app/actions/news'
 
 
 const PostImageModal = () => {
@@ -25,7 +25,7 @@ const PostImageModal = () => {
         const form = event.currentTarget
         const formData = new FormData(form)
         const result = await PostNews(formData)
-        if (result.status === 200) {
+        if (result?.status === 201) {
             form.reset();
             handleCloseModal();
             

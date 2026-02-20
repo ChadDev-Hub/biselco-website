@@ -1,8 +1,8 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect} from 'react'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import NewsCard from './newscard'
-type Props = {
+type NewsData = {
     id: number
     title: string;
     date_posted: string;
@@ -14,12 +14,17 @@ type Props = {
         user_name: string;
         last_name: string;
         first_name: string;
+        photo: string;
     },
     news_images: string[]
 }
 
-const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
-    const [NewsData, setNewsData] = useState<Props[]>(initialData || []);
+type Props = {
+    initialData: NewsData[];
+}
+
+const NewsDataContainer = ({ initialData }: Props) => {
+    const [NewsData, setNewsData] = useState<NewsData[] | []>(initialData || []);
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
@@ -29,10 +34,9 @@ const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
             });
         }
     }, [message])
-
     return (
         <section className='flex flex-col gap-4 w-full items-center'>
-            {NewsData.map((n: Props) => (
+            {NewsData.map((n: NewsData) => (
                 <NewsCard
                     key={n.id}
                     postId={n.id}
@@ -44,6 +48,7 @@ const NewsDataContainer = ({ initialData }: { initialData: Props[] }) => {
                     last_name={n.user.last_name}
                     first_name={n.user.first_name}
                     period={n.period}
+                    photo={n.user.photo}
                 />
             ))}
         </section>

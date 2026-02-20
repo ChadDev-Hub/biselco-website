@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { getLandingPageData } from "./services/serverapi";
-import DocNavigation from "./components/common/doc";
-import Drawer from "./components/common/drawer";
-import ThemeController from "./components/common/themeController";
+import { getLandingPageData } from "../lib/serverFetch";
+import DocNavigation from "./common/doc";
+import Drawer from "./common/drawer";
+import ThemeController from "./common/themeController";
 import { WebsocketProvider } from "./utils/websocketprovider";
 import { AuthProvider } from "./utils/authProvider";
-import { getCurrentUser } from "./services/serverapi";
+import { getCurrentUser } from "../lib/serverFetch";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 
@@ -52,10 +52,6 @@ export default async function RootLayout({
           </WebsocketProvider>
         </GoogleOAuthProvider>
       </AuthProvider>
-
-
-
-
     </html>
   );
 }

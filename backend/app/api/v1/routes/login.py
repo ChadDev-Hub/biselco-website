@@ -19,6 +19,7 @@ from sqlalchemy.orm import selectinload
 from ....core.security import verify_google_login
 from ....core.security import verify_token
 from ....modules.user.schema.requests_model import GoogleLogin
+from ....modules.user.schema.requests_model import RefreshToken, AccessToken
 import os
 
 
@@ -41,14 +42,16 @@ async def login_for_access_token(
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Invalid Role")
         access_token = await create_access_token(
             data={
-                "subject" : user.email, 
+                "sub": "access_token",
+                "email" : user.email, 
                 "user_id": str(user.id),
-                "role": role[0]})
+                "role": role})
         refresh_token = await create_refresh_token(
             data= {
-                "subject": user.email,
+                "sub": "refresh_token",
+                "email": user.email,
                 "user_id": str(user.id),
-                "role" : role[0]
+                "role" : role
             }
         )
         response.set_cookie(key="refresh_token",
@@ -61,7 +64,7 @@ async def login_for_access_token(
         response.set_cookie(
             key="access_token",
             value=access_token,
-            max_age=datetime.now(timezone.utc) + timedelta(minutes=1),
+            max_age=60,
             httponly=True,
             secure=False,
             samesite="lax")
@@ -70,27 +73,27 @@ async def login_for_access_token(
              "detail": "Login Success",
         }
         
-@router.post("/token/refresh", status_code=status.HTTP_202_ACCEPTED)
-async def refresh_token(response:Response, request:Request, session:AsyncSession = Depends(get_session)):
-    refresh_token = request.cookies.get("refresh_token")
+@router.post("/token/refresh", status_code=status.HTTP_202_ACCEPTED, response_model=AccessToken)
+async def refresh_token(token:RefreshToken, session:AsyncSession = Depends(get_session)):
+    refresh_token = token.refresh_token
     if not refresh_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     try:
         current_user = await verify_token(refresh_token)
         if not current_user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-        access_token = await create_access_token(data=current_user)
-        response.set_cookie(key="access_token",\
-                            max_age=timedelta(minutes=1),
-                            value=access_token,
-                            httponly=True,
-                            secure=False,
-                            samesite="lax")
+        access_token_data = {
+            "sub": "access_token",
+            "email": current_user.get("email"),
+            "user_id": current_user.get("user_id"),
+            "role": current_user.get("role")
+        }
+        access_token = await create_access_token(data=access_token_data)
     except InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Token")
-    return {
-        "detail": "Token Refreshed"
-    }
+    return AccessToken(
+        access_token=access_token,
+        type="Bearer")
 
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
@@ -103,12 +106,14 @@ async def get_user(user:dict = Depends(get_current_user), session:AsyncSession =
         .where(Users.id == user.get("user_id")))).scalar_one_or_none()
     if not user_stmt:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
- 
+    roles_name = [role.name for role in user_stmt.roles]
     return UserModel(
+        user_id=user_stmt.id,
+        user_name=user_stmt.user_name,
         email=user_stmt.email,
         first_name=user_stmt.first_name,
         last_name=user_stmt.last_name,
-        role=user_stmt.roles[0].name,
+        role=roles_name,
         photo=user_stmt.photo
     )
     
@@ -151,15 +156,22 @@ async def google_login(response:Response,data:GoogleLogin, session:AsyncSession 
     # IF USER EXISTS GET USER INFORMATION TO ENCODE TOKEN
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
-
-    token_data = {
-        "subject": user.email,
+    roles = [role.name for role in user.roles]
+    access_token_data = {
+        "sub": "access_token",
+        "email" : user.email,
         "user_id": str(user.id),
-        "role": user.roles[0].name
+        "role": roles}
+    
+    refresh_token_data = {
+        "sub": "refresh_token",
+        "email" : user.email,
+        "user_id": str(user.id),
+        "role": roles
     }
         
-    access_token = await create_access_token(data=token_data)
-    refresh_token = await create_refresh_token(data=token_data)
+    access_token = await create_access_token(data=access_token_data)
+    refresh_token = await create_refresh_token(data=refresh_token_data)
     
     response.set_cookie(key="refresh_token",
                             value=refresh_token,
@@ -172,7 +184,7 @@ async def google_login(response:Response,data:GoogleLogin, session:AsyncSession 
     response.set_cookie(
             key="access_token",
             value=access_token,
-            expires=datetime.now(timezone.utc)+ timedelta(minutes=15),
+            max_age=60,
             httponly=True,
             secure=False,
             samesite="lax")

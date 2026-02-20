@@ -1,7 +1,7 @@
 
 "use client"
 import React from 'react'
-import Delete from '../modal/deletemodal'
+import Delete from './modal/deletemodal'
 
 type Props = {
     deletecomplaint: (onClose: () => void) => React.ReactNode;

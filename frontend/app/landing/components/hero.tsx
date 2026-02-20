@@ -4,8 +4,8 @@ interface Props {
     description: string;
 }
 import Image from "next/image";
-import LoginModal from "../auth-component/loginmodal";
-import SignupModal from "../auth-component/signupmodal";
+import LoginModal from "../../common/auth-component/loginmodal";
+import SignupModal from "../../common/auth-component/signupmodal";
 
 
 export default async function  Hero({ subtitle, description }: Props) {

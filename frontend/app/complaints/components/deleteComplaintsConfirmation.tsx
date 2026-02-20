@@ -1,5 +1,5 @@
 import React from 'react'
-import { DeleteComplaint } from '@/app/services/serverapi'
+import { DeleteComplaint } from '@/lib/serverFetch'
 type DeletConfirmationProps = {
     onClose: () => void;
     deleteComplaint: (id: number)=> void;

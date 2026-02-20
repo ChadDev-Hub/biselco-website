@@ -1,4 +1,11 @@
-"use clientr"
+"use client"
+
+import NewsContents from "./NewsContents";
+import NewsHeader from "./NewsHeader";
+import Divider from "./CustomDivider";
+import NewsText from "./NewsText";
+
+
 type Props = {
     postId: number;
     title: string;
@@ -8,12 +15,9 @@ type Props = {
     user_name: string;
     first_name: string;
     last_name: string;
-    period: string
+    period: string;
+    photo: string
 }
-import NewsContents from "./NewsContents";
-import NewsHeader from "./NewsHeader";
-import Divider from "./CustomDivider";
-import NewsText from "./NewsText";
 const NewsCard =  (
     {   postId,
         title,
@@ -23,7 +27,8 @@ const NewsCard =  (
         user_name,
         first_name,
         last_name,
-        period
+        period,
+        photo,
     }: Props) => {
     return (
         <div className="card rounded-md flex flex-col lg:h-full bg-base-100/45 w-full drop-shadow-md backdrop-blur-md shadow-lg" >
@@ -33,7 +38,7 @@ const NewsCard =  (
                     author={user_name}
                     first_name={first_name}
                     last_name={last_name}
-                    profileUrl="https://lh3.googleusercontent.com/a/ACg8ocL4MtgkdVBQWMcjROm0OfbTaPWBS1Lqbah9zcbjr6TB9W0JYsgO=s396-c-no"
+                    profileUrl={photo}
                     date={date_posted}
                     time={time_posted}
                     period={period}

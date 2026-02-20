@@ -1,9 +1,8 @@
 "use server"
-import { getLandingPageData } from "../services/serverapi";
-import Hero from "../components/common/hero";
-import { cookies } from "next/headers";
+import { getLandingPageData } from "../../lib/serverFetch";
+import Hero from "./components/hero";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "../services/serverapi";
+import { getCurrentUser } from "../../lib/serverFetch";
 const Landing = async () => {
   const user = await getCurrentUser()
   if (user.status  === 200){
@@ -37,7 +36,6 @@ const Landing = async () => {
               <div className="stat-value text-secondary">99.9%</div>
               <div className="stat-desc">Global Availability</div>
             </div>
-
           </div>
         </div>
       </section>

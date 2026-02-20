@@ -1,13 +1,16 @@
 "use client"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
+import { useAuth } from "../utils/authProvider"
+import LogoutButton from "./logout"
 interface Props {
     title?: string,
 
 }
+
 export default function NavBar({ title }: Props) {
     const currentRouter = usePathname()
-
+    const {user} = useAuth()
     // LOGOUT
 
     return (
@@ -38,7 +41,7 @@ export default function NavBar({ title }: Props) {
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl text-blue-700">{title}</a>
             </div>
-            <div className="flex flex-none z-40">
+            <div className={`flex flex-none z-40 ${currentRouter === "/landing" ? "hidden" : ""}`}>
                 <button type="button" aria-label="Search" className="btn btn-ghost btn-circle">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> </svg>
                 </button>
@@ -49,15 +52,15 @@ export default function NavBar({ title }: Props) {
                     </div>
                 </button>
 
-                <div className="dropdown dropdown-end z-20">
+                <div className={`dropdown dropdown-end z-20 ${currentRouter === "/landing" ? "hidden" : ""}`}>
                     <div aria-label="Profile" tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
                             <Image
                                 loading="eager"
-                                src="/globe.svg"
+                                src={user?.photo?? "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"}
                                 alt="svg"
-                                width={5}
-                                height={5}
+                                width={1}
+                                height={1}
                             />
                         </div>
                     </div>
@@ -71,7 +74,10 @@ export default function NavBar({ title }: Props) {
                             </a>
                         </li>
                         <li><a>Settings</a></li>
-                        <li></li>
+                        <li>
+                            <LogoutButton
+                             />
+                        </li>
                     </ul>
                 </div>
             </div>

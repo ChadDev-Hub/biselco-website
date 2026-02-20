@@ -1,9 +1,9 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import DashBoardTable from '../common/table'
+import DashBoardTable from '../../common/table'
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
-import AlertComponent from '../common/alert'
+import AlertComponent from '../../common/alert'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 
 type Props = {

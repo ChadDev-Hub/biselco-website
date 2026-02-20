@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import { Signup } from '../../actions'
+import { Signup } from '@/app/actions/auth'
 import GoogleLoginButton from './googlelogin'
 export default function SignupModal() {
     const [signupMessage, setSignupMessage] = useState({

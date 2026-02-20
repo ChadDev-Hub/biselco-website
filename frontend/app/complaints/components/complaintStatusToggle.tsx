@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/app/services/serverapi';
+import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/lib/serverFetch';
 
 type Props = {
     user_id: number;

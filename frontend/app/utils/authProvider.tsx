@@ -1,6 +1,5 @@
 "use client"
-import React, {createContext, useState, useContext, useEffect} from 'react'
-import { refToken } from '../actions'
+import React, {createContext, useState, useContext} from 'react'
 type Props = {
     children: React.ReactNode;
     initialUser: User | null
@@ -8,9 +7,11 @@ type Props = {
 
 
 type User = {
-    username: string;
     user_id: number;
+    user_name: string;
+    
     role: string;
+    photo: string;
 }
 
 type contextType = {

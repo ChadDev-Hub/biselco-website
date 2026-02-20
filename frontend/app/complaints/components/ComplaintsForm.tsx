@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import BiselcoMap from '../common/Map'
-import { PostComplaints } from '@/app/services/serverapi'
+import BiselcoMap from '../../common/Map'
+import { PostComplaints } from '@/lib/serverFetch'
 
 
 

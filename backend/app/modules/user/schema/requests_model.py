@@ -17,3 +17,13 @@ class LoginUser(BaseModel):
 # GOOGLE LOGIN REQUESTS
 class GoogleLogin(BaseModel):
     token: str
+    
+    
+# REFRESH TOKEN MODEL 
+class RefreshToken(BaseModel):
+    refresh_token: str
+    
+    
+class AccessToken(BaseModel):
+    access_token: str
+    type: str

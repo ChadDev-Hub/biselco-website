@@ -1,8 +1,8 @@
 "use server"
 import React from 'react'
-import Stats from '@/app/components/common/status'
-import { GetAllComplaints } from '@/app/services/serverapi'
-import ComplaintsContainer from '@/app/components/Complaints/complaintsDashboardContainer'
+import Stats from '@/app/common/status'
+import { GetAllComplaints } from '@/lib/serverFetch'
+import ComplaintsContainer from '@/app/complaints/components/complaintsDashboardContainer'
 
 const DashBoardPage = async() => {
   const result = await GetAllComplaints()

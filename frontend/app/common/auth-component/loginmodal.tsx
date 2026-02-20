@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { loginfortoken } from '../../services/clientApi'
-import { getCurrentUser } from '../../services/serverapi'
+import { getCurrentUser } from '../../../lib/serverFetch'
 import { useAuth } from '../../utils/authProvider'
 interface Props {
     baseurl?: string;

@@ -2,13 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
-  console.log(request)
-  console.log(accessToken)
-  console.log(refreshToken)
-
   const baseUrl = process.env.BASESERVERURL
   // 1. If no access token but we have a refresh token, try to rotate
   if (!accessToken && refreshToken) {
@@ -19,11 +15,10 @@ export async function middleware(request: NextRequest) {
     });
     
     if (response.ok) {
-      const { new_access_token } = await response.json();
-      
+      const data = await response.json();
       // 2. Create the response and SET the new cookie
       const res = NextResponse.next();
-      res.cookies.set('access_token', new_access_token, {
+      res.cookies.set('access_token', data.access_token, {
         httpOnly: true,
         secure: true,
         maxAge: 60, // 15 minutes

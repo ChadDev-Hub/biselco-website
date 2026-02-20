@@ -37,6 +37,4 @@ const Delete = ({ children }: Props) => {
         </>
     )
 }
-
-
 export default Delete;

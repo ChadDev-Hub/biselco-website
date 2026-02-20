@@ -1,12 +1,12 @@
 "use server"
 
 import React from 'react'
-import { UserComplaints } from '../services/serverapi'
-import ComplaintsContainer from '../components/Complaints/complaintContainer'
-import { ComplaintStatusName } from '../services/serverapi'
-import { ComplaintsDashboardRouteButton} from '../components/buttons/complaints'
-import CreateComplaints from '../components/Complaints/CreateComplaintsModal'
-import FabIcon from '../components/common/Fab'
+import { UserComplaints } from '../../lib/serverFetch'
+import ComplaintsContainer from './components/complaintContainer'
+import { ComplaintStatusName } from '../../lib/serverFetch'
+import { ComplaintsDashboardRouteButton} from '../common/buttons/complaints'
+import CreateComplaints from './components/CreateComplaintsModal'
+import FabIcon from '../common/Fab'
 const ComplaintsPage = async () => {
   const complaints = await UserComplaints();
   const complaintsStatusName = await ComplaintStatusName();
