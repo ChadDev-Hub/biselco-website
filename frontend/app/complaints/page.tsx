@@ -1,15 +1,11 @@
 "use server"
 
-import React from 'react'
-import { UserComplaints } from '../../lib/serverFetch'
-import ComplaintsContainer from './components/complaintContainer'
-import { ComplaintStatusName } from '../../lib/serverFetch'
+import React, {Suspense} from 'react'
+import ComplaintsFeed from './components/complaintsFeed'
 import { ComplaintsDashboardRouteButton} from '../common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '../common/Fab'
 const ComplaintsPage = async () => {
-  const complaints = await UserComplaints();
-  const complaintsStatusName = await ComplaintStatusName();
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -49,9 +45,9 @@ const ComplaintsPage = async () => {
             ))}
           </nav>
         </header>
-          <ComplaintsContainer
-            complaintsData={complaints.detail}
-            complaintsStatusName={complaintsStatusName.detail} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplaintsFeed/>
+          </Suspense>
           <FabIcon>
             <div data-tip = "Create Complaint" className='tooltip tooltip-left'>
               <CreateComplaints/>

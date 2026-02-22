@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/utils/websocketprovider'
+import { set } from 'ol/transform'
 
 
 type Props = {
@@ -36,15 +37,28 @@ const ComplaintsContainer = (
 ) => {
     const [complaints, setComplaints] = useState<Complaints[]>(complaintsData || []);
     const message = useWebsocket();
+    
     useEffect(()=>{
         if (!message) return
-        if (message.detail === "complaints") {
-            const newComplaints = async() => {
-                    setComplaints((prev) => {
+        switch (message.detail) {
+            case "complaints":
+                setComplaints((prev) => {
                     const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);                   
                     return [message.data, ...existing_complaint];});
-            }
-            newComplaints();
+                break;
+            case "complaint_status":
+                    setComplaints((prev)=>{
+                    return prev.map((complaint) => 
+                        complaint.id === message.data.id? {...complaint, ...message.data} : complaint
+                    )
+                })
+            case "deleted_complaint":
+                setComplaints((prev)=>{
+                    return prev.filter((complaint) => complaint.id !== message.data.id);
+                })
+                break;
+            default:
+                break;
         }
     },[message]);
     const handleDelete = (id: number) => {

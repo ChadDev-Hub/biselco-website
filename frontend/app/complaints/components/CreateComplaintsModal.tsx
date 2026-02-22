@@ -71,8 +71,8 @@ const CreateComplaints = () => {
                         </g>
                     </g></svg>
             </button>
-            <dialog id="complaints-modal" className="modal backdrop-blur-2xl transition-all">
-                <fieldset className='fieldset modal-box w-full z-40'>
+            <dialog id="complaints-modal" className="modal backdrop-blur-2xl transition-all px-2">
+                <fieldset className='fieldset modal-box w-full z-40 p-3'>
                     <legend className='fieldset-legend text-2xl font-bold w-full'>
                         <p>
                             Create Complaints

@@ -10,10 +10,10 @@ const DocNavigation = () => {
     : currentRoute === "/complaints" ? "complaints" : "logout";
   return (
 
-    <div className={`fixed bottom-6  w-full px-4 flex justify-between items-end lg:hidden ${currentRoute === "/landing" ? "hidden" : "visible"}`}>
+    <div className={`fixed bottom-6  w-full px-4 flex  justify-between items-end lg:hidden ${currentRoute === "/landing" ? "hidden" : "visible"}`}>
 
       {/* Left Island: Main Navigation */}
-      <div className="dock dock-sm relative bg-base-100/45 rounded-full backdrop-blur-md shadow-lg  mr-4">
+      <div className="dock dock-sm relative bg-base-100/45 glass rounded-full backdrop-blur-md shadow-lg  mr-4">
 
         <div className={isActive === "home" ? "dock-active" : ""}>
           <HomeRouteButton

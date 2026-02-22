@@ -1,14 +1,13 @@
 "use client"
 
 import React, { useState } from 'react'
-import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/lib/serverFetch';
+import { UpdateComplaintStatus, DeleteComplaintStatus  } from '@/app/actions/complaint'
 
 type Props = {
     user_id: number;
     name?: string;
     id?: number;
     enabled?: boolean;
-    setShowAlert: React.Dispatch<React.SetStateAction<Alerts | null>>
 }
 
 type AlertType = "error" | "success"
@@ -18,41 +17,25 @@ type Alerts = {
 
 }
 
-const EnableButton = ({ id, name, enabled, setShowAlert, user_id }: Props) => {
+const EnableButton = ({ id, name, enabled, user_id }: Props) => {
     const [checked, setChecked] = useState(enabled);
     const handleUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const check = event.target.checked
         if (check) {
             if (!id || !name) return
             const res = await UpdateComplaintStatus(id, name, user_id)
-            if (res.status === 401) {
+            if (res?.status === 401) {
                 setChecked(false)
-                setShowAlert({
-                    type: "error",
-                    message: res.detail
-                }) 
             } else {
-                setShowAlert({
-                    type: "success",
-                    message: res.detail
-                })
                 setChecked(true)
             }
         } 
         if (!check) {
             if (!id || !name) return
             const res = await DeleteComplaintStatus(id,name, user_id)
-            if (res.status === 401) {
+            if (res?.status === 401) {
                 setChecked(true)
-                setShowAlert({
-                    type: "error",
-                    message: res.detail
-                }) 
             } else {
-                setShowAlert({
-                    type: "success",
-                    message: res.detail
-                })
                 setChecked(false)
             }
         }

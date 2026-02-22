@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React from 'react'
 import DeletePost from './deletePostButton';
 type Props = {
+  postId: number;
   author: string;
   first_name: string;
   last_name: string;
@@ -13,7 +14,7 @@ type Props = {
   period: string;
 }
 
-const NewsHeader = ({ author, profileUrl, date, time, first_name, last_name, period }: Props) => {
+const NewsHeader = ({ postId,author, profileUrl, date, time, first_name, last_name, period }: Props) => {
   return (
     <div>
       <div className="flex items-center justify-between px-2">
@@ -53,7 +54,7 @@ const NewsHeader = ({ author, profileUrl, date, time, first_name, last_name, per
           </div>
           <ul tabIndex={-1} className="dropdown-content menu p-2  bg-base-100 rounded-box w-fit shadow-sm">
              <li>
-              <DeletePost/>
+              <DeletePost postId={postId}/>
              </li>
              <li>Edit</li>
           </ul>

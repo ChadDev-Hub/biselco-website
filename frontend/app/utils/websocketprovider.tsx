@@ -7,14 +7,20 @@ type Props = {
 
 
 type WSMessage = {
-  detail: "news"
+  detail: "news";
   data: NewsData;
 } | {
-  detail: "complaints"
-  data: ComplaintData
+  detail: "complaints";
+  data: ComplaintData;
 } | {
-  detail: "complaints status"
-  data: ComplaintData
+  detail: "complaint_status";
+  data: ComplaintData;
+} | {
+  detail : "deleted_news";
+  data: NewsData;
+} | {
+  detail: "deleted_complaint";
+  data: ComplaintData;
 }
 
 type NewsData = {

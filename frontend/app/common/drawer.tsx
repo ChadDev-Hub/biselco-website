@@ -47,12 +47,6 @@ const Drawer = ({ children, baseurl, title }: Props) => {
                                 orientation="flex flex-row"
                             />
                         </li>
-                        <li>
-                            <LogoutButton
-                                svgfill={isActive === "logout" ? "#D4F6FF" : "None"}
-                                strokeColor={isActive === "logout" ? "currentColor" : "currentColor"}
-                                baseurl={baseurl} />
-                        </li>
                     </ul>
                 </div>
             </div>

@@ -23,9 +23,8 @@ export default async function  Hero({ subtitle, description }: Props) {
                 <h1 className="text-2xl lg:text-5xl text-blue-700 font-bold text-shadow-lg">{subtitle}</h1>
                 <p className="text-black text-base">{description}</p>
                 <div className="
-                flex justify-center sm:justify-center md:justify-end lg:justify-end
-                 w-full gap-4">
-                    <SignupModal/>
+                flex justify-center sm:justify-center md:justify-center lg:justify-start
+                 w-full gap-4 ">
                     <LoginModal baseurl={baseUrl}/>
                 </div>
             </div>

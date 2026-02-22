@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import NewsCard from './newscard'
 type NewsData = {
@@ -28,10 +28,15 @@ const NewsDataContainer = ({ initialData }: Props) => {
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
-        if (message.detail === "news") {
-            queueMicrotask(() => {
+        switch (message.detail) {
+            case "news":
                 setNewsData(prev => [message.data, ...prev]);
-            });
+                break;
+            case "deleted_news":
+                setNewsData(NewsData.filter((news) => news.id !== message.data.id));
+                break;
+            default:
+                break;
         }
     }, [message])
     return (

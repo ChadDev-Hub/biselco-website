@@ -1,9 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import DashBoardTable from '../../common/table'
+import DashBoardTable from '../../../common/table'
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
-import AlertComponent from '../../common/alert'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 
 type Props = {
@@ -40,29 +39,16 @@ type status = {
 }
 
 
-type AlertType = "error" | "success"
-type Alerts = {
-    type: AlertType,
-    message: string,
 
-}
 
 const ComplaintsContainer = ({
     data
 }: Props) => {
     const [allComplaints, setallComplaints] = useState<Complaint[]>(data);
-    const [showAlert, setShowAlert] = useState<Alerts | null>(null);
-    useEffect(() => {
-        if (!showAlert) return
-        const timeout = setTimeout(() => {
-            setShowAlert(null)
-        }, 3000)
-        return () => clearTimeout(timeout)
-    }, [showAlert])
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
-        if (message.detail === "complaints status") {
+        if (message.detail === "complaint_status") {
             queueMicrotask(() => {
                 setallComplaints((prev) => {
                     return prev.map((complaint) => 
@@ -71,12 +57,17 @@ const ComplaintsContainer = ({
                 });
             });
         }
+        if (message.detail === "complaints") {
+            queueMicrotask(() => {
+                setallComplaints((prev) => {
+                    const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
+                    return [message.data, ...existing_complaint];
+                });
+            });
+        }
     }, [message])
     return (
         <>
-            {showAlert && <AlertComponent
-                alertstyle={showAlert?.type}
-                message={showAlert?.message} />}
             <DashBoardTable>
                 <thead className='text-md font-bold text-center text-yellow-400'>
                     <tr >
@@ -109,8 +100,7 @@ const ComplaintsContainer = ({
                                 <ComplaintStatusButton
                                     user_id={complaint.user_id}
                                     status={complaint.status}
-                                    complaints_id={complaint.id}
-                                    setShowAlert={setShowAlert} />
+                                    complaints_id={complaint.id} />
                             </td>
                             <td className='animate-pulse text-green-500 font-bold'>{
                             complaint.status.find((stats)=> stats.status_id === Math.max(...complaint.status.map((stats)=> stats.status_id)))?.name

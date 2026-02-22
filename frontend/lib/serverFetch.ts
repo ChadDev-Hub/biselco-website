@@ -85,7 +85,10 @@ export async function GetAllComplaints() {
             error: data.detail
         }
     }
-    return data.detail
+    return {
+        status: res.status,
+        data: data
+    }
 }
 
 
@@ -112,7 +115,7 @@ export async function UserComplaints() {
     }
     return {
         status: res.status,
-        detail: data.detail
+        data: data
     }
 }
 
@@ -125,10 +128,7 @@ export async function ComplaintStatusName() {
     const res = await fetch(
         `${baseUrl}/v1/complaints/status/name`,
         {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`
-            }
+            method: "GET"
         }
     )
     const data = await res.json()
@@ -140,6 +140,6 @@ export async function ComplaintStatusName() {
     }
     return {
         status: res.status,
-        detail: data.detail
+        data: data
     }
 }

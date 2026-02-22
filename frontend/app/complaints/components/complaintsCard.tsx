@@ -43,7 +43,7 @@ const ComplaintsCard = ({ subject, description, complaintsStatusName, status,del
                 <p className='text-md'>{description}</p>
             </div>
             <hr className='bg-gray-400/20' />
-            <Accordion>
+            <Accordion title='Show Complaint Status....'>
                 <ComplaintsTimeLine
                     data={complaintsStatusName}
                     status={status}

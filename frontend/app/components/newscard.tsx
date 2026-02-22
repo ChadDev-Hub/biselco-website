@@ -35,6 +35,7 @@ const NewsCard =  (
             <div className="shadow-lg mb-2 p-4 rounded-md">
                 {/* HEADER */}
                 <NewsHeader
+                    postId={postId}
                     author={user_name}
                     first_name={first_name}
                     last_name={last_name}

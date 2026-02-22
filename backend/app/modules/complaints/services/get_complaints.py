@@ -3,7 +3,7 @@ from fastapi import status
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select, and_, desc, asc
 from sqlalchemy.orm import selectinload
-from ..modules.complaints import *
+from .. import *
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from uuid import UUID
@@ -83,8 +83,6 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
             "srid": srid
         }
     data = {
-        "detail" : "complaints",
-        "data" : {
              "id" : n_complaint.id,
              "user_id": str(n_complaint.user_id),
              "first_name" : n_complaint.user.first_name,
@@ -95,7 +93,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
             "municipality" : n_complaint.municipality,
             "location" : location,
             "status" : status_list}
-    }
+
     await session.close()
     return data
 
@@ -117,7 +115,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,
-            "status_id": str(s.status_id),
+            "status_id": s.status_id,
             "name": s.status.status_name,
             "description": s.status.description,
             "date": s.date.isoformat(),
@@ -126,7 +124,7 @@ async def user_complaints(session:AsyncSession, user_id:int):
         if isinstance(geom, Point):
             complaint = {
                 "id": c.id,
-                "user_id": c.user_id,
+                "user_id": str(c.user_id),
                 "first_name": c.user.first_name,
                 "last_name": c.user.last_name,
                 "subject": c.subject,

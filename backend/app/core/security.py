@@ -113,7 +113,7 @@ async def verify_google_login(token:str):
     first_name = idinfo["given_name"]
     last_name = idinfo["family_name"]
     pricture = idinfo['picture']
-
+    print(idinfo)
     return {
         "username": f"BIS{username}",
         "email": email,

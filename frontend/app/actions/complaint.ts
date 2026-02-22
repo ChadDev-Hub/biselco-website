@@ -1,44 +1,25 @@
 "use server"
 import { cookies } from "next/headers"
+import { serverFetchAutoRefresh } from "./actionWraper"
 const baseUrl = process.env.BASESERVERURL
 // POST COMPLAINTS
 export async function PostComplaints(form: FormData) {
     const cookieStore = await cookies()
     const accessToken =  cookieStore.get("access_token")?.value
-    const res = await fetch( 
+    const data = await serverFetchAutoRefresh( 
         `${baseUrl}/v1/complaints/create`,
-        {
-            method: "POST",
-            body: form,
-            headers: {
-                "Authorization": `Bearer ${accessToken}`
-            }
-        }
+        "POST",
+        form,
     )
-    const data = await res.json()
-    if (!res.ok) {
-        return {
-            status: res.status,
-            error: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        detail: data.detail
-    }
+    return data
 }
 
 
 // DELETE COMPLAINT
 export async function DeleteComplaint(id: number) {
-    const cookieHeader = (await cookies()).toString();
     const data = await serverFetchAutoRefresh(
         `${baseUrl}/v1/complaints/delete/${id}`,
         "DELETE",
-        undefined,
-        {
-            "Cookie": cookieHeader
-        }
     )
     return data
 }

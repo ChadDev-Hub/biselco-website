@@ -1,13 +1,14 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
 import { PostNews } from '@/app/actions/news'
-
+import { useAlert } from '../common/alert'
 
 const PostImageModal = () => {
     const [uploadedImage, setUploadedImage] = useState<File[]>([])
-
+    const modalRef = useRef<HTMLDialogElement>(null);
+    const {showAlert} = useAlert();
     // HANDLE UPLOAD OF PHOTOS
     const handleUploadedImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
@@ -28,23 +29,18 @@ const PostImageModal = () => {
         if (result?.status === 201) {
             form.reset();
             handleCloseModal();
+            showAlert("success", "Post Created Successfully")
             
         }
         
     }
     // OPEN MODAL
     const handleOpenModal = () => {
-        const modal = document.getElementById("postphoto-modal") as HTMLDialogElement
-        if (modal) {
-            modal.showModal()
-        }
+        modalRef.current?.showModal()
     }
     // CLOSE MODAL
     const handleCloseModal = () => {
-        const modal = document.getElementById("postphoto-modal") as HTMLDialogElement
-        if (modal) {
-            modal.close()
-        }
+        modalRef.current?.close()
     }
 
     // REMOVE IMAGE
@@ -62,8 +58,8 @@ const PostImageModal = () => {
                     autoplay
                 />
             </button>
-            <dialog id='postphoto-modal' className='modal backdrop-blur-lg'>
-                <fieldset  className='fieldset  flex flex-col modal-box bg-base-200  w-full p-4'>
+            <dialog ref={modalRef} className='modal backdrop-blur-lg px-2'>
+                <fieldset  className='fieldset  flex flex-col modal-box bg-base-200   w-full p-4'>
                     <legend className='fieldset-legend w-full flex justify-between text-lg font-bold text-shadow-2xs text-blue-700'>
                         <p>
                             New News

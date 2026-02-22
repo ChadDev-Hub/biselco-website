@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { loginfortoken } from '../../services/clientApi'
 import { getCurrentUser } from '../../../lib/serverFetch'
 import { useAuth } from '../../utils/authProvider'
+import GoogleLoginButton from './googlelogin'
 interface Props {
     baseurl?: string;
 }
@@ -84,12 +85,12 @@ export default function LoginModal({ baseurl }: Props) {
                 }
             }}> Login </button >
             <dialog id="login_modal" className="modal backdrop-blur-sm">
-                <div className="modal-box bg-black/45 backdrop-blur-xs max-w-sm flex flex-col items-center border ">
+                <div className="modal-box max-w-80  backdrop-blur-xs flex flex-col items-center border glass ">
                     <form id='login-form' onSubmit={handleSubmit} className='w-full px-2'>
                         <button type='button' onClick={handleClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                         <fieldset className='fieldset w-full flex flex-col gap-2'>
-                            <legend className='fieldset-legend text-2xl '>
-                                Signup Form
+                            <legend className='fieldset-legend text-3xl text-blue-800 text-shadow-md shadow font-bold w-full flex justify-center'>
+                                Login
                             </legend>
                             {/* LOGIN MESSAGE */}
                             {loginMessage.show &&
@@ -165,8 +166,12 @@ export default function LoginModal({ baseurl }: Props) {
                                 <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
                             </p>
                         </fieldset>
-                        <button className='w-full btn btn-primary rounded-full mt-2'>LOGIN</button>
+                        <button type='submit' className='w-full btn btn-primary rounded-full mt-2'>LOGIN</button>
                     </form>
+                    <hr className='bg-gray-400/20' />
+                    <h3 className='font-bold text-blue-800'>OR</h3>
+                    <hr />
+                    <GoogleLoginButton/>
                 </div>
             </dialog>
         </>

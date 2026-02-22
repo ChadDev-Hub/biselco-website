@@ -1,14 +1,16 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { Logout } from '@/app/services/clientApi'
+import { Logout } from '../actions/auth'
 
 
 const LogoutButton = () => {
     const router = useRouter()
     const handleLogout = async () => {
-        await Logout(baseurl)
-        router.replace("/landing")
+        const res = await Logout()
+        if (res.status === 200) {
+            router.push("/landing")
+        };
     }
     return (
         <button onClick={handleLogout} type="button" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Logout">

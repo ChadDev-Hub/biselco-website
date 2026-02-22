@@ -9,7 +9,7 @@ import { WebsocketProvider } from "./utils/websocketprovider";
 import { AuthProvider } from "./utils/authProvider";
 import { getCurrentUser } from "../lib/serverFetch";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
+import AlertComponent from "./common/alert";
 
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
@@ -40,15 +40,17 @@ export default async function RootLayout({
       <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
         <GoogleOAuthProvider clientId={googleClient ?? ""}>
           <WebsocketProvider>
-            <ThemeController />
-            <body
-              className={`${geistSans.variable} ${geistMono.variable} antialiased `}
-            >
-              <Drawer baseurl={baseurl} title={data.hero.title}>
-                {children}
-                <DocNavigation />
-              </Drawer>
-            </body>
+            <AlertComponent>
+              <ThemeController />
+              <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+              >
+                <Drawer baseurl={baseurl} title={data.hero.title}>
+                  {children}
+                  <DocNavigation />
+                </Drawer>
+              </body>
+            </AlertComponent>
           </WebsocketProvider>
         </GoogleOAuthProvider>
       </AuthProvider>

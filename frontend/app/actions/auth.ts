@@ -45,7 +45,18 @@ export const Login = async (formdata: FormData) => {
 // LOUTOUT
 
 export const Logout = async () => {
+    const res = await fetch(`${baseUrl}/auth/logout`, { method: "POST" })
     const cookieStore = await cookies()
     cookieStore.delete('access_token')
     cookieStore.delete('refresh_token')
+    if (!res.ok) {
+        return {
+            status: res.status,
+            detail: "Logout Failed"
+        }
+    }
+    return {
+        status: res.status,
+        detail: "Logout Successfull"
+    }
 }

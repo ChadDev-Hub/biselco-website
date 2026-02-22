@@ -2,7 +2,7 @@
 import React from 'react'
 import Stats from '@/app/common/status'
 import { GetAllComplaints } from '@/lib/serverFetch'
-import ComplaintsContainer from '@/app/complaints/components/complaintsDashboardContainer'
+import ComplaintsContainer from '@/app/complaints/dashboard/components/complaintsDashboardContainer'
 
 const DashBoardPage = async() => {
   const result = await GetAllComplaints()
@@ -26,7 +26,7 @@ const DashBoardPage = async() => {
         <h1>Dashboard</h1>
         <Stats/>
         <ComplaintsContainer
-        data={result}/>
+        data={result.data}/>
         </main>
     </div>
   )

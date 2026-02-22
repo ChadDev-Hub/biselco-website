@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import BiselcoMap from '../../common/Map'
-import { PostComplaints } from '@/lib/serverFetch'
+import { PostComplaints } from '@/app/actions/complaint';
 
 
 
 const ComplaintsForm = () => {
+    // STATE
     const [lat, setLat] = useState<number>(0);
     const [long, setLong] = useState<number>(0);
 
@@ -19,7 +20,7 @@ const ComplaintsForm = () => {
         formdata.append('latitude', lat.toFixed(10));
         formdata.append('longitude', long.toFixed(10));
         const result = await PostComplaints(formdata);
-        if (result.status === 201) {
+        if (result?.status === 201) {
             form.reset();
             const modal = document.getElementById('complaints-modal') as HTMLDialogElement;
             if (modal) {

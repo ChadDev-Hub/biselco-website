@@ -8,18 +8,19 @@ from ....modules.complaints.schema.requests_model import ComplaintsStatus, Creat
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_X, ST_Y, ST_SRID
 from shapely.geometry import Point
-from ....dependencies.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
+from ....modules.complaints.services.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
 from ....core.websocket_manager import manager
 from ....modules.complaints import *
 from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
+from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
 async def get_user_complaints(user:dict = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
@@ -31,13 +32,13 @@ async def get_user_complaints(user:dict = Depends(get_current_user),session:Asyn
 
 
 #GET ALL COMPLAINTS
-@router.get("/all", status_code=status.HTTP_200_OK)
+@router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
 async def get_all_complaint(session:AsyncSession = Depends(get_session)):
     return await complaints(session=session)
 
 
 # GET ALL COMPLAINTS STATUS NAME
-@router.get("/status/name", status_code=status.HTTP_200_OK)
+@router.get("/status/name", status_code=status.HTTP_200_OK, response_model=list[ComplaintStatusName])
 async def get_complaints_status_name(session:AsyncSession = Depends(get_session)):
     status_name = (await session.execute(select(ComplaintsStatusName).order_by(desc(ComplaintsStatusName.id)))).scalars().all()
     return status_name
@@ -87,16 +88,17 @@ async def create_complaints(
 
     # QUERY THE LATEST COMPLAINT
     data = await new_complaint(session=session, complaint_id=new_complaints.id, user_id=user_id)
-    
+    json_data = {
+        "detail": "complaints",
+        "data" : ComplaintsModel(**data).model_dump()}
     # SEND TO ADMIN AND SPECIFIC  CLIENT
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
     admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
     if user_id not in admin_ids or not admin_ids:
         admin_ids.append(user_id)   
-    print(admin_ids)
     for admin_id in admin_ids:
-        await manager.broad_cast_personal_json(user_id=admin_id, data=data)
+        await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
     await session.close()
     
     return {
@@ -141,7 +143,7 @@ async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_
             admin_ids.append(user_id)
         for admin in admin_ids:
             to_send = {
-                "detail": "deleted complaint",
+                "detail": "deleted_complaints",
                 "data": deleted_complaint,
             }
             await manager.broad_cast_personal_json(user_id=admin, data=to_send)
@@ -202,7 +204,7 @@ async def update_complaint_status(
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
             to_send = {
-                "detail": "complaints status",
+                "detail": "complaint_status",
                 "data": new_status,
             }
             await manager.broad_cast_personal_json(user_id=admin, data=to_send)

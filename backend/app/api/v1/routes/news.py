@@ -70,6 +70,8 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     """
     user_id = current_user.get("user_id")
     user = await session.scalar(select(Users).where(Users.id == user_id))
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     now = datetime.now()
     date = now.date()
     time = now.time()
@@ -106,7 +108,7 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
         "detail" : "Sucessully Created"
     }
 
-@router.delete("/delete/{post_id}")
+@router.delete("/delete/{post_id}", status_code=status.HTTP_200_OK)
 async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), current_user:dict = Depends(get_current_user)):
     """
     Delete a Post with a given post_id
@@ -117,22 +119,45 @@ async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), c
     Returns:
     dict: A dictionary with a detail key containing a message indicating whether the deletion was successful
     """
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     try:
-        select_stmt = select(News).where(News.id == post_id)
-        data = (await session.execute(select_stmt)).scalar_one_or_none()
-        if not data:
+        news_data = (await session.execute(
+            select(News)
+            .options(selectinload(News.user).load_only(Users.user_name,Users.first_name, Users.last_name, Users.photo))
+            .options(selectinload(News.news_images))      
+            .where(News.id == post_id))).scalar_one_or_none()
+    
+        if not news_data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Post not found"
             )
-        delete_stmt = delete(News).where(News.id == post_id)
-        await session.execute(delete_stmt)
+        news_json = NewsModel(
+            id=news_data.id,
+            title=news_data.title,
+            description=news_data.description,
+            date_posted=news_data.date_posted.isoformat(),
+            time_posted=news_data.time_posted.strftime("%I:%M %p"),
+            period=TimeAgo(date_posted=news_data.date_posted, time_posted=news_data.time_posted),
+            user=UserModel(
+                user_name=news_data.user.user_name,
+                first_name=news_data.user.first_name,
+                last_name=news_data.user.last_name,
+                photo=news_data.user.photo
+            ),
+            images=[m for m in news_data.news_images]
+        )
+        await session.delete(news_data)
         await session.commit()
-        await session.close()
+        await manager.broadcast({
+            "detail": "deleted_news",
+            "data" : news_json.model_dump()
+        })
     except Exception as e:
         return e
     return {
-        "detail" : "Successfully Deleted"
+        "deleted": True
     }
     
     

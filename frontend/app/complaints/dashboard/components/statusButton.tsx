@@ -7,7 +7,7 @@ type Props = {
     status: status[];
     complaints_id: number;
     user_id: number;
-    setShowAlert: React.Dispatch<React.SetStateAction<Alerts | null>>
+   
 }
 type status = {
     id: number;
@@ -24,7 +24,7 @@ type Alerts = {
     message: string,
 
 }
-const ComplaintStatusButton = ({ status, complaints_id, setShowAlert, user_id }: Props) => {
+const ComplaintStatusButton = ({ status, complaints_id, user_id }: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const complaintStatusName = ['Received', 'Pending', 'Working', 'Complete']
 
@@ -93,7 +93,6 @@ const ComplaintStatusButton = ({ status, complaints_id, setShowAlert, user_id }:
                                             status.find((stats: status) => stats.name === item) ? true : false
                                         }
                                         name={item}
-                                        setShowAlert={setShowAlert}
                                     />
                                 </li>
                             )}

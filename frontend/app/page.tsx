@@ -1,10 +1,10 @@
 "use server"
-
 import { redirect } from "next/navigation";
-import NewsNavBar from "./common/newsNavBar";
+import NewsNavBar from "./components/newsNavBar";
 import { getCurrentUser } from "../lib/serverFetch";
 import { Suspense } from "react";
 import NewsFeed from "./components/newsFeed";
+import NewFeedLoading from "./loading";
 export default async function Home() {
   const currentUser = await getCurrentUser()
   if (currentUser.status === 401) {
@@ -35,7 +35,7 @@ export default async function Home() {
           </h1>
         </header>
         <NewsNavBar />
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<NewFeedLoading/>}>
           <NewsFeed/>
         </Suspense>
       </main>

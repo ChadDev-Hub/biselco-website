@@ -59,8 +59,8 @@ export default function NavBar({ title }: Props) {
                                 loading="eager"
                                 src={user?.photo?? "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"}
                                 alt="svg"
-                                width={1}
-                                height={1}
+                                width={2}
+                                height={2}
                             />
                         </div>
                     </div>
