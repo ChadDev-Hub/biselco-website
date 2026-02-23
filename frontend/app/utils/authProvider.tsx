@@ -13,7 +13,7 @@ type User = {
     email: string;
     first_name: string;
     last_name: string;
-    role: string;
+    role: string[];
     photo: string;
 }
 
@@ -25,6 +25,7 @@ type contextType = {
 const authContext = createContext<contextType | null>(null)
 const AuthProvider = ({children, initialUser}: Props) => {
     const [user, setUser] = useState<User | null>(initialUser)
+    console.log(user)
   return (
     <authContext.Provider value={{user, setUser}}>
         {children}

@@ -16,26 +16,27 @@ from ....modules.complaints import *
 from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
 from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
+from ....modules.user.schema.response_model import Token
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_user_complaints(user:dict = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
+async def get_user_complaints(user:Token = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    user_id = user.get("user_id")
+    user_id = user.user_id
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     complaint =  await user_complaints(session=session, user_id=user_id)
     return complaint
 
-
 #GET ALL COMPLAINTS
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_all_complaint(session:AsyncSession = Depends(get_session)):
+async def get_all_complaint(session:AsyncSession = Depends(get_session), user:Token = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     return await complaints(session=session)
-
 
 # GET ALL COMPLAINTS STATUS NAME
 @router.get("/status/name", status_code=status.HTTP_200_OK, response_model=list[ComplaintStatusName])
@@ -46,13 +47,13 @@ async def get_complaints_status_name(session:AsyncSession = Depends(get_session)
 # CREATE ALL COMPLAINTS ON SPECIFIC USER 
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
-    user:dict = Depends(get_current_user), 
+    user:Token = Depends(get_current_user), 
     session:AsyncSession = Depends(get_session), 
     form:CreateComplaints = Form()):
     # USER VERIFICATION
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    user_id = user.get("user_id")
+    user_id = user.user_id
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     current_user = await session.scalar(select(Users).where(Users.id == user_id))
@@ -107,10 +108,13 @@ async def create_complaints(
 
 # DELETE COMPLAINT
 @router.delete("/delete/{complaint_id}", status_code=status.HTTP_200_OK)
-async def delete_complaint(complaint_id:int, session:AsyncSession = Depends(get_session), user:dict = Depends(get_current_user)):
+async def delete_complaint(
+    complaint_id:int, 
+    session:AsyncSession = Depends(get_session), 
+    user:Token = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    user_id = user.get("user_id")
+    user_id = user.user_id
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     try:
@@ -159,14 +163,15 @@ async def update_complaint_status(
     complaint_id:int,
     data:ComplaintsStatus = Body(),
     session:AsyncSession = Depends(get_session),
-    user:dict = Depends(get_current_user)):
+    user:Token = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
     # CLIENT
     user_id = data.user_id
+    user_role = user.role
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
-    if user.get("role") != "admin":
+    if "admin" not in user_role:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
@@ -218,11 +223,11 @@ async def delete_complaint_status(
     complaint_id:int,
     session:AsyncSession = Depends(get_session), 
     data:ComplaintsStatus = Body(),
-    user:dict = Depends(get_current_user),
+    user:Token = Depends(get_current_user),
     ):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    if user.get("role") != "admin":
+    if "admin" not in user.role:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()

@@ -11,7 +11,7 @@ interface Props {
 
 export default function LoginModal({ baseurl }: Props) {
     const router = useRouter()
-    const {user, setUser} = useAuth()
+    const { setUser } = useAuth()
     const [loginMessage, setLoginMessage] = useState({
         message: "",
         alert_style: "",
@@ -40,14 +40,14 @@ export default function LoginModal({ baseurl }: Props) {
 
         // Get Current User After Successfull Login
         const user = await getCurrentUser()
-        if (user.status === 401){
+        if (user.status === 401) {
             setUser(null)
         }
         if (user.status === 200) {
             setUser(user.detail)
         }
         router.push("/")
-        
+
     }
 
     useEffect(() => {
@@ -171,7 +171,9 @@ export default function LoginModal({ baseurl }: Props) {
                     <hr className='bg-gray-400/20' />
                     <h3 className='font-bold text-blue-800'>OR</h3>
                     <hr />
-                    <GoogleLoginButton/>
+                    <div className='rounded-full overflow-hidden flex items-center justify-center'>
+                        <GoogleLoginButton />
+                    </div>
                 </div>
             </dialog>
         </>

@@ -2,9 +2,9 @@
 
 import React, {Suspense} from 'react'
 import ComplaintsFeed from './components/complaintsFeed'
-import { ComplaintsDashboardRouteButton} from '../common/buttons/complaints'
+import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
-import FabIcon from '../common/Fab'
+import FabIcon from '@/app/common/Fab'
 const ComplaintsPage = async () => {
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">

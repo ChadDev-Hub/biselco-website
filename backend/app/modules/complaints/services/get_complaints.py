@@ -99,7 +99,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
 
 
 # GET COMPLAINTS FOR SPECIFIC USER
-async def user_complaints(session:AsyncSession, user_id:int):
+async def user_complaints(session:AsyncSession, user_id:UUID):
     complaints = (await session.execute(
         select(Complaints)
         .options(selectinload(Complaints.status_updates)

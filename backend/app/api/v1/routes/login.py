@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Depends, HTTPException, status, Response, Request, Body
 from fastapi.exceptions import ResponseValidationError
 from fastapi import Response
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from ....dependencies.db_session import get_session
 from ....modules.user import Users, Roles
@@ -20,13 +20,14 @@ from ....core.security import verify_google_login
 from ....core.security import verify_token
 from ....modules.user.schema.requests_model import GoogleLogin
 from ....modules.user.schema.requests_model import RefreshToken, AccessToken
+from ....modules.user.schema.response_model import Token
 import os
 
 
 router = APIRouter(prefix="/auth", tags=['Auth'])
 load_dotenv()
 
-
+ADMINLOGINSECRETKEY=os.getenv("ADMINLOGINSECRET")
 @router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
                                 response: Response,
@@ -97,13 +98,13 @@ async def refresh_token(token:RefreshToken, session:AsyncSession = Depends(get_s
 
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
-async def get_user(user:dict = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
+async def get_user(user:Token = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
     user_stmt = (await session.execute(
         select(Users)
         .options(selectinload(Users.roles))
-        .where(Users.id == user.get("user_id")))).scalar_one_or_none()
+        .where(Users.id == user.user_id))).scalar_one_or_none()
     if not user_stmt:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
     roles_name = [role.name for role in user_stmt.roles]
@@ -120,7 +121,7 @@ async def get_user(user:dict = Depends(get_current_user), session:AsyncSession =
 
 # GOOGLE LOGIN
 @router.post("/google")
-async def google_login(response:Response,data:GoogleLogin, session:AsyncSession = Depends(get_session)):
+async def google_login(response:Response, data:GoogleLogin, session:AsyncSession = Depends(get_session)):
     token = data.token
     if not token:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found")
@@ -153,9 +154,7 @@ async def google_login(response:Response,data:GoogleLogin, session:AsyncSession 
         await session.commit()
         await session.refresh(user, attribute_names=["roles"])
         
-    # IF USER EXISTS GET USER INFORMATION TO ENCODE TOKEN
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+    # IF USER EXISTS IN THE DATABASE
     roles = [role.name for role in user.roles]
     access_token_data = {
         "sub": "access_token",
@@ -191,3 +190,87 @@ async def google_login(response:Response,data:GoogleLogin, session:AsyncSession 
     return {
         "detail": "Login Success"
     }
+    
+# ADMIN GOOGLE LOGIN
+@router.post("/google/admin/{secret_key}", status_code=status.HTTP_201_CREATED)
+async def google_admin_login(
+    secret_key:str,
+    response:Response,
+    data:GoogleLogin, 
+    session:AsyncSession = Depends(get_session)):
+    if secret_key != ADMINLOGINSECRETKEY:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Secret Key")
+    token = data.token
+    if not token:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Google Credentials")
+    
+    verified_token = await verify_google_login(token)
+    if not verified_token:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token")
+    
+    # GET USER ROLE
+    admin_user  = (await session.execute(
+        select(Roles).where(Roles.name == "admin"))).scalar_one_or_none()
+    if not admin_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role Not Found")
+    
+    # Check If USER EXISTS IN THE DATABSE
+    user = (await session.execute(select(Users).where(Users.email == verified_token.get("email"))
+                                       .options(selectinload(Users.roles)))).scalar_one_or_none()
+    # IF USER DOES NOT EXISTS CREATE USER
+    if not user:
+        user = Users(
+            user_name=verified_token.get("username"),
+            first_name=verified_token.get("first_name"),
+            last_name=verified_token.get("last_name"),
+            email=verified_token.get("email"),
+            photo=verified_token.get("picture"),
+            roles= [admin_user]
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user, attribute_names=["roles"])
+    else:
+        user.roles.append(admin_user)
+        await session.commit()
+        await session.refresh(user, attribute_names=["roles"])
+
+    # GET USER USER TO ENCODE
+    roles = [role.name for role in user.roles]
+    access_token_data = {
+        "sub": "access_token",
+        "email" : user.email,
+        "user_id": str(user.id),
+        "role": roles}
+    
+    refresh_token_data = {
+        "sub": "refresh_token",
+        "email" : user.email,
+        "user_id": str(user.id),
+        "role": roles
+    }
+        
+    access_token = await create_access_token(data=access_token_data)
+    refresh_token = await create_refresh_token(data=refresh_token_data)
+    
+    response.set_cookie(key="refresh_token",
+                            value=refresh_token,
+                            expires=datetime.now(timezone.utc)+ timedelta(days=7),
+                            httponly=True,    
+                            secure=False,
+                            samesite="lax"
+                            )
+    
+    response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=60,
+            httponly=True,
+            secure=False,
+            samesite="lax")
+    return (
+        {
+            "detail": "Login Success"
+        }       
+    )
+    

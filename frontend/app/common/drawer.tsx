@@ -4,17 +4,18 @@ import NavBar from './navbar'
 import { usePathname } from 'next/navigation'
 import { ComplaintsRouteButton } from './buttons/complaints'
 import { HomeRouteButton } from './buttons/home'
-import LogoutButton from './logout'
 type Props = {
     children: React.ReactNode;
     baseurl?: string;
     title?: string
 }
 
-const Drawer = ({ children, baseurl, title }: Props) => {
+const Drawer = ({ children, title }: Props) => {
     const currentRoute = usePathname()
+    const visibleRoutes = ["/", "/complaints", "/complaints/dashboard"];
     const isActive = currentRoute === "/" ? "home"
         : currentRoute === "/complaints" ? "complaints" : "logout";
+
     return (
         <div className="drawer absolute z-40 lg:drawer-open">
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -26,7 +27,7 @@ const Drawer = ({ children, baseurl, title }: Props) => {
                     {children}
                 </div>
             </div>
-            <div className={`drawer-side is-drawer-close:overflow-visible mt-18 fixed ${currentRoute === "/landing" ? "hidden" : "visible"}`} >
+            <div className={`drawer-side is-drawer-close:overflow-visible mt-18 fixed ${visibleRoutes.includes(currentRoute)  ? "visible" : "hidden"}`} >
                 <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
                 <div className="flex min-h-full flex-col items-start bg-base-300/45 drop-shadow-2xl  is-drawer-close:w-14 backdrop-blur-sm is-drawer-open:w-64">
                     {/* Sidebar content here */}

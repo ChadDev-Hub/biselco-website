@@ -48,7 +48,7 @@ const ComplaintsRouteButton = ({ svgfill, strokeColor, orientation }: Props) => 
 
 
 const ComplaintsDashboardRouteButton = () => {
-    const {user, setUser} = useAuth()
+    const {user} = useAuth()
     const router = useRouter()
     const handleClick = () => {
         router.push("/complaints/dashboard")
@@ -59,7 +59,7 @@ const ComplaintsDashboardRouteButton = () => {
         aria-label='complaint dashboard' 
        
          type='button' 
-         className={`btn  btn-circle btn-lg ${user?.role === "mco"? "hidden": "visible"}`}>
+         className={`btn  btn-circle btn-lg ${user?.role.includes("admin") ? "visible": "hidden"}`}>
             <svg
                 fill="currentColor"
                 height={25}

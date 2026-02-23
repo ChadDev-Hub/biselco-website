@@ -16,7 +16,7 @@ class Token(BaseModel):
     sub:str
     email:str
     user_id:UUID
-    role:str
+    role:List[str]
     
 class AccessToken(BaseModel):
     access_token: str

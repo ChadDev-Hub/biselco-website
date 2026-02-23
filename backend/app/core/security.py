@@ -78,7 +78,7 @@ async def get_current_user(token:str = Depends(oauth2_scheme)):
             raise credential_exception
         if current_user.get("sub") != "access_token":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Token")
-        return current_user
+        return Token(**current_user)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Access token expired")
 

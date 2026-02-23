@@ -1,7 +1,7 @@
 "use server"
-import NewsNavBar from "./(protected)/components/newsNavBar";
-import { Suspense } from "react";
-import NewsFeed from "./(protected)/components/newsFeed";
+import NewsNavBar from "./components/newsNavBar";
+import { Suspense} from "react";
+import NewsFeed from "./components/newsFeed";
 import NewFeedLoading from "./loading";
 export default async function Home() {
   return (

@@ -20,7 +20,10 @@ export async function getCurrentUser() {
             error: data.detail
         }
     }
-    return data
+    return {
+        status: res.status,
+        detail: data
+    }
 };
 
 
