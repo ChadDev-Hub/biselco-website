@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
 import { PostNews } from '@/app/actions/news'
-import { useAlert } from '../common/alert'
+import { useAlert } from '@/app/common/alert'
 
 const PostImageModal = () => {
     const [uploadedImage, setUploadedImage] = useState<File[]>([])

@@ -195,11 +195,8 @@ async def update_complaint_status(
         
         
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        new_complaints_data = {
-            "detail": "complaints",
-            "data": new_status
-        }
-        await manager.broad_cast_personal_json(user_id=user_id, data=new_complaints_data)
+        if user_id not in admin_ids:
+            admin_ids.append(user_id)
         
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
@@ -249,14 +246,14 @@ async def delete_complaint_status(
         user_id = data.user_id
         new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
         
-        new_complaint_data = {
-            "detail": "complaints",
-            "data": new_status
-        }
-        await manager.broad_cast_personal_json(user_id=user_id, data=new_complaint_data)
+        # APPEND USER ID IF IT IS NOT IN ADMIN
+        if user_id not in admin_ids:
+            admin_ids.append(user_id)
+        
+        # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
             to_send = {
-                "detail": "complaints status",
+                "detail": "complaint_status",
                 "data": new_status,
             }
             await manager.broad_cast_personal_json(user_id=admin, data=to_send)

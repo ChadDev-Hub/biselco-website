@@ -1,14 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import Image from 'next/image'
-
-import Carousel from '../common/carousel';
-// const Carousel = dynamic(() => import("../../common/carousel"), {
-//   ssr: false,
-//   loading: () => (
-//     <div className="h-110 w-full bg-base-200 animate-pulse rounded-md" />
-//   ),
-// });
+import Carousel from '@/app/common/carousel'
 
 
 

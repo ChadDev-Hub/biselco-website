@@ -17,13 +17,10 @@ export async function getCurrentUser() {
     if (!res.ok){
         return { 
             status: res.status,
-            error: data
+            error: data.detail
         }
     }
-    return {
-        status: res.status,
-        detail: data
-    }
+    return data
 };
 
 
@@ -122,9 +119,6 @@ export async function UserComplaints() {
 
 // GET COMPLAINT STATUS NAME
 export async function ComplaintStatusName() {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get("access_token")?.value
-
     const res = await fetch(
         `${baseUrl}/v1/complaints/status/name`,
         {

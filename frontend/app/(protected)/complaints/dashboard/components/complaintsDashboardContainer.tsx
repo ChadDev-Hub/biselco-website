@@ -93,10 +93,10 @@ const ComplaintsContainer = ({
                             <td>{complaint.description}</td>
                             <td>{complaint.village}</td>
                             <td>{complaint.municipality}</td>
-                            <td>
+                            <td className='text-center'>
                                 <MapButton location={complaint.location} />
                             </td>
-                            <td>
+                            <td className='text-center'>
                                 <ComplaintStatusButton
                                     user_id={complaint.user_id}
                                     status={complaint.status}

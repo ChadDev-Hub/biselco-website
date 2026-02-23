@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { UpdateComplaintStatus, DeleteComplaintStatus  } from '@/app/actions/complaint'
-
+import { useAlert } from '@/app/common/alert'
 type Props = {
     user_id: number;
     name?: string;
@@ -10,34 +10,41 @@ type Props = {
     enabled?: boolean;
 }
 
-type AlertType = "error" | "success"
-type Alerts = {
-    type: AlertType,
-    message: string,
 
-}
 
 const EnableButton = ({ id, name, enabled, user_id }: Props) => {
     const [checked, setChecked] = useState(enabled);
+    const {showAlert} = useAlert();
+
+    // HAND TOGGLE UPDATE OF COMPLAINT STATUS
     const handleUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const check = event.target.checked
-        if (check) {
-            if (!id || !name) return
-            const res = await UpdateComplaintStatus(id, name, user_id)
-            if (res?.status === 401) {
-                setChecked(false)
-            } else {
-                setChecked(true)
-            }
-        } 
-        if (!check) {
-            if (!id || !name) return
-            const res = await DeleteComplaintStatus(id,name, user_id)
-            if (res?.status === 401) {
-                setChecked(true)
-            } else {
-                setChecked(false)
-            }
+        switch (check) {
+            case true:
+                if (!id || !name) return
+                const update = await UpdateComplaintStatus(id, name, user_id)
+                
+                if (update?.status === 401) {
+                    setChecked(false)
+                    showAlert('error', update.error)
+                } else {
+                    setChecked(true)
+                    showAlert('success', update?.data.detail)
+                }
+                break;
+            case false:
+                if (!id || !name) return
+                const del = await DeleteComplaintStatus(id, name, user_id)
+                if (del?.status === 401) {
+                    setChecked(true)
+                    showAlert('error', del.error)
+                } else {
+                    setChecked(false)
+                    showAlert('success', del?.data.detail)
+                }
+                break;
+            default:
+                break;
         }
     }
 

@@ -18,12 +18,8 @@ type status = {
     time: string;
 }
 
-type AlertType = "error" | "success"
-type Alerts = {
-    type: AlertType,
-    message: string,
 
-}
+
 const ComplaintStatusButton = ({ status, complaints_id, user_id }: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const complaintStatusName = ['Received', 'Pending', 'Working', 'Complete']

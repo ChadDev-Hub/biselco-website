@@ -1,5 +1,6 @@
 "use client"
 import React, {createContext, useState, useContext} from 'react'
+
 type Props = {
     children: React.ReactNode;
     initialUser: User | null
@@ -9,7 +10,9 @@ type Props = {
 type User = {
     user_id: number;
     user_name: string;
-    
+    email: string;
+    first_name: string;
+    last_name: string;
     role: string;
     photo: string;
 }

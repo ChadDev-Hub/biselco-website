@@ -2,7 +2,7 @@
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "../utils/authProvider"
-import LogoutButton from "./logout"
+import LogoutButton from "./auth-component/logout"
 interface Props {
     title?: string,
 

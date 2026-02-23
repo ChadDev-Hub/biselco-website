@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { DeleteNews } from '../actions/news'
-import { useAlert } from '../common/alert'
+import React, {  useRef } from 'react'
+import { DeleteNews } from '@/app/actions/news'
+import { useAlert } from '@/app/common/alert'
 type Props = {
     postId: number;
 }
