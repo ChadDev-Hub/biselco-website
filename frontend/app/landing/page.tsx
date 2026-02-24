@@ -1,8 +1,6 @@
 "use server"
 import { getLandingPageData } from "../../lib/serverFetch";
 import Hero from "./components/hero";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "../../lib/serverFetch";
 const Landing = async () => {
   const landingPageData = await getLandingPageData()
   return (

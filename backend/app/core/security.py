@@ -92,7 +92,7 @@ async def get_current_user_ws(websocket:WebSocket):
         return None
     try:
         paload = await verify_token(token)
-        if paload.get("sub") != "refresh_token":
+        if not paload:
             return None
         return Token(**paload)
     except jwt.PyJWTError:

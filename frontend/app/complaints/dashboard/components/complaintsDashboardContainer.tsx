@@ -1,12 +1,18 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import DashBoardTable from '../../../common/table'
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
+import { redirect } from 'next/navigation'
+
+type PromiseType = {
+    status?: number
+    data: Complaint[]}
+
 type Props = {
-    data: Complaint[]
+    data: Promise<PromiseType>
 }
 
 type Complaint = {
@@ -47,35 +53,46 @@ type status = {
 const ComplaintsContainer = ({
     data
 }: Props) => {
-    const [allComplaints, setallComplaints] = useState<Complaint[]>(data);
+    const complaintsIinitialData = use(data)
+    const [allComplaints, setallComplaints] = useState<Complaint[] | []>(()=>{
+        if (complaintsIinitialData.status === 401) {
+            redirect("/landing");
+        }
+        return complaintsIinitialData.data
+    });
+
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
             case "complaints":
+                queueMicrotask(() =>
                 setallComplaints((prev) => {
                     const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
                     return [message.data, ...existing_complaint];
-                });
+                }));
                 break;
             case "complaint_status":
+                queueMicrotask(() =>
                 setallComplaints((prev) => {
                      return prev.map((complaint) =>
                         complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
                     )
-                })
+                }))
                 break;
             case "deleted_complaint":
+                queueMicrotask(() =>
                 setallComplaints((prev) => {
                     return prev.filter((complaint) => complaint.id !== message.data.id);
-                });
+                }));
                 break;
             case "presence":
+                queueMicrotask(() =>
                 setallComplaints((prev) => {
                     return prev.map((complaint)=>
                         complaint.user_id === message.data.user_id ? {...complaint, ...message.data} : complaint
                     )
-                })
+                }))
                 break;
             default:
                 break;

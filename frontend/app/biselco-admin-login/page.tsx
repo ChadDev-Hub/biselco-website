@@ -1,6 +1,3 @@
-"use server"
-
-
 import React from 'react'
 import AdminLoginHeader from './components/header'
 import LoginForm from './components/loginform'

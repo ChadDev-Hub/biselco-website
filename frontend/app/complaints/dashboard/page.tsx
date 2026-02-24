@@ -1,10 +1,9 @@
-"use server"
 import React, {Suspense} from 'react'
 import Stats from '@/app/common/status'
-
-import DashBoardFeed from './components/complaintDashBoadFeed'
-
-const DashBoardPage = async() => {
+import { GetAllComplaints } from '@/lib/serverFetch'
+import ComplaintsContainer from './components/complaintsDashboardContainer'
+const DashBoardPage = () => {
+  const complaintsData = GetAllComplaints()
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -22,10 +21,10 @@ const DashBoardPage = async() => {
       md:mt-20
       lg:mt-20 
       pb-21">
-        <h1>Dashboard</h1>
+        <h1 className='text-5xl font-bold'>24 COMPLAINTS DASHBOARD</h1>
         <Stats/>
         <Suspense fallback={<div>Loading...</div>}>
-          <DashBoardFeed/>
+          <ComplaintsContainer data={complaintsData} />
         </Suspense>
         </main>
     </div>

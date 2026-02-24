@@ -57,10 +57,13 @@ export async function getNewsPage() {
     if (!res.ok){
         return { 
             status: res.status,
-            error: data.detail
+            data: data.detail
         }
     }
-    return data
+    return {
+        status: res.status,
+        data: data
+    }
 }
 
 
@@ -82,7 +85,7 @@ export async function GetAllComplaints() {
     if(!res.ok){
         return {
             status: res.status,
-            error: data.detail
+            data: data.detail
         }
     }
     return {
@@ -110,7 +113,7 @@ export async function UserComplaints() {
     if (!res.ok) {
         return {
             status: res.status,
-            error: data.detail
+            data: data.detail
         }
     }
     return {
@@ -132,9 +135,10 @@ export async function ComplaintStatusName() {
     if (!res.ok) {
         return {
             status: res.status,
-            error: data.detail
+            data: data.detail
         }
     }
+    
     return {
         status: res.status,
         data: data

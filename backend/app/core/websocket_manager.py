@@ -6,8 +6,8 @@ from uuid import UUID
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[UUID,WebSocket] = {}
-    async def connect(self, websocket: WebSocket, user_id:UUID):
+        self.active_connections: dict[str,WebSocket] = {}
+    async def connect(self, websocket: WebSocket, user_id:str):
         await websocket.accept()
         self.active_connections[user_id] = websocket
         await self.broadcastPresence(user_id, "online")
@@ -16,12 +16,12 @@ class ConnectionManager:
         self.active_connections.pop(user_id, None)
         asyncio.create_task(self.broadcastPresence(user_id, "offline"))
 
-    async def send_personal_message(self, message: str, user_id:UUID):
+    async def send_personal_message(self, message: str, user_id:str):
         websocket = self.active_connections.get(user_id)
         if websocket:
             await websocket.send_text(message)
             
-    async def broad_cast_personal_json(self, user_id:UUID, data:dict):
+    async def broad_cast_personal_json(self, user_id:str, data:dict):
         websocket = self.active_connections.get(user_id)
         if websocket:
             await websocket.send_json(data)
@@ -36,7 +36,7 @@ class ConnectionManager:
         for user_id in disconnected:
             self.disconnect(user_id)
     
-    async def broadcastPresence(self, user_id:UUID, status:str):
+    async def broadcastPresence(self, user_id:str, status:str):
         await self.broadcast({
             "detail": "presence",
             "data":{

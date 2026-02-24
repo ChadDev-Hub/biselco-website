@@ -1,13 +1,22 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/utils/websocketprovider'
-import { set } from 'ol/transform'
+import { redirect } from 'next/navigation'
 
+type PromiseType = {
+    status?: number;
+    data: Complaints[];
+}
+
+type ComplaintStatusType = {
+    status?: number;
+    data: []
+}
 
 type Props = {
-    complaintsData:Complaints[];
-    complaintsStatusName:[];
+    complaintsData:Promise<PromiseType>;
+    complaintsStatusName:Promise<ComplaintStatusType>;
     serverurl?:string;
 }
 
@@ -29,6 +38,8 @@ type Complaints = {
     status: [];
 }
 
+
+
 const ComplaintsContainer = (
     {
         complaintsData,
@@ -36,28 +47,41 @@ const ComplaintsContainer = (
         serverurl
     }:Props
 ) => {
-    const [complaints, setComplaints] = useState<Complaints[]>(complaintsData || []);
+    // DATA INITIALIZATION, STREAMING AND STATE MANAGEMENT
+    const complaintsInitialData = use(complaintsData)
+    const complaintsStatusNameInitialData = use(complaintsStatusName)
+    const [complaints, setComplaints] = useState<Complaints[]| []>(()=>{
+        if (complaintsInitialData.status === 401) {
+            redirect('/landing')
+        }
+        return complaintsInitialData.data
+    });
+
+    // WEBSOCKET
     const message = useWebsocket();
-    
     useEffect(()=>{
         if (!message) return
         switch (message.detail) {
             case "complaints":
-                setComplaints((prev) => {
+                queueMicrotask(()=>
+                    setComplaints((prev) => {
                     const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);                   
-                    return [message.data, ...existing_complaint];});
+                    return [message.data, ...existing_complaint]})
+                )
                 break;
             case "complaint_status":
+                queueMicrotask(() =>
                     setComplaints((prev)=>{
                     return prev.map((complaint) => 
                         complaint.id === message.data.id? {...complaint, ...message.data} : complaint
                     )
-                })
+                }))
                 break;
             case "deleted_complaint":
-                setComplaints((prev)=>{
-                    return prev.filter((complaint) => complaint.id !== message.data.id);
-                })
+                queueMicrotask(()=>
+                     setComplaints((prev)=>{
+                    return prev.filter((complaint) => complaint.id !== message.data.id)
+                }))
                 break;
             default:
                 break;
@@ -67,7 +91,7 @@ const ComplaintsContainer = (
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
         setComplaints(updatedComplaints);
     };
-    console.log(complaints)
+    
   return (
     <section className='flex flex-col gap-4 w-full items-center'>
          {complaints.map((complaint: Complaints) => (
@@ -77,11 +101,10 @@ const ComplaintsContainer = (
         subject={complaint.subject} 
         description={complaint.description}
         status={complaint.status}
-        complaintsStatusName={complaintsStatusName}
+        complaintsStatusName={complaintsStatusNameInitialData.data}
         serverurl={serverurl}
         deleteComplaint={handleDelete}/>
     ))}
-
     </section>
   )
 }

@@ -1,9 +1,11 @@
-"use server"
 import NewsNavBar from "./components/newsNavBar";
 import { Suspense} from "react";
-import NewsFeed from "./components/newsFeed";
+
 import NewFeedLoading from "./loading";
-export default async function Home() {
+import { getNewsPage } from "@/lib/serverFetch";
+import NewsFeedContainer from "./components/newsFeed";
+export default  function Home() {
+  const news = getNewsPage();
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -30,7 +32,7 @@ export default async function Home() {
         </header>
         <NewsNavBar />
         <Suspense fallback={<NewFeedLoading/>}>
-          <NewsFeed/>
+          <NewsFeedContainer initialData={news} />
         </Suspense>
       </main>
     </div>
