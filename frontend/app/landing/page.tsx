@@ -4,10 +4,6 @@ import Hero from "./components/hero";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../../lib/serverFetch";
 const Landing = async () => {
-  const user = await getCurrentUser()
-  if (user.status  === 200){
-    redirect("/")
-  }
   const landingPageData = await getLandingPageData()
   return (
     <div className="bg-base-100 text-base-content min-h-screen font-sans">

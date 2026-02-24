@@ -16,6 +16,7 @@ type Complaints = {
     user_id : number;
     first_name:string;
     last_name:string;
+    user_photo:string;
     subject: string;
     description: string;
     village: string; 
@@ -52,6 +53,7 @@ const ComplaintsContainer = (
                         complaint.id === message.data.id? {...complaint, ...message.data} : complaint
                     )
                 })
+                break;
             case "deleted_complaint":
                 setComplaints((prev)=>{
                     return prev.filter((complaint) => complaint.id !== message.data.id);
@@ -65,6 +67,7 @@ const ComplaintsContainer = (
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
         setComplaints(updatedComplaints);
     };
+    console.log(complaints)
   return (
     <section className='flex flex-col gap-4 w-full items-center'>
          {complaints.map((complaint: Complaints) => (

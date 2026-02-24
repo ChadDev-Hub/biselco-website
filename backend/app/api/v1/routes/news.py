@@ -12,6 +12,7 @@ from ....dependencies.time_ago import TimeAgo
 from ....core.websocket_manager import manager
 from datetime import datetime
 from ....modules.news.schema.response_model import NewsModel, UserModel
+from ....modules.user.schema.response_model import Token
 import json
 from typing import List
 router = APIRouter(prefix="/news", tags=["News"])
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/news", tags=["News"])
 
 
 @router.get("/", response_model=List[NewsModel])
-async def get_news(current_user = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
+async def get_news(current_user:Token = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
     """
     Get all news posts
     
@@ -56,7 +57,7 @@ async def get_news(current_user = Depends(get_current_user),session:AsyncSession
     ]
 
 @router.post("/create", status_code=status.HTTP_201_CREATED )
-async def create_news(current_user:dict = Depends(get_current_user), session:AsyncSession = Depends(get_session),formNews:CreateNews = Form()):
+async def create_news(current_user:Token = Depends(get_current_user), session:AsyncSession = Depends(get_session),formNews:CreateNews = Form()):
     """
     Create a new News post
     
@@ -68,8 +69,8 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     Returns:
     dict: A dictionary with a detail key containing a message indicating whether the creation was successful
     """
-    user_id = current_user.get("user_id")
-    user = await session.scalar(select(Users).where(Users.id == user_id))
+    user_id = current_user.user_id
+    user = await session.scalar(select(Users).where(Users.id == str(user_id)))
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     now = datetime.now()
@@ -109,7 +110,7 @@ async def create_news(current_user:dict = Depends(get_current_user), session:Asy
     }
 
 @router.delete("/delete/{post_id}", status_code=status.HTTP_200_OK)
-async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), current_user:dict = Depends(get_current_user)):
+async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), current_user:Token = Depends(get_current_user)):
     """
     Delete a Post with a given post_id
     

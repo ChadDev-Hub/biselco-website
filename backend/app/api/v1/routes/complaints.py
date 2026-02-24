@@ -95,9 +95,9 @@ async def create_complaints(
     # SEND TO ADMIN AND SPECIFIC  CLIENT
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-    admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
-    if user_id not in admin_ids or not admin_ids:
-        admin_ids.append(user_id)   
+    admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
+    if str(user_id) not in admin_ids:
+        admin_ids.append(str(user_id))  
     for admin_id in admin_ids:
         await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
     await session.close()
@@ -141,10 +141,10 @@ async def delete_complaint(
         await session.commit()
         await session.close()
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+        admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
         
-        if user_id not in admin_ids:
-            admin_ids.append(user_id)
+        if str(user_id) not in admin_ids:
+            admin_ids.append(str(user_id))
         for admin in admin_ids:
             to_send = {
                 "detail": "deleted_complaints",
@@ -194,14 +194,12 @@ async def update_complaint_status(
         # SEND TO ADMIN AND TO SPECIFIC CLIENT 
         # ADMINS
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [user.id for  admin_user in  admins  for  user in admin_user.users]
+        admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
         new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
         
-        
-        
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if user_id not in admin_ids:
-            admin_ids.append(user_id)
+        if str(user_id) not in admin_ids:
+            admin_ids.append(str(user_id))
         
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
@@ -247,13 +245,13 @@ async def delete_complaint_status(
         
         # BROADCAST
         admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [user.id for  admin_user in  admin  for  user in admin_user.users]
+        admin_ids = [str(user.id) for  admin_user in  admin  for  user in admin_user.users]
         user_id = data.user_id
         new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
         
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if user_id not in admin_ids:
-            admin_ids.append(user_id)
+        if str(user_id) not in admin_ids:
+            admin_ids.append(str(user_id))
         
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:

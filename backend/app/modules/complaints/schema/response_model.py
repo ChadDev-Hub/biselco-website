@@ -20,6 +20,7 @@ class ComplaintsModel(BaseModel):
     user_id: str
     first_name: str
     last_name: str
+    user_photo:str
     subject: str
     description: str
     village: str

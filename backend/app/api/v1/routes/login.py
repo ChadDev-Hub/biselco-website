@@ -5,9 +5,9 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from ....dependencies.db_session import get_session
 from ....modules.user import Users, Roles
+from sqlalchemy.exc import IntegrityError
 from ....modules.user.schema.requests_model import LoginUser
 from datetime import timedelta, datetime, timezone
-import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi.security import OAuth2PasswordRequestForm
 from ....core.authentication import authenticate_user
@@ -28,6 +28,7 @@ router = APIRouter(prefix="/auth", tags=['Auth'])
 load_dotenv()
 
 ADMINLOGINSECRETKEY=os.getenv("ADMINLOGINSECRET")
+
 @router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
                                 response: Response,
@@ -198,6 +199,7 @@ async def google_admin_login(
     response:Response,
     data:GoogleLogin, 
     session:AsyncSession = Depends(get_session)):
+    print(ADMINLOGINSECRETKEY)
     if secret_key != ADMINLOGINSECRETKEY:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Secret Key")
     token = data.token
@@ -231,9 +233,11 @@ async def google_admin_login(
         await session.commit()
         await session.refresh(user, attribute_names=["roles"])
     else:
-        user.roles.append(admin_user)
-        await session.commit()
-        await session.refresh(user, attribute_names=["roles"])
+        if admin_user not in user.roles:
+            user.roles.append(admin_user)
+            await session.commit()
+            await session.refresh(user, attribute_names=["roles"])
+     
 
     # GET USER USER TO ENCODE
     roles = [role.name for role in user.roles]

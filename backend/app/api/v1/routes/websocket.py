@@ -9,11 +9,11 @@ async def websocket_endpoint(websocket: WebSocket):
     if not user:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
-    await manager.connect(websocket=websocket, user_id=user['user_id']) 
+    await manager.connect(websocket=websocket, user_id=str(user.user_id)) 
     try:
         while True:
             json = await websocket.receive_json()
     except WebSocketDisconnect:
-        manager.disconnect(user['user_id'])
+        manager.disconnect(user_id=str(user.user_id))
     
     

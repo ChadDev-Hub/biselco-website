@@ -91,15 +91,10 @@ async def get_current_user_ws(websocket:WebSocket):
     if not token:
         return None
     try:
-        paload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
+        paload = await verify_token(token)
         if paload.get("sub") != "refresh_token":
             return None
-        return {
-            "sub": paload.get("sub"),
-            "email": paload.get("email"),
-            "user_id": paload.get("user_id"),
-            "role": paload.get("role")
-        }
+        return Token(**paload)
     except jwt.PyJWTError:
         return None
     
@@ -113,7 +108,6 @@ async def verify_google_login(token:str):
     first_name = idinfo["given_name"]
     last_name = idinfo["family_name"]
     pricture = idinfo['picture']
-    print(idinfo)
     return {
         "username": f"BIS{username}",
         "email": email,

@@ -21,6 +21,14 @@ type WSMessage = {
 } | {
   detail: "deleted_complaint";
   data: ComplaintData;
+} | {
+  detail: "presence";
+  data: UserPresence;
+}
+
+type UserPresence = {
+  "user_id": number;
+  "user_status": string;
 }
 
 type NewsData = {
@@ -45,10 +53,12 @@ type ComplaintData = {
     user_id : number;
     first_name:string;
     last_name:string;
+    user_photo:string;
     subject: string;
     description: string;
     village: string; 
     municipality: string;
+    user_status?:string;
     location: {
         latitude: number;
         longitude: number;
@@ -90,7 +100,6 @@ const WebsocketProvider = ({children}: Props) => {
        ws.onclose = (event) => {
         
         if (!isMounted) return
-        console.log(event)
         // Exponential backoff (max 10s)
         const timeout = Math.min(1000 * 2 ** reconnectAttempts.current, 10000)
         reconnectAttempts.current += 1

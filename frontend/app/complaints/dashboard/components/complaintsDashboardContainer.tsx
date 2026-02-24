@@ -4,22 +4,25 @@ import DashBoardTable from '../../../common/table'
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
-
+import Image from 'next/image'
 type Props = {
     data: Complaint[]
 }
 
 type Complaint = {
     id: number;
-    user_id : number;
-    first_name:string;
-    last_name:string;
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    user_photo: string;
     subject: string;
     description: string;
     village: string;
     municipality: string;
     location: Location;
-    status: status[]
+    status: status[];
+    user_status?: string;
+
 }
 
 type Location = {
@@ -48,30 +51,44 @@ const ComplaintsContainer = ({
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
-        if (message.detail === "complaint_status") {
-            queueMicrotask(() => {
-                setallComplaints((prev) => {
-                    return prev.map((complaint) => 
-                        complaint.id === message.data.id? {...complaint, ...message.data} : complaint
-                    )
-                });
-            });
-        }
-        if (message.detail === "complaints") {
-            queueMicrotask(() => {
+        switch (message.detail) {
+            case "complaints":
                 setallComplaints((prev) => {
                     const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
                     return [message.data, ...existing_complaint];
                 });
-            });
+                break;
+            case "complaint_status":
+                setallComplaints((prev) => {
+                     return prev.map((complaint) =>
+                        complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
+                    )
+                })
+                break;
+            case "deleted_complaint":
+                setallComplaints((prev) => {
+                    return prev.filter((complaint) => complaint.id !== message.data.id);
+                });
+                break;
+            case "presence":
+                setallComplaints((prev) => {
+                    return prev.map((complaint)=>
+                        complaint.user_id === message.data.user_id ? {...complaint, ...message.data} : complaint
+                    )
+                })
+                break;
+            default:
+                break;
         }
     }, [message])
+    console.log(allComplaints)
     return (
         <>
             <DashBoardTable>
                 <thead className='text-md font-bold text-center text-yellow-400'>
                     <tr >
                         <th>id</th>
+                        <th>Profile</th>
                         <th>First Name</th>
                         <th>Last Name</th>
                         <td>Subject</td>
@@ -87,6 +104,19 @@ const ComplaintsContainer = ({
                     {allComplaints.map((complaint) => (
                         <tr key={complaint.id}>
                             <th>{complaint.id}</th>
+                            <td>
+                                <div className={`avatar avatar-${complaint.user_status}`}>
+                                    <div className='w-8'>
+                                        <Image
+                                            src={complaint.user_photo}
+                                            alt="User Photo"
+                                            width={50}
+                                            height={50}
+                                            className="rounded-full"
+                                        />
+                                    </div>
+                                </div>
+                            </td>
                             <td>{complaint.first_name}</td>
                             <td>{complaint.last_name}</td>
                             <td>{complaint.subject}</td>
@@ -103,7 +133,7 @@ const ComplaintsContainer = ({
                                     complaints_id={complaint.id} />
                             </td>
                             <td className='animate-pulse text-green-500 font-bold'>{
-                            complaint.status.find((stats)=> stats.status_id === Math.max(...complaint.status.map((stats)=> stats.status_id)))?.name
+                                complaint.status.find((stats) => stats.status_id === Math.max(...complaint.status.map((stats) => stats.status_id)))?.name
                             }</td>
                         </tr>
                     ))}

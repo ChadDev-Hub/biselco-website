@@ -1,5 +1,6 @@
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi import Response
+import asyncio
 from uuid import UUID
 
 
@@ -9,9 +10,11 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket, user_id:UUID):
         await websocket.accept()
         self.active_connections[user_id] = websocket
+        await self.broadcastPresence(user_id, "online")
 
     def disconnect(self, user_id):
         self.active_connections.pop(user_id, None)
+        asyncio.create_task(self.broadcastPresence(user_id, "offline"))
 
     async def send_personal_message(self, message: str, user_id:UUID):
         websocket = self.active_connections.get(user_id)
@@ -33,6 +36,13 @@ class ConnectionManager:
         for user_id in disconnected:
             self.disconnect(user_id)
     
-    
+    async def broadcastPresence(self, user_id:UUID, status:str):
+        await self.broadcast({
+            "detail": "presence",
+            "data":{
+                "user_id": str(user_id),
+                "user_status": status
+            }
+        })
             
 manager = ConnectionManager()
