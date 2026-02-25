@@ -26,6 +26,7 @@ class ComplaintsModel(BaseModel):
     village: str
     municipality: str
     location: Location
+    date_time_submitted: str
     status: list[ComplaintStatus]
 
 

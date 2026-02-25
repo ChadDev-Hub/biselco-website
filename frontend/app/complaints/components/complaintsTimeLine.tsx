@@ -31,9 +31,9 @@ const ComplaintsTimeLine = ({ data, status }: Props) => {
                 <li key={item.id}>
                     {item.id % 2 === 0 ? (
                         <div className={`timeline-end timeline-box   ${statuslist?.includes(item.status_name) ? "bg-base-100 drop-shadow-2xl" : "bg-base-100/10"}`}>
-                            <h2 className={`text-md lg:text-lg text-shadow-2xs font-bold ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            <h2 className={`text-md lg:text-lg text-shadow-2xs flex flex-col font-bold ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
-                                <span className="text-gray-400/45 text-[0.60rem] italic "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>
+                                {statuslist?.includes(item.status_name) && <span className="text-green-500 animate-pulse  text-[0.60rem] italic "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>}
                             </h2>
                             <hr className={`${statuslist?.includes(item.status_name) ? "" : "bg-transparent"}`}/>
                             <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
@@ -44,7 +44,7 @@ const ComplaintsTimeLine = ({ data, status }: Props) => {
                         <div className={`timeline-start timeline-box ${statuslist?.includes(item.status_name) ? "bg-base-100  drop-shadow-2xl" : "bg-base-100/10"}`}>
                             <h2 className={`text-md lg:text-lg text-shadow-2xs flex flex-col font-bold ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
-                                <span className="text-gray-400/45 text-[0.60rem] italic "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>
+                                {statuslist?.includes(item.status_name) && <span className="text-green-500 text-[0.60rem] italic animate-pulse "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>}
                             </h2>
                             <hr className={`${statuslist?.includes(item.status_name) ? "" : "bg-transparent"}`}/>
                             <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>

@@ -37,6 +37,7 @@ type NewsData = {
     date_posted: string;
     description: string;
     time_posted: string;
+
     period: string;
     user: {
         id: number;
@@ -56,6 +57,7 @@ type ComplaintData = {
     user_photo:string;
     subject: string;
     description: string;
+    date_time_submitted: string;
     village: string; 
     municipality: string;
     user_status?:string;
@@ -98,7 +100,7 @@ const WebsocketProvider = ({children}: Props) => {
 
 
        ws.onclose = (event) => {
-        
+        console.log("WS Closed", event)
         if (!isMounted) return
         // Exponential backoff (max 10s)
         const timeout = Math.min(1000 * 2 ** reconnectAttempts.current, 10000)

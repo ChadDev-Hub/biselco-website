@@ -28,6 +28,7 @@ type Complaints = {
     user_photo:string;
     subject: string;
     description: string;
+    date_time_submitted: string;
     village: string; 
     municipality: string;
     location: {
@@ -101,6 +102,7 @@ const ComplaintsContainer = (
         subject={complaint.subject} 
         description={complaint.description}
         status={complaint.status}
+        date_time_submitted={complaint.date_time_submitted}
         complaintsStatusName={complaintsStatusNameInitialData.data}
         serverurl={serverurl}
         deleteComplaint={handleDelete}/>

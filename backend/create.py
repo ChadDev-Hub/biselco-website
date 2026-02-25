@@ -8,6 +8,9 @@ from app.modules.user import *
 from app.modules.complaints import *
 from app.modules.news import *
 from app.modules.meters import *
+from app.modules.departments import *
+from app.modules.forms import *
+from app.modules.technical import *
 async def create_permission_and_rules():
     roles_permission= {
         "admin": ["view:all", "create:all", "delete:all", "post:all"],

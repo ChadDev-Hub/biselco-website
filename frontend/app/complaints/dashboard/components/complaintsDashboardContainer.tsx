@@ -23,6 +23,7 @@ type Complaint = {
     user_photo: string;
     subject: string;
     description: string;
+    date_time_submitted: string;
     village: string;
     municipality: string;
     location: Location;
@@ -108,6 +109,7 @@ const ComplaintsContainer = ({
                         <th>Profile</th>
                         <th>First Name</th>
                         <th>Last Name</th>
+                        <th>Submitted At</th>
                         <td>Subject</td>
                         <td>Description</td>
                         <td>Village</td>
@@ -118,9 +120,9 @@ const ComplaintsContainer = ({
                     </tr>
                 </thead>
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
-                    {allComplaints.map((complaint) => (
-                        <tr key={complaint.id}>
-                            <th>{complaint.id}</th>
+                    {allComplaints.map((complaint, index) => (
+                        <tr key={index}>
+                            <th>{index}</th>
                             <td>
                                 <div className={`avatar avatar-${complaint.user_status}`}>
                                     <div className='w-8'>
@@ -136,6 +138,7 @@ const ComplaintsContainer = ({
                             </td>
                             <td>{complaint.first_name}</td>
                             <td>{complaint.last_name}</td>
+                            <td>{complaint.date_time_submitted}</td>
                             <td>{complaint.subject}</td>
                             <td>{complaint.description}</td>
                             <td>{complaint.village}</td>

@@ -13,6 +13,7 @@ type Props = {
     subject: string;
     description: string;    
     status: status[];
+    date_time_submitted: string;
     complaintsStatusName:[];
     serverurl?: string;
     deleteComplaint: (id: number) => void;
@@ -26,11 +27,15 @@ type status = {
     time: string
 }
 
-const ComplaintsCard = ({ subject, description, complaintsStatusName, status,deleteComplaint, id }: Props) => {
+const ComplaintsCard = ({ subject, description, complaintsStatusName, status, deleteComplaint, id, date_time_submitted }: Props) => {
     return (
-        <div className="card card-sm bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl px-2 w-full ">
+        <div className="card card-sm bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl p-4 w-full ">
             <ComplaintCardHeader>
-                <h2 className='text-lg font-bold text-shadow-2xs'>{subject}</h2>
+                <div className='flex flex-col gap-2'>
+                    <h2 className='text-2xl font-extrabold text-shadow-2xs underline text-blue-800'>{subject}</h2>
+                    <p className='font-thin text-xs italic'><span className='font-bold'>Submitted At:</span> {date_time_submitted}</p>
+                </div>
+                
                 <Options deletecomplaint={
                     (onclose) => (
                     <DeletConfirmation 
@@ -43,7 +48,7 @@ const ComplaintsCard = ({ subject, description, complaintsStatusName, status,del
                 <p className='text-md'>{description}</p>
             </div>
             <hr className='bg-gray-400/20' />
-            <Accordion title='Show Complaint Status....'>
+            <Accordion title='Show Status Informations'>
                 <ComplaintsTimeLine
                     data={complaintsStatusName}
                     status={status}

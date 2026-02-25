@@ -6,7 +6,7 @@ import { ComplaintsRouteButton } from './buttons/complaints'
 import { HomeRouteButton } from './buttons/home'
 const DocNavigation = () => {
   const currentRoute = usePathname()
-  const visibleRoutes = ["/", "/complaints", "/complaints/dashboard"];
+  const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical"];
   const isActive = currentRoute === "/" ? "home"
     : currentRoute === "/complaints" ? "complaints" : "logout";
   return (

@@ -10,7 +10,7 @@ interface Props {
 
 export default function NavBar({ title }: Props) {
     const currentRouter = usePathname()
-    const visibleRoutes = ["/landing","/", "/complaints", "/complaints/dashboard"];
+    const visibleRoutes = ["/landing","/", "/complaints", "/complaints/dashboard", "/technical"];
     const {user} = useAuth()
     return (
         <div className={`navbar navbar-center  top-0 left-0 right-0 z-50 fixed md:fixed lg:fixed p-4 bg-base-200/45 backdrop-blur-sm ${visibleRoutes.includes(currentRouter) ? "visible": "hidden"}`}>
