@@ -1,4 +1,4 @@
-from model.departments import Departments
+from .model.departments import Departments
 
 __all__ = [
     "Departments"
