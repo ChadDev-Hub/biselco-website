@@ -4,6 +4,7 @@ import NavBar from './navbar'
 import { usePathname } from 'next/navigation'
 import { ComplaintsRouteButton } from './buttons/complaints'
 import { HomeRouteButton } from './buttons/home'
+import TechnicalDepRouteButton from './buttons/technicalDep'
 type Props = {
     children: React.ReactNode;
     baseurl?: string;
@@ -14,7 +15,8 @@ const Drawer = ({ children, title }: Props) => {
     const currentRoute = usePathname()
     const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical"];
     const isActive = currentRoute === "/" ? "home"
-        : currentRoute === "/complaints" ? "complaints" : "logout";
+        : currentRoute === "/complaints" ? "complaints" 
+        : currentRoute === "/technical" ? "technical" : "";
 
     return (
         <div className="drawer absolute z-40 lg:drawer-open">
@@ -45,6 +47,13 @@ const Drawer = ({ children, title }: Props) => {
                             <ComplaintsRouteButton
                                 strokeColor={isActive === "complaints" ? "currentColor" : "currentColor"}
                                 svgfill={isActive === "complaints" ? "#D4F6FF" : "None"}
+                                orientation="flex flex-row"
+                            />
+                        </li>
+                        <li className='hidden md:block lg:block'>
+                            <TechnicalDepRouteButton
+                                strokeColor={isActive === "technical" ? "currentColor" : "currentColor"}
+                                svgfill={isActive === "technical" ? "#D4F6FF" : "None"}
                                 orientation="flex flex-row"
                             />
                         </li>

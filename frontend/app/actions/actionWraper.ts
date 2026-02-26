@@ -22,7 +22,7 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
         if (!refreshRes.ok) {
             return {
                 status: refreshRes.status,
-                error: reFreshData.detail
+                data: reFreshData.detail
             }
         }
         const newAccessToken = reFreshData.access_token
@@ -41,7 +41,7 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
         if (!res.ok) {
             return {
                 status: res.status,
-                error: data.detail
+                data: data.detail
             }
         }
         return {
@@ -64,7 +64,7 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
     if (!res.ok) {
         return {
             status: res.status,
-            error: data.detail
+            data: data.detail
         }
     }
     return {

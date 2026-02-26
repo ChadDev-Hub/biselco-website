@@ -7,7 +7,7 @@ const ThemeController = () => {
             if (typeof window == "undefined") {
                 return "cupcake"
             }
-            const current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "luxury" : "cupcake"
+            const current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "cupcake" : "cupcake"
             document.documentElement.setAttribute("data-theme", current)
             return current
         })

@@ -16,7 +16,7 @@ class NewConnection (BaseModel):
     __tablename__ = "new_connection"
     __table_args__ = {"schema": "technical_dep"}
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
-    form_id: Mapped[int] = mapped_column(ForeignKey("public.form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
+    form_id: Mapped[int] = mapped_column(ForeignKey("form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     times_tamped: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     date_accomplished: Mapped[date] = mapped_column(type_=Date, nullable=False)
     consumer_name: Mapped[str] = mapped_column(type_=Text, nullable=False)
@@ -31,14 +31,14 @@ class NewConnection (BaseModel):
     
     
     # Relationship
-    company_form: Mapped["CompanyForm"] = relationship(back_populates="new_connections")
+    form: Mapped["CompanyForm"] = relationship(back_populates="new_connections")
     images: Mapped[List["NewConnectionImage"]] = relationship(back_populates="new_connection", cascade="all, delete-orphan")
 
 class NewConnectionImage(BaseModel):
     __tablename__ = "new_connection_image"
     __table_args__ = {"schema": "technical_dep"}
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
-    new_connection_id: Mapped[int] = mapped_column(ForeignKey("public.new_connection.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
+    new_connection_id: Mapped[int] = mapped_column(ForeignKey("technical_dep.new_connection.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     image: Mapped[str] = mapped_column(type_=Text, nullable=False)
     
     # Relationship
@@ -50,7 +50,7 @@ class ChangeMeter(BaseModel):
     __tablename__ = "change_meter"
     __table_args__ = {"schema": "technical_dep"}
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
-    form_id: Mapped[int] = mapped_column(ForeignKey("public.form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
+    form_id: Mapped[int] = mapped_column(ForeignKey("form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     times_tamped: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     date_accomplished: Mapped[date] = mapped_column(type_=Date, nullable=False)
     consumer_name: Mapped[str] = mapped_column(type_=Text, nullable=False)
@@ -66,7 +66,7 @@ class ChangeMeter(BaseModel):
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))
     
     # Relationship
-    company_form: Mapped["CompanyForm"] = relationship(back_populates="change_meters")
+    form: Mapped["CompanyForm"] = relationship(back_populates="change_meters")
     images: Mapped[List["ChangeMeterImage"]] = relationship(back_populates="change_meter", cascade="all, delete-orphan")
     
 class ChangeMeterImage(BaseModel):

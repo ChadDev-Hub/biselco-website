@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .routes import complaints, landing, login, logout, meter, news, signup, websocket
+from .routes import complaints, landing, login, logout, meter, news, signup, websocket, user, technical_form
 
 
 
@@ -12,3 +12,5 @@ router.include_router(meter.router)
 router.include_router(news.router)
 router.include_router(signup.router)
 router.include_router(websocket.router)
+router.include_router(user.router)
+router.include_router(technical_form.router)
