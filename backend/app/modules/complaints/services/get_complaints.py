@@ -1,20 +1,36 @@
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.sql.operators import ilike_op
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, and_, desc, asc
+from sqlalchemy import select, and_, desc, or_
 from sqlalchemy.orm import selectinload
 from .. import *
+from ...user import Users
+from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
+from datetime import datetime
 from uuid import UUID
-async def complaints(session:AsyncSession):
-    complaints = (await session.execute(
-        select(Complaints)
-        .options(selectinload(Complaints.status_updates)
-                 .selectinload(ComplaintsStatusUpdates.status))
-        .options(selectinload(Complaints.user))
-        .order_by(desc(Complaints.time_stamped))
-    )).scalars().all()
+from typing import Optional
+import pytz
+
+async def complaints(session:AsyncSession, query:Optional[str]=None):
+    stmt = select(Complaints).join(Complaints.user).join(Complaints.status_updates).join(ComplaintsStatusUpdates.status)
+    stmt = stmt.options(selectinload(Complaints.status_updates)
+                        .selectinload(ComplaintsStatusUpdates.status)).options(selectinload(Complaints.user)).order_by(desc(Complaints.time_stamped)).distinct()
+    
+    if query:
+        stmt = stmt.where(or_(Complaints.subject.ilike(f"%{query}%"),
+                              Complaints.description.ilike(f"%{query}%"),
+                              Complaints.village.ilike(f"%{query}%"),
+                              Complaints.municipality.ilike(f"%{query}%"),
+                              Users.first_name.ilike(f"%{query}%"),
+                              Users.last_name.ilike(f"%{query}%"),
+                              Users.email.ilike(f"%{query}%"),
+                              ComplaintsStatusName.status_name.ilike(f"%{query}%"),
+                              )
+                          )
+    complaints = (await session.execute(stmt)).scalars().all()
     data = []
     for c in complaints:
         geom = Point(to_shape(c.location).coords)
@@ -36,7 +52,7 @@ async def complaints(session:AsyncSession):
             "user_photo": c.user.photo,
             "subject": c.subject,
             "description": c.description,
-            "date_time_submitted": c.time_stamped.strftime("%Y-%m-%d | %I:%M %p"),
+            "date_time_submitted": c.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
             "village": c.village,
             "municipality": c.municipality,
             "location": {
@@ -92,7 +108,7 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
              "user_photo" : n_complaint.user.photo,
             "subject" : n_complaint.subject,
             "description" : n_complaint.description,
-            "date_time_submitted": n_complaint.time_stamped.strftime("%Y-%m-%d | %I:%M %p"),
+            "date_time_submitted": n_complaint.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
             "village" : n_complaint.village,
             "municipality" : n_complaint.municipality,
             "location" : location,
@@ -134,7 +150,7 @@ async def user_complaints(session:AsyncSession, user_id:UUID):
                 "user_photo": c.user.photo,
                 "subject": c.subject,
                 "description": c.description,
-                "date_time_submitted": c.time_stamped.strftime("%Y-%m-%d | %I:%M %p"),
+                "date_time_submitted": c.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
                 "village": c.village,
                 "municipality": c.municipality,
                 "location": {
@@ -174,7 +190,7 @@ async def new_complaints_status(session:AsyncSession, complaint_id):
         "user_photo": new_complaint_status.user.photo,
         "subject": new_complaint_status.subject,
         "description": new_complaint_status.description,
-        "date_time_submitted": new_complaint_status.time_stamped.strftime("%Y-%m-%d | %I:%M %p"),
+        "date_time_submitted": new_complaint_status.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": new_complaint_status.village,
         "municipality": new_complaint_status.municipality,
         "location": {

@@ -6,13 +6,20 @@ import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
+import { Fascinate } from 'next/font/google'
+
+
+const fascinate = Fascinate({weight: '400',
+     subsets: ['latin'],
+    variable: '--font-fascinate'},
+    )
 
 type PromiseType = {
     status?: number
     data: Complaint[]}
 
 type Props = {
-    data: Promise<PromiseType>
+    data: Promise<PromiseType>;
 }
 
 type Complaint = {
@@ -50,17 +57,20 @@ type status = {
 
 
 
-
 const ComplaintsContainer = ({
     data
 }: Props) => {
     const complaintsIinitialData = use(data)
-    const [allComplaints, setallComplaints] = useState<Complaint[] | []>(()=>{
+    const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
+
+    // SET INITIAL DATA ON MOUNT
+    useEffect(() => {
         if (complaintsIinitialData.status === 401) {
             redirect("/landing");
         }
-        return complaintsIinitialData.data
-    });
+        queueMicrotask(() =>
+        setallComplaints(complaintsIinitialData.data));
+    }, [complaintsIinitialData]);
 
     const message = useWebsocket();
     useEffect(() => {
@@ -99,17 +109,17 @@ const ComplaintsContainer = ({
                 break;
         }
     }, [message])
-    console.log(allComplaints)
     return (
-        <>
+        <><fieldset className='fieldset rounded-box'>
+            <legend className={`fieldset-legend text-2xl text-shadow-md  font-bold  text-blue-800 ${fascinate.className}`}>Complaints Table</legend>
             <DashBoardTable>
                 <thead className='text-md font-bold text-center text-yellow-400'>
                     <tr >
                         <th>id</th>
-                        <th>Profile</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Submitted At</th>
+                        <td>Profile</td>
+                        <td>First Name</td>
+                        <td>Last Name</td>
+                        <td className='min-w-50'>Submitted At</td>
                         <td>Subject</td>
                         <td>Description</td>
                         <td>Village</td>
@@ -138,9 +148,9 @@ const ComplaintsContainer = ({
                             </td>
                             <td>{complaint.first_name}</td>
                             <td>{complaint.last_name}</td>
-                            <td>{complaint.date_time_submitted}</td>
-                            <td>{complaint.subject}</td>
-                            <td>{complaint.description}</td>
+                            <td >{complaint.date_time_submitted}</td>
+                            <td className='overflow-x-scroll'>{complaint.subject}</td>
+                            <td className='flex h-20  overflow-x-scroll'>{complaint.description}</td>
                             <td>{complaint.village}</td>
                             <td>{complaint.municipality}</td>
                             <td className='text-center'>
@@ -159,6 +169,8 @@ const ComplaintsContainer = ({
                     ))}
                 </tbody>
             </DashBoardTable>
+        </fieldset>
+            
 
         </>
 

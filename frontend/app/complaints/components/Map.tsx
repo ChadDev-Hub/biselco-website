@@ -11,6 +11,7 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import Style from 'ol/style/Style'
 import Icon from 'ol/style/Icon'
+import {Overlay} from 'ol'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { Geolocation } from 'ol'
 import { defaults as defaultControls } from 'ol/control'
@@ -28,7 +29,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
     const onSelectLocationRef = useRef(onSelectLocation)
     const geoLocationRef = useRef<Geolocation | null>(null)
     const userSourceRef = useRef<VectorSource | null>(null)
-
+    const PopupRef = useRef<HTMLDivElement>(null)
     // Initialize the map
     useEffect(() => {
         if (!mapDivRef.current || mapRef.current) return
@@ -75,6 +76,15 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 }),
             }),
         })
+        
+        // POPUP OVERLAY
+        const overlay = new Overlay({
+            element: PopupRef.current!,
+            autoPan: true,
+            offset : [-85, -50]
+            
+        })
+
 
         // CREATE NEW LAYER AND ADDING THE SOURCE
         // user layer
@@ -109,6 +119,8 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
             }),
             view:view,
         })
+
+        mapRef.current.addOverlay(overlay)
         // CREATE AN ACTION ON THE MAP FOR Pointing on the specific location
         mapRef.current.on('singleclick', (evt) => {
             const coord = evt.coordinate
@@ -119,6 +131,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 new Feature({ geometry: new Point(coord) })
             )
             onSelectLocationRef.current?.(lat, lon)
+            overlay.setPosition(coord)
         })
 
         // CREATE A COMPLAINT MARKER IF COORDINATES IS AVAILABLE
@@ -197,6 +210,9 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 </g>
             </svg>
         </button>
+        <div ref={PopupRef} className='animate-ping'>
+            <h1 className='font-bold text-blue-800'>Selected Complaints Location</h1>
+        </div>
     </div>
 }
 

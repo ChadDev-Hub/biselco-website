@@ -31,6 +31,7 @@ from app.modules.news import *
 from app.modules.departments import *
 from app.modules.forms import * 
 from app.modules.technical import *
+from app.modules.meters import *
 
 # target_metadata = mymodel.Base.metadata
 target_metadata = BaseModel.metadata

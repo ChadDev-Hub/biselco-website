@@ -15,13 +15,13 @@ const TechnicalDepRouteButton = ({strokeColor, svgfill, orientation}:Props) => {
         router.replace("/technical")
     }
     return (
-        <button onClick={handleClick} aria-label='Technical-department-Route' type='button' className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`}>
+        <button onClick={handleClick} aria-label='Technical-department-Route' type='button' data-tip="Navigate to Technical Department" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`}>
             <svg
                 fill={svgfill}
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
-                width={35}
-                height={35}
+                width={25}
+                height={25}
                 viewBox="-3.53 -3.53 39.11 39.11"
                 stroke={strokeColor}
                 strokeWidth={1}>

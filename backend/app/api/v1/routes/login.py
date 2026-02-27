@@ -154,6 +154,11 @@ async def google_login(response:Response, data:GoogleLogin, session:AsyncSession
         session.add(user)
         await session.commit()
         await session.refresh(user, attribute_names=["roles"])
+    else:
+        if mco_user not in user.roles:
+            user.roles.append(mco_user)
+            await session.commit()
+            await session.refresh(user, attribute_names=["roles"])
         
     # IF USER EXISTS IN THE DATABASE
     roles = [role.name for role in user.roles]

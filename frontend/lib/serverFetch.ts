@@ -69,16 +69,16 @@ export async function getNewsPage() {
 
 
 // GET ALL COMPLAINTS 
-export async function GetAllComplaints() {
+export async function GetAllComplaints(q?:string|number|boolean) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get("access_token")?.value
-
     const res = await fetch(
-        `${baseUrl}/v1/complaints/all`,{
+        `${baseUrl}/v1/complaints/all?q=${encodeURIComponent(q??"")}`,{
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${accessToken}`
-            }
+            },
+            cache: "no-store"
         }
     )
     const data = await res.json()
@@ -88,6 +88,7 @@ export async function GetAllComplaints() {
             data: data.detail
         }
     }
+    
     return {
         status: res.status,
         data: data

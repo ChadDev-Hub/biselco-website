@@ -46,7 +46,7 @@ const ComplaintsForm = () => {
             name='description' 
             title='Complaints Description' 
             placeholder='Your Complaints' 
-            className='input min-h-50 rounded-md w-full'>
+            className='textarea min-h-50 rounded-md w-full'>
             </textarea>
 
 

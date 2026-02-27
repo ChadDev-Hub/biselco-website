@@ -32,6 +32,10 @@ async def get_news(current_user:Token = Depends(get_current_user),session:AsyncS
     Returns:
     List[News]: A list of all news posts sorted by date posted in ascending order and time posted in descending order
     """
+    user = await session.scalar(select(Users).where(Users.id == str(current_user.user_id)))
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+    
     news = (await session.scalars(
         select(News)
         .options(selectinload(News.news_images))

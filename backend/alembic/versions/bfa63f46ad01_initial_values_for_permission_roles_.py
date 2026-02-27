@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.execute(
         """
     INSERT INTO roles (name)
-    VALUES ('admin), ('mco')
+    VALUES ('admin'), ('mco')
     ON CONFLICT (name) DO NOTHING;
     """)
 
@@ -31,8 +31,7 @@ def upgrade() -> None:
     op.execute(
         """
     INSERT INTO permissions (code)
-    VALUES 
-    ('view:all'), ('create:all'), ('delete:all'), ('post:all')
+    VALUES ('view:all'), ('create:all'), ('delete:all'), ('post:all'),
     ('view:news'), ('create:profile'), ('post:complaint'), ('delete:complaint')
     ON CONFLICT (code) DO NOTHING;
     """
@@ -41,24 +40,20 @@ def upgrade() -> None:
     # ADD ROLE AND PERMISSION RELATIONSHIPS
     op.execute(
         """
-        INSERT INTO roles_permission (role_id, permission_id)
-        VALUES (
-            (SELECT id FROM roles WHERE name = 'admin'),
-            (SELECT id FROM permissions WHERE code = 'view:all')),
-            ((SELECT id FROM roles WHERE name = 'admin'),
-            (SELECT id FROM permissions WHERE code = 'create:all')),
-            ((SELECT id FROM roles WHERE name = 'admin'),
-            (SELECT id FROM permissions WHERE code = 'delete:all')),
-            ((SELECT id FROM roles WHERE name = 'admin'),
-            (SELECT id FROM permissions WHERE code = 'post:all')),
-            ((SELECT id FROM roles WHERE name = 'mco'),
-            (SELECT id FROM permissions WHERE code = 'view:news')),
-            ((SELECT id FROM roles WHERE name = 'mco'),
-            (SELECT id FROM permissions WHERE code = 'create:profile')),
-            ((SELECT id FROM roles WHERE name = 'mco'),
-            (SELECT id FROM permissions WHERE code = 'post:complaint')),
-            ((SELECT id FROM roles WHERE name = 'mco'),
-            (SELECT id FROM permissions WHERE code = 'delete:complaint'));
+        INSERT INTO roles_permission (roles_id, perm_id)
+        SELECT r.id, p.id 
+        FROM ( VALUES 
+        ('admin','view:all'),
+        ('admin','create:all'),
+        ('admin','delete:all'),
+        ('admin','post:all'),
+        ('mco','view:news'),
+        ('mco','create:profile'),
+        ('mco','post:complaint'),
+        ('mco','delete:complaint')
+        ) AS t (role, permission)
+        JOIN roles r ON r.name = t.role
+        JOIN permissions p ON p.code = t.permission;
         """
     )
 
@@ -96,14 +91,30 @@ def upgrade() -> None:
     op.execute(
         """
         INSERT INTO FORM(department_id, form_name, form_description)
-        VALUE
-            ((SELECT id FROM departments WHERE name = 'TSD'), 'New Connection', 'Form for New Connection Accomplishments, Upload Photo Of the Current or New Meter Including Location Pinned on the map and Needed data for Reporting and Insights.'),
-            ((SELECT id FROM departments WHERE name = 'TSD'), 'Change Meter', 'Form for Change Meter Accomplishments, Upload Photo Of the Current or New Meter Including Location Pinned on then map and Needed data for Reporting and Insights.'),
-            ((SELECT id FROM departments WHERE name = 'TSD'), 'Construction Daily', 'Form for Construction Accomplishments Where They can Upload Photos of Their Works.')
-            ((SELECT id FROM departments WHERE name = 'TSD'), 'Maintenance Daily', 'Form for Maintenance Accomplishments Where They can Upload Photos of Their Works Daily.');
+        SELECT dep.id, t.form_name, t.form_description
+        FROM (
+            VALUES
+                ('TSD', 'New Connection', 'Form for New Connection Accomplishments, Upload Photo Of the Current or New Meter Including Location Pinned on the map and Needed data for Reporting and Insights.'),
+                ('TSD', 'Change Meter', 'Form for Change Meter Accomplishments, Upload Photo Of the Current or New Meter Including Location Pinned on then map and Needed data for Reporting and Insights.'),
+                ('TSD', 'Construction Daily', 'Form for Construction Accomplishments Where They can Upload Photos of Their Works.'),
+                ('TSD', 'Maintenance Daily', 'Form for Maintenance Accomplishments Where They can Upload Photos of Their Works Daily.')
+        ) AS t(dep_name, form_name, form_description)
+        JOIN departments dep ON dep.name = t.dep_name;
         """
     )
 
 def downgrade() -> None:
     """Downgrade schema."""
-    pass
+    
+    op.execute("DELETE FROM roles WHERE name IN ('admin', 'mco');")
+    op.execute("DELETE FROM roles_permission WHERE roles_id IN (SELECT id FROM roles WHERE name IN ('admin', 'mco'));")
+    op.execute("DELETE FROM permissions WHERE code IN ('view:all', 'create:all', 'delete:all', 'post:all', 'view:news', 'create:profile', 'post:complaint', 'delete:complaint');")
+    op.execute("DELETE FROM complaints_status_name WHERE status_name IN ('Received', 'Pending', 'Working', 'Complete');")
+    op.execute("DELETE FROM departments WHERE name IN ('OGM', 'FSD', 'ISD', 'TSD', 'ASD');")
+    op.execute("DELETE FROM FORM WHERE form_name IN ('New Connection', 'Change Meter', 'Construction Daily', 'Maintenance Daily');")
+    
+    op.execute("ALTER SEQUENCE roles_id_seq RESTART WITH 1;")
+    op.execute("ALTER SEQUENCE permissions_id_seq RESTART WITH 1;")
+    op.execute("ALTER SEQUENCE complaints_status_name_id_seq RESTART WITH 1;")
+    op.execute("ALTER SEQUENCE departments_id_seq RESTART WITH 1;")
+    op.execute("ALTER SEQUENCE form_id_seq RESTART WITH 1;")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket,Body
+from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket,Body, Query
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select, asc, desc, delete, and_
 from sqlalchemy.orm import selectinload
@@ -17,26 +17,29 @@ from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
 from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
 from ....modules.user.schema.response_model import Token
+from typing import Optional
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
 async def get_user_complaints(user:Token = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
+    current_user = (await session.execute(select(Users).where(Users.id == user.user_id))).scalar_one_or_none()
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
     user_id = user.user_id
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     complaint =  await user_complaints(session=session, user_id=user_id)
     return complaint
 
 #GET ALL COMPLAINTS
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_all_complaint(session:AsyncSession = Depends(get_session), user:Token = Depends(get_current_user)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    return await complaints(session=session)
+async def get_all_complaint(q:Optional[str] = Query(None), session:AsyncSession = Depends(get_session), user:Token = Depends(get_current_user)):
+    current_user = (await session.execute(select(Users).where(Users.id == user.user_id))).scalar_one_or_none()
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
+    return await complaints(session=session, query=q)
+
+
 
 # GET ALL COMPLAINTS STATUS NAME
 @router.get("/status/name", status_code=status.HTTP_200_OK, response_model=list[ComplaintStatusName])
