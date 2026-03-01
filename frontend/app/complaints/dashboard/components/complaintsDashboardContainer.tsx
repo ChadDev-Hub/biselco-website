@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { Fascinate } from 'next/font/google'
 import MessageDetailView from './messageDetailView'
-
+import TableSearch from './tableSearch'
 const fascinate = Fascinate({weight: '400',
      subsets: ['latin'],
     variable: '--font-fascinate'},
@@ -112,7 +112,12 @@ const ComplaintsContainer = ({
     }, [message])
     return (
         <><fieldset className='fieldset rounded-box'>
-            <legend className={`fieldset-legend text-2xl text-shadow-md  font-bold  text-blue-800 ${fascinate.className}`}>Complaints Table</legend>
+            <legend className={`fieldset-legend flex w-full`}>
+                <h3 className={`text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800 ${fascinate.className}`}>
+                    Complaints Table
+                </h3>
+                <TableSearch/>
+            </legend>
             <DashBoardTable>
                 <thead className='text-md font-bold text-center text-yellow-400'>
                     <tr >
@@ -150,7 +155,7 @@ const ComplaintsContainer = ({
                             <td>{complaint.first_name}</td>
                             <td>{complaint.last_name}</td>
                             <td >{complaint.date_time_submitted}</td>
-                            <td className='overflow-x-scroll'>{complaint.subject}</td>
+                            <td >{complaint.subject}</td>
                             <td className='flex justify-center'>
                                 <MessageDetailView complaintDescription={complaint.description}/>
                             </td>

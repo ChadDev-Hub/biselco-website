@@ -25,11 +25,7 @@ const DashBoardPage = ({searchParams}:{searchParams: Promise <{ [key: string]: s
       lg:mt-20 
       pb-21">
         <ComplaintDashBoardHeader/>
-        <Stats/>
-        <div className='flex w-full flex-col justify-center items-center'>
-          <TableSearch/>
-        </div>
-        
+        <Stats/>       
         <Suspense fallback={<div>Loading...</div>}>
           <ComplaintsContainer data={complaintsData} />
         </Suspense>

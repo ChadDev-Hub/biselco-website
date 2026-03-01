@@ -13,21 +13,21 @@ const TableSearch = () => {
     const query = searchParams.get('q') || '';
     const [input, setInput] = useState(query);
 
+    const [debouncedValue] = useDebounce(input, 500);
 
-    const [debounce] = useDebounce((value:string)=>{
-        router.push(`/complaints/dashboard?q=${value}`);
-        router.refresh();
-    },500);
-    
+    useEffect(()=>{
+        router.push(`/complaints/dashboard?q=${debouncedValue}`);
+    },[debouncedValue, router])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInput(value);
-        debounce(value);
     }
-
-    useEffect(() => {
-        if(!query) return
+    
+    useEffect(()=>{
+        if(query){
+            setInput(query);
+        }
     },[query])
   return (
     <input value={input} onChange={handleChange} type="text" className='input input-bordered w-full max-w-xs' placeholder='Search'/>

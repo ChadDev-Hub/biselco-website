@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react'
 
-import ComplaintMap from '../../components/complaintsMap'
+import ComplaintMap from './complaintsMap'
 type Props = {
     location: location;
 }

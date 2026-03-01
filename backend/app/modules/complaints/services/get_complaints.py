@@ -104,16 +104,26 @@ async def complaints(session:AsyncSession, query:Optional[str]=None):
 
 # NEW COMPLAINT
 async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
-    n_complaint = await session.scalar(
-    select(Complaints)
-    .options(
-        selectinload(Complaints.status_updates)
-        .selectinload(ComplaintsStatusUpdates.status)
-    )
-    .options(selectinload(Complaints.user))
-    .order_by(desc(Complaints.time_stamped))
-    .where(and_(Complaints.id == complaint_id, Complaints.user_id == user_id))
-    )
+
+    latest_status = (select(ComplaintsStatusUpdates.complaint_id,ComplaintsStatusName.status_name,
+                     func.row_number().over(
+                         partition_by=ComplaintsStatusUpdates.complaint_id,
+                         order_by=desc(ComplaintsStatusUpdates.status_id)
+                     ).label("rn")
+                     )
+                     .join(ComplaintsStatusName, ComplaintsStatusName.id == ComplaintsStatusUpdates.status_id)
+                     .where(ComplaintsStatusUpdates.complaint_id == complaint_id)
+                     .cte("latest_status"))
+    stmt = (select(Complaints, latest_status.c.status_name.label("latest_status"))
+            .join(latest_status, latest_status.c.complaint_id == Complaints.id)
+            .options(selectinload(Complaints.status_updates)
+                    .selectinload(ComplaintsStatusUpdates.status),
+                    selectinload(Complaints.user))
+            .where(latest_status.c.rn == 1)
+            )
+
+    row = (await(session.execute(stmt))).one_or_none()
+    n_complaint, l_status = row
     if not n_complaint:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
     # GET STATUS
@@ -150,7 +160,9 @@ async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
             "village" : n_complaint.village,
             "municipality" : n_complaint.municipality,
             "location" : location,
-            "status" : status_list}
+            "status" : status_list,
+            "latest_status" : l_status
+            }
 
     await session.close()
     return data
