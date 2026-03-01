@@ -1,8 +1,11 @@
 
 "use client"
 import React, { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useDebounce } from 'use-debounce';
+
+
+
 
 const TableSearch = () => {
     const router = useRouter();
@@ -12,9 +15,11 @@ const TableSearch = () => {
 
 
     const [debounce] = useDebounce((value:string)=>{
-        router.replace(`/complaints/dashboard?q=${value}`);
+        router.push(`/complaints/dashboard?q=${value}`);
+        router.refresh();
     },500);
     
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInput(value);

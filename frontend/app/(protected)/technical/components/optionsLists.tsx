@@ -1,8 +1,7 @@
 "use client"
-import React, { use, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import FormCard from './formCard'
-
-
+import { useRouter, usePathname } from 'next/navigation'
 type Props = {
     initialData: Promise<PromiseType | undefined>
 }
@@ -21,18 +20,29 @@ type TechnicalForms = {
 
 
 const TechniclaFormLists = ({ initialData }: Props) => {
+    const router = useRouter()
+    const currentPath = usePathname()
     const formsData = use(initialData)
-    const [forms, setForms] = useState<TechnicalForms[] | [] | undefined>(() => {
-        return formsData?.data
-    });
+    const [forms, setForms] = useState<TechnicalForms[] | [] | undefined>([]);
+
+    useEffect(() => {
+        queueMicrotask(() =>
+        setForms(formsData?.data));
+    },[formsData])
+
+    // HANDLE NAVIGATIONS
+    const handleNavigation = (formNavigate:string) => {
+        const destinationPath = formNavigate.replace(" ", "-").toLowerCase()
+        router.push(`${currentPath}/${destinationPath}`)
+    }
     return (
         <>
-            <div className='flex flex-wrap  gap-4 w-fit justify-self-start  items-center mx-4 sm:mx-4 md-mx-10 lg:mx-37'>
+            <div className='flex flex-wrap gap-4 w-fit justify-center  items-center mx-4 sm:mx-4 md-mx-20 lg:mx-35'>
                     {forms?.map((form: TechnicalForms) =>
                     (
                         <div key={form.id}>
                             <FormCard cardTitle={form.form_name} cardDescription={form.form_description}>
-                                <button type='button' className='btn neutral '>Submit Report</button>
+                                <button onClick={()=>handleNavigation(form.form_name)} type='button' className='btn neutral '>Submit Report</button>
                                 <button type='button' className='btn btn-primary'>View Data</button>
                             </FormCard>
                         </div>

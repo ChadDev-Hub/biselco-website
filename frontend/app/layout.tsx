@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -10,7 +11,7 @@ import { AuthProvider } from "./utils/authProvider";
 import { getCurrentUser } from "../lib/serverFetch";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import AlertComponent from "./common/alert";
-
+import "react-datepicker/dist/react-datepicker.css";
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",

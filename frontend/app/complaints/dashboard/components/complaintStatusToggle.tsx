@@ -26,7 +26,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
                 
                 if (update?.status === 401) {
                     setChecked(false)
-                    showAlert('error', update.error)
+                    showAlert('error', update.data.detail)
                 } else {
                     setChecked(true)
                     showAlert('success', update?.data.detail)
@@ -37,7 +37,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
                 const del = await DeleteComplaintStatus(id, name, user_id)
                 if (del?.status === 401) {
                     setChecked(true)
-                    showAlert('error', del.error)
+                    showAlert('error', del.data.detail)
                 } else {
                     setChecked(false)
                     showAlert('success', del?.data.detail)

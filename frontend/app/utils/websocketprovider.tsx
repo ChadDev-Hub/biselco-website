@@ -67,6 +67,7 @@ type ComplaintData = {
         srid: number;
     }
     status: [];
+    latest_status?: string
 
 }
 

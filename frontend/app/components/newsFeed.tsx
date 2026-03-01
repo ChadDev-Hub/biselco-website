@@ -34,7 +34,7 @@ type Props = {
 const NewsFeedContainer = ({ initialData }: Props) => {
     const NewsInitialData = use(initialData);
     const [NewsData, setNewsData] = useState<NewsData[] | []>(()=>{
-        if (NewsInitialData.status === 401) {
+        if (NewsInitialData.status === 404) {
             redirect("/landing")
         }
         return NewsInitialData.data

@@ -1,10 +1,11 @@
+'use client'
 import React from 'react'
 import ComplaintsTimeLine from './complaintsTimeLine'
 import ComplaintCardHeader from './complaintsCardHeader'
 import Accordion from '../../common/Accordion'
 import Options from '../../common/OptionsLists'
 import DeletConfirmation from './deleteComplaintsConfirmation'
-
+import ComplaintsCardBody from './complaintCardBody'
 
 
 
@@ -44,9 +45,7 @@ const ComplaintsCard = ({ subject, description, complaintsStatusName, status, de
                     complaintId={id}/>)
                     }/>
             </ComplaintCardHeader>
-            <div className="card-body">
-                <p className='text-md'>{description}</p>
-            </div>
+            <ComplaintsCardBody text={description} />
             <hr className='bg-gray-400/20' />
             <Accordion title='Show Status Informations'>
                 <ComplaintsTimeLine

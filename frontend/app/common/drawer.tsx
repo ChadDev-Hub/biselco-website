@@ -13,7 +13,7 @@ type Props = {
 
 const Drawer = ({ children, title }: Props) => {
     const currentRoute = usePathname()
-    const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical"];
+    const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical", "/technical/change-meter"];
     const isActive = currentRoute === "/" ? "home"
         : currentRoute === "/complaints" ? "complaints"
             : currentRoute === "/technical" ? "technical" : "";

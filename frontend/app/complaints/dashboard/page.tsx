@@ -6,7 +6,6 @@ import TableSearch from './components/tableSearch'
 import ComplaintDashBoardHeader from './components/header'
 const DashBoardPage = ({searchParams}:{searchParams: Promise <{ [key: string]: string}>}) => {
   const params = use(searchParams)
-  console.log(params.q)
   const complaintsData = GetAllComplaints(params.q)
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">

@@ -7,7 +7,7 @@ import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { Fascinate } from 'next/font/google'
-
+import MessageDetailView from './messageDetailView'
 
 const fascinate = Fascinate({weight: '400',
      subsets: ['latin'],
@@ -35,6 +35,7 @@ type Complaint = {
     municipality: string;
     location: Location;
     status: status[];
+    latest_status?: string;
     user_status?: string;
 
 }
@@ -120,7 +121,7 @@ const ComplaintsContainer = ({
                         <td>First Name</td>
                         <td>Last Name</td>
                         <td className='min-w-50'>Submitted At</td>
-                        <td>Subject</td>
+                        <td className='min-w-20'>Subject</td>
                         <td>Description</td>
                         <td>Village</td>
                         <td>Municipalit</td>
@@ -132,7 +133,7 @@ const ComplaintsContainer = ({
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
                     {allComplaints.map((complaint, index) => (
                         <tr key={index}>
-                            <th>{index}</th>
+                            <th className='z-10'>{index}</th>
                             <td>
                                 <div className={`avatar avatar-${complaint.user_status}`}>
                                     <div className='w-8'>
@@ -150,10 +151,12 @@ const ComplaintsContainer = ({
                             <td>{complaint.last_name}</td>
                             <td >{complaint.date_time_submitted}</td>
                             <td className='overflow-x-scroll'>{complaint.subject}</td>
-                            <td className='flex h-20  overflow-x-scroll'>{complaint.description}</td>
+                            <td className='flex justify-center'>
+                                <MessageDetailView complaintDescription={complaint.description}/>
+                            </td>
                             <td>{complaint.village}</td>
                             <td>{complaint.municipality}</td>
-                            <td className='text-center'>
+                            <td align='center'>
                                 <MapButton location={complaint.location} />
                             </td>
                             <td className='text-center'>
@@ -162,8 +165,8 @@ const ComplaintsContainer = ({
                                     status={complaint.status}
                                     complaints_id={complaint.id} />
                             </td>
-                            <td className='animate-pulse text-green-500 font-bold'>{
-                                complaint.status.find((stats) => stats.status_id === Math.max(...complaint.status.map((stats) => stats.status_id)))?.name
+                            <td className='animate-pulse text-red-700 drop-shadow-md drop-shadow-amber-900 font-bold'>{
+                                complaint.latest_status
                             }</td>
                         </tr>
                     ))}

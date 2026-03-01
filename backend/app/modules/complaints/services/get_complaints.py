@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.operators import ilike_op
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, and_, desc, or_
+from sqlalchemy import select, and_, desc, or_, func, cast, Text, Date, Time
 from sqlalchemy.orm import selectinload
 from .. import *
 from ...user import Users
@@ -15,26 +15,59 @@ from typing import Optional
 import pytz
 
 async def complaints(session:AsyncSession, query:Optional[str]=None):
-    stmt = select(Complaints).join(Complaints.user).join(Complaints.status_updates).join(ComplaintsStatusUpdates.status)
-    stmt = stmt.options(selectinload(Complaints.status_updates)
-                        .selectinload(ComplaintsStatusUpdates.status)).options(selectinload(Complaints.user)).order_by(desc(Complaints.time_stamped)).distinct()
-    
+    status_cte = (
+    select(
+        ComplaintsStatusUpdates.complaint_id,
+        ComplaintsStatusName.status_name,
+        func.row_number().over(
+                partition_by=ComplaintsStatusUpdates.complaint_id,
+                order_by=desc(ComplaintsStatusUpdates.status_id)
+            ).label("rn")
+        )
+        .join(
+            ComplaintsStatusName,
+            ComplaintsStatusName.id == ComplaintsStatusUpdates.status_id
+        )
+        .cte("status_cte")
+    )
+
+    stmt = (
+        select(
+            Complaints,
+            status_cte.c.status_name.label("latest_status")
+        )
+        .join(
+            status_cte,
+            status_cte.c.complaint_id == Complaints.id
+        )
+        .join(
+            Users,
+            Users.id == Complaints.user_id
+        )
+        .options(
+            selectinload(Complaints.status_updates)
+            .selectinload(ComplaintsStatusUpdates.status),
+            selectinload(Complaints.user)
+        )
+        .where(status_cte.c.rn == 1)
+        .order_by(Complaints.id.desc())
+    )
     if query:
-        stmt = stmt.where(or_(Complaints.subject.ilike(f"%{query}%"),
-                              Complaints.description.ilike(f"%{query}%"),
-                              Complaints.village.ilike(f"%{query}%"),
-                              Complaints.municipality.ilike(f"%{query}%"),
-                              Users.first_name.ilike(f"%{query}%"),
-                              Users.last_name.ilike(f"%{query}%"),
-                              Users.email.ilike(f"%{query}%"),
-                              ComplaintsStatusName.status_name.ilike(f"%{query}%"),
-                              )
-                          )
-    complaints = (await session.execute(stmt)).scalars().all()
-    data = []
-    for c in complaints:
-        geom = Point(to_shape(c.location).coords)
-        srid = c.location.srid
+        stmt = stmt.where(or_(
+                            func.to_char(Complaints.time_stamped, "YYYY-MM-DD").ilike(f"%{query}%"),
+                            func.to_char(Complaints.time_stamped, "HH12:MI AM").ilike(f"%{query}%"),
+                            Complaints.subject.ilike(f"%{query}%"), 
+                            Complaints.description.ilike(f"%{query}%"),
+                            Complaints.village.ilike(f"%{query}%"),
+                            Complaints.municipality.ilike(f"%{query}%"),
+                            Users.first_name.ilike(f"%{query}%"),
+                            Users.last_name.ilike(f"%{query}%"),
+                            Users.email.ilike(f"%{query}%"),
+                            status_cte.c.status_name.ilike(f"%{query}%"),
+                          ))
+    data = (await session.execute(stmt)).unique().all()
+    results = []
+    for  complaints, latest_status in data:
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,
@@ -42,27 +75,32 @@ async def complaints(session:AsyncSession, query:Optional[str]=None):
             "name": s.status.status_name,
             "description": s.status.description,
             "date": s.date.isoformat(),
-            "time": s.time.strftime("%I:%M %p"),
-        } for s in c.status_updates]
-        data.append({
-            "id": c.id,
-            "user_id": str(c.user_id),
-            "first_name": c.user.first_name,
-            "last_name": c.user.last_name,
-            "user_photo": c.user.photo,
-            "subject": c.subject,
-            "description": c.description,
-            "date_time_submitted": c.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
-            "village": c.village,
-            "municipality": c.municipality,
+            "time": s.time.strftime("%I:%M %p")
+        } for s in complaints.status_updates]
+        complaints_data = {
+            "id": complaints.id,
+            "user_id": str(complaints.user_id),
+            "first_name": complaints.user.first_name,
+            "last_name": complaints.user.last_name,
+            "user_photo": complaints.user.photo,
+            "subject": complaints.subject,
+            "description": complaints.description,
+            "date_time_submitted": complaints.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+            "village": complaints.village,
+            "municipality": complaints.municipality,
             "location": {
-                "latitude": geom.y,
-                "longitude": geom.x,
-                "srid": srid
-            },
-            "status": status_list
-        })
-    return data
+                'latitude': Point(to_shape(complaints.location).coords).y,
+                'longitude': Point(to_shape(complaints.location).coords).x,
+                'srid': complaints.location.srid
+                },
+            "status": status_list,
+            "latest_status": latest_status
+        }
+        
+        results.append(complaints_data)
+
+    return results
+    
 
 # NEW COMPLAINT
 async def new_complaint(session:AsyncSession, complaint_id:int, user_id:UUID):
@@ -164,15 +202,42 @@ async def user_complaints(session:AsyncSession, user_id:UUID):
 
 # GET NEW COMPLAINTS ALL USERS STATUS
 async def new_complaints_status(session:AsyncSession, complaint_id):
-    new_complaint_status = (await session.execute(
-        select(Complaints)
-        .options(selectinload(Complaints.status_updates)
-                 .selectinload(ComplaintsStatusUpdates.status))
-        .options(selectinload(Complaints.user))
-        .order_by(desc(Complaints.time_stamped))
-        .where(Complaints.id == complaint_id))).scalar_one_or_none()
+    latest_status = (
+        select(ComplaintsStatusUpdates.complaint_id,
+               ComplaintsStatusName.status_name,
+               func.row_number().over(
+                   partition_by=ComplaintsStatusUpdates.complaint_id,
+                   order_by=desc(ComplaintsStatusUpdates.status_id)
+               ).label("rn")
+               ).join(
+                   ComplaintsStatusName,
+                   ComplaintsStatusName.id == ComplaintsStatusUpdates.status_id
+               )
+    ).cte("latest_status")
+    stmt = (
+        select(
+            Complaints,
+            latest_status.c.status_name.label("latest_status")
+        )
+        .join(
+            latest_status,
+            latest_status.c.complaint_id == Complaints.id
+        )
+        .options(
+            selectinload(Complaints.status_updates)
+            .selectinload(ComplaintsStatusUpdates.status),
+            selectinload(Complaints.user)
+        )
+        .where((latest_status.c.rn == 1) & (Complaints.id == complaint_id))
+    )
+    
+    row = (await session.execute(stmt)).one_or_none()
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+    new_complaint_status, latest_stats = row
     if not new_complaint_status:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+    
     status_list = [{
         "id": s.id,
         "complaint_id": s.complaint_id,
@@ -197,6 +262,7 @@ async def new_complaints_status(session:AsyncSession, complaint_id):
             "latitude": Point(to_shape(new_complaint_status.location).coords).y,
             "longitude": Point(to_shape(new_complaint_status.location).coords).x,
             "srid": new_complaint_status.location.srid},
-        "status": status_list
+        "status": status_list,
+        "latest_status": latest_stats
     }
     return data

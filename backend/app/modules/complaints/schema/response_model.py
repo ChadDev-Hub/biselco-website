@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-
+from typing import List, Optional
 class ComplaintStatus(BaseModel):
     id: int
     complaint_id: int
@@ -28,6 +28,7 @@ class ComplaintsModel(BaseModel):
     location: Location
     date_time_submitted: str
     status: list[ComplaintStatus]
+    latest_status: Optional[str] = None
 
 
 class ComplaintStatusName(BaseModel):

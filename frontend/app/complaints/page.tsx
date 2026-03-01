@@ -1,5 +1,3 @@
-
-
 import React, {Suspense} from 'react'
 import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
