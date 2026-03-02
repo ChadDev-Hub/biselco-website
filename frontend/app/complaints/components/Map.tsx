@@ -17,12 +17,16 @@ import { Geolocation } from 'ol'
 import { defaults as defaultControls } from 'ol/control'
 
 
+
 type Props = {
-    onSelectLocation?: (lat: number, lon: number) => void
+    onSelectLocation?: (lat: number | undefined, lon: number | undefined) => void
     coordinates?: [number, number]
+    markerSvg?: string;
+    markerPopup?: string;
+    animatePing?: boolean
 }
 
-const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
+const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, animatePing }: Props) => {
     const mapRef = useRef<Map | null>(null)
     const mapDivRef = useRef<HTMLDivElement | null>(null)
     const markerSourceRef = useRef<VectorSource | null>(null)
@@ -30,13 +34,16 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
     const geoLocationRef = useRef<Geolocation | null>(null)
     const userSourceRef = useRef<VectorSource | null>(null)
     const PopupRef = useRef<HTMLDivElement>(null)
+    const initialCoordinates = useRef<[number, number] | [] | null>(coordinates ?? null)
+
     // Initialize the map
     useEffect(() => {
         if (!mapDivRef.current || mapRef.current) return
+
         // Create New Marker Source 
         markerSourceRef.current = new VectorSource()
         userSourceRef.current = new VectorSource()
-        const svg = `
+        const defaultSvg = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="red">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                 <circle cx="12" cy="9" r="2.5" fill="white"/>
@@ -44,8 +51,8 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 `;
         const usersvg = `
         <svg 
-        height="15" 
-        width="15" version="1.1" id="Capa_1" 
+        height="25" 
+        width="25" version="1.1" id="Capa_1" 
         xmlns="http://www.w3.org/2000/svg" 
         xmlns:xlink="http://www.w3.org/1999/xlink"
          viewBox="0 0 53.545 53.545" 
@@ -71,7 +78,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
             source: markerSourceRef.current,
             style: new Style({
                 image: new Icon({
-                    src: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+                    src: `data:image/svg+xml;utf8,${markerSvg? encodeURIComponent(markerSvg) : encodeURIComponent(defaultSvg)}`,
                     anchor: [0.5, 1],
                 }),
             }),
@@ -119,13 +126,27 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
             }),
             view:view,
         })
-
         mapRef.current.addOverlay(overlay)
+
+        // CREATE A COMPLAINT MARKER IF COORDINATES IS AVAILABLE
+        if (initialCoordinates.current) {
+            markerSourceRef.current?.clear()
+            markerSourceRef.current?.addFeature(
+                new Feature({ geometry: new Point(fromLonLat(initialCoordinates.current)) })
+            )
+            onSelectLocationRef.current?.(initialCoordinates.current[1], initialCoordinates.current[0])
+            overlay.setPosition(fromLonLat(initialCoordinates.current))
+            mapRef.current?.getView().animate({
+                center: fromLonLat(initialCoordinates.current),
+                zoom: 16,
+                duration: 500
+            })
+        }
+
         // CREATE AN ACTION ON THE MAP FOR Pointing on the specific location
         mapRef.current.on('singleclick', (evt) => {
             const coord = evt.coordinate
             const [lon, lat] = toLonLat(coord)
-
             markerSourceRef.current?.clear()
             markerSourceRef.current?.addFeature(
                 new Feature({ geometry: new Point(coord) })
@@ -134,13 +155,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
             overlay.setPosition(coord)
         })
 
-        // CREATE A COMPLAINT MARKER IF COORDINATES IS AVAILABLE
-        if (coordinates) {
-            markerSourceRef.current?.clear()
-            markerSourceRef.current?.addFeature(
-                new Feature({ geometry: new Point(fromLonLat(coordinates)) })
-            )
-        }
+        
 
         // INTIALIZE NEW GEOLOCATION
         geoLocationRef.current = new Geolocation({
@@ -169,7 +184,8 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
             mapRef.current?.setTarget(undefined)
             mapRef.current = null
         }
-    }, [coordinates])
+    }, [markerSvg])
+
     // HANDLE THE REALTIME-LOCATION
     const handleClick = () => {
         geoLocationRef.current?.setTracking(true)
@@ -210,8 +226,8 @@ const BiselcoMap = ({ onSelectLocation, coordinates }: Props) => {
                 </g>
             </svg>
         </button>
-        <div ref={PopupRef} className='animate-ping'>
-            <h1 className='font-bold text-blue-800'>Selected Complaints Location</h1>
+        <div ref={PopupRef} className={`${animatePing? 'animate-ping' : ''}`}>
+            <h1 className='font-bold text-blue-800'>{markerPopup}</h1>
         </div>
     </div>
 }

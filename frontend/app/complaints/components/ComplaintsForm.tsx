@@ -6,8 +6,8 @@ import { PostComplaints } from '@/app/actions/complaint';
 
 const ComplaintsForm = () => {
     // STATE
-    const [lat, setLat] = useState<number>(0);
-    const [long, setLong] = useState<number>(0);
+    const [lat, setLat] = useState<number | undefined>(0);
+    const [long, setLong] = useState<number | undefined>(0);
 
     // INITIALIZE NEW FORM
     // HANDLE SUBMIT
@@ -17,8 +17,8 @@ const ComplaintsForm = () => {
         const form = e.currentTarget;
         formdata.append('subject', form.subject.value as string);
         formdata.append('description', form.description.value as string);
-        formdata.append('latitude', lat.toFixed(10));
-        formdata.append('longitude', long.toFixed(10));
+        formdata.append('latitude', (lat ?? 0).toFixed(10));
+        formdata.append('longitude', (long ?? 0).toFixed(10));
         const result = await PostComplaints(formdata);
         if (result?.status === 201) {
             form.reset();
@@ -56,8 +56,9 @@ const ComplaintsForm = () => {
                     setLat(lat);
                     setLong(long);
                 }}
+                markerPopup='Selected Complaint Location'
+                animatePing
             />
-
             <button type='submit' className='btn btn-success rounded-full w-full px-5 mt-2.5'>Submit Complaints</button>
         </form>
     )

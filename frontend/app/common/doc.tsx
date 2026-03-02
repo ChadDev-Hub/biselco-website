@@ -6,7 +6,7 @@ import { ComplaintsRouteButton } from './buttons/complaints'
 import { HomeRouteButton } from './buttons/home'
 const DocNavigation = () => {
   const currentRoute = usePathname()
-  const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical"];
+  const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical", "/technical/change-meter"];
   const isActive = currentRoute === "/" ? "home"
     : currentRoute === "/complaints" ? "complaints" : "logout";
   return (
@@ -15,7 +15,6 @@ const DocNavigation = () => {
 
       {/* Left Island: Main Navigation */}
       <div className="dock dock-sm relative bg-base-100/45 glass rounded-full backdrop-blur-md shadow-lg  mr-4">
-
         <div className={isActive === "home" ? "dock-active" : ""}>
           <HomeRouteButton
           strokeColor={isActive === "home" ? "currentColor" : "currentColor"}

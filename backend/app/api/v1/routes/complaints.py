@@ -18,6 +18,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
 from ....modules.user.schema.response_model import Token
 from typing import Optional
+
+
+# ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
