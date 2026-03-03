@@ -26,10 +26,8 @@ def upgrade() -> None:
         DECLARE
             location text;
         BEGIN
-            SELECT municipality.name || ' | ' || village.name INTO location
+            SELECT b.location INTO location
             FROM gis.boundary b
-            JOIN gis.village on village.id = b.village_id
-            JOIN gis.municipality on municipality.id = b.municipality_id
             WHERE st_intersects(b.geom, new.geom)
             LIMIT 1;
         new.location = location;
