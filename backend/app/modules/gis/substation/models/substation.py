@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Text, Integer, ForeignKey, BIGINT, Computed, Numeric
+from sqlalchemy import Text, Integer, ForeignKey, BIGINT, Computed, Numeric, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import func
 from geoalchemy2 import Geometry
@@ -22,7 +22,7 @@ class Substation(BaseModel):
     voltage_profile_id: Mapped[str] = mapped_column(type_=Text, nullable=True)
     village_id: Mapped[int] = mapped_column(ForeignKey("gis.villages.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
     municipal_id: Mapped[int] = mapped_column(ForeignKey("gis.municipality.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
-    is_active: Mapped[bool] = mapped_column(type_=Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(type_=Boolean, nullable=True)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     image: Mapped[str] = mapped_column(type_=Text, nullable=True)
     
@@ -30,6 +30,4 @@ class Substation(BaseModel):
     village: Mapped["Village"] = relationship("Village", back_populates="substations")
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="substations")
     
-    
-
     

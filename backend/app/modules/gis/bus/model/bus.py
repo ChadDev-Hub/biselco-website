@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Text, Integer, ForeignKey, BIGINT, Computed, Numeric
+from sqlalchemy import Text, Integer, ForeignKey, BIGINT, Computed, Numeric, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from .....db.base import BaseModel
 from geoalchemy2 import Geometry
@@ -28,7 +28,7 @@ class Bus(BaseModel):
     substation_id: Mapped[int] = mapped_column(ForeignKey("gis.substation.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     image: Mapped[str] = mapped_column(type_=Text, nullable=True)
-    is_active: Mapped[bool] = mapped_column(type_=Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(type_=Boolean, nullable=True)
     
     # RELATIONSHIPS
     pole: Mapped["ElectricPoles"] = relationship("ElectricPoles", back_populates="bus")

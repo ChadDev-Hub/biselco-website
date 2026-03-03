@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Integer, Text, ForeignKey, Numeric
+from sqlalchemy import Integer, Text, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
@@ -26,6 +26,7 @@ class PrimaryLines(BaseModel):
     neutral_wire: Mapped[str] = mapped_column(ForeignKey("gis.conductor_wires.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
     village_id: Mapped[int] = mapped_column(ForeignKey("gis.villages.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
     municipality_id: Mapped[int] = mapped_column(ForeignKey("gis.municipality.id", ondelete="CASCADE",onupdate="CASCADE"),type_=Integer,nullable=False)
+    is_active: Mapped[bool] = mapped_column(type_=Boolean, nullable=True)
     
     # RELATIONSHIPS
     from_bus: Mapped["Bus"] = relationship("Bus", foreign_keys=[from_bus_id], back_populates="pl_out_going_lines")
