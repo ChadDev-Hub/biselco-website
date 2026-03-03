@@ -4,9 +4,10 @@ from sqlalchemy import func
 from geoalchemy2 import Geometry
 from geoalchemy2.functions import ST_Area
 from geoalchemy2.elements import WKBElement
-from ....db.base import BaseModel
-from ..franchise_area.model.villages import Village
-from ..franchise_area.model.municipality import Municipality
+from .....db.base import BaseModel
+from ...franchise_area.model.villages import Village
+from ...franchise_area.model.municipality import Municipality
+from ...bus.model.bus import Bus
 from typing import List
 
 
@@ -24,6 +25,7 @@ class ElectricPoles(BaseModel):
     pole_assembly: Mapped[str] = mapped_column(ForeignKey("gis.pole_assembly.name", ondelete="CASCADE",onupdate="CASCADE"),type_=Text,nullable=True)
     height: Mapped[float] = mapped_column(type_=Numeric(precision=10, scale=4), nullable=True)
     
+    bus: Mapped[List["Bus"]] = relationship("Bus", back_populates="pole")
     village: Mapped["Village"] = relationship("Village", back_populates="electric_poles")
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="electric_poles")
     assembly: Mapped["PoleAssembly"] = relationship("PoleAssembly", back_populates="poles")

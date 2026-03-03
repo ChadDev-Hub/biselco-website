@@ -10,7 +10,8 @@ from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .boundary import Boundary
-    from ...substation.model.substation import Substation
+    from ...substation.models.substation import Substation
+    from ...bus.model.bus import Bus
 
 
 class Village(BaseModel):
@@ -25,3 +26,9 @@ class Village(BaseModel):
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="villages")
     boundaries: Mapped[List["Boundary"]] = relationship("Boundary", back_populates="villages")
     substations: Mapped[List["Substation"]] = relationship("Substation", back_populates="village")
+    buses: Mapped[List["Bus"]] = relationship("Bus", back_populates="village")
+    
+    
+
+    
+    

@@ -10,7 +10,7 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .boundary import Boundary
     from .villages import Village
-    from ...substation.model.substation import Substation
+    from ...substation.models.substation import Substation
 
 class Municipality(BaseModel):
     __tablename__ = "municipality"

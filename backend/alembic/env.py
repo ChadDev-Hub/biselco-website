@@ -33,6 +33,7 @@ from app.modules.forms import *
 from app.modules.technical import *
 from app.modules.meters import *
 from app.modules.gis.franchise_area import *
+
 # target_metadata = mymodel.Base.metadata
 target_metadata = BaseModel.metadata
 
