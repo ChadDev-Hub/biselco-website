@@ -3,7 +3,7 @@ from .franchise_area import *
 from .bus import *
 from .distribution_lines import *
 from .poles import *
-from .conductor import *
+from .wires import *
 
 
 __all__ = [
