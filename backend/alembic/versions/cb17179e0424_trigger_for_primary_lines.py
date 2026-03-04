@@ -5,6 +5,7 @@ Revises: 054fe1c14cc2
 Create Date: 2026-03-04 14:42:32.070428
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,39 +13,37 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cb17179e0424'
-down_revision: Union[str, Sequence[str], None] = '054fe1c14cc2'
+revision: str = "cb17179e0424"
+down_revision: Union[str, Sequence[str], None] = "054fe1c14cc2"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.execute("""
+    op.execute(
+        """
                CREATE OR REPLACE FUNCTION primary_lines_trigg_func()
                RETURNS TRIGGER AS $$
                DECLARE
-               substation_id text;
-               feeder_id text;
-               from_bus text;
-               to_bus text;
-               village integer;
-               
-               municipality integer;
-               
+                    from_bus text;
+                    to_bus text;
+                    village integer;
+                    municipality integer;
                BEGIN
-               SELECT b.bus_id, b.description, b.substation_id
-               INTO from_bus
+               
+               SELECT b.bus_id
+               INTO from_bus   
                FROM gis.bus b
                WHERE st_intersects(b.geom, st_startpoint(new.geom))
-               AND b.description = 'Primary Node'
+               AND (b.description = 'Primary Node' OR b.description = 'Feeder Node')
                LIMIT 1;
                
                SELECT b.bus_id
                INTO to_bus
                FROM gis.bus b
                WHERE st_intersects(b.geom, st_endpoint(new.geom))
-               AND b.description = 'Primary Node'
+               AND (b.description = 'Primary Node' OR b.description = 'Feeder Node')
                LIMIT 1; 
                
                
@@ -58,8 +57,10 @@ def upgrade() -> None:
                RAISE EXCEPTION 'No Matching Boundary Found';
                END IF;
                
-               IF from_bus IS NULL OR to_bus IS NULL THEN 
-               RAISE EXCEPTION 'No Matching Bus Found';
+               IF from_bus IS NULL THEN 
+               RAISE EXCEPTION 'No Matching from Bus Found';
+               ELSIF to_bus IS NULL THEN
+               RAISE EXCEPTION 'No Matching to Bus Found';
                END IF;
                
                new.from_bus_id = from_bus;
@@ -69,38 +70,48 @@ def upgrade() -> None:
                return new;
                END;
                $$ LANGUAGE plpgsql;
-               """)
-    
-    op.execute("""
+               """
+    )
+
+    op.execute(
+        """
                CREATE OR REPLACE FUNCTION primary_lines_trigg_after_func()
                RETURNS TRIGGER AS $$
                BEGIN
                -- UPDATE GIS BUS OR NODE
                
                UPDATE gis.bus as target
-               SET substation_id = source.substation_id
+               SET 
+               substation_id = source.substation_id,
+               feeder_id = source.feeder_id
                from gis.bus as source
                where source.bus_id = new.from_bus_id
+               and target.feeder_id is null
                AND target.bus_id = new.to_bus_id
                AND target.description = 'Primary Node';
                RETURN NEW;
                END;
                $$ LANGUAGE plpgsql;
-               """)
-    
-    op.execute("""
+               """
+    )
+
+    op.execute(
+        """
                CREATE TRIGGER primary_lines_trigg
                BEFORE INSERT OR UPDATE
                ON gis.primary_lines
                FOR EACH ROW EXECUTE PROCEDURE primary_lines_trigg_func();
-               """)
-    
-    op.execute("""
+               """
+    )
+
+    op.execute(
+        """
                CREATE TRIGGER primary_lines_trigg_after
                AFTER INSERT OR UPDATE
                ON gis.primary_lines
                FOR EACH ROW EXECUTE PROCEDURE primary_lines_trigg_after_func();
-               """)
+               """
+    )
 
 
 def downgrade() -> None:

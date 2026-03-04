@@ -64,7 +64,7 @@ def upgrade() -> None:
     
     op.execute("""
                CREATE TRIGGER bus_trigger
-               BEFORE INSERT OR UPDATE
+               BEFORE INSERT
                ON gis.bus
                FOR EACH ROW EXECUTE PROCEDURE gis.bus_trigger_func();
                """)

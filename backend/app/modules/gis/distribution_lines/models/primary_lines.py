@@ -16,10 +16,6 @@ class PrimaryLines(BaseModel):
     id: Mapped[int] = mapped_column(primary_key=True)
     geom: Mapped[WKBElement] = mapped_column(
         Geometry(geometry_type='LINESTRING', srid=4326), nullable=False)
-    substation_id: Mapped[int] = mapped_column(ForeignKey(
-        "gis.substation.id"), type_=Integer, nullable=False)
-    feeder_id: Mapped[str] = mapped_column(ForeignKey(
-        "gis.feeder.feeder_id"), type_=Text, nullable=True)
     primary_line_id: Mapped[str] = mapped_column(
         type_=Text, nullable=False, unique=True)
     from_bus_id: Mapped[str] = mapped_column(
@@ -34,9 +30,9 @@ class PrimaryLines(BaseModel):
         Computed("ST_Length(geom::geography)", persisted=True),
         type_=Numeric(precision=10, scale=4), nullable=True)
     conductor_wire: Mapped[str] = mapped_column(ForeignKey(
-        "gis.conductor_wires.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+        "gis.conductor_wires.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=True)
     neutral_wire: Mapped[str] = mapped_column(ForeignKey(
-        "gis.neutral_concentric_cable.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+        "gis.neutral_concentric_cable.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=True)
     village_id: Mapped[int] = mapped_column(ForeignKey(
         "gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
     municipality_id: Mapped[int] = mapped_column(ForeignKey(

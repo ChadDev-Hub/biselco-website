@@ -17,32 +17,37 @@ if TYPE_CHECKING:
 
 class Substation(BaseModel):
     __tablename__ = "substation"
-    __table_args__ = {'schema': 'gis'}
+    __table_args__ = {"schema": "gis"}
     id: Mapped[int] = mapped_column(primary_key=True)
     geom: Mapped[WKBElement] = mapped_column(
-        Geometry(geometry_type='POINT', srid=4326), nullable=False, index=True)
-    substation_id: Mapped[str] = mapped_column(
-        type_=Text, nullable=False, unique=True)
+        Geometry(geometry_type="POINT", srid=4326), nullable=False, index=True
+    )
+    substation_id: Mapped[str] = mapped_column(type_=Text, nullable=False, unique=True)
     phasing: Mapped[str] = mapped_column(type_=Text, nullable=True)
     description: Mapped[str] = mapped_column(type_=Text, nullable=True)
     generator_type: Mapped[str] = mapped_column(type_=Text, nullable=True)
     voltage_rating_kv: Mapped[float] = mapped_column(
-        type_=Numeric(precision=10, scale=4), nullable=True)
+        type_=Numeric(precision=10, scale=4), nullable=True
+    )
     voltage_profile_id: Mapped[str] = mapped_column(type_=Text, nullable=True)
-    village_id: Mapped[int] = mapped_column(ForeignKey(
-        "gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
-    municipal_id: Mapped[int] = mapped_column(ForeignKey(
-        "gis.municipality.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+    village_id: Mapped[int] = mapped_column(
+        ForeignKey("gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"),
+        type_=Integer,
+        nullable=False,
+    )
+    municipal_id: Mapped[int] = mapped_column(
+        ForeignKey("gis.municipality.id", ondelete="CASCADE", onupdate="CASCADE"),
+        type_=Integer,
+        nullable=False,
+    )
     is_active: Mapped[bool] = mapped_column(type_=Boolean, nullable=True)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     image: Mapped[str] = mapped_column(type_=Text, nullable=True)
 
     # RELATIONSHIPS
-    village: Mapped["Village"] = relationship(
-        "Village", back_populates="substations")
+    village: Mapped["Village"] = relationship("Village", back_populates="substations")
     municipal: Mapped["Municipality"] = relationship(
-        "Municipality", back_populates="substations")
-    buses: Mapped[List["Bus"]] = relationship(
-        "Bus", back_populates="substation")
-    feeder: Mapped[List["Feeder"]] = relationship(
-        "Feeder", back_populates="substation")
+        "Municipality", back_populates="substations"
+    )
+    buses: Mapped[List["Bus"]] = relationship("Bus", back_populates="substation")
+    feeder: Mapped[List["Feeder"]] = relationship("Feeder", back_populates="substation")
