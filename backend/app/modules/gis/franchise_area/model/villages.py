@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from .boundary import Boundary
     from ...substation.models.substation import Substation
     from ...bus.model.bus import Bus
+    from ...distribution_lines.models.primary_lines import PrimaryLines
+    from ...distribution_transformer.model.transformer import DistributionTransformer
 
 
 class Village(BaseModel):
@@ -27,8 +29,8 @@ class Village(BaseModel):
     boundaries: Mapped[List["Boundary"]] = relationship("Boundary", back_populates="villages")
     substations: Mapped[List["Substation"]] = relationship("Substation", back_populates="village")
     buses: Mapped[List["Bus"]] = relationship("Bus", back_populates="village")
-    
-    
+    primary_lines: Mapped[List["PrimaryLines"]] = relationship("PrimaryLines", back_populates="village")
+    distribution_transformers: Mapped[List["DistributionTransformer"]] = relationship("DistributionTransformer", back_populates="village")
 
     
     

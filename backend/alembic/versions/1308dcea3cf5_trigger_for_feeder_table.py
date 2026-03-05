@@ -53,13 +53,13 @@ def upgrade() -> None:
             is_active = new.is_active,
             feeder_id = new.feeder_id,
             substation_id = new.substation_id
-            where n.id = (
+            where n.id in (
                 SELECT id 
                 FROM gis.bus as a
                 WHERE st_intersects(a.geom, new.geom)
-                LIMIT 1
-            );
-            return new;
+                OR a.feeder_id = new.feeder_id
+                );
+            RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
                """)

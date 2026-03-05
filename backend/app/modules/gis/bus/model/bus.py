@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ...distribution_lines.models.primary_lines import PrimaryLines
     from ...poles.model.electric_poles import ElectricPoles
     from ...substation.models.substation import Substation
-
+    from ...distribution_transformer.model.transformer import DistributionTransformer
 
 class Bus(BaseModel):
     __tablename__ = "bus"
@@ -58,3 +58,8 @@ class Bus(BaseModel):
         "PrimaryLines", back_populates="from_bus")
     pl_incoming_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="to_bus")
+    primary_transformers: Mapped[List["DistributionTransformer"]] = relationship(
+        "DistributionTransformer", back_populates="primary_bus")
+    secondary_transrormers: Mapped[List["DistributionTransformer"]] = relationship(
+        "DistributionTransformer", back_populates="secondary_bus")
+    

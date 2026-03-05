@@ -37,12 +37,41 @@ def upgrade() -> None:
                 END;
                 $$ LANGUAGE plpgsql;
                """)
+    
+    op.execute("""
+               CREATE OR REPLACE FUNCTION gis.substation_trigger_after_func()
+               RETURNS TRIGGER AS $$
+               BEGIN
+                    -- UPDATE GIS FEEDER
+                    UPDATE gis.feeder as f
+                    SET is_active = new.is_active
+                    WHERE f.substation_id = new.substation_id;
+                    
+                    
+                    -- UPDATE GIS BUS
+                    UPDATE gis.bus as b
+                    set is_active = new.is_active
+                    WHERE b.substation_id = new.substation_id;
+                    return new;
+               END;
+               $$ LANGUAGE plpgsql;
+                """)
+    
+    op.execute("""
+               CREATE TRIGGER substation_trigger_after
+               AFTER INSERT OR UPDATE
+               ON gis.substation
+               FOR EACH ROW EXECUTE FUNCTION gis.substation_trigger_after_func();
+               """)
+    
     op.execute("""
                 CREATE TRIGGER substation_trigger
                 BEFORE INSERT OR UPDATE
                 ON gis.substation
-                FOR EACH ROW EXECUTE PROCEDURE gis.substation_trigger_func();""")
+                FOR EACH ROW EXECUTE FUNCTION gis.substation_trigger_func();""")
     
 def downgrade() -> None:
     op.execute("DROP TRIGGER substation_trigger ON gis.substation;")
     op.execute("DROP FUNCTION gis.substation_trigger_func();")
+    op.execute("DROP TRIGGER substation_trigger_after ON gis.substation;")
+    op.execute("DROP FUNCTION gis.substation_trigger_after_func();")

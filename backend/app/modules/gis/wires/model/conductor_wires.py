@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from ...distribution_lines.models.primary_lines import PrimaryLines
+    from ...distribution_transformer.model.transformer import TransformerLinebushing
 
 
 class ConductorWires(BaseModel):
@@ -25,7 +26,9 @@ class ConductorWires(BaseModel):
 
     primary_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="conductor")
-
+    line_bushing: Mapped[List["TransformerLinebushing"]] = relationship(
+        "TransformerLinebushing", back_populates="conductor")
+    
 
 class NeutralConcentricCable(BaseModel):
     __tablename__ = "neutral_concentric_cable"

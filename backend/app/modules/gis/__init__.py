@@ -4,7 +4,7 @@ from .bus import *
 from .distribution_lines import *
 from .poles import *
 from .wires import *
-
+from .distribution_transformer import * 
 
 __all__ = [
     "Substation",
@@ -18,4 +18,10 @@ __all__ = [
     "ConductorWires",
     "PoleAssembly",
     "PoleConstruction",
+    "ConstructionMaterial",
+    "PoleMaterial",
+    "DistributionTransformer",
+    "TransformerType",
+    "TransformerLinebushing"
+
 ]

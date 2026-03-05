@@ -63,13 +63,40 @@ def upgrade() -> None:
                """)
     
     op.execute("""
+               CREATE OR REPLACE FUNCTION gis.bus_trigger_after_func()
+               RETURNS TRIGGER AS $$
+               BEGIN
+                    -- UPDATE PRIMARY LINES
+                    UPDATE gis.primary_lines pl
+                    SET is_active = new.is_active
+                    where pl.from_bus_id = new.bus_id
+                    AND pl.is_active IS DISTINCT FROM NEW.is_active;
+                    
+                    
+                    RETURN new;
+               END;
+               $$ LANGUAGE plpgsql;
+               """)
+    
+    # BEFORE INSERT
+    op.execute("""
                CREATE TRIGGER bus_trigger
                BEFORE INSERT
                ON gis.bus
-               FOR EACH ROW EXECUTE PROCEDURE gis.bus_trigger_func();
+               FOR EACH ROW EXECUTE FUNCTION gis.bus_trigger_func();
                """)
+    
+    # after AN UPDATE TO BUS OR INSERT
+    op.execute ("""
+                CREATE TRIGGER bus_trigger_after
+                AFTER INSERT OR UPDATE 
+                ON gis.bus
+                FOR EACH ROW EXECUTE FUNCTION  gis.bus_trigger_after_func();
+                """)
 
 def downgrade() -> None:
     """Downgrade schema."""
     op.execute("DROP TRIGGER IF EXISTS bus_trigger ON gis.bus;")
     op.execute("DROP FUNCTION IF EXISTS gis.bus_trigger_func();")
+    op.execute("DROP TRIGGER IF EXISTS bus_trigger_after ON gis.bus;")
+    op.execute("DROP FUNCTION IF EXISTS gis.bus_trigger_after_func();")

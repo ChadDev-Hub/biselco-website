@@ -88,8 +88,12 @@ def upgrade() -> None:
                where source.bus_id = new.from_bus_id
                and target.feeder_id is null
                AND target.bus_id = new.to_bus_id
-               AND target.description = 'Primary Node';
-               RETURN NEW;
+               AND target.description = 'Primary Node'
+               AND (
+                    target.substation_id IS DISTINCT FROM source.substation_id
+                    OR target.feeder_id IS DISTINCT FROM source.feeder_id
+                );
+            RETURN NEW;
                END;
                $$ LANGUAGE plpgsql;
                """
@@ -116,7 +120,8 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("DROP TRIGGER IF EXISTS primary_lines_trigg_after ON gis.primary_lines;")
+    op.execute(
+        "DROP TRIGGER IF EXISTS primary_lines_trigg_after ON gis.primary_lines;")
     op.execute("DROP FUNCTION IF EXISTS primary_lines_trigg_after_func();")
     op.execute("DROP TRIGGER IF EXISTS primary_lines_trigg ON gis.primary_lines;")
     op.execute("DROP FUNCTION IF EXISTS primary_lines_trigg_func();")
