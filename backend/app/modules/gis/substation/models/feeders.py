@@ -22,8 +22,8 @@ class Feeder(BaseModel):
         "gis.substation.substation_id", ondelete="CASCADE", onupdate="CASCADE"), type_=Text, nullable=True, unique=False)
     feeder_id: Mapped[str] = mapped_column(type_=Text, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(type_=Text, nullable=True)
-    village_id: Mapped[str] = mapped_column(type_=Integer, nullable=False)
-    municipal_id: Mapped[str] = mapped_column(type_=Integer, nullable=False)
+    village_id: Mapped[str] = mapped_column(ForeignKey("gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"),type_=Integer, nullable=False)
+    municipal_id: Mapped[str] = mapped_column(ForeignKey("gis.municipality.id", ondelete="CASCADE", onupdate="CASCADE"),type_=Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(type_=Text, nullable=True)
     
     # RELATIONSHIPS

@@ -29,8 +29,7 @@ class ElectricPoles(BaseModel):
     village: Mapped["Village"] = relationship("Village", back_populates="electric_poles")
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="electric_poles")
     assembly: Mapped["PoleAssembly"] = relationship("PoleAssembly", back_populates="poles")
-    materials: Mapped[List["PoleMaterial"]] = relationship("PoleMaterial", back_populates="poles")
-
+    materials: Mapped[List["ConstructionMaterial"]] = relationship("ConstructionMaterial",secondary="gis.pole_material", back_populates="poles")
 
 # POLE CONSTRUCTION
 class PoleConstruction(BaseModel):
@@ -40,7 +39,6 @@ class PoleConstruction(BaseModel):
     name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     remarks: Mapped[str] = mapped_column(Text, nullable=True)
-    
     assemblies: Mapped[List["PoleAssembly"]] = relationship("PoleAssembly", back_populates="construction")
     
 # POLE ASSEMBLY
@@ -66,7 +64,7 @@ class PoleMaterial(BaseModel):
     material_id:Mapped[int] = mapped_column(ForeignKey("gis.construction_material.id", ondelete="CASCADE",onupdate="CASCADE"),
                                               primary_key=True, type_=Integer,nullable=False)
     quantity: Mapped[int] = mapped_column(type_=Integer, nullable=True)
-
+    
 
 # CONSTRUCTION MATERIAL TABLE
 class ConstructionMaterial(BaseModel):
@@ -77,5 +75,5 @@ class ConstructionMaterial(BaseModel):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     remarks: Mapped[str] = mapped_column(Text, nullable=True)
     
-    assemblies: Mapped[List["PoleAssembly"]] = relationship("PoleAssembly", back_populates="components")
-    poles: Mapped[List["ElectricPoles"]] = relationship("ElectricPoles", secondary="pole_material", back_populates="materials")
+    
+    poles: Mapped[List["ElectricPoles"]] = relationship("ElectricPoles", secondary="gis.pole_material", back_populates="materials")

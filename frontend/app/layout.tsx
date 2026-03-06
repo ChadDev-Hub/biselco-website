@@ -36,7 +36,6 @@ export default async function RootLayout({
   const data = await getLandingPageData()
   const user = await getCurrentUser()
   const googleClient = process.env.GOOGLE_CLIENT_ID
-
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <AuthProvider initialUser={user.status === 200 ?   user.detail : null}>

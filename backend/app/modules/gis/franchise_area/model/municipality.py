@@ -14,7 +14,9 @@ if TYPE_CHECKING:
     from ...bus.model.bus import Bus
     from ...distribution_lines.models.primary_lines import PrimaryLines
     from ...distribution_transformer.model.transformer import DistributionTransformer
-
+    from ...substation.models.feeders import Feeder
+    from ...poles.model.electric_poles import ElectricPoles
+    
 class Municipality(BaseModel):
     __tablename__ = "municipality"
     __table_args__ = {'schema': 'gis'}
@@ -29,4 +31,5 @@ class Municipality(BaseModel):
     buses: Mapped[List["Bus"]] = relationship("Bus", back_populates="municipal")
     primary_lines: Mapped[List["PrimaryLines"]] = relationship("PrimaryLines", back_populates="municipal")
     distribution_transformers: Mapped[List["DistributionTransformer"]] = relationship("DistributionTransformer", back_populates="municipal")
-    
+    feeders: Mapped[List["Feeder"]] = relationship("Feeder", back_populates="municipal")
+    electric_poles: Mapped[List["ElectricPoles"]] = relationship("ElectricPoles", back_populates="municipal")

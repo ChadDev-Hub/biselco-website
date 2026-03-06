@@ -92,7 +92,7 @@ const ComplaintsContainer = ({
                     )
                 }))
                 break;
-            case "deleted_complaint":
+            case "deleted_complaints":
                 queueMicrotask(() =>
                 setallComplaints((prev) => {
                     return prev.filter((complaint) => complaint.id !== message.data.id);

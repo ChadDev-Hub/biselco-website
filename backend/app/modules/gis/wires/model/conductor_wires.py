@@ -26,7 +26,7 @@ class ConductorWires(BaseModel):
 
     primary_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="conductor")
-    line_bushing: Mapped[List["TransformerLinebushing"]] = relationship(
+    linebushing: Mapped[List["TransformerLinebushing"]] = relationship(
         "TransformerLinebushing", back_populates="conductor")
     
 
@@ -51,3 +51,4 @@ class NeutralConcentricCable(BaseModel):
 
     primary_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="neutral")
+    

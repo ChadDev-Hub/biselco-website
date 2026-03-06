@@ -19,7 +19,7 @@ type WSMessage = {
   detail : "deleted_news";
   data: NewsData;
 } | {
-  detail: "deleted_complaint";
+  detail: "deleted_complaints";
   data: ComplaintData;
 } | {
   detail: "presence";

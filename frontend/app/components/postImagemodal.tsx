@@ -8,6 +8,7 @@ import { useAlert } from '@/app/common/alert'
 const PostImageModal = () => {
     const [uploadedImage, setUploadedImage] = useState<File[]>([])
     const modalRef = useRef<HTMLDialogElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const {showAlert} = useAlert();
     // HANDLE UPLOAD OF PHOTOS
     const handleUploadedImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,9 +18,16 @@ const PostImageModal = () => {
         }
         setUploadedImage((prev) =>
             [...prev, ...Array.from(files)])
-
     }
 
+    // REMOVE IMAGE
+    const handleRemoveImage = (imageIndex: number) => {
+        setUploadedImage((prev) =>
+            prev.filter((name, index) => index !== imageIndex)
+        )
+        if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+    
     // HANDLE SUBMIT
     const handleSubmit = async(event:React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -43,12 +51,7 @@ const PostImageModal = () => {
         modalRef.current?.close()
     }
 
-    // REMOVE IMAGE
-    const handleRemoveImage = (imageIndex: number) => {
-        setUploadedImage((prev) =>
-            prev.filter((name, index) => index !== imageIndex)
-        )
-    }
+    
     return (
         <>
             <button aria-label='photos' onClick={handleOpenModal} type='button' className='btn btn-circle btn-ghost tooltip tooltip-bottom sm:tooltip-bottom' data-tip="Post Photos">
@@ -90,17 +93,18 @@ const PostImageModal = () => {
                                     <path d="M959.9 540.8c0 113.6-92.1 205.8-205.7 205.9H590.9v-44h163.3c43.2 0 83.8-16.9 114.3-47.4 30.6-30.6 47.4-71.2 47.4-114.5 0-43.2-16.8-83.9-47.4-114.4S797.2 379 754 379c-11.5 0-22.8 1.2-33.8 3.5-15 3.2-29.4 8.4-42.8 15.7-1-15.4-3.3-30.7-6.8-45.6v-0.1c-3.6-15.6-8.6-30.8-14.9-45.7-14.4-33.9-34.9-64.4-61.1-90.6-26.2-26.2-56.6-46.7-90.6-61.1-35.1-14.8-72.4-22.4-110.9-22.4s-75.8 7.5-110.9 22.4c-33.9 14.3-64.4 34.9-90.6 61.1-26.2 26.2-46.7 56.7-61.1 90.6-14.9 35.1-22.4 72.4-22.4 110.9s7.5 75.8 22.4 110.9c14.3 33.9 34.9 64.4 61.1 90.6 26.2 26.2 56.7 46.7 90.6 61.1 35.1 14.8 72.4 22.4 110.9 22.4h39.7v44h-41C210.7 746 64.1 599 64.1 417.7c0-181.7 147.3-329 329-329 154.6 0 284.3 106.6 319.5 250.3v0.1c13.4-2.7 27.2-4.2 41.4-4.2 113.7 0.1 205.9 92.2 205.9 205.9z" fill='currentColor' />
                                     <path d="M692.9 636.1h-22.6L519.8 485.6v449.6h-16V485.8L353.4 636.1h-22.6l181-181z" fill="orange" />
                                 </svg>
-                                <input type="file" accept='image/*' onChange={handleUploadedImage} className='hidden' multiple />
+                                <input ref={fileInputRef}  type="file" accept='image/*' onChange={handleUploadedImage} className='hidden file-input' multiple />
                             </label>
                         </div>
                     </div>
-                    <div className='grid grid-cols-3 gap-3 overflow-y-auto max-h-50 max-w-100 py-4 inset-shadow-2xs'>
+                    <div className='grid grid-cols-3 gap-3 w-full overflow-y-auto max-h-50 py-4 inset-shadow-2xs'>
                         {uploadedImage.map((im, index) => (
-                            <div key={index}>
-                                <div className='w-full flex justify-end'>
-                                    <button key={index} type='button' onClick={() => handleRemoveImage(index)} className='btn btn-ghost btn-sm'>X</button>
+                            <div key={index} className='border border-gray-600  relative rounded-box overflow-hidden'>
+                                <div className='absolute top-0.5 right-0.5 z-10'>
+                                    <button key={index} type='button' onClick={() => handleRemoveImage(index)} className='btn drop-shadow-md drop-shadow-gray-700 btn-sm'>X</button>
                                 </div>
                                 <Image
+                                    className='w-full'
                                     src={URL.createObjectURL(im)}
                                     alt='Uploaded Images'
                                     width={100}

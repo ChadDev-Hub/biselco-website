@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from ...substation.models.substation import Substation
     from ...distribution_transformer.model.transformer import DistributionTransformer
 
+
 class Bus(BaseModel):
     __tablename__ = "bus"
     __table_args__ = {'schema': 'gis'}
@@ -55,11 +56,18 @@ class Bus(BaseModel):
     municipal: Mapped["Municipality"] = relationship(
         "Municipality", back_populates="buses")
     pl_out_going_lines: Mapped[List["PrimaryLines"]] = relationship(
-        "PrimaryLines", back_populates="from_bus")
+        "PrimaryLines",
+        foreign_keys="PrimaryLines.from_bus_id",
+        back_populates="from_bus")
     pl_incoming_lines: Mapped[List["PrimaryLines"]] = relationship(
-        "PrimaryLines", back_populates="to_bus")
+        "PrimaryLines",
+        foreign_keys="PrimaryLines.to_bus_id",
+        back_populates="to_bus")
     primary_transformers: Mapped[List["DistributionTransformer"]] = relationship(
-        "DistributionTransformer", back_populates="primary_bus")
-    secondary_transrormers: Mapped[List["DistributionTransformer"]] = relationship(
-        "DistributionTransformer", back_populates="secondary_bus")
-    
+        "DistributionTransformer",
+        foreign_keys="DistributionTransformer.from_primary_bus_id",
+        back_populates="primary_bus")
+    secondary_transformers: Mapped[List["DistributionTransformer"]] = relationship(
+        "DistributionTransformer",
+        foreign_keys="DistributionTransformer.to_secondary_bus_id",
+        back_populates="secondary_bus")

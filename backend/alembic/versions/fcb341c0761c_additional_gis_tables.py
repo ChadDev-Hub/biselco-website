@@ -399,7 +399,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(
             ["neutral_wire"],
-            ["gis.conductor_wires.id"],
+            ["gis.neutral_concentric_cable.id"],
             onupdate="CASCADE",
             ondelete="CASCADE",
         ),
