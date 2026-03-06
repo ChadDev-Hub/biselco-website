@@ -26,6 +26,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 from app.modules.user import *
+from app.modules.meters import *
 from app.modules.complaints import * 
 from app.modules.news import * 
 from app.modules.departments import *

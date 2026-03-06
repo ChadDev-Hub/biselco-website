@@ -71,7 +71,7 @@ def upgrade() -> None:
                 FOR EACH ROW EXECUTE FUNCTION gis.substation_trigger_func();""")
     
 def downgrade() -> None:
-    op.execute("DROP TRIGGER substation_trigger ON gis.substation;")
-    op.execute("DROP FUNCTION gis.substation_trigger_func();")
-    op.execute("DROP TRIGGER substation_trigger_after ON gis.substation;")
-    op.execute("DROP FUNCTION gis.substation_trigger_after_func();")
+    op.execute("DROP TRIGGER IF EXISTS substation_trigger ON gis.substation;")
+    op.execute("DROP FUNCTION IF EXISTS gis.substation_trigger_func();")
+    op.execute("DROP TRIGGER IF EXISTS substation_trigger_after ON gis.substation;")
+    op.execute("DROP FUNCTION IF EXISTS gis.substation_trigger_after_func();")
