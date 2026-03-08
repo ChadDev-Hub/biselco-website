@@ -48,66 +48,30 @@ def upgrade() -> None:
                FOR EACH ROW EXECUTE PROCEDURE gis.distribution_transformer_trigger_func();
                """)
     
-    
-    # TRIGGER FOR TRANSFORMER LINE BUSHING
     op.execute("""
-               CREATE OR REPLACE FUNCTION gis.distribution_linebushing_trigger_func()
-               RETURNS TRIGGER AS $$
-               DECLARE
-                    dt_id text;
-                BEGIN
-                    SELECT dt.transformer_id
-                    INTO dt_id
-                    FROM gis.distribution_transformer as dt
-                    WHERE st_intersects(dt.geom, st_startpoint(new.geom)) 
-                    or st_intersects(dt.geom, st_endpoint(new.geom))
-                    LIMIT 1;
-                    new.transformer_id = dt_id;
-                    return new;
-                END $$ LANGUAGE plpgsql;
-               """)
-    op.execute("""
-               CREATE TRIGGER distribution_linebushing_trigger
-               BEFORE INSERT OR UPDATE
-               ON gis.transformer_linebushing
-               FOR EACH ROW EXECUTE PROCEDURE gis.distribution_linebushing_trigger_func();
-               """)
-    
-    # TRIGGER FOR TRANSFORMER LINE BUSHING AFTER
-    op.execute("""
-               CREATE OR REPLACE FUNCTION gis.transformer_line_bushing_after_func()
+               CREATE OR REPLACE FUNCTION gis.distribution_transformer_trigger_after_func()
                RETURNS TRIGGER AS $$
                BEGIN
-                    UPDATE GIS.distribution_transformer as dt
-                    SET from_primary_bus_id = bus.bus_id
-                    FROM gis.bus as bus
-                    WHERE ST_INTERSECTS(ST_STARTPOINT(new.geom), bus.geom)
-                    AND bus.description = 'Primary Node'
-                    AND dt.transformer_id = new.transformer_id;
-                    
-                    
-                    UPDATE GIS.distribution_transformer as dt
-                    SET to_secondary_bus_id = bus.bus_id
-                    FROM gis.bus as bus
-                    WHERE ST_INTERSECTS(ST_ENDPOINT(new.geom), bus.geom)
-                    AND bus.description = 'Secondary Node'
-                    AND dt.transformer_id = new.transformer_id;
-                RETURN NEW;
-                END; $$ LANGUAGE plpgsql;
+                    UPDATE gis.bus as bus
+                    SET is_active = new.is_active
+                    FROM gis.transformer_linebushing as tl
+                    where tl.transformer_id = new.transformer_id
+                    AND st_intersects(st_endpoint(tl.geom), bus.geom)
+                    AND bus.description = 'Secondary Node';
+                    RETURN NEW;
+               END;
+               $$ LANGUAGE plpgsql;
+               
                """)
-    # TRIGGER
     op.execute("""
-               CREATE TRIGGER transformer_line_bushing_after
+               CREATE TRIGGER distribution_transformer_trigger_after
                AFTER INSERT OR UPDATE
-               ON gis.transformer_linebushing
-               FOR EACH ROW EXECUTE PROCEDURE gis.transformer_line_bushing_after_func();
+               ON gis.distribution_transformer
+               FOR EACH ROW EXECUTE PROCEDURE gis.distribution_transformer_trigger_after_func();
                """)
-
     
 def downgrade() -> None:
     op.execute("""DROP TRIGGER IF EXISTS distribution_transformer_trigger ON gis.distribution_transformer;""")
     op.execute("""DROP FUNCTION IF EXISTS gis.distribution_transformer_trigger_func();""")
-    op.execute("""DROP TRIGGER IF EXISTS distribution_linebushing_trigger ON gis.transformer_linebushing;""")
-    op.execute("""DROP FUNCTION IF EXISTS gis.distribution_linebushing_trigger_func();""")
-    op.execute("""DROP TRIGGER IF EXISTS transformer_line_bushing_after ON gis.transformer_linebushing;""")
-    op.execute("""DROP FUNCTION IF EXISTS gis.transformer_line_bushing_after_func();""")
+    op.execute("""DROP TRIGGER IF EXISTS distribution_transformer_trigger_after ON gis.distribution_transformer;""")
+    op.execute("""DROP FUNCTION IF EXISTS gis.distribution_transformer_trigger_after_func();""")

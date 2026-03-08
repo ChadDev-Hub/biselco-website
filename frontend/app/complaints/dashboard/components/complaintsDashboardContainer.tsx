@@ -136,14 +136,14 @@ const ComplaintsContainer = ({
                     </tr>
                 </thead>
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
-                    {allComplaints.map((complaint, index) => (
+                    {allComplaints.map((complaint:Complaint, index:number) => (
                         <tr key={index}>
                             <th className='z-10'>{index}</th>
                             <td>
                                 <div className={`avatar avatar-${complaint.user_status}`}>
                                     <div className='w-8'>
                                         <Image
-                                            src={complaint.user_photo}
+                                            src={complaint.user_photo ?? "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"}
                                             alt="User Photo"
                                             width={50}
                                             height={50}
