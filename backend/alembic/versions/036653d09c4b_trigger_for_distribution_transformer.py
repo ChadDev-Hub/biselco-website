@@ -54,11 +54,19 @@ def upgrade() -> None:
                BEGIN
                     UPDATE gis.bus as bus
                     SET is_active = new.is_active
-                    FROM gis.transformer_linebushing as tl
-                    where tl.transformer_id = new.transformer_id
-                    AND st_intersects(st_endpoint(tl.geom), bus.geom)
-                    AND bus.description = 'Secondary Node';
-                    RETURN NEW;
+                    WHERE bus.bus_id = new.to_secondary_bus_id
+                    AND bus.is_active is distinct from new.is_active;
+                    
+                    UPDATE gis.secondary_lines as sl
+                    set is_active = new.is_active
+                    where sl.transformer_id = new.transformer_id
+                    AND sl.is_active is distinct from new.is_active;
+                    
+                    UPDATE gis.transformer_linebushing as tl
+                    SET is_active = new.is_active
+                    WHERE tl.transformer_id = new.transformer_id
+                    AND tl.is_active is distinct from new.is_active;
+               RETURN NEW;
                END;
                $$ LANGUAGE plpgsql;
                

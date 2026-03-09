@@ -73,6 +73,16 @@ def upgrade() -> None:
                     AND pl.is_active IS DISTINCT FROM NEW.is_active;
                     
                     
+                    UPDATE gis.distribution_transformer as dt
+                    SET is_active = new.is_active
+                    where dt.from_primary_bus_id = new.bus_id
+                    AND dt.is_active IS DISTINCT FROM NEW.is_active;
+                    
+                    UPDATE gis.secondary_lines as sl
+                    SET is_active = new.is_active
+                    where sl.from_bus_id = new.bus_id
+                    AND sl.is_active IS DISTINCT FROM NEW.is_active;
+                    
                     RETURN new;
                END;
                $$ LANGUAGE plpgsql;

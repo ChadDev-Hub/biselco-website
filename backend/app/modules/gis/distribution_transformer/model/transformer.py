@@ -1,3 +1,4 @@
+from __future__ import annotations
 from sqlalchemy import Text, Integer, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from geoalchemy2 import Geometry
@@ -7,7 +8,10 @@ from ...franchise_area.model.villages import Village
 from ...franchise_area.model.municipality import Municipality
 from ...wires.model.conductor_wires import ConductorWires
 from ...bus.model.bus import Bus
-from typing import List
+from typing import List , TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...distribution_lines.models.secondary_lines import SecondaryLines
 
 
 class DistributionTransformer(BaseModel):
@@ -60,6 +64,9 @@ class DistributionTransformer(BaseModel):
         "Bus",
         foreign_keys=[to_secondary_bus_id],
         back_populates="secondary_transformers")
+    secondary_lines: Mapped[List["SecondaryLines"]] = relationship(
+        "SecondaryLines", back_populates="transformer"
+    )
 
 class TransformerType(BaseModel):
     __tablename__ = "transformer_type"

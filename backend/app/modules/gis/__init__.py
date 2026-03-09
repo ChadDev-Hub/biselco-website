@@ -5,6 +5,7 @@ from .distribution_lines import *
 from .poles import *
 from .wires import *
 from .distribution_transformer import * 
+from .consumer import *
 
 __all__ = [
     "Substation",
@@ -22,6 +23,8 @@ __all__ = [
     "PoleMaterial",
     "DistributionTransformer",
     "TransformerType",
-    "TransformerLinebushing"
+    "TransformerLinebushing",
+    "SecondaryLines",
+    "ConsumerMeter"
 
 ]

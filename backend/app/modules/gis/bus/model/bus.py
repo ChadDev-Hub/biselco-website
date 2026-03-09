@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ...poles.model.electric_poles import ElectricPoles
     from ...substation.models.substation import Substation
     from ...distribution_transformer.model.transformer import DistributionTransformer
-
+    from ...distribution_lines.models.secondary_lines import SecondaryLines 
 
 class Bus(BaseModel):
     __tablename__ = "bus"
@@ -71,3 +71,11 @@ class Bus(BaseModel):
         "DistributionTransformer",
         foreign_keys="DistributionTransformer.to_secondary_bus_id",
         back_populates="secondary_bus")
+    sl_outgoing_lines: Mapped[List["SecondaryLines"]] = relationship(
+        "SecondaryLines",
+        foreign_keys="SecondaryLines.from_bus_id",
+        back_populates="from_bus")
+    sl_incoming_lines: Mapped[List["SecondaryLines"]] = relationship(
+        "SecondaryLines",
+        foreign_keys="SecondaryLines.to_bus_id",
+        back_populates="to_bus")

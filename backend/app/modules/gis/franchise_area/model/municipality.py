@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from ...distribution_transformer.model.transformer import DistributionTransformer
     from ...substation.models.feeders import Feeder
     from ...poles.model.electric_poles import ElectricPoles
+    from ...distribution_lines.models.secondary_lines import SecondaryLines
+    from ...consumer.model.consumer import ConsumerMeter
     
 class Municipality(BaseModel):
     __tablename__ = "municipality"
@@ -33,3 +35,7 @@ class Municipality(BaseModel):
     distribution_transformers: Mapped[List["DistributionTransformer"]] = relationship("DistributionTransformer", back_populates="municipal")
     feeders: Mapped[List["Feeder"]] = relationship("Feeder", back_populates="municipal")
     electric_poles: Mapped[List["ElectricPoles"]] = relationship("ElectricPoles", back_populates="municipal")
+    secondary_lines: Mapped[List["SecondaryLines"]] = relationship("SecondaryLines", back_populates="municipal")
+    
+    consumer_meters: Mapped[List["ConsumerMeter"]] = relationship("ConsumerMeter", back_populates="municipal")
+    
