@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ...substation.models.substation import Substation
     from ...distribution_transformer.model.transformer import DistributionTransformer
     from ...distribution_lines.models.secondary_lines import SecondaryLines 
-
+    from ...consumer.model.service_drop import ServiceDrop
 class Bus(BaseModel):
     __tablename__ = "bus"
     __table_args__ = {'schema': 'gis'}
@@ -79,3 +79,9 @@ class Bus(BaseModel):
         "SecondaryLines",
         foreign_keys="SecondaryLines.to_bus_id",
         back_populates="to_bus")
+    
+    service_drops: Mapped[List["ServiceDrop"]] = relationship(
+        "ServiceDrop",
+        foreign_keys="ServiceDrop.from_bus_id",
+        back_populates="from_bus"
+    )

@@ -25,8 +25,8 @@ def upgrade() -> None:
                CREATE OR REPLACE FUNCTION gis.transformer_linebushing_func()
                RETURNS TRIGGER AS $$
                BEGIN
-               SELECT transformer_id
-               INTO new.transformer_id
+               SELECT dt.transformer_id
+               INTO NEW.transformer_id
                FROM gis.distribution_transformer  as dt
                where st_intersects(ST_STARTPOINT(NEW.geom), dt.geom)
                OR st_intersects(ST_ENDPOINT(NEW.geom), dt.geom)
@@ -77,7 +77,7 @@ def upgrade() -> None:
                from gis.distribution_transformer as dt
                join gis.bus as b2
                on b2.bus_id = dt.from_primary_bus_id
-               where st_intersects(st_endpoint(new.geom), b1.geom)
+               WHERE dt.to_secondary_bus_id = b1.bus_id
                AND dt.transformer_id = New.transformer_id;
                
                

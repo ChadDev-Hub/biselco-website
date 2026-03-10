@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from ...poles.model.electric_poles import ElectricPoles
     from ...distribution_lines.models.secondary_lines import SecondaryLines
     from ...consumer.model.consumer import ConsumerMeter
-    
+    from ...consumer.model.service_drop import ServiceDrop
 class Municipality(BaseModel):
     __tablename__ = "municipality"
     __table_args__ = {'schema': 'gis'}
@@ -38,4 +38,4 @@ class Municipality(BaseModel):
     secondary_lines: Mapped[List["SecondaryLines"]] = relationship("SecondaryLines", back_populates="municipal")
     
     consumer_meters: Mapped[List["ConsumerMeter"]] = relationship("ConsumerMeter", back_populates="municipal")
-    
+    service_drops: Mapped[List["ServiceDrop"]] = relationship("ServiceDrop", back_populates="municipal")

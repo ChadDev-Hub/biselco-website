@@ -39,8 +39,8 @@ class SecondaryLines(BaseModel):
     is_active: Mapped[bool] = mapped_column(type_=Boolean, nullable=True)
     
     # RELATIONSHIPS
-    from_bus: Mapped["Bus"] = relationship("Bus", back_populates="sl_outgoing_lines")
-    to_bus: Mapped["Bus"] = relationship("Bus", back_populates="sl_incoming_lines")
+    from_bus: Mapped["Bus"] = relationship("Bus", foreign_keys=[from_bus_id], back_populates="sl_outgoing_lines")
+    to_bus: Mapped["Bus"] = relationship("Bus", foreign_keys=[to_bus_id], back_populates="sl_incoming_lines")
     conductor: Mapped["ConductorWires"] = relationship("ConductorWires", back_populates="secondary_lines")
     transformer: Mapped["DistributionTransformer"] = relationship("DistributionTransformer", back_populates="secondary_lines")
     village: Mapped["Village"] = relationship("Village", back_populates="secondary_lines")

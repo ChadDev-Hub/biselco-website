@@ -1,3 +1,4 @@
+from __future__ import annotations
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import Text, Integer, ForeignKey, Boolean, Date
 from geoalchemy2 import Geometry
@@ -6,7 +7,10 @@ from .....db.base import BaseModel
 from datetime import date
 from ...franchise_area.model.villages import Village
 from ...franchise_area.model.municipality import Municipality
+from typing import List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from .service_drop import ServiceDrop
 
 class ConsumerMeter(BaseModel):
     __tablename__ = "consumer_meter"
@@ -30,7 +34,7 @@ class ConsumerMeter(BaseModel):
     # RELATIONSHIPS
     village: Mapped["Village"] = relationship("Village", back_populates="consumer_meters")
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="consumer_meters")
-    
+    service_drop: Mapped["ServiceDrop"] = relationship("ServiceDrop", back_populates="to_consumer")
     
     
     

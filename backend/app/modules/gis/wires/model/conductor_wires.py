@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ...distribution_lines.models.primary_lines import PrimaryLines
     from ...distribution_transformer.model.transformer import TransformerLinebushing
     from ...distribution_lines.models.secondary_lines import SecondaryLines
-
+    from ...consumer.model.service_drop import ServiceDrop
 
 class ConductorWires(BaseModel):
     __tablename__ = "conductor_wires"
@@ -31,6 +31,9 @@ class ConductorWires(BaseModel):
         "TransformerLinebushing", back_populates="conductor")
     secondary_lines: Mapped[List["SecondaryLines"]] = relationship(
         "SecondaryLines", back_populates="conductor"
+    )
+    service_drops: Mapped[List["ServiceDrop"]] = relationship(
+        "ServiceDrop", back_populates="conductor"
     )
 
 class NeutralConcentricCable(BaseModel):

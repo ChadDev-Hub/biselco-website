@@ -21,7 +21,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
+    
+target_metadata = BaseModel.metadata
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
@@ -34,9 +35,15 @@ from app.modules.forms import *
 from app.modules.technical import *
 from app.modules.meters import *
 from app.modules.gis.franchise_area import *
-
+from app.modules.gis.consumer import * 
+from app.modules.gis.bus import *
+from app.modules.gis.distribution_lines import *
+from app.modules.gis.distribution_transformer import *
+from app.modules.gis.poles import *
+from app.modules.gis.substation import *
+from app.modules.gis.wires import * 
 # target_metadata = mymodel.Base.metadata
-target_metadata = BaseModel.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -86,7 +93,11 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default= True,
+            include_schemas=True
         )
 
         with context.begin_transaction():

@@ -83,6 +83,11 @@ def upgrade() -> None:
                     where sl.from_bus_id = new.bus_id
                     AND sl.is_active IS DISTINCT FROM NEW.is_active;
                     
+                    
+                    UPDATE gis.service_drop as sd
+                    SET is_active = new.is_active
+                    where sd.from_bus_id = new.bus_id
+                    AND sd.is_active IS DISTINCT FROM NEW.is_active;
                     RETURN new;
                END;
                $$ LANGUAGE plpgsql;

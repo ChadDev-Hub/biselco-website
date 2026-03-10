@@ -1,24 +1,28 @@
 "use client"
-import React from 'react'
+import {useRef, useState} from 'react'
 import ComplaintsForm from './ComplaintsForm'
-
+import MeterComplaints from './meterComplaintsForm'
 
 const CreateComplaints = () => {
+    const complaintsModalRef = useRef<HTMLDialogElement>(null);
+    const complaintsChoices = ["Meter Complaints", "Pole Complaints", "Wire Complaints", "Transformer Complaints", "Line Clearing Complaints",  "Other Complaints"];
+    const [complaints, setComplaints] = useState("");
+    const [hideChoices, sethideChoices] = useState(false);
+
+    const handleChooseComplaints = (choosedComplaints: string) => {
+        sethideChoices(!hideChoices);
+        setComplaints(choosedComplaints);
+    }
+
     const handleClick = () => {
-        const modal = document.getElementById('complaints-modal') as HTMLDialogElement;
-        if (modal) {
-            modal.showModal()
-        }
+        complaintsModalRef.current?.showModal();
+
     };
+
     const handleClose = () => {
-        const modal = document.getElementById('complaints-modal') as HTMLDialogElement;
-        const form = document.getElementById('complaints-form') as HTMLFormElement
-        if (modal) {
-            modal.close()
-        }
-        if (form) {
-            form.reset()
-        }
+        complaintsModalRef.current?.close();
+        sethideChoices(false);
+        setComplaints("");
     };
     return (
         <>
@@ -71,7 +75,7 @@ const CreateComplaints = () => {
                         </g>
                     </g></svg>
             </button>
-            <dialog id="complaints-modal" className="modal backdrop-blur-2xl transition-all px-2">
+            <dialog ref={complaintsModalRef} id="complaints-modal" className="modal backdrop-blur-2xl transition-all px-2">
                 <fieldset className='fieldset modal-box w-full z-40 p-3'>
                     <legend className='fieldset-legend text-2xl font-bold w-full'>
                         <p>
@@ -79,7 +83,16 @@ const CreateComplaints = () => {
                         </p>
                         <button type='button' className='btn btn-circle shadow-lg' onClick={handleClose}>x</button>
                     </legend>
-                    <ComplaintsForm />
+                    {!hideChoices &&<div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 my-2 '>
+                        {
+                        complaintsChoices.map((complaint, index) => (
+                            <button onClick={()=>handleChooseComplaints(complaint)} type='button' key={index} className='btn btn-sm btn-outline px-4'>
+                                {complaint}
+                            </button>
+                        ))}
+                        
+                    </div>}
+                    {hideChoices && complaints === "Meter Complaints" &&  <MeterComplaints/>}
                 </fieldset>
             </dialog>
         </>

@@ -4,13 +4,16 @@ import { PostComplaints } from '@/app/actions/complaint';
 
 
 
+
 const ComplaintsForm = () => {
+
     // STATE
     const [lat, setLat] = useState<number | undefined>(0);
     const [long, setLong] = useState<number | undefined>(0);
 
     // INITIALIZE NEW FORM
     // HANDLE SUBMIT
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formdata = new FormData();
@@ -30,12 +33,10 @@ const ComplaintsForm = () => {
     };
 
     return (
-        <form action="" onSubmit={handleSubmit} id='complaints-form' className='w-full lg:w-160 flex flex-col gap-4' >
-
+        <form  action="" onSubmit={handleSubmit} id='complaints-form' className='w-full lg:w-160 flex flex-col gap-4' >
             <label className="label">
                 <span className="label-text text-shadow-2xs font-bold">Complaints</span>
             </label>
-
             <input
                 name='subject'
                 title='Complaint Sucject'
@@ -48,9 +49,6 @@ const ComplaintsForm = () => {
             placeholder='Your Complaints' 
             className='textarea min-h-50 rounded-md w-full'>
             </textarea>
-
-
-
             <BiselcoMap
                 onSelectLocation={(lat, long) => {
                     setLat(lat);
