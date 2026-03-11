@@ -1,13 +1,19 @@
 "use client"
-import React,{useRef, useState} from 'react'
+import React, { useRef, useState } from 'react'
 
 type Props = {
     children: React.ReactNode;
 }
 
-const CreateComplaints = ({children}: Props) => {
+const CreateComplaints = ({ children }: Props) => {
     const complaintsModalRef = useRef<HTMLDialogElement>(null);
-    const complaintsChoices = ["Meter Complaints", "Pole Complaints", "Wire Complaints", "Transformer Complaints", "Line Clearing Complaints",  "Other Complaints"];
+    const complaintsChoices = [
+        "Meter Services",
+        "Pole & Support Structure",
+        "Wiring & Cabling",
+        "Transformer Unit",
+        "Line Clearing / Pruning",
+        "Other"];
     const [complaints, setComplaints] = useState("");
     const [hideChoices, sethideChoices] = useState(false);
 
@@ -16,11 +22,13 @@ const CreateComplaints = ({children}: Props) => {
         setComplaints(choosedComplaints);
     }
 
+    // HANDLE OPEN MODAL
     const handleClick = () => {
         complaintsModalRef.current?.showModal();
 
     };
 
+    // handle Close Modal
     const handleClose = () => {
         complaintsModalRef.current?.close();
         sethideChoices(false);
@@ -28,7 +36,10 @@ const CreateComplaints = ({children}: Props) => {
     };
     return (
         <>
-            <button aria-label='modal' onClick={handleClick} type='button' className='btn btn-lg btn-circle'>
+            <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-lg shadow-md btn-success'>
+                <span className='font-bold text-shadow-md text-yellow-300 text-shadow-blue-700'>
+                    Submit Complaints
+                </span>
                 <svg
                     fill="currentColor"
                     height={25}
@@ -53,7 +64,7 @@ const CreateComplaints = ({children}: Props) => {
                         </g>
                         <g>
                             <g>
-                                <path  d="M396.798,230.397v-68.266c0-4.71-3.823-8.533-8.533-8.533H251.734c-4.71,0-8.533-3.823-8.533-8.533V8.534 c0-4.71-3.823-8.533-8.533-8.533H46.937c-4.71,0-8.533,3.823-8.533,8.533v469.326c0,4.71,3.823,8.533,8.533,8.533l177.081,0.008 c3.251,0,6.221-1.852,7.654-4.779c1.434-2.918,1.084-6.4-0.905-8.977c-19.464-25.164-29.892-55.252-30.225-87.09 c-0.666-64.34,41.557-122.878,103.388-140.695c27.374-7.885,55.73-7.825,81.978-0.256c4.54,1.271,9.258-1.306,10.564-5.837 C396.994,236.967,396.798,231.523,396.798,230.397z">
+                                <path d="M396.798,230.397v-68.266c0-4.71-3.823-8.533-8.533-8.533H251.734c-4.71,0-8.533-3.823-8.533-8.533V8.534 c0-4.71-3.823-8.533-8.533-8.533H46.937c-4.71,0-8.533,3.823-8.533,8.533v469.326c0,4.71,3.823,8.533,8.533,8.533l177.081,0.008 c3.251,0,6.221-1.852,7.654-4.779c1.434-2.918,1.084-6.4-0.905-8.977c-19.464-25.164-29.892-55.252-30.225-87.09 c-0.666-64.34,41.557-122.878,103.388-140.695c27.374-7.885,55.73-7.825,81.978-0.256c4.54,1.271,9.258-1.306,10.564-5.837 C396.994,236.967,396.798,231.523,396.798,230.397z">
                                 </path>
                             </g>
                         </g>
@@ -80,21 +91,24 @@ const CreateComplaints = ({children}: Props) => {
             <dialog ref={complaintsModalRef} id="complaints-modal" className="modal backdrop-blur-2xl transition-all px-2">
                 <fieldset className='fieldset modal-box w-full z-40 p-3'>
                     <legend className='fieldset-legend text-2xl font-bold w-full'>
-                        <p>
-                            Create Complaints
+                        <p className='font-bold text-blue-700 text-shadow-yellow-400 text-shadow-md'>
+                           Make Your Complaints
                         </p>
                         <button type='button' className='btn btn-circle shadow-lg' onClick={handleClose}>x</button>
                     </legend>
-                    {!hideChoices &&<div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 my-2 '>
+                    {!hideChoices && <div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 my-2 '>
                         {
-                        complaintsChoices.map((complaint, index) => (
-                            <button onClick={()=>handleChooseComplaints(complaint)} type='button' key={index} className='btn btn-sm btn-outline px-4'>
-                                {complaint}
-                            </button>
-                        ))}
-                        
+                            complaintsChoices.map((complaint, index) => (
+                                <button onClick={() => handleChooseComplaints(complaint)} type='button' key={index} className='btn  btn-sm  px-4 py-2 btn-soft drop-shadow-md shadow-md'>
+                                    <p className='font-bold text-shadow-yellow-400'>
+                                        {complaint}
+                                    </p>
+                                    
+                                </button>
+                            ))}
+
                     </div>}
-                    {hideChoices && complaints === "Meter Complaints" &&  children}
+                    {hideChoices && complaints === "Meter Services" && children}
                 </fieldset>
             </dialog>
         </>

@@ -1,5 +1,4 @@
 from geoalchemy2.shape import to_shape
-from geojson import Point, Feature
 from shapely.geometry import mapping
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +7,7 @@ from ..model.consumer import ConsumerMeter
 from .....dependencies.db_session import get_session
 from ...franchise_area.model.villages import Village
 from ...franchise_area.model.municipality import Municipality
-from typing import Optional, Any, List
+from typing import Optional, Any
 from ..schema.response_model import Consumer
 from geoalchemy2.functions import ST_AsGeoJSON
 import json

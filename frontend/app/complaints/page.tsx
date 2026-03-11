@@ -1,4 +1,4 @@
-import React, {Suspense, use} from 'react'
+import React, { Suspense, use } from 'react'
 import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
@@ -9,14 +9,15 @@ import MeterComplaints from './components/meterComplaintsForm'
 import { queryConsumer } from '../actions/consumer'
 
 
-type Props ={
-  searchParams: Promise <{consumer?:string}>
+type Props = {
+  searchParams: Promise<{ consumer?: string }>
 }
-const ComplaintsPage = ({searchParams}:Props) => {
+const ComplaintsPage = ({ searchParams }: Props) => {
   const params = use(searchParams)
   const data = UserComplaints()
   const statusName = ComplaintStatusName()
   const consumers = queryConsumer(params.consumer)
+
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -39,7 +40,7 @@ const ComplaintsPage = ({searchParams}:Props) => {
               Complaints <span className="text-yellow-300">Portal</span>
             </h1>
             <p className="text-[clamp(0.875rem,2.5vw,1.125rem)] text-blue-800 ">
-              Our Complaints Portal is a secure and user-friendly platform designed 
+              Our Complaints Portal is a secure and user-friendly platform designed
               to help you manage and track your complaints efficiently.
             </p>
           </div>
@@ -56,19 +57,21 @@ const ComplaintsPage = ({searchParams}:Props) => {
             ))}
           </nav>
         </header>
-          <Suspense fallback={<ComplaintsLoading/>}>
-            <ComplaintsContainer complaintsData={data} complaintsStatusName={statusName}/>
-          </Suspense>
-          <FabIcon>
-            <div data-tip = "Create Complaint" className='tooltip tooltip-left'>
-              <CreateComplaints>
-                <MeterComplaints data={consumers}/>
-              </CreateComplaints>
-            </div>
-            <div data-tip = "Navigate Dashboard" className='tooltip tooltip-left'>
-              <ComplaintsDashboardRouteButton/>
-            </div>
-          </FabIcon>
+        <section className='w-full flex justify-center'>
+          <div data-tip="Submit Complaints" className='tooltip tooltip-bottom'>
+            <CreateComplaints>
+              <MeterComplaints data={consumers} />
+            </CreateComplaints>
+          </div>
+        </section>
+        <Suspense fallback={<ComplaintsLoading />}>
+          <ComplaintsContainer complaintsData={data} complaintsStatusName={statusName} />
+        </Suspense>
+        <FabIcon>
+          <div data-tip="Navigate Dashboard" className='tooltip tooltip-left'>
+            <ComplaintsDashboardRouteButton />
+          </div>
+        </FabIcon>
       </main>
     </div>
   )

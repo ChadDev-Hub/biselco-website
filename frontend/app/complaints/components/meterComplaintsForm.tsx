@@ -3,7 +3,8 @@ import { useRouter } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import BiselcoMap from "./Map";
-
+import Image from "next/image";
+import { PostComplaints } from "@/app/actions/complaint";
 type PromiseType = {
   status: number
   data: ConsumerData[]
@@ -33,6 +34,7 @@ interface ComplaintFormData {
   issue: string;
   details: string;
   geolocation: coordinates | undefined;
+  attachment?: File;
 }
 
 const MeterComplaints = ({ data }: Props) => {
@@ -42,19 +44,24 @@ const MeterComplaints = ({ data }: Props) => {
     accountNumber: "",
     issue: "",
     details: "",
-    geolocation: undefined
+    geolocation: undefined,
+    attachment: undefined
   });
   const router = useRouter()
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [deBounceAccountNumber] = useDebounce(formData.accountNumber, 500);
-
-
-
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (e.target instanceof HTMLInputElement && name === "attachment") {
+      const file = e.target.files?.[0];
+      setFormData({ ...formData, [name]: e.target.files?.[0] });
+      
+    } else {
+      setFormData({ ...formData, [name]: value });
+    };
+    
 
     if (name === "accountNumber") {
       if (value === "") {
@@ -71,7 +78,8 @@ const MeterComplaints = ({ data }: Props) => {
     setFormData({ ...formData, accountNumber: accountNumber, geolocation: coords });
     setSelectedConsumer([]);
   }
-
+  
+// CHANGE URL WHEN ACCOUNT NUMBER CHANGES USING DEBOUNCE
   useEffect(() => {
     if (deBounceAccountNumber) {
       router.replace(`/complaints?consumer=${deBounceAccountNumber}`);
@@ -105,18 +113,20 @@ const MeterComplaints = ({ data }: Props) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // handle Form Submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     // Here you would normally send data to your API
-    console.log("Submitted Complaint:", formData);
+    const data = new FormData(e.currentTarget as HTMLFormElement);
+    PostComplaints(data);
     setSubmitted(true);
   };
 
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Submit a Meter Complaint</h2>
+      <h2 className="text-2xl font-bold mb-4">Meter Services Complaint</h2>
       {submitted ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
@@ -153,7 +163,7 @@ const MeterComplaints = ({ data }: Props) => {
 
 
           {/* Issue Type */}
-          <div>
+          <div className="relative overflow-visible">
             <label className="block mb-1 font-medium">Issue</label>
             <select
               enterKeyHint="next"
@@ -162,9 +172,9 @@ const MeterComplaints = ({ data }: Props) => {
               value={formData.issue}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
-                } input`}
+                } select `}
             >
-              <option value="">Select issue</option>
+              <option value=""  disabled={true}>Select Issue</option>
               <option value="billing">Billing</option>
               <option value="meter">Meter Issue</option>
               <option value="service">Service Disruption</option>
@@ -186,6 +196,7 @@ const MeterComplaints = ({ data }: Props) => {
             />
             {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
           </div>
+
           {/* Map */}
           {formData.geolocation &&
             <div className="w-full">
@@ -202,6 +213,29 @@ const MeterComplaints = ({ data }: Props) => {
               {errors.geolocation && <p className="text-red-500 text-sm">{errors.geolocation}</p>}
             </div>}
 
+          {/* Image */}
+          <div className="w-full">
+            <input
+             capture="environment" 
+             name="attachment" 
+             onChange={handleChange} 
+             accept="image/*" 
+             title="Complaints Image" 
+             className="w-full file-input" 
+             type="file"
+             placeholder="Upload Image" />   
+              {formData.attachment && (
+                <Image
+                  src={URL.createObjectURL(formData.attachment)}
+                  alt="Complaints Image"
+                  width={200}
+                  height={200}
+                  sizes="(min-width: 1024px) 200px, 100vw"
+                  className="w-auto h-auto"
+                />
+              )}
+          </div>
+          
           {/* Submit Button */}
           <button
             type="submit"
