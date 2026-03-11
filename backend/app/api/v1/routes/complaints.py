@@ -36,10 +36,14 @@ async def get_user_complaints(user:Token = Depends(get_current_user),session:Asy
 
 #GET ALL COMPLAINTS
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_all_complaint(q:Optional[str] = Query(None), session:AsyncSession = Depends(get_session)):
-    # current_user = (await session.execute(select(Users).where(Users.id == user.user_id))).scalar_one_or_none()
-    # if not current_user:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
+async def get_all_complaint(q:Optional[str] = Query(None), session:AsyncSession = Depends(get_session), user:Token=Depends(get_current_user)):
+    current_user = (await session.execute(select(Users)
+                                          .options(selectinload(Users.roles))
+                                          .where(Users.id == user.user_id))).scalar_one_or_none()
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+    if "admin" not in [role.name.lower() for role in current_user.roles]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
     return await complaints(session=session, query=q)
 
 
@@ -275,3 +279,6 @@ async def delete_complaint_status(
 @router.get("/latests_status")
 async def get_latests_status(session:AsyncSession = Depends(get_session)):
     return await new_complaints_status(session=session, complaint_id=4)
+
+
+

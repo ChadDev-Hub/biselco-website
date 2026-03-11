@@ -2,7 +2,6 @@ import React, {Suspense, use} from 'react'
 import Stats from '@/app/common/status'
 import { GetAllComplaints } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintsDashboardContainer'
-import TableSearch from './components/tableSearch'
 import ComplaintDashBoardHeader from './components/header'
 const DashBoardPage = ({searchParams}:{searchParams: Promise <{ [key: string]: string}>}) => {
   const params = use(searchParams)

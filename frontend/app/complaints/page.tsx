@@ -1,13 +1,22 @@
-import React, {Suspense} from 'react'
+import React, {Suspense, use} from 'react'
 import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
 import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './loading'
-const ComplaintsPage = () => {
+import MeterComplaints from './components/meterComplaintsForm'
+import { queryConsumer } from '../actions/consumer'
+
+
+type Props ={
+  searchParams: Promise <{consumer?:string}>
+}
+const ComplaintsPage = ({searchParams}:Props) => {
+  const params = use(searchParams)
   const data = UserComplaints()
   const statusName = ComplaintStatusName()
+  const consumers = queryConsumer(params.consumer)
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="
@@ -52,7 +61,9 @@ const ComplaintsPage = () => {
           </Suspense>
           <FabIcon>
             <div data-tip = "Create Complaint" className='tooltip tooltip-left'>
-              <CreateComplaints/>
+              <CreateComplaints>
+                <MeterComplaints data={consumers}/>
+              </CreateComplaints>
             </div>
             <div data-tip = "Navigate Dashboard" className='tooltip tooltip-left'>
               <ComplaintsDashboardRouteButton/>

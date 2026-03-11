@@ -5,7 +5,7 @@ import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
-import { redirect } from 'next/navigation'
+import { redirect} from 'next/navigation'
 import { Fascinate } from 'next/font/google'
 import MessageDetailView from './messageDetailView'
 import TableSearch from './tableSearch'
@@ -63,16 +63,23 @@ const ComplaintsContainer = ({
 }: Props) => {
     const complaintsIinitialData = use(data)
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
-
     // SET INITIAL DATA ON MOUNT
     useEffect(() => {
+        switch (complaintsIinitialData.status) {
+            case 404:
+                redirect("/landing");
+                break;
+            case 401:
+                redirect("/complaints")
+            default:
+                break;
+        }
         if (complaintsIinitialData.status === 401) {
-            redirect("/landing");
+            
         }
         queueMicrotask(() =>
         setallComplaints(complaintsIinitialData.data));
     }, [complaintsIinitialData]);
-
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return

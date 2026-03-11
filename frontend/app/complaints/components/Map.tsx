@@ -1,6 +1,6 @@
 'use client'
 
-import {  useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
@@ -11,7 +11,7 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import Style from 'ol/style/Style'
 import Icon from 'ol/style/Icon'
-import {Overlay} from 'ol'
+import { Overlay } from 'ol'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { Geolocation } from 'ol'
 import { defaults as defaultControls } from 'ol/control'
@@ -20,13 +20,14 @@ import { defaults as defaultControls } from 'ol/control'
 
 type Props = {
     onSelectLocation?: (lat: number | undefined, lon: number | undefined) => void
+    consumermeters?: [number, number]
     coordinates?: [number, number]
     markerSvg?: string;
     markerPopup?: string;
     animatePing?: boolean
 }
 
-const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, animatePing }: Props) => {
+const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, animatePing, consumermeters }: Props) => {
     const mapRef = useRef<Map | null>(null)
     const mapDivRef = useRef<HTMLDivElement | null>(null)
     const markerSourceRef = useRef<VectorSource | null>(null)
@@ -78,18 +79,18 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             source: markerSourceRef.current,
             style: new Style({
                 image: new Icon({
-                    src: `data:image/svg+xml;utf8,${markerSvg? encodeURIComponent(markerSvg) : encodeURIComponent(defaultSvg)}`,
+                    src: `data:image/svg+xml;utf8,${markerSvg ? encodeURIComponent(markerSvg) : encodeURIComponent(defaultSvg)}`,
                     anchor: [0.5, 1],
                 }),
             }),
         })
-        
+
         // POPUP OVERLAY
         const overlay = new Overlay({
             element: PopupRef.current!,
             autoPan: true,
-            offset : [-85, -50]
-            
+            offset: [-85, -50]
+
         })
 
 
@@ -118,13 +119,13 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
                 markerLayer,
                 userLayer,
             ],
-            controls: defaultControls({ 
-                attribution: false ,
+            controls: defaultControls({
+                attribution: false,
                 zoom: false,
                 rotate: false,
 
             }),
-            view:view,
+            view: view,
         })
         mapRef.current.addOverlay(overlay)
 
@@ -155,7 +156,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             overlay.setPosition(coord)
         })
 
-        
+
 
         // INTIALIZE NEW GEOLOCATION
         geoLocationRef.current = new Geolocation({
@@ -186,11 +187,31 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         }
     }, [markerSvg])
 
+    useEffect(() => {
+        if (!mapRef.current || !consumermeters) return;
+        markerSourceRef.current?.clear()
+
+        // Add New Marker
+        markerSourceRef.current?.addFeature(
+            new Feature({ geometry: new Point(fromLonLat(consumermeters)) })
+        )
+        // Move overlay
+        const overlay = mapRef.current.getOverlays().getArray()[0];
+        overlay?.setPosition(fromLonLat(consumermeters));
+
+        // Animate map to new location
+        mapRef.current.getView().animate({
+            center: fromLonLat(consumermeters),
+            zoom: 18,
+            duration: 500
+        });
+    }, [consumermeters])
+
     // HANDLE THE REALTIME-LOCATION
     const handleClick = () => {
         geoLocationRef.current?.setTracking(true)
     }
-    return <div ref={mapDivRef} className="w-full h-64 rounded-lg relative cursor-pointer border">
+    return <div ref={mapDivRef} className="w-full h-64 rounded-lg relative cursor-pointer">
         <button
             onClick={handleClick}
             aria-label='Realtime-Location'
@@ -226,7 +247,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
                 </g>
             </svg>
         </button>
-        <div ref={PopupRef} className={`${animatePing? 'animate-ping' : ''}`}>
+        <div ref={PopupRef} className={`${animatePing ? 'animate-ping' : ''}`}>
             <h1 className='font-bold text-blue-800'>{markerPopup}</h1>
         </div>
     </div>

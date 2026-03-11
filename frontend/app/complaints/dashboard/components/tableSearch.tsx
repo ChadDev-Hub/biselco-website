@@ -16,8 +16,13 @@ const TableSearch = () => {
     const [debouncedValue] = useDebounce(input, 500);
 
     useEffect(()=>{
-        router.push(`/complaints/dashboard?q=${debouncedValue}`);
+        if (debouncedValue){
+            router.replace(`/complaints/dashboard?q=${debouncedValue}`);
+        }else{
+            router.replace(`/complaints/dashboard`);
+        }
     },[debouncedValue, router])
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -26,8 +31,10 @@ const TableSearch = () => {
     
     useEffect(()=>{
         if(query){
-            setInput(query);
-        }
+            queueMicrotask(()=>{
+                setInput(query);
+            });  
+        };
     },[query])
   return (
     <input value={input} onChange={handleChange} type="text" className='input input-bordered w-full max-w-xs' placeholder='Search'/>

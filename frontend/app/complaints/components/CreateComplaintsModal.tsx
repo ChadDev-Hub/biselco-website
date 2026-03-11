@@ -1,9 +1,11 @@
 "use client"
-import {useRef, useState} from 'react'
-import ComplaintsForm from './ComplaintsForm'
-import MeterComplaints from './meterComplaintsForm'
+import React,{useRef, useState} from 'react'
 
-const CreateComplaints = () => {
+type Props = {
+    children: React.ReactNode;
+}
+
+const CreateComplaints = ({children}: Props) => {
     const complaintsModalRef = useRef<HTMLDialogElement>(null);
     const complaintsChoices = ["Meter Complaints", "Pole Complaints", "Wire Complaints", "Transformer Complaints", "Line Clearing Complaints",  "Other Complaints"];
     const [complaints, setComplaints] = useState("");
@@ -92,7 +94,7 @@ const CreateComplaints = () => {
                         ))}
                         
                     </div>}
-                    {hideChoices && complaints === "Meter Complaints" &&  <MeterComplaints/>}
+                    {hideChoices && complaints === "Meter Complaints" &&  children}
                 </fieldset>
             </dialog>
         </>
