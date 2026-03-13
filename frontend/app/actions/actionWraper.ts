@@ -11,9 +11,6 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
     if (!accessToken) {
         const refreshRes = await fetch(`${baseUrl}/v1/auth/token/refresh`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 refresh_token: refreshToken
             })

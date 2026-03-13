@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UpdateComplaintStatus, DeleteComplaintStatus  } from '@/app/actions/complaint'
 import { useAlert } from '@/app/common/alert'
 type Props = {
-    user_id: number;
     name?: string;
     id?: number;
     enabled?: boolean;
@@ -12,9 +11,13 @@ type Props = {
 
 
 
-const EnableButton = ({ id, name, enabled, user_id }: Props) => {
+const EnableButton = ({ id, name, enabled}: Props) => {
     const [checked, setChecked] = useState(enabled);
     const {showAlert} = useAlert();
+    
+    useEffect(()=>{
+        setChecked(enabled)
+    },[enabled])
 
     // HAND TOGGLE UPDATE OF COMPLAINT STATUS
     const handleUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +25,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
         switch (check) {
             case true:
                 if (!id || !name) return
-                const update = await UpdateComplaintStatus(id, name, user_id)
+                const update = await UpdateComplaintStatus(id, name)
                 
                 if (update?.status === 401) {
                     setChecked(false)
@@ -34,7 +37,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
                 break;
             case false:
                 if (!id || !name) return
-                const del = await DeleteComplaintStatus(id, name, user_id)
+                const del = await DeleteComplaintStatus(id, name)
                 if (del?.status === 401) {
                     setChecked(true)
                     showAlert('error', del.data.detail)
@@ -50,9 +53,9 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
 
     return (
         <>
-            <label className="toggle text-base-content toggle-lg ">
-                <input type="checkbox" checked={checked} onChange={handleUpdate} />
-                <svg aria-label="enabled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <label className={`toggle text-base-content toggle-lg ${checked ? "toggle-primary border-primary border-2" : "toggle-secondary border-error border-2"}`}>
+                <input disabled={name?.includes("Received")} type="checkbox" checked={checked} onChange={handleUpdate} />
+                <svg aria-label="enabled"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <g
                         width={15}
                         height={15}
@@ -62,7 +65,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
                         fill="none"
                         stroke="currentColor"
                     >
-                        <path d="M20 6 9 17l-5-5"></path>
+                        <path  d="M20 6 9 17l-5-5"></path>
                     </g>
                 </svg>
                 <svg
@@ -71,7 +74,7 @@ const EnableButton = ({ id, name, enabled, user_id }: Props) => {
                     aria-label="disabled"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
-                    fill="none"
+                    fill="green"
                     stroke="currentColor"
                     strokeWidth={4}
                     strokeLinecap="round"

@@ -145,3 +145,21 @@ export async function ComplaintStatusName() {
         data: data
     }
 }
+
+
+// VERIFY CONSUMER
+export const queryConsumer = async(query?:string)=>{
+    const res = await fetch(`${baseUrl}/v1/consumers/?consumer=${query}`,{
+        method:"GET"})
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

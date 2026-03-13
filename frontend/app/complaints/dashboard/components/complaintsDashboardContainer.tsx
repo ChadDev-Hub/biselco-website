@@ -5,18 +5,21 @@ import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
-import { redirect} from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { Fascinate } from 'next/font/google'
 import MessageDetailView from './messageDetailView'
 import TableSearch from './tableSearch'
-const fascinate = Fascinate({weight: '400',
-     subsets: ['latin'],
-    variable: '--font-fascinate'},
-    )
+const fascinate = Fascinate({
+    weight: '400',
+    subsets: ['latin'],
+    variable: '--font-fascinate'
+},
+)
 
 type PromiseType = {
     status?: number
-    data: Complaint[]}
+    data: Complaint[]
+}
 
 type Props = {
     data: Promise<PromiseType>;
@@ -24,7 +27,6 @@ type Props = {
 
 type Complaint = {
     id: number;
-    user_id: number;
     first_name: string;
     last_name: string;
     user_photo: string;
@@ -74,44 +76,43 @@ const ComplaintsContainer = ({
             default:
                 break;
         }
-        if (complaintsIinitialData.status === 401) {
-            
-        }
         queueMicrotask(() =>
-        setallComplaints(complaintsIinitialData.data));
+            setallComplaints(complaintsIinitialData.data));
+
     }, [complaintsIinitialData]);
     const message = useWebsocket();
+    console.log(allComplaints)
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
             case "complaints":
                 queueMicrotask(() =>
-                setallComplaints((prev) => {
-                    const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
-                    return [message.data, ...existing_complaint];
-                }));
+                    setallComplaints((prev) => {
+                        const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
+                        return [message.data, ...existing_complaint];
+                    }));
                 break;
             case "complaint_status":
                 queueMicrotask(() =>
-                setallComplaints((prev) => {
-                     return prev.map((complaint) =>
-                        complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
-                    )
-                }))
+                    setallComplaints((prev) => {
+                        return prev.map((complaint) =>
+                            complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
+                        )
+                    }))
                 break;
             case "deleted_complaints":
                 queueMicrotask(() =>
-                setallComplaints((prev) => {
-                    return prev.filter((complaint) => complaint.id !== message.data.id);
-                }));
+                    setallComplaints((prev) => {
+                        return prev.filter((complaint) => complaint.id !== message.data.id);
+                    }));
                 break;
             case "presence":
                 queueMicrotask(() =>
-                setallComplaints((prev) => {
-                    return prev.map((complaint)=>
-                        complaint.user_id === message.data.user_id ? {...complaint, ...message.data} : complaint
-                    )
-                }))
+                    setallComplaints((prev) => {
+                        return prev.map((complaint) =>
+                            complaint.user_id === message.data.user_id ? { ...complaint, ...message.data } : complaint
+                        )
+                    }))
                 break;
             default:
                 break;
@@ -121,9 +122,9 @@ const ComplaintsContainer = ({
         <><fieldset className='fieldset rounded-box'>
             <legend className={`fieldset-legend flex w-full`}>
                 <h3 className={`text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800 ${fascinate.className}`}>
-                    Complaints Table
+                    Real-Time Complaints Table
                 </h3>
-                <TableSearch/>
+                <TableSearch />
             </legend>
             <DashBoardTable>
                 <thead className='text-md font-bold text-center text-yellow-400'>
@@ -133,9 +134,9 @@ const ComplaintsContainer = ({
                         <td>First Name</td>
                         <td>Last Name</td>
                         <td className='min-w-50'>Submitted At</td>
-                        <td className='min-w-20'>Subject</td>
+                        <td className='min-w-60'>Subject</td>
                         <td>Description</td>
-                        <td>Village</td>
+                        <td className='min-w-50'>Village</td>
                         <td>Municipalit</td>
                         <td>Location</td>
                         <td>Update Status</td>
@@ -143,7 +144,7 @@ const ComplaintsContainer = ({
                     </tr>
                 </thead>
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
-                    {allComplaints.map((complaint:Complaint, index:number) => (
+                    {allComplaints.map((complaint: Complaint, index: number) => (
                         <tr key={index}>
                             <th className='z-10'>{index}</th>
                             <td>
@@ -162,9 +163,9 @@ const ComplaintsContainer = ({
                             <td>{complaint.first_name}</td>
                             <td>{complaint.last_name}</td>
                             <td >{complaint.date_time_submitted}</td>
-                            <td >{complaint.subject}</td>
-                            <td className='flex justify-center'>
-                                <MessageDetailView complaintDescription={complaint.description}/>
+                            <td className='w-full'>{complaint.subject}</td>
+                            <td className='flex justify-center  w-full'>
+                                <MessageDetailView complaintDescription={complaint.description} />
                             </td>
                             <td>{complaint.village}</td>
                             <td>{complaint.municipality}</td>
@@ -173,7 +174,6 @@ const ComplaintsContainer = ({
                             </td>
                             <td className='text-center'>
                                 <ComplaintStatusButton
-                                    user_id={complaint.user_id}
                                     status={complaint.status}
                                     complaints_id={complaint.id} />
                             </td>
@@ -185,7 +185,7 @@ const ComplaintsContainer = ({
                 </tbody>
             </DashBoardTable>
         </fieldset>
-            
+
 
         </>
 

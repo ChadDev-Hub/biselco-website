@@ -51,9 +51,19 @@ const MessageDetailView = ({ complaintDescription }: Props) => {
                     <h3 className='text-lg font-bold'>
                         Complaints Details
                     </h3>
-                    <p className='text-md italic'>
-                        {complaintDescription}
-                    </p>
+                    <div className='italic text-xs'>
+                        {complaintDescription.split("\n").map((item, index) =>
+                            <div key={index} className={`${item.includes("Details") ? "mt-4": ""}`}>
+                                {item.split(":")[0] && 
+                                <span className='font-bold'>
+                                    {item.split(":")[0]}:
+                                </span>}
+                                {item.split(":")[1] && 
+                                <span>
+                                    {item.split(":")[1]}
+                                </span>}
+                            </div>)}
+                    </div>
                     <div className='modal-action'>
                         <button onClick={handleClose} type='button' className='btn btn-neutral'>Close</button>
                     </div>

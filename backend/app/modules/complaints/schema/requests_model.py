@@ -1,11 +1,15 @@
 from pydantic import BaseModel
 from uuid import UUID
+from typing import List, Optional
+from fastapi import UploadFile
 # COMPLAINTS MODEL
 class CreateComplaints(BaseModel):
-    subject:str
-    description:str
-    latitude:float
-    longitude:float
+    accountNumber: str
+    issue: str
+    details: str
+    lon: float
+    lat: float
+    
     
     
 class ComplaintsStatus(BaseModel):
@@ -19,4 +23,3 @@ class ComplaintsStatus(BaseModel):
         user_id: int
     """
     status_name: str
-    user_id: UUID

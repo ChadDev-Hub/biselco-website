@@ -97,29 +97,10 @@ async def refresh_token(token:RefreshToken, session:AsyncSession = Depends(get_s
         access_token=access_token,
         type="Bearer")
 
-
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
-async def get_user(user:Token = Depends(get_current_user), session:AsyncSession = Depends(get_session)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
-    user_stmt = (await session.execute(
-        select(Users)
-        .options(selectinload(Users.roles))
-        .where(Users.id == user.user_id))).scalar_one_or_none()
-    if not user_stmt:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
-    roles_name = [role.name for role in user_stmt.roles]
-    return UserModel(
-        user_id=user_stmt.id,
-        user_name=user_stmt.user_name,
-        email=user_stmt.email,
-        first_name=user_stmt.first_name,
-        last_name=user_stmt.last_name,
-        role=roles_name,
-        photo=user_stmt.photo
-    )
+async def get_user(user:UserModel = Depends(get_current_user)):
+    return user
     
-
 # GOOGLE LOGIN
 @router.post("/google")
 async def google_login(response:Response, data:GoogleLogin, session:AsyncSession = Depends(get_session)):

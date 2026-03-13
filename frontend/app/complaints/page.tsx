@@ -6,9 +6,8 @@ import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './loading'
 import MeterComplaints from './components/meterComplaintsForm'
-import { queryConsumer } from '../actions/consumer'
-
-
+import { queryConsumer } from '@/lib/serverFetch' 
+import ComplaintHeader from './components/header'
 type Props = {
   searchParams: Promise<{ consumer?: string }>
 }
@@ -34,33 +33,18 @@ const ComplaintsPage = ({ searchParams }: Props) => {
       md:mt-20
       lg:mt-20 
       pb-21">
-        <header className="flex flex-col items-center text-center w-full space-y-6">
-          <div className="space-y-2 ">
-            <h1 className="text-[clamp(2rem,6vw,4rem)] font-extrabold tracking-tight text-red-600">
-              Complaints <span className="text-yellow-300">Portal</span>
-            </h1>
-            <p className="text-[clamp(0.875rem,2.5vw,1.125rem)] text-blue-800 ">
-              Our Complaints Portal is a secure and user-friendly platform designed
-              to help you manage and track your complaints efficiently.
-            </p>
-          </div>
-
-          {/* Feature Pills - Replaces the yellow underlined text */}
-          <nav className="flex flex-wrap flex-col lg:flex-row justify-center gap-3">
-            {["Post Complaints", "View History", "Real-Time Status"].map((item) => (
-              <span
-                key={item}
-                className="px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-medium shadow-sm hover:border-indigo-300 transition-colors"
-              >
-                {item}
-              </span>
-            ))}
-          </nav>
-        </header>
+        {/* Header */}
+        <section>
+            <ComplaintHeader />
+        </section>
+          
+          {/* Feature Pills - Replaces the yellow underlined text */}  
         <section className='w-full flex justify-center'>
           <div data-tip="Submit Complaints" className='tooltip tooltip-bottom'>
-            <CreateComplaints>
-              <MeterComplaints data={consumers} />
+            <CreateComplaints
+            meterComplaints={<MeterComplaints data={consumers} />}
+            >
+              
             </CreateComplaints>
           </div>
         </section>

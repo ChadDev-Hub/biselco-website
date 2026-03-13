@@ -1,12 +1,12 @@
-from fastapi import APIRouter, status, Depends, Form, WebSocketDisconnect, WebSocket,Body, Query
+from fastapi import APIRouter, status, Depends, Form, Body, Query, File, UploadFile
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select, asc, desc, delete, and_
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....core.security import get_current_user, get_current_user_ws
-from ....modules.complaints.schema.requests_model import ComplaintsStatus, CreateComplaints
+from ....modules.complaints.schema.requests_model import ComplaintsStatus
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from geoalchemy2.functions import ST_Point, ST_X, ST_Y, ST_SRID
+from geoalchemy2.functions import ST_Point, ST_SetSRID, ST_Intersects
 from shapely.geometry import Point
 from ....modules.complaints.services.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
 from geoalchemy2.shape import to_shape
@@ -16,124 +16,228 @@ from ....modules.complaints import *
 from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
 from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
-from ....modules.user.schema.response_model import Token
+from ....modules.user.schema.response_model import UserModel
 from typing import Optional
-
-
+from ....modules.gis.franchise_area.model.boundary import Boundary
+from ....modules.gis.consumer.model.consumer import ConsumerMeter
+from ....modules.gis.franchise_area.services.get_location import verifyLocation
+from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_user_complaints(user:Token = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
-    current_user = (await session.execute(select(Users).where(Users.id == user.user_id))).scalar_one_or_none()
+async def get_user_complaints(user:UserModel  = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+    current_user = (await session.execute(select(Users).where(Users.id == user.id))).scalar_one_or_none()
     if not current_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
-    user_id = user.user_id
-    complaint =  await user_complaints(session=session, user_id=user_id)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
+    complaint = await user_complaints(session=session, user_id=user.id)
     return complaint
 
-#GET ALL COMPLAINTS
+# GET ALL COMPLAINTS
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_all_complaint(q:Optional[str] = Query(None), session:AsyncSession = Depends(get_session), user:Token=Depends(get_current_user)):
+async def get_all_complaint(
+        q: Optional[str] = Query(None),
+        session: AsyncSession = Depends(get_session),
+        user: UserModel = Depends(get_current_user)):
     current_user = (await session.execute(select(Users)
                                           .options(selectinload(Users.roles))
-                                          .where(Users.id == user.user_id))).scalar_one_or_none()
+                                          .where(Users.id == user.id))).scalar_one_or_none()
     if not current_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
     if "admin" not in [role.name.lower() for role in current_user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Admin Only Transaction Allowed")
     return await complaints(session=session, query=q)
-
 
 
 # GET ALL COMPLAINTS STATUS NAME
 @router.get("/status/name", status_code=status.HTTP_200_OK, response_model=list[ComplaintStatusName])
-async def get_complaints_status_name(session:AsyncSession = Depends(get_session)):
+async def get_complaints_status_name(session: AsyncSession = Depends(get_session)):
     status_name = (await session.execute(select(ComplaintsStatusName).order_by(desc(ComplaintsStatusName.id)))).scalars().all()
     return status_name
 
-# CREATE ALL COMPLAINTS ON SPECIFIC USER 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+# CREATE COMPLAINTS ON SPECIFIC USER  (METER)
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
-    user:Token = Depends(get_current_user), 
-    session:AsyncSession = Depends(get_session), 
-    form:CreateComplaints = Form()):
-    # USER VERIFICATION
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    user_id = user.user_id
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    current_user = await session.scalar(select(Users).where(Users.id == user_id))
-    if not current_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
-    
+    user: UserModel = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+    accountNumber: str = Form(...),
+    issue: str = Form(...),
+    details: str = Form(...),
+    lon: str = Form(...),
+    lat: str = Form(...),
+    attachment: UploadFile = File(...)
+):
+    geom = ST_SetSRID(ST_Point(float(lon), float(lat)), 4326)
+    # VERIFY COMPLAINTS LOCATION
+    location = (await session.execute(select(Boundary)
+                                      .options(
+        selectinload(Boundary.villages),
+        selectinload(Boundary.municipal)
+    )
+        .where(ST_Intersects(Boundary.geom, geom)).order_by(desc(Boundary.id)).limit(1))).scalar_one_or_none()
+
+    # LIMIT COMPLAINTS LOCATION ON FRANCHISE AREA ONLY
+    if not location:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Complaint location Exceeds Franchise Area")
+
     # GET RECEIVED COMPLAINTS
     received = (await session.execute(
         select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
     ).scalars().first()
     if not received:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaints Status Not Found")
-    # CREATE COMPLAINT
-    location = ST_Point(form.longitude, form.latitude, srid=4326)
-    new_complaints = Complaints(
-        subject = form.subject,
-        description = form.description,
-        reference_pole = "Pole1",
-        location = location,
-        village = "Bintuan",
-        municipality = "Coron",
-        user = current_user
-    )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Complaints Status Not Found")
 
+    # VERIFY CONSUMER ACCOUNT
+    account = (await session.execute(
+        select(ConsumerMeter)
+        .where(ConsumerMeter.account_no == accountNumber)
+    )).scalar_one_or_none()
+    if not account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Consumer Account Not Found")
+
+    # COMPLAINT DESCRIPTION
+    description = f"""
+    Account Number: {account.account_no}\n
+    Consumer Name: {account.account_name}\n
+    Meter Number: {account.meter_no}\n
+    Meter Brand: {account.meter_brand}\n\n
+    Details: {details}"""
+
+    # CREATE COMPLAINT
+    new_complaints = Complaints(
+        subject=issue.upper(),
+        description=description,
+        reference_pole="Pole1",
+        location=geom,
+        village=location.villages.name,
+        municipality=location.municipal.name,
+        user_id = user.id
+    )
+    # COMPLAINT STATUS UPDATE
     status_updates = ComplaintsStatusUpdates(
-            date = datetime.now().date(),
-            time = datetime.now().time(),
-            status = received)
+        date=datetime.now().date(),
+        time=datetime.now().time(),
+        status=received)
     new_complaints.status_updates.append(status_updates)
     session.add(new_complaints)
     await session.commit()
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
 
     # QUERY THE LATEST COMPLAINT
-    data = await new_complaint(session=session, complaint_id=new_complaints.id, user_id=user_id)
+    data = await new_complaint(session=session, complaint_id=new_complaints.id)
     json_data = {
         "detail": "complaints",
-        "data" : ComplaintsModel(**data).model_dump()}
+        "data": ComplaintsModel(**data).model_dump()}
     # SEND TO ADMIN AND SPECIFIC  CLIENT
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-    admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
-    if str(user_id) not in admin_ids:
-        admin_ids.append(str(user_id))  
+    admin_ids = [str(user.id)
+                 for admin_user in admins for user in admin_user.users]
+    if str(user.id) not in admin_ids:
+        admin_ids.append(str(user.id))
+    for admin_id in admin_ids:
+        await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
+    await session.close()
+    return {
+        "detail": "Complaints Submitted"
+    }
+
+
+# CREATE COMPLAINT ON SPECIFIC USER GENERIC COMPLAINTS'
+
+
+@router.post("/generic", status_code=status.HTTP_201_CREATED)
+async def create_generic_complaints(
+    user: UserModel = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+    issue: str = Form(...),
+    details: str = Form(...),
+    location:VerifiedLocation = Depends(verifyLocation),
+    attachment: UploadFile = File(...)
+):
+    
+    # GET RECIEVED COMPLAINTS
+    received = (await session.execute(
+        select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
+    ).scalars().first()
+    if not received:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Complaints Status Not Found")
+        
+    status_updates = ComplaintsStatusUpdates(
+        date=datetime.now().date(),
+        time=datetime.now().time(),
+        status=received)
+        
+        
+    # COMPLAINT DESCRIPTION
+    description = f"""
+    Details: {details}"""
+    
+    
+    # CREATE COMPLAINT
+    new_complaints = Complaints(
+        subject=issue.upper(),
+        description=description,
+        reference_pole="Pole1",
+        location=location.geom,
+        village=location.village,
+        municipality=location.municipality,
+        user_id = user.id
+        
+    )
+    new_complaints.status_updates.append(status_updates)
+    session.add(new_complaints)
+    await session.commit()
+    await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
+    
+    # QUERY THE LATEST COMPLAINT
+    data = await new_complaint(session=session, complaint_id=new_complaints.id)
+    json_data = {
+        "detail": "complaints",
+        "data": ComplaintsModel(**data).model_dump()}
+    
+    # SEND TO ADMIN AND SPECIFIC  CLIENT
+    # ADMIN USER
+    admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
+    admin_ids = [str(user.id)
+                 for admin_user in admins for user in admin_user.users]
+    if str(user.id) not in admin_ids:
+        admin_ids.append(str(user.id))
     for admin_id in admin_ids:
         await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
     await session.close()
     
     return {
-        "detail" : "Complaints Submitted"
+        "detail": "Complaints Submitted"
     }
+    
 
 # DELETE COMPLAINT
-@router.delete("/delete/{complaint_id}", status_code=status.HTTP_200_OK)
+
+
+@router.delete("/{complaint_id}", status_code=status.HTTP_200_OK)
 async def delete_complaint(
-    complaint_id:int, 
-    session:AsyncSession = Depends(get_session), 
-    user:Token = Depends(get_current_user)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    user_id = user.user_id
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
+        complaint_id: int,
+        session: AsyncSession = Depends(get_session),
+        user: UserModel = Depends(get_current_user)):
     try:
         select_stmt = select(Complaints).where(Complaints.id == complaint_id)
         data = (await session.execute(select_stmt)).scalar_one_or_none()
-        
         if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-        
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+
         deleted_complaint = {
             "id": data.id,
             "subject": data.subject,
@@ -142,7 +246,7 @@ async def delete_complaint(
             "location": {
                 'latitude': Point(to_shape(data.location).coords).y,
                 'longitude': Point(to_shape(data.location).coords).x,
-                },
+            },
             "village": data.village,
             "municipality": data.municipality
         }
@@ -151,10 +255,11 @@ async def delete_complaint(
         await session.commit()
         await session.close()
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
-        
-        if str(user_id) not in admin_ids:
-            admin_ids.append(str(user_id))
+        admin_ids = [str(user.id)
+                     for admin_user in admins for user in admin_user.users]
+
+        if str(user.id) not in admin_ids:
+            admin_ids.append(str(user.id))
         for admin in admin_ids:
             to_send = {
                 "detail": "deleted_complaints",
@@ -164,52 +269,51 @@ async def delete_complaint(
     except Exception as e:
         return e
     return {
-        "detail" : "Successfully Deleted"
-    }    
-    
+        "detail": "Successfully Deleted"
+    }
+
 # UPDATE COMPLAINT STATUS
-@router.put("/update/status/{complaint_id}", status_code=status.HTTP_201_CREATED)
+
+
+@router.put("/status/{complaint_id}", status_code=status.HTTP_201_CREATED)
 async def update_complaint_status(
-    complaint_id:int,
-    data:ComplaintsStatus = Body(),
-    session:AsyncSession = Depends(get_session),
-    user:Token = Depends(get_current_user)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    # CLIENT
-    user_id = data.user_id
-    user_role = user.role
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
-    if "admin" not in user_role:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+        complaint_id: int,
+        data: ComplaintsStatus = Body(),
+        session: AsyncSession = Depends(get_session),
+        user: UserModel = Depends(get_current_user)):
+    
+    if "admin" not in [role.name for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Admin Only Transaction Allowed")
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
         if not select_complaint:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
         select_status = (await session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == data.status_name))).scalar_one_or_none()
         if not select_status:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
         new_status = ComplaintsStatusUpdates(
-            date = datetime.now().date(),
-            time = datetime.now().time(),
-            complaints = select_complaint,
-            status = select_status
+            date=datetime.now().date(),
+            time=datetime.now().time(),
+            complaints=select_complaint,
+            status=select_status
         )
         session.add(new_status)
         await session.commit()
         await session.refresh(select_complaint, attribute_names=["status_updates"])
         await session.close()
-        
-        # SEND TO ADMIN AND TO SPECIFIC CLIENT 
+
+        # SEND TO ADMIN AND TO SPECIFIC CLIENT
         # ADMINS
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [str(user.id) for  admin_user in  admins  for  user in admin_user.users]
+        admin_ids = [str(user.id) for admin_user in admins for user in admin_user.users]
         new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
-        
+
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if str(user_id) not in admin_ids:
-            admin_ids.append(str(user_id))
+        if str(select_complaint.user_id) not in admin_ids:
+            admin_ids.append(str(select_complaint.user_id))
         
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
@@ -221,48 +325,52 @@ async def update_complaint_status(
     except Exception as e:
         return e
     return {
-        "detail" : f"{data.status_name} Successfully Updated"
+        "detail": f"{data.status_name} Successfully Updated"
     }
-        
 
-# DELETE STATUS 
-@router.delete("/delete/status/{complaint_id}", status_code=status.HTTP_200_OK)
+
+# DELETE STATUS
+@router.delete("/status/{complaint_id}", status_code=status.HTTP_200_OK)
 async def delete_complaint_status(
-    complaint_id:int,
-    session:AsyncSession = Depends(get_session), 
-    data:ComplaintsStatus = Body(),
-    user:Token = Depends(get_current_user),
-    ):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction")
-    if "admin" not in user.role:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Only Transaction Allowed")
+    complaint_id: int,
+    session: AsyncSession = Depends(get_session),
+    data: ComplaintsStatus = Body(),
+    user: UserModel = Depends(get_current_user),
+):
+    
+    if "admin" not in [role.name for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Admin Only Transaction Allowed")
     try:
         select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
         if not select_complaint:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
         select_status = (await session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == data.status_name))).scalar_one_or_none()
         if not select_status:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            
+        # DELETE STATEMENT
         delete_stmt = delete(ComplaintsStatusUpdates).where(
             and_(
-            ComplaintsStatusUpdates.complaints == select_complaint, 
-            ComplaintsStatusUpdates.status == select_status)
-            )
+                ComplaintsStatusUpdates.complaints == select_complaint,
+                ComplaintsStatusUpdates.status == select_status)
+        )
         await session.execute(delete_stmt)
         await session.commit()
         await session.close()
-        
+
         # BROADCAST
         admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [str(user.id) for  admin_user in  admin  for  user in admin_user.users]
-        user_id = data.user_id
+        admin_ids = [str(user.id)
+                     for admin_user in admin for user in admin_user.users]
         new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
-        
+
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if str(user_id) not in admin_ids:
-            admin_ids.append(str(user_id))
-        
+        if str(select_complaint.user_id) not in admin_ids:
+            admin_ids.append(str(select_complaint.user_id))
+
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
             to_send = {
@@ -273,12 +381,5 @@ async def delete_complaint_status(
     except Exception as e:
         return e
     return {
-        "detail" : f"{data.status_name} Successfully Updated"
+        "detail": f"{data.status_name} Successfully Updated"
     }
-
-@router.get("/latests_status")
-async def get_latests_status(session:AsyncSession = Depends(get_session)):
-    return await new_complaints_status(session=session, complaint_id=4)
-
-
-

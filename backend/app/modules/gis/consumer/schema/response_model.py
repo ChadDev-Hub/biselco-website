@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from shapely.geometry import mapping
 from typing import Optional, List
 class location (BaseModel):
@@ -14,5 +14,4 @@ class Consumer(BaseModel):
     municipality: str
     geolocation: Optional[location] | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

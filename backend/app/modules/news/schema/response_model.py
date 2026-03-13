@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 # NEWS MODEL
-class UserModel(BaseModel):
+class User(BaseModel):
     user_name: str
     first_name: str
     last_name: str
@@ -15,7 +15,7 @@ class NewsModel(BaseModel):
     date_posted: str
     time_posted: str
     period: str
-    user: UserModel
+    user: User
     images: Optional[list | str]
 
 

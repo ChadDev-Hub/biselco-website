@@ -20,9 +20,9 @@ const Stats = () => {
                         ></path>
                     </svg>
                 </div>
-                <div className="stat-title">Downloads</div>
+                <div className="stat-title text-yellow-400">Daily Concerns</div>
                 <div className="stat-value">31K</div>
-                <div className="stat-desc">Jan 1st - Feb 1st</div>
+                <div className="stat-desc">↗️Today</div>
             </div>
 
             <div className="stat">
@@ -41,7 +41,7 @@ const Stats = () => {
                         ></path>
                     </svg>
                 </div>
-                <div className="stat-title">New Users</div>
+                <div className="stat-title">Complete Concerns</div>
                 <div className="stat-value">4,200</div>
                 <div className="stat-desc">↗︎ 400 (22%)</div>
             </div>
@@ -62,7 +62,7 @@ const Stats = () => {
                         ></path>
                     </svg>
                 </div>
-                <div className="stat-title">New Registers</div>
+                <div className="stat-title">Total Concerns</div>
                 <div className="stat-value">1,200</div>
                 <div className="stat-desc">↘︎ 90 (14%)</div>
             </div>

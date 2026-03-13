@@ -8,13 +8,18 @@ type Props = {
 
 
 type User = {
-    user_id: number;
+    id: number;
     user_name: string;
     email: string;
     first_name: string;
     last_name: string;
-    role: string[];
+    roles: Roles[];
     photo: string;
+}
+
+type Roles = {
+    id: number;
+    name: string
 }
 
 type contextType = {

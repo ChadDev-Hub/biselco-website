@@ -51,7 +51,6 @@ type NewsData = {
 
 type ComplaintData = {
     id: number;
-    user_id : number;
     first_name:string;
     last_name:string;
     user_photo:string;

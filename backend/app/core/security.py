@@ -8,6 +8,12 @@ from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from ..modules.user.schema.response_model import Token
+from sqlalchemy import select
+from ..dependencies.db_session import get_session
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from ..modules.user import Users
+from ..modules.user.schema.response_model import UserModel
+from sqlalchemy.orm import selectinload
 load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
@@ -62,7 +68,7 @@ async def verify_token(token):
         return None
 
 # GET CURRENT USER
-async def get_current_user(token:str = Depends(oauth2_scheme)):
+async def get_current_user(token:str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)):
     if not SECRET_KEY:
         raise ValueError("No secret key")
     credential_exception = HTTPException(
@@ -73,12 +79,19 @@ async def get_current_user(token:str = Depends(oauth2_scheme)):
     if not token:
         raise credential_exception
     try:
-        current_user = await verify_token(token)
-        if not current_user:
+        payload = await verify_token(token)
+        if not payload:
             raise credential_exception
-        if current_user.get("sub") != "access_token":
+        if payload.get("sub") != "access_token":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Token")
-        return Token(**current_user)
+        user_id = payload.get("user_id")
+        user = (await session.execute(select(Users)
+                                      .options(selectinload(Users.roles))
+                                      .where(Users.id == user_id))).scalar_one_or_none()
+        if not user:
+            raise credential_exception
+        print("user found", user.id)
+        return UserModel.model_validate(user)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Access token expired")
 

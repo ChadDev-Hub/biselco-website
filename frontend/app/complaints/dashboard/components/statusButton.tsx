@@ -6,7 +6,6 @@ import EnableButton from './complaintStatusToggle'
 type Props = {
     status: status[];
     complaints_id: number;
-    user_id: number;
 
 }
 type status = {
@@ -20,7 +19,7 @@ type status = {
 
 
 
-const ComplaintStatusButton = ({ status, complaints_id, user_id }: Props) => {
+const ComplaintStatusButton = ({ status, complaints_id}: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const complaintStatusName = ['Received', 'Pending', 'Working', 'Complete']
 
@@ -34,7 +33,7 @@ const ComplaintStatusButton = ({ status, complaints_id, user_id }: Props) => {
             modalRef.current.close()
         }
     }
-
+    console.log(status.map(s=>s.name))
 
     return (
         <>
@@ -96,10 +95,9 @@ const ComplaintStatusButton = ({ status, complaints_id, user_id }: Props) => {
                                         <span key={index} className='loading loading-dots loading-sm' />
                                     }
                                     <EnableButton
-                                        user_id={user_id}
                                         id={complaints_id}
                                         enabled={
-                                            status.find((stats: status) => stats.name === item) ? true : false
+                                            status.find((stats: status)=>stats.name == item) ? true : false
                                         }
                                         name={item}
                                     />

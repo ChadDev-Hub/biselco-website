@@ -1,5 +1,5 @@
 import React, {Suspense, use} from 'react'
-import Stats from '@/app/common/status'
+import Stats from './components/status'
 import { GetAllComplaints } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintsDashboardContainer'
 import ComplaintDashBoardHeader from './components/header'

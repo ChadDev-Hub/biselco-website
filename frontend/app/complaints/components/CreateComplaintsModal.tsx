@@ -1,12 +1,12 @@
 "use client"
 import React, { useRef, useState } from 'react'
-
+import GenericComplaints from './genericComplaintsForm'
 type Props = {
-    children: React.ReactNode;
+    meterComplaints: React.ReactNode;
 }
 
-const CreateComplaints = ({ children }: Props) => {
-    const complaintsModalRef = useRef<HTMLDialogElement>(null);
+const CreateComplaints = ({ meterComplaints }: Props) => {
+    // COMPLAINTS CHOICES
     const complaintsChoices = [
         "Meter Services",
         "Pole & Support Structure",
@@ -14,6 +14,10 @@ const CreateComplaints = ({ children }: Props) => {
         "Transformer Unit",
         "Line Clearing / Pruning",
         "Other"];
+    const poleIsueChoices = ["leaning pole", "burned pole" , "damaged pole" , "rotten pole", "requests pole relocation", "other"]
+
+    // MODAL REF 
+    const complaintsModalRef = useRef<HTMLDialogElement>(null);
     const [complaints, setComplaints] = useState("");
     const [hideChoices, sethideChoices] = useState(false);
 
@@ -92,7 +96,7 @@ const CreateComplaints = ({ children }: Props) => {
                 <fieldset className='fieldset modal-box w-full z-40 p-3'>
                     <legend className='fieldset-legend text-2xl font-bold w-full'>
                         <p className='font-bold text-blue-700 text-shadow-yellow-400 text-shadow-md'>
-                           Make Your Complaints
+                            Make Your Complaints
                         </p>
                         <button type='button' className='btn btn-circle shadow-lg' onClick={handleClose}>x</button>
                     </legend>
@@ -103,12 +107,18 @@ const CreateComplaints = ({ children }: Props) => {
                                     <p className='font-bold text-shadow-yellow-400'>
                                         {complaint}
                                     </p>
-                                    
+
                                 </button>
                             ))}
 
                     </div>}
-                    {hideChoices && complaints === "Meter Services" && children}
+                    {hideChoices &&
+                        complaints === "Meter Services" ?
+                        meterComplaints :
+                        complaints === "Pole & Support Structure" ?
+                            <GenericComplaints 
+                            title={complaints}
+                            choices={poleIsueChoices} /> : null}
                 </fieldset>
             </dialog>
         </>

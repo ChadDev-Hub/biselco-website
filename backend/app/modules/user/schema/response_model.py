@@ -1,15 +1,29 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 from typing import List
 
+class Roles(BaseModel):
+    id:int
+    name:str
+    
+    model_config=ConfigDict(
+        from_attributes=True
+    )
+
+
 class UserModel(BaseModel):
-    user_id:UUID
-    user_name:str
+    id:UUID
     first_name:str
     last_name:str
+    user_name:str
     email:str
+    roles:List[Roles]
     photo:str
-    role:list
+    
+    model_config= ConfigDict(
+        from_attributes=True
+    )
+
 
 
 class Token(BaseModel):

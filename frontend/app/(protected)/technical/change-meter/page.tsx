@@ -1,10 +1,10 @@
 
 import React from 'react'
-import ChangeMeterForm from './components/changeMeterForm'
+
 
 const ChangeMeterFormPage = () => {
   return (
-    <ChangeMeterForm />
+    <div>ChangeMeterFormPage</div>
   )
 }
 

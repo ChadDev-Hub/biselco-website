@@ -139,7 +139,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             overlay.setPosition(fromLonLat(initialCoordinates.current))
             mapRef.current?.getView().animate({
                 center: fromLonLat(initialCoordinates.current),
-                zoom: 16,
+                zoom: 18,
                 duration: 500
             })
         }

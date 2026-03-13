@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy import select, asc, and_, desc, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from ....modules.news import News, NewsImages
+from ....modules.news import News
 from ....modules.user import Users
 from ....modules.news.schema.requests_model import CreateNews
 from ....core.security import get_current_user, get_current_user_ws
@@ -11,8 +11,8 @@ from ....dependencies.db_session import get_session
 from ....dependencies.time_ago import TimeAgo
 from ....core.websocket_manager import manager
 from datetime import datetime
-from ....modules.news.schema.response_model import NewsModel, UserModel
-from ....modules.user.schema.response_model import Token
+from ....modules.news.schema.response_model import NewsModel, User
+from ....modules.user.schema.response_model import UserModel
 import json
 from typing import List
 router = APIRouter(prefix="/news", tags=["News"])
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/news", tags=["News"])
 
 
 @router.get("/", response_model=List[NewsModel])
-async def get_news(current_user:Token = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
+async def get_news(user:UserModel = Depends(get_current_user),session:AsyncSession = Depends(get_session)):
     """
     Get all news posts
     
@@ -32,15 +32,12 @@ async def get_news(current_user:Token = Depends(get_current_user),session:AsyncS
     Returns:
     List[News]: A list of all news posts sorted by date posted in ascending order and time posted in descending order
     """
-    user = await session.scalar(select(Users).where(Users.id == str(current_user.user_id)))
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
-    
     news = (await session.scalars(
         select(News)
         .options(selectinload(News.news_images))
         .options(selectinload(News.user).load_only(Users.user_name,Users.first_name, Users.last_name, Users.photo))
         .order_by(desc(News.date_posted), desc(News.time_posted)))).all()
+    
     return [
         NewsModel(
             id = n.id,
@@ -49,7 +46,7 @@ async def get_news(current_user:Token = Depends(get_current_user),session:AsyncS
             date_posted = n.date_posted.isoformat(),
             time_posted = n.time_posted.strftime("%I:%M %p"),
             period = TimeAgo(date_posted=n.date_posted, time_posted=n.time_posted),
-            user = UserModel(
+            user = User(
                 user_name = n.user.user_name,
                 first_name = n.user.first_name,
                 last_name = n.user.last_name,
@@ -61,7 +58,9 @@ async def get_news(current_user:Token = Depends(get_current_user),session:AsyncS
     ]
 
 @router.post("/create", status_code=status.HTTP_201_CREATED )
-async def create_news(current_user:Token = Depends(get_current_user), session:AsyncSession = Depends(get_session),formNews:CreateNews = Form()):
+async def create_news(user:UserModel = Depends(get_current_user), 
+                      session:AsyncSession = Depends(get_session),
+                      formNews:CreateNews = Form()):
     """
     Create a new News post
     
@@ -73,10 +72,6 @@ async def create_news(current_user:Token = Depends(get_current_user), session:As
     Returns:
     dict: A dictionary with a detail key containing a message indicating whether the creation was successful
     """
-    user_id = current_user.user_id
-    user = await session.scalar(select(Users).where(Users.id == str(user_id)))
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     now = datetime.now()
     date = now.date()
     time = now.time()
@@ -97,12 +92,12 @@ async def create_news(current_user:Token = Depends(get_current_user), session:As
         date_posted=new_news.date_posted.isoformat(),
         time_posted=new_news.time_posted.strftime("%I:%M %p"),
         period=TimeAgo(date_posted=new_news.date_posted, time_posted=new_news.time_posted),
-        user=UserModel(
-            user_name=new_news.user.user_name,
-            first_name=new_news.user.first_name,
-            last_name=new_news.user.last_name,
-            photo=new_news.user.photo
-        ),
+        user=User(
+                user_name = new_news.user.user_name,
+                first_name = new_news.user.first_name,
+                last_name = new_news.user.last_name,
+                photo = new_news.user.photo
+            ),
         images=[m for m in new_news.news_images]
     )
     await manager.broadcast({
@@ -114,7 +109,7 @@ async def create_news(current_user:Token = Depends(get_current_user), session:As
     }
 
 @router.delete("/delete/{post_id}", status_code=status.HTTP_200_OK)
-async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), current_user:Token = Depends(get_current_user)):
+async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), current_user:UserModel = Depends(get_current_user)):
     """
     Delete a Post with a given post_id
     
@@ -145,7 +140,7 @@ async def DeletePost(post_id:int, session:AsyncSession = Depends(get_session), c
             date_posted=news_data.date_posted.isoformat(),
             time_posted=news_data.time_posted.strftime("%I:%M %p"),
             period=TimeAgo(date_posted=news_data.date_posted, time_posted=news_data.time_posted),
-            user=UserModel(
+            user=User(
                 user_name=news_data.user.user_name,
                 first_name=news_data.user.first_name,
                 last_name=news_data.user.last_name,
