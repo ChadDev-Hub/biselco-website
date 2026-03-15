@@ -153,16 +153,16 @@ async def get_user(user: UserModel = Depends(get_current_user)):
 
 @router.get("/google/login")
 async def google_login(secret: Optional[str] = Query(None)):
-    role  = "mco"
+    role = "mco"
     if secret:
         if secret == ADMINLOGINSECRETKEY:
             role = "admin"
-        else: 
+        else:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Invalid Secret Key",
             )
-            
+
     queryparms = {
         "client_id": GOOGLE_CLIENT,
         "redirect_uri": REDIRECT_URI,
@@ -170,18 +170,18 @@ async def google_login(secret: Optional[str] = Query(None)):
         "scope": "openid email profile",
         "access_type": "offline",
         "prompt": "consent",
-        "state" : role
+        "state": role
     }
-        
+
     url = f"{GOOGLE_ENDPOINT}?{urlencode(queryparms)}"
     return RedirectResponse(url=url)
 
 
 @router.get("/google/login/callback")
 async def google_login_callback(
-    code: str, state: Optional[str] = None, 
+    code: str, state: Optional[str] = None,
     session: AsyncSession = Depends(get_session),
-    
+
 ):
     if not code:
         raise HTTPException(
@@ -217,7 +217,7 @@ async def google_login_callback(
             role=[r.name for r in current_user.roles],
         )
     )
-    
+
     redirect = RedirectResponse(url=f"{FRONTEND}/")
     redirect.set_cookie(
         key="refresh_token",
@@ -227,7 +227,7 @@ async def google_login_callback(
         secure=False,
         samesite="lax",
     )
-    
+
     redirect.set_cookie(
         key="access_token",
         value=access_token,
