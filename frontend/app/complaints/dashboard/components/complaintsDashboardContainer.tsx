@@ -78,7 +78,6 @@ const ComplaintsContainer = ({
         }
         queueMicrotask(() =>
             setallComplaints(complaintsIinitialData.data));
-
     }, [complaintsIinitialData]);
     const message = useWebsocket();
     console.log(allComplaints)

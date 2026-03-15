@@ -22,6 +22,7 @@ export async function proxy(request: NextRequest) {
         httpOnly: true,
         secure: true,
         maxAge: 60, // 15 minutes
+        sameSite: "none"
       });
       return res;
     }

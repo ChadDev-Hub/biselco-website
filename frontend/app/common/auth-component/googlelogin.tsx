@@ -17,7 +17,6 @@ export default function GoogleLoginButton() {
             token: credentialResponse.credential,
           }),
         });
-        console.log(res)
         if (!res.ok) {
           return;
         }

@@ -1,6 +1,8 @@
 "use server"
 import { getLandingPageData } from "../../lib/serverFetch";
 import Hero from "./components/hero";
+import McoGoogleLogin from "../common/auth-component/mcoGoogleLogin";
+
 const Landing = async () => {
   const landingPageData = await getLandingPageData()
   return (
@@ -8,6 +10,7 @@ const Landing = async () => {
       <Hero
         subtitle={landingPageData.hero.subtitle}
         description={landingPageData.hero.description} />
+        <McoGoogleLogin/>
 
       <section className="py-20 bg-base-100">
         <div className="container mx-auto px-4 text-center">

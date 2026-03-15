@@ -98,9 +98,7 @@ const MeterComplaints = ({ data }: Props) => {
     const newErrors: { [key: string]: string } = {};
     if (!formData.accountNumber) {
       newErrors.accountNumber = "Account number is required.";
-    } else if (!/^\d+$/.test(formData.accountNumber)) {
-      newErrors.accountNumber = "Account number must be numeric.";
-    }
+    } 
 
     if (!formData.issue) {
       newErrors.issue = "Please select an issue type.";

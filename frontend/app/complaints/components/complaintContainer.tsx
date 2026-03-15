@@ -15,100 +15,102 @@ type ComplaintStatusType = {
 }
 
 type Props = {
-    complaintsData:Promise<PromiseType>;
-    complaintsStatusName:Promise<ComplaintStatusType>;
-    serverurl?:string;
+    complaintsData: Promise<PromiseType>;
+    complaintsStatusName: Promise<ComplaintStatusType>;
+    serverurl?: string;
 }
 
 type Complaints = {
     id: number;
-    user_id : number;
-    first_name:string;
-    last_name:string;
-    user_photo:string;
+    first_name: string;
+    last_name: string;
+    user_photo: string;
     subject: string;
     description: string;
     date_time_submitted: string;
-    village: string; 
+    village: string;
     municipality: string;
-    location: {
-        latitude: number;
-        longitude: number;
-        srid: number;
-    }
+    location:location,
     status: [];
+    latest_status?: string;
+    user_status?: string;
 }
 
-
+type location = {
+    latitude: number;
+    longitude: number;
+    srid: number;
+}
 
 const ComplaintsContainer = (
     {
         complaintsData,
         complaintsStatusName,
         serverurl
-    }:Props
+    }: Props
 ) => {
     // DATA INITIALIZATION, STREAMING AND STATE MANAGEMENT
     const complaintsInitialData = use(complaintsData)
     const complaintsStatusNameInitialData = use(complaintsStatusName)
-    const [complaints, setComplaints] = useState<Complaints[]| []>(()=>{
-        if (complaintsInitialData.status === 401) {
-            redirect('/landing')
-        }
-        return complaintsInitialData.data
-    });
+    const [complaints, setComplaints] = useState<Complaints[] | []>([]);
+    useEffect(() => {
+
+        setComplaints(complaintsInitialData.data)
+
+    }, [complaintsInitialData])
 
     // WEBSOCKET
     const message = useWebsocket();
-    useEffect(()=>{
+    useEffect(() => {
         if (!message) return
         switch (message.detail) {
             case "complaints":
-                queueMicrotask(()=>
+                queueMicrotask(() =>
                     setComplaints((prev) => {
-                    const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);                   
-                    return [message.data, ...existing_complaint]})
+                        const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
+                        return [message.data, ...existing_complaint]
+                    })
                 )
                 break;
             case "complaint_status":
                 queueMicrotask(() =>
-                    setComplaints((prev)=>{
-                    return prev.map((complaint) => 
-                        complaint.id === message.data.id? {...complaint, ...message.data} : complaint
-                    )
-                }))
+                    setComplaints((prev) => {
+                        return prev.map((complaint) =>
+                            complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
+                        )
+                    }))
                 break;
             case "deleted_complaints":
-                queueMicrotask(()=>
-                     setComplaints((prev)=>{
-                    return prev.filter((complaint) => complaint.id !== message.data.id)
-                }))
+                queueMicrotask(() =>
+                    setComplaints((prev) => {
+                        return prev.filter((complaint) => complaint.id !== message.data.id)
+                    }))
                 break;
             default:
                 break;
         }
-    },[message]);
+    }, [message]);
     const handleDelete = (id: number) => {
         const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
         setComplaints(updatedComplaints);
     };
-    
-  return (
-    <section className='flex flex-col gap-4 w-full items-center'>
-         {complaints.map((complaint: Complaints) => (
-        <ComplaintsCard 
-        key={complaint.id}
-        id ={complaint.id}
-        subject={complaint.subject} 
-        description={complaint.description}
-        status={complaint.status}
-        date_time_submitted={complaint.date_time_submitted}
-        complaintsStatusName={complaintsStatusNameInitialData.data}
-        serverurl={serverurl}
-        deleteComplaint={handleDelete}/>
-    ))}
-    </section>
-  )
+
+    return (
+        <section className='flex flex-col gap-4 w-full items-center'>
+            {complaints.map((complaint: Complaints) => (
+                <ComplaintsCard
+                    key={complaint.id}
+                    id={complaint.id}
+                    subject={complaint.subject}
+                    description={complaint.description}
+                    status={complaint.status}
+                    date_time_submitted={complaint.date_time_submitted}
+                    complaintsStatusName={complaintsStatusNameInitialData.data}
+                    serverurl={serverurl}
+                    deleteComplaint={handleDelete} />
+            ))}
+        </section>
+    )
 }
 
 export default ComplaintsContainer;

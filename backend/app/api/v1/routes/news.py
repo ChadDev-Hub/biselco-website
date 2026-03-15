@@ -80,7 +80,7 @@ async def create_news(user:UserModel = Depends(get_current_user),
         description = formNews.description,
         date_posted = date,
         time_posted = time,
-        user = user
+        user_id = user.id
     )
     session.add(new_news)
     await session.commit()

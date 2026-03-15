@@ -17,8 +17,8 @@ class ConsumerMeter(BaseModel):
     __table_args__ = {"schema": "gis"}
     id: Mapped[int] = mapped_column(primary_key=True)
     geom: Mapped[WKBElement] = mapped_column(Geometry(geometry_type="POINT", srid=4326))
-    account_no: Mapped[str] = mapped_column(Text, nullable=True, unique=True)
-    account_name: Mapped[str] = mapped_column(Text, nullable=True)
+    account_no: Mapped[str] = mapped_column(Text, nullable=True, unique=True, index=True)
+    account_name: Mapped[str] = mapped_column(Text, nullable=True, index=True)
     account_type: Mapped[str] = mapped_column(Text, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     meter_no: Mapped[str] = mapped_column(Text, nullable=True)

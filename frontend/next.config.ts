@@ -8,9 +8,15 @@ const nextConfig: NextConfig = {
     "http://localhost:3000",
     "http://192.168.254.118:3000",
   ],
+  
 };
 
 module.exports = {
+  experimental:{
+    serverActions:{
+      bodySizeLimit:"30mb"
+    }
+  },
   allowedDevOrigins: ['local-origin.dev', '*.local-origin.dev'],
   images:{
     remotePatterns:[{
