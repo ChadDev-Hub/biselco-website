@@ -3,11 +3,10 @@ from fastapi import HTTPException, status
 from ..model.users import Users
 from ..model.roles import Roles
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..schema.response_model import UserModel
+from ..schema.response_model import UserModel, GoogleUser
 from sqlalchemy.orm import selectinload
 
-
-async def add_user(session: AsyncSession, role:str, user:UserModel):
+async def add_user(session: AsyncSession, role:str, user:GoogleUser):
     roles = (await session.execute(select(Roles).where(Roles.name == role))).scalar_one_or_none()
     if not roles:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role Not Found")

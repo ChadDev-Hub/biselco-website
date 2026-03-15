@@ -76,20 +76,21 @@ async def login_for_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User Invalid Role"
         )
     access_token = await create_access_token(
-        data={
-            "sub": "access_token",
-            "email": user.email,
-            "user_id": str(user.id),
-            "role": role,
-        }
+        data=
+        Token(
+            sub="access_token",
+            email=user.email,
+            user_id=str(user.id),
+            role=[r.name for r in user.roles],
+        )
     )
     refresh_token = await create_refresh_token(
-        data={
-            "sub": "refresh_token",
-            "email": user.email,
-            "user_id": str(user.id),
-            "role": role,
-        }
+        data=Token(
+            sub="refresh_token",
+            email=user.email,
+            user_id=str(user.id),
+            role=[r.name for r in user.roles],
+        )
     )
     response.set_cookie(
         key="refresh_token",
@@ -117,7 +118,8 @@ async def login_for_access_token(
     "/token/refresh", status_code=status.HTTP_202_ACCEPTED, response_model=AccessToken
 )
 async def refresh_token(
-    token: RefreshToken, session: AsyncSession = Depends(get_session)
+    token: RefreshToken, 
+    session: AsyncSession = Depends(get_session)
 ):
     refresh_token = token.refresh_token
     if not refresh_token:
@@ -125,19 +127,28 @@ async def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction"
         )
     try:
-        current_user = await verify_token(refresh_token)
+        verified_refresh_token = await verify_token(refresh_token)
+        if not verified_refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized Transaction",
+            )
+        current_user = (await session.execute(select(Users)
+                                              .where(Users.id == verified_refresh_token.user_id)
+                                              .options(selectinload(Users.roles)))).scalar_one_or_none()
         if not current_user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Unauthorized Transaction",
             )
-        access_token = await create_access_token(data=Token(
+        access_token = await create_access_token(
+            data=Token(
             sub="access_token",
-            email=current_user.get("email"),
-            user_id=current_user.get("user_id"),
-            role=current_user.get("role"),
+            email=current_user.email,
+            user_id=str(current_user.id),
+            role=[r.name for r in current_user.roles],
         ))
-    except InvalidTokenError:
+    except InvalidTokenError:   
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Token"
         )
@@ -199,6 +210,10 @@ async def google_login_callback(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid User"
         )
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Role"
+        )
     # Current User
     current_user = await add_user(session=session, role=role, user=user)
     access_token = await create_access_token(
@@ -231,7 +246,7 @@ async def google_login_callback(
     redirect.set_cookie(
         key="access_token",
         value=access_token,
-        max_age=60,
+        expires=datetime.now(timezone.utc) + timedelta(minutes=15),
         httponly=True,
         secure=False,
         samesite="lax",

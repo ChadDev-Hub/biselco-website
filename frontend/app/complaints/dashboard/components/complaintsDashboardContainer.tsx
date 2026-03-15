@@ -73,18 +73,21 @@ const ComplaintsContainer = ({
                 break;
             case 401:
                 redirect("/complaints")
+                break;
+            case 200:
+                queueMicrotask(() =>
+                    setallComplaints(complaintsIinitialData.data));
+                break;
             default:
                 break;
         }
-        queueMicrotask(() =>
-            setallComplaints(complaintsIinitialData.data));
+
     }, [complaintsIinitialData]);
     const message = useWebsocket();
-    console.log(allComplaints)
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
-            case "complaints":
+            case "complaints_admin":
                 queueMicrotask(() =>
                     setallComplaints((prev) => {
                         const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);

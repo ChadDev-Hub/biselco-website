@@ -13,6 +13,11 @@ type WSMessage = {
   detail: "complaints";
   data: ComplaintData;
 } | {
+  detail: "complaints_admin";
+  data: ComplaintData;
+}
+  |
+{
   detail: "complaint_status";
   data: ComplaintData;
 } | {
@@ -76,7 +81,7 @@ const WebsocketContext = createContext<WSMessage | null>(null)
 
 const WebsocketProvider = ({children}: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
-  const {user, setUser} = useAuth()
+  const {user} = useAuth()
   const wsRef = useRef<WebSocket | null>(null)
   const WSURL = 'ws://localhost:8000/v1/socket/ws'
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null)

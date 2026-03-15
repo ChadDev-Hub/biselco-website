@@ -1,6 +1,6 @@
 "use client"
 
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import BiselcoMap from "./Map";
 import Image from "next/image";
 import { PostGenericComplaints } from "@/app/actions/complaint";
@@ -14,14 +14,14 @@ interface ComplaintFormData {
 }
 
 type Props = {
-  title: string; 
+  title: string;
   choices: string[];
 }
 
 const toTitleCase = (text: string) =>
   text.replace(/\b\w/g, c => c.toUpperCase());
 
-const GenericComplaints = ({ title,choices }: Props) => {
+const GenericComplaints = ({ title, choices }: Props) => {
   const [formData, setFormData] = useState<ComplaintFormData>({
     issue: "",
     details: "",
@@ -32,14 +32,14 @@ const GenericComplaints = ({ title,choices }: Props) => {
 
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  
+  const [loading, setLoading] = useState(false);
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (e.target instanceof HTMLInputElement && name === "attachment") {
       const file = e.target.files?.[0];
       setFormData({ ...formData, [name]: file });
-      
+
     } else {
       setFormData({ ...formData, [name]: value });
     };
@@ -66,27 +66,30 @@ const GenericComplaints = ({ title,choices }: Props) => {
   };
 
   // handle Form Submission
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    
 
-  // Here you would normally send data to your API
+
+    // Here you would normally send data to your API
     const data = new FormData(e.currentTarget as HTMLFormElement);
     data.set("lon", formData.lon?.toString() ?? "");
     data.set("lat", formData.lat?.toString() ?? "");
-    
-    
+
+    setLoading(true);
     const res = await PostGenericComplaints(data);
+    
     switch (res?.status) {
       case 201:
         setSubmitted(true);
+        setLoading(false);
         break;
       case 403:
         const newErrors: { [key: string]: string } = {};
         newErrors.geolocation = res.data;
         setErrors(newErrors);
+        setLoading(false);
         break;
       default:
         break;
@@ -100,94 +103,102 @@ const GenericComplaints = ({ title,choices }: Props) => {
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            
+      ) :
+        loading ? (
+          <div className="w-full text-center">
+            <span className="loading loading-infinity loading-xl text-primary">
+              Submitting Your Concern
+            </span>
+          </div>)
+          :
+          (
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Issue Type */}
-          <div className="relative overflow-visible">
-            <label className="block mb-1 font-medium">Issue</label>
-            <select
-              enterKeyHint="next"
-              title="Select Issue"
-              name="issue"
-              value={formData.issue}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
-                } select `}
-            >
-              <option value=""  disabled={true}>Select Issue</option>
-              {choices.map((choice) => (
-                <option key={choice} value={choice}>
-                  {toTitleCase(choice)}
-                </option>
-              ))}
-              
-            </select>
-            {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
-          </div>
 
-          {/* Complaint Details */}
-          <div>
-            <label className="block mb-1 font-medium">Details</label>
-            <textarea
-              name="details"
-              value={formData.details}
-              onChange={handleChange}
-              placeholder="Describe your complaint"
-              className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
-                } textarea`}
-            />
-            {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
-          </div>
+              {/* Issue Type */}
+              <div className="relative overflow-visible">
+                <label className="block mb-1 font-medium">Issue</label>
+                <select
+                  enterKeyHint="next"
+                  title="Select Issue"
+                  name="issue"
+                  value={formData.issue}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
+                    } select `}
+                >
+                  <option value="" disabled={true}>Select Issue</option>
+                  {choices.map((choice) => (
+                    <option key={choice} value={choice}>
+                      {toTitleCase(choice)}
+                    </option>
+                  ))}
 
-          {/* Map */}
-            <div className="w-full">
-              <label className="label w-full text-wrap font-bold text-black">
-                Please Pin The Location of Your Complaints
-              </label>
-              <BiselcoMap
-                animatePing
-                markerPopup="Complaint Location"
-                consumermeters={formData.lon && formData.lat ? [formData.lon, formData.lat] : undefined}
-                onSelectLocation={(lat, lon)=>{
-                  setFormData(prev => ({...prev, lat, lon}))
-                }}
-              />
-              {errors.geolocation && <p className="text-red-500 text-sm">{errors.geolocation}</p>}
-            </div>
-          {/* Image */}
-          <div className="w-full flex flex-col gap-4">
-            <input
-             capture="environment" 
-             name="attachment" 
-             onChange={handleChange} 
-             accept="image/*" 
-             title="Complaints Image" 
-             className="w-full file-input" 
-             type="file"
-             placeholder="Upload Image" />   
-              {formData.attachment && (
-                <Image
-                  src={URL.createObjectURL(formData.attachment)}
-                  alt="Complaints Image"
-                  width={200}
-                  height={200}
-                  sizes="(min-width: 1024px) 200px, 100vw"
-                  className="w-auto h-auto"
+                </select>
+                {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
+              </div>
+
+              {/* Complaint Details */}
+              <div>
+                <label className="block mb-1 font-medium">Details</label>
+                <textarea
+                  name="details"
+                  value={formData.details}
+                  onChange={handleChange}
+                  placeholder="Describe your complaint"
+                  className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
+                    } textarea`}
                 />
-              )}
-          </div>
-          
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            Submit Complaint
-          </button>
-        </form>
-      )}
+                {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
+              </div>
+
+              {/* Map */}
+              <div className="w-full">
+                <label className="label w-full text-wrap font-bold text-black">
+                  Please Pin The Location of Your Complaints
+                </label>
+                <BiselcoMap
+                  animatePing
+                  markerPopup="Complaint Location"
+                  consumermeters={formData.lon && formData.lat ? [formData.lon, formData.lat] : undefined}
+                  onSelectLocation={(lat, lon) => {
+                    setFormData(prev => ({ ...prev, lat, lon }))
+                  }}
+                />
+                {errors.geolocation && <p className="text-red-500 text-sm">{errors.geolocation}</p>}
+              </div>
+              {/* Image */}
+              <div className="w-full flex flex-col gap-4">
+                <input
+                  capture="environment"
+                  name="attachment"
+                  onChange={handleChange}
+                  accept="image/*"
+                  title="Complaints Image"
+                  className="w-full file-input"
+                  type="file"
+                  placeholder="Upload Image" />
+                {formData.attachment && (
+                  <Image
+                    src={URL.createObjectURL(formData.attachment)}
+                    alt="Complaints Image"
+                    width={200}
+                    height={200}
+                    sizes="(min-width: 1024px) 200px, 100vw"
+                    className="w-auto h-auto"
+                  />
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+              >
+                Submit Complaint
+              </button>
+            </form>
+          )}
     </div>
   );
 };

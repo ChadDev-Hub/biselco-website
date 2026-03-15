@@ -22,6 +22,7 @@ from ....modules.gis.franchise_area.model.boundary import Boundary
 from ....modules.gis.consumer.model.consumer import ConsumerMeter
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
+import time
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -29,10 +30,6 @@ router = APIRouter(prefix="/complaints", tags=["Complaints"])
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
 async def get_user_complaints(user:UserModel  = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
-    current_user = (await session.execute(select(Users).where(Users.id == user.id))).scalar_one_or_none()
-    if not current_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User Not Found")
     complaint = await user_complaints(session=session, user_id=user.id)
     return complaint
 
@@ -101,17 +98,18 @@ async def create_complaints(
         select(ConsumerMeter)
         .where(ConsumerMeter.account_no == accountNumber)
     )).scalar_one_or_none()
-    if not account:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Consumer Account Not Found")
-
-    # COMPLAINT DESCRIPTION
-    description = f"""
-    Account Number: {account.account_no}\n
-    Consumer Name: {account.account_name}\n
-    Meter Number: {account.meter_no}\n
-    Meter Brand: {account.meter_brand}\n\n
-    Details: {details}"""
+    if account:
+        # COMPLAINT DESCRIPTION
+        description = f"""
+        Account Number: {account.account_no}\n
+        Consumer Name: {account.account_name}\n
+        Meter Number: {account.meter_no}\n
+        Meter Brand: {account.meter_brand}\n\n
+        Details: {details}"""
+    else:
+        description = f"""
+        Account Number: {accountNumber}\n\n
+        Details: {details}"""
 
     # CREATE COMPLAINT
     new_complaints = Complaints(
@@ -135,18 +133,21 @@ async def create_complaints(
 
     # QUERY THE LATEST COMPLAINT
     data = await new_complaint(session=session, complaint_id=new_complaints.id)
-    json_data = {
+    new_complaint_data = {
         "detail": "complaints",
         "data": ComplaintsModel(**data).model_dump()}
-    # SEND TO ADMIN AND SPECIFIC  CLIENT
+    # SEND TO SPECIFIC  CLIENT
+    await manager.broad_cast_personal_json(user_id=str(user.id), data=new_complaint_data)
+    new_complaint_data_admin = {
+        "detail": "complaints_admin",
+        "data": ComplaintsModel(**data).model_dump()}
+    
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-    admin_ids = [str(user.id)
-                 for admin_user in admins for user in admin_user.users]
-    if str(user.id) not in admin_ids:
-        admin_ids.append(str(user.id))
+    admin_ids = [str(us.id) for admin in admins for us in admin.users]
+    
     for admin_id in admin_ids:
-        await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
+        await manager.broad_cast_personal_json(user_id=admin_id, data=new_complaint_data_admin)
     await session.close()
     return {
         "detail": "Complaints Submitted"
@@ -207,17 +208,21 @@ async def create_generic_complaints(
         "detail": "complaints",
         "data": ComplaintsModel(**data).model_dump()}
     
-    # SEND TO ADMIN AND SPECIFIC  CLIENT
+    # SEND TO SPECIFIC  CLIENT
+    await manager.broad_cast_personal_json(user_id=str(user.id), data=json_data)
+    
+    new_complaints_admin = {
+        "detail": "complaints_admin",
+        "data": ComplaintsModel(**data).model_dump()}
+    
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-    admin_ids = [str(user.id)
-                 for admin_user in admins for user in admin_user.users]
-    if str(user.id) not in admin_ids:
-        admin_ids.append(str(user.id))
+    admin_ids = [str(user.id) for admin_user in admins for user in admin_user.users]
+
     for admin_id in admin_ids:
-        await manager.broad_cast_personal_json(user_id=admin_id, data=json_data)
+        await manager.broad_cast_personal_json(user_id=admin_id, data=new_complaints_admin)
     await session.close()
-    
+    time.sleep(3)
     return {
         "detail": "Complaints Submitted"
     }

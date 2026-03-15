@@ -21,7 +21,7 @@ load_dotenv()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 G_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 G_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -60,7 +60,9 @@ async def verify_token(token):
         email = payload.get("email")
         user_id = payload.get("user_id")
         role = payload.get("role")
-        return {"sub": sub, "email": email, "user_id": user_id, "role": role}
+        return Token(
+            sub=sub, email=email, user_id=user_id, role=role
+        )
     except jwt.ExpiredSignatureError:
         raise
     except jwt.PyJWTError:
@@ -84,11 +86,11 @@ async def get_current_user(
         payload = await verify_token(token)
         if not payload:
             raise credential_exception
-        if payload.get("sub") != "access_token":
+        if payload.sub != "access_token":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Token"
             )
-        user_id = payload.get("user_id")
+        user_id = payload.user_id
         user = (
             await session.execute(
                 select(Users)
@@ -98,7 +100,6 @@ async def get_current_user(
         ).scalar_one_or_none()
         if not user:
             raise credential_exception
-        print("user found", user.id)
         return UserModel.model_validate(user)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Access token expired")
@@ -115,7 +116,7 @@ async def get_current_user_ws(websocket: WebSocket):
         paload = await verify_token(token)
         if not paload:
             return None
-        return Token(**paload)
+        return Token(**paload.model_dump())
     except jwt.PyJWTError:
         return None
 

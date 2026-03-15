@@ -54,9 +54,20 @@ const ComplaintsContainer = (
     const complaintsStatusNameInitialData = use(complaintsStatusName)
     const [complaints, setComplaints] = useState<Complaints[] | []>([]);
     useEffect(() => {
-
-        setComplaints(complaintsInitialData.data)
-
+        switch (complaintsInitialData.status) {
+            case 401:
+                redirect("/landing")
+                break;
+            case 403:
+                redirect("/landing")
+                break;
+            case 200:
+                queueMicrotask(() =>
+                    setComplaints(complaintsInitialData.data));
+                break;  
+            default:
+                break;
+        }
     }, [complaintsInitialData])
 
     // WEBSOCKET

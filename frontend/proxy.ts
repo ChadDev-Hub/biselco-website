@@ -21,7 +21,7 @@ export async function proxy(request: NextRequest) {
       res.cookies.set('access_token', data.access_token, {
         httpOnly: true,
         secure: true,
-        maxAge: 60, // 15 minutes
+        maxAge: 60 * 15, // 15 minutes
         sameSite: "none"
       });
       return res;
