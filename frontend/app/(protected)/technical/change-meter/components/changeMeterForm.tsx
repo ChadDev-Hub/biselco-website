@@ -38,13 +38,29 @@ type Location = {
     coordinates: [number, number];
 }
 
+type PromiseType = {
+    status: number;
+    data: Consumer[];
+}
+
 type Props = { 
-    data:Consumer;
+    data: Promise<PromiseType>
 }
 const ChangeMeterForm = ({data}: Props) => {
+    const consumerData = use(data); 
     const {register,control, handleSubmit, setValue, formState: { errors }} = useForm<FormField>();
     const router = useRouter();
-    const [consumer, setConsumer] = useState(data);
+    const [consumer, setConsumer] = useState<Consumer[]>([]);
+    const [isSelecting, setIsSelecting] = useState(false);
+    useEffect(() => {
+        if(consumerData?.data){
+            const setConsumerData = () => {
+                setConsumer(consumerData?.data);
+            }
+            setConsumerData();
+            
+        }
+    }, [consumerData?.data])
 
     // WATCH ACCOUNT NUMBER INPUT
     const consumerSearch = useWatch({
@@ -55,15 +71,33 @@ const ChangeMeterForm = ({data}: Props) => {
 
     // DEBOUNCE CONSUMER QUERY
     const [debounceSearch] = useDebounce(consumerSearch, 500);
+
     useEffect(() => {
+        if(isSelecting) return;
         if(debounceSearch){
-            router.replace("/technical/change-meter?consumerSearch=" + debounceSearch);
+            router.replace("/technical/change-meter?consumer=" + debounceSearch);
         }
         else{ 
             router.replace("/technical/change-meter");
         }
-    }, [debounceSearch, router]);
+    }, [debounceSearch, router, isSelecting]);
 
+    // HANDLE SELECTED CONSUMER
+    const selectConsumer = (account:string) => {
+        setIsSelecting(true);
+        setValue("accountNumber",account);
+        setConsumer([]);
+    }
+
+    useEffect(()=>{
+        if(isSelecting){
+            const timer = setTimeout(() => {
+            setIsSelecting(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+        }
+        
+    },[isSelecting])
 
     // HANDLE SUBMIT
     const onSubmit: SubmitHandler<FormField> = (data) => 
@@ -86,7 +120,7 @@ const ChangeMeterForm = ({data}: Props) => {
                     {errors.dateAccomplished && <span className="text-red-500">Date Accomplished is required</span>}
                 </div>
                 {/* Account Number  */}
-                <div>
+                <div className="relative">
                     <label className='label font-bold text-md'>
                         Account Number
                     </label>
@@ -98,6 +132,16 @@ const ChangeMeterForm = ({data}: Props) => {
                     className="input w-full" 
                     type="text" />
                     {errors.accountNumber && <span className="text-red-500">Account Number is required</span>}
+                    {consumer.length > 0 ?
+                    <ul className="flex flex-col max-h-40 z-10 overflow-y-scroll top-15 text-xl p-4 rounded-md absolute w-full bg-base-100">
+                        {consumer.map((item: Consumer, index) => (
+                            <li key={index} onMouseDown={()=>selectConsumer(item.account_no)} className="cursor-pointer  w-full text-left">
+                                {item.account_no} - {item.account_name}
+                                <hr />
+                            </li>
+                        
+                        ))}
+                    </ul> : null}
                 </div>
                 {/* Consumer Name */}
                 <div>
