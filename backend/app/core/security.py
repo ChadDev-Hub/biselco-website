@@ -133,6 +133,7 @@ async def get_google_token(code: str):
                 "grant_type": "authorization_code",
             },
         )
+        print(token_res.status_code, token_res.json())
         return token_res.json()
 
 

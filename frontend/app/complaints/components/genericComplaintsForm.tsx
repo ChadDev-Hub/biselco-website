@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
-import BiselcoMap from "./Map";
+import BiselcoMap from "../../common/Map";
 import Image from "next/image";
 import { PostGenericComplaints } from "@/app/actions/complaint";
 // Define the type for form data
@@ -15,15 +15,16 @@ interface ComplaintFormData {
 
 type Props = {
   title: string;
-  choices: string[];
+  choices?: string[];
+  isother?: boolean
 }
 
 const toTitleCase = (text: string) =>
   text.replace(/\b\w/g, c => c.toUpperCase());
 
-const GenericComplaints = ({ title, choices }: Props) => {
+const GenericComplaints = ({ title, choices, isother }: Props) => {
   const [formData, setFormData] = useState<ComplaintFormData>({
-    issue: "",
+    issue: isother ? "Other" : "",
     details: "",
     lon: undefined,
     lat: undefined,
@@ -44,7 +45,7 @@ const GenericComplaints = ({ title, choices }: Props) => {
       setFormData({ ...formData, [name]: value });
     };
   };
-
+  console.log(formData);
   // SIMPLE VALIDATION
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -52,6 +53,7 @@ const GenericComplaints = ({ title, choices }: Props) => {
     if (!formData.issue) {
       newErrors.issue = "Please select an issue type.";
     }
+
 
     if (!formData.details) {
       newErrors.details = "Please provide complaint details.";
@@ -69,17 +71,18 @@ const GenericComplaints = ({ title, choices }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-
-
-
     // Here you would normally send data to your API
-    const data = new FormData(e.currentTarget as HTMLFormElement);
-    data.set("lon", formData.lon?.toString() ?? "");
-    data.set("lat", formData.lat?.toString() ?? "");
-
+    const data = new FormData();
+    data.append("issue", formData.issue);
+    data.append("details", formData.details);
+    data.append("lon", formData.lon?.toString() ?? "");
+    data.append("lat", formData.lat?.toString() ?? "");
+    if (formData.attachment) {
+      data.append("attachment", formData.attachment);
+    }
     setLoading(true);
     const res = await PostGenericComplaints(data);
-    
+
     switch (res?.status) {
       case 201:
         setSubmitted(true);
@@ -116,7 +119,7 @@ const GenericComplaints = ({ title, choices }: Props) => {
 
 
               {/* Issue Type */}
-              <div className="relative overflow-visible">
+              <div className={`relative overflow-visible ${isother ? "hidden" : ""}`} >
                 <label className="block mb-1 font-medium">Issue</label>
                 <select
                   enterKeyHint="next"
@@ -128,7 +131,7 @@ const GenericComplaints = ({ title, choices }: Props) => {
                     } select `}
                 >
                   <option value="" disabled={true}>Select Issue</option>
-                  {choices.map((choice) => (
+                  {choices?.map((choice) => (
                     <option key={choice} value={choice}>
                       {toTitleCase(choice)}
                     </option>
@@ -159,7 +162,7 @@ const GenericComplaints = ({ title, choices }: Props) => {
                 </label>
                 <BiselcoMap
                   animatePing
-                  markerPopup="Complaint Location"
+                  markerPopup="Report Location"
                   consumermeters={formData.lon && formData.lat ? [formData.lon, formData.lat] : undefined}
                   onSelectLocation={(lat, lon) => {
                     setFormData(prev => ({ ...prev, lat, lon }))

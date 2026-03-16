@@ -69,7 +69,7 @@ async def create_complaints(
     details: str = Form(...),
     lon: str = Form(...),
     lat: str = Form(...),
-    attachment: UploadFile = File(...)
+    attachment: Optional[UploadFile] = File(None)
 ):
     geom = ST_SetSRID(ST_Point(float(lon), float(lat)), 4326)
     # VERIFY COMPLAINTS LOCATION
@@ -164,9 +164,8 @@ async def create_generic_complaints(
     issue: str = Form(...),
     details: str = Form(...),
     location:VerifiedLocation = Depends(verifyLocation),
-    attachment: UploadFile = File(...)
+    attachment: Optional[UploadFile] = File(None)
 ):
-    
     # GET RECIEVED COMPLAINTS
     received = (await session.execute(
         select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
@@ -222,7 +221,6 @@ async def create_generic_complaints(
     for admin_id in admin_ids:
         await manager.broad_cast_personal_json(user_id=admin_id, data=new_complaints_admin)
     await session.close()
-    time.sleep(3)
     return {
         "detail": "Complaints Submitted"
     }

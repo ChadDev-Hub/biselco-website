@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
-import BiselcoMap from "./Map";
+import BiselcoMap from "../../common/Map";
 import Image from "next/image";
 import { PostComplaints } from "@/app/actions/complaint";
 type PromiseType = {
@@ -48,7 +48,6 @@ const MeterComplaints = ({ data }: Props) => {
     lat: undefined,
     attachment: undefined
   });
-  console.log(formData)
   const router = useRouter()
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -71,7 +70,7 @@ const MeterComplaints = ({ data }: Props) => {
       if (value === "") {
         setFormData({ ...formData, [name]: value, ['lon']: undefined, ['lat']: undefined })
         setSelectedConsumer([]);
-        setShowMap(false)
+        setShowMap(false);
         return;
       }
       setSelectedConsumer(consumerData?.data ?? []);
@@ -88,11 +87,15 @@ const MeterComplaints = ({ data }: Props) => {
   // CHANGE URL WHEN ACCOUNT NUMBER CHANGES USING DEBOUNCE
   useEffect(() => {
     if (deBounceAccountNumber) {
-      router.replace(`/complaints?consumer=${deBounceAccountNumber}`);
+      router.push(`/complaints?consumer=${deBounceAccountNumber}`);
+      
     } else {
-      router.replace(`/complaints`);
+      router.push(`/complaints`);
     };
   }, [deBounceAccountNumber, router]);
+
+
+
 
   // SIMPLE VALIDATION
   const validate = (): boolean => {
@@ -173,9 +176,9 @@ const MeterComplaints = ({ data }: Props) => {
                   } dropdown dropdown-center dropdown-bottom input input-primary`}
               />
               {errors.accountNumber && <p className="text-red-500 text-sm">{errors.accountNumber}</p>}
-              {selectedConsumer && selectedConsumer.length > 0 ? (
+              {selectedConsumer.length > 0 ? (
                 <ul className="dropdown-content shadow-md z-10 grid top-16 bg-base-100 w-full grid-cols-1 menu absolute rounded-box drop-shadow-md max-h-50 overflow-y-scroll">
-                  {consumerData?.data.map((consumer) => (
+                  {consumerData?.data.map((consumer: ConsumerData) => (
                     <li
                       key={consumer.account_no}
                       onClick={() => handleConsumerSelect(consumer.account_no, consumer.geolocation.coordinates)}
@@ -187,8 +190,6 @@ const MeterComplaints = ({ data }: Props) => {
                 </ul>
               ) : null}
             </div>
-
-
             {/* Issue Type */}
             <div className="relative overflow-visible">
               <label className="block mb-1 font-medium">Issue</label>
@@ -206,6 +207,7 @@ const MeterComplaints = ({ data }: Props) => {
                 <option value="reconnection">Reconnection</option>
                 <option value="meter issue">Meter Issue</option>
                 <option value="service disruption">Service Disruption</option>
+                <option value="low voltage">Low Voltage</option>
                 <option value="other">Other</option>
               </select>
               {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}

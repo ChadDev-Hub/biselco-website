@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import React from 'react'
 
 type Props = {
   text: string;
@@ -13,7 +12,7 @@ const ComplaintsCardBody = ({ text }: Props) => {
   }
   return (
     <div className='card-body'>
-      <p onClick={handleShowFullText} className={`text-md ${showfulltext ? "line-clamp-none" : "line-clamp-4"}`}
+      <div onClick={handleShowFullText} className={`text-md ${showfulltext ? "line-clamp-none" : "line-clamp-4"}`}
       >
         {
           text.split("\n").map((item, index) => (
@@ -23,7 +22,7 @@ const ComplaintsCardBody = ({ text }: Props) => {
             </div>
           ))
         }
-      </p>
+      </div>
     </div>
   )
 }

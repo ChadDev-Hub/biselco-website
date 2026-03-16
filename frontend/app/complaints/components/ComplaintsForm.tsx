@@ -1,8 +1,6 @@
-import React, { useState } from 'react'
-import BiselcoMap from './Map';
+import { useState } from 'react'
+import BiselcoMap from '../../common/Map';
 import { PostComplaints } from '@/app/actions/complaint';
-
-
 
 
 const ComplaintsForm = () => {

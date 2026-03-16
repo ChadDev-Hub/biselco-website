@@ -6,16 +6,17 @@ import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './loading'
 import MeterComplaints from './components/meterComplaintsForm'
-import { queryConsumer } from '@/lib/serverFetch' 
+import { queryConsumer } from '@/lib/serverFetch'
 import ComplaintHeader from './components/header'
 type Props = {
   searchParams: Promise<{ consumer?: string }>
 }
 const ComplaintsPage = ({ searchParams }: Props) => {
   const params = use(searchParams)
+  const consumers = queryConsumer(params.consumer)
+
   const data = UserComplaints()
   const statusName = ComplaintStatusName()
-  const consumers = queryConsumer(params.consumer)
 
   return (
     <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
@@ -35,16 +36,16 @@ const ComplaintsPage = ({ searchParams }: Props) => {
       pb-21">
         {/* Header */}
         <section>
-            <ComplaintHeader />
+          <ComplaintHeader />
         </section>
-          
-          {/* Feature Pills - Replaces the yellow underlined text */}  
+
+        {/* Feature Pills */}
         <section className='w-full flex justify-center'>
           <div data-tip="Submit Complaints" className='tooltip tooltip-bottom'>
             <CreateComplaints
-            meterComplaints={<MeterComplaints data={consumers} />}
+              meterComplaints={
+                <MeterComplaints data={consumers} />}
             >
-              
             </CreateComplaints>
           </div>
         </section>

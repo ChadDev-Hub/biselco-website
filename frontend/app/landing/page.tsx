@@ -6,12 +6,12 @@ import McoGoogleLogin from "../common/auth-component/mcoGoogleLogin";
 const Landing = async () => {
   const landingPageData = await getLandingPageData()
   return (
-    <div className="bg-base-100 text-base-content min-h-screen font-sans">
+    <div className="bg-base-100 text-base-content min-h-screen font-sans">      
       <Hero
-        subtitle={landingPageData.hero.subtitle}
-        description={landingPageData.hero.description} />
+      subtitle={landingPageData.hero.subtitle}
+        description={landingPageData.hero.description}>
         <McoGoogleLogin/>
-
+      </Hero>
       <section className="py-20 bg-base-100">
         <div className="container mx-auto px-4 text-center">
           <div className="stats stats-vertical lg:stats-horizontal shadow-xl bg-base-200 w-full max-w-4xl">

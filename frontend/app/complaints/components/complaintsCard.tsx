@@ -1,5 +1,4 @@
 'use client'
-import React from 'react'
 import ComplaintsTimeLine from './complaintsTimeLine'
 import ComplaintCardHeader from './complaintsCardHeader'
 import Accordion from '../../common/Accordion'

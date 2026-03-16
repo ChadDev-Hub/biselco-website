@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+
 import { Fascinate } from 'next/font/google'
 const facinate = Fascinate({ weight: '400', subsets: ['latin'], variable: '--font-fascinate' })
 const ComplaintHeader = () => {

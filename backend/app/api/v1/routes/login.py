@@ -51,7 +51,7 @@ ADMINLOGINSECRETKEY = os.getenv("ADMINLOGINSECRET")
 GOOGLE_CLIENT = os.getenv("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
-GOOGLE_ENDPOINT = os.getenv("GOOLE_AUTH_ENDPOINT")
+GOOGLE_ENDPOINT = os.getenv("GOOGLE_AUTH_ENDPOINT")
 FRONTEND = os.getenv("FRONTEND_BASE_URL")
 
 
@@ -76,8 +76,7 @@ async def login_for_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User Invalid Role"
         )
     access_token = await create_access_token(
-        data=
-        Token(
+        data=Token(
             sub="access_token",
             email=user.email,
             user_id=str(user.id),
@@ -118,7 +117,7 @@ async def login_for_access_token(
     "/token/refresh", status_code=status.HTTP_202_ACCEPTED, response_model=AccessToken
 )
 async def refresh_token(
-    token: RefreshToken, 
+    token: RefreshToken,
     session: AsyncSession = Depends(get_session)
 ):
     refresh_token = token.refresh_token
@@ -143,12 +142,12 @@ async def refresh_token(
             )
         access_token = await create_access_token(
             data=Token(
-            sub="access_token",
-            email=current_user.email,
-            user_id=str(current_user.id),
-            role=[r.name for r in current_user.roles],
-        ))
-    except InvalidTokenError:   
+                sub="access_token",
+                email=current_user.email,
+                user_id=str(current_user.id),
+                role=[r.name for r in current_user.roles],
+            ))
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Token"
         )
@@ -190,10 +189,13 @@ async def google_login(secret: Optional[str] = Query(None)):
 
 @router.get("/google/login/callback")
 async def google_login_callback(
-    code: str, state: Optional[str] = None,
+    code: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
     session: AsyncSession = Depends(get_session),
-
+    error: Optional[str] = Query(None),
 ):
+    if error: 
+        return RedirectResponse(url=f"{FRONTEND}/landing")
     if not code:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google Credentials"

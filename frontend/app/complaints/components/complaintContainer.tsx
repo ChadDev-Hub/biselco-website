@@ -1,5 +1,5 @@
 "use client"
-import React, { use, useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import { redirect } from 'next/navigation'

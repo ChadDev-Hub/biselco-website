@@ -12,10 +12,37 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
         "Pole & Support Structure",
         "Wiring & Cabling",
         "Transformer Unit",
-        "Line Clearing / Pruning",
         "Other"];
-    const poleIsueChoices = ["leaning pole", "burned pole" , "damaged pole" , "rotten pole", "requests pole relocation", "other"]
 
+    const poleIsueChoices = [
+        "leaning pole", 
+        "burned pole" , 
+        "damaged pole" , 
+        "rotten pole", 
+        "requests pole relocation", 
+        "other"]
+
+    const wiringIssueChoices = [
+        "Loose Connection", 
+        "Broken Service Drop Wire",
+        "Tree Branch Interference",  
+        "Spark or Burning Smell",
+        "Sagging Service Drop Wire",
+        "other",
+    ]
+    const TransformerIssueChoices = [
+        "Burning Smell",
+        "Transformer Noise",
+        "Sparking from Transformer",
+        "Transformer Explosion / Fire",
+        "Oil Leakage",
+        "low voltage",
+        "high voltage",
+        "other",
+
+
+
+    ]
     // MODAL REF 
     const complaintsModalRef = useRef<HTMLDialogElement>(null);
     const [complaints, setComplaints] = useState("");
@@ -38,11 +65,39 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
         sethideChoices(false);
         setComplaints("");
     };
+
+    let complaintComponentForm: React.ReactNode = null
+    switch (complaints) {
+        case "Meter Services":
+            complaintComponentForm = meterComplaints
+            break;
+        case "Pole & Support Structure":
+            complaintComponentForm = <GenericComplaints 
+                            title={complaints}
+                            choices={poleIsueChoices} />
+            break;
+        case "Wiring & Cabling":
+            complaintComponentForm = <GenericComplaints 
+                            title={complaints}
+                            choices={wiringIssueChoices} />
+            break;
+        case "Transformer Unit":
+            complaintComponentForm = <GenericComplaints 
+                            title={complaints}
+                            choices={TransformerIssueChoices} />
+            break;
+        case "Other":
+            complaintComponentForm = <GenericComplaints 
+                            title={complaints}
+                            isother={true} />
+        default:
+            break;
+    }
     return (
         <>
             <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-lg shadow-md btn-success'>
                 <span className='font-bold text-shadow-md text-yellow-300 text-shadow-blue-700'>
-                    Submit Complaints
+                    Submit Your Concern
                 </span>
                 <svg
                     fill="currentColor"
@@ -96,7 +151,7 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
                 <fieldset className='fieldset modal-box w-full z-40 p-3'>
                     <legend className='fieldset-legend text-2xl font-bold w-full'>
                         <p className='font-bold text-blue-700 text-shadow-yellow-400 text-shadow-md'>
-                            Make Your Complaints
+                            Make a Concern
                         </p>
                         <button type='button' className='btn btn-circle shadow-lg' onClick={handleClose}>x</button>
                     </legend>
@@ -112,13 +167,7 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
                             ))}
 
                     </div>}
-                    {hideChoices &&
-                        complaints === "Meter Services" ?
-                        meterComplaints :
-                        complaints === "Pole & Support Structure" ?
-                            <GenericComplaints 
-                            title={complaints}
-                            choices={poleIsueChoices} /> : null}
+                    {hideChoices && complaintComponentForm}
                 </fieldset>
             </dialog>
         </>

@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { DeleteComplaint } from '@/app/actions/complaint'
 type DeletConfirmationProps = {
     onClose: () => void;

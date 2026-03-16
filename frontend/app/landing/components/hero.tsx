@@ -1,15 +1,14 @@
-"use server"
+"client";
 interface Props {
     subtitle: string;
     description: string;
+    children?: React.ReactNode
 }
+
 import Image from "next/image";
-import LoginModal from "../../common/auth-component/loginmodal";
-import SignupModal from "../../common/auth-component/signupmodal";
 
 
-export default async function  Hero({ subtitle, description }: Props) {
-    const baseUrl = process.env.BASESERVERURL
+export default async function  Hero({ subtitle, description, children }: Props) {
     return (
         <div className="
           grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2
@@ -25,7 +24,7 @@ export default async function  Hero({ subtitle, description }: Props) {
                 <div className="
                 flex justify-center sm:justify-center md:justify-center lg:justify-start
                  w-full gap-4 ">
-                    <LoginModal baseurl={baseUrl}/>
+                    {children}
                 </div>
             </div>
             <div className="flex justify-center rounded-full order-1 lg:order-2">

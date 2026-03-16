@@ -1,9 +1,4 @@
 "use client"
-
-import React from 'react'
-import { GoogleLogin } from "@react-oauth/google";
-import { useAlert } from '@/app/common/alert';
-import { GoogleLoginRoute } from '@/app/actions/auth';
 type Props = {
   login: ()=>void;
 }
