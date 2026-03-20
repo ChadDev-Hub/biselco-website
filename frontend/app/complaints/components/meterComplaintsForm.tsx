@@ -1,18 +1,12 @@
 "use client"
-import { useRouter } from "next/navigation";
-import React, { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import BiselcoMap from "../../common/Map";
 import Image from "next/image";
 import { PostComplaints } from "@/app/actions/complaint";
-type PromiseType = {
-  status: number
-  data: ConsumerData[]
-} | undefined
+import { useForm, SubmitHandler, useWatch } from "react-hook-form";
+import { queryConsumer } from "@/lib/serverFetch";
 
-type Props = {
-  data: Promise<PromiseType>
-}
 
 type ConsumerData = {
   account_no: string;
@@ -26,7 +20,7 @@ type ConsumerData = {
     coordinates: coordinates;
   }
 }
-type coordinates = [number, number]
+type coordinates = [number | undefined, number | undefined];
 // Define the type for form data
 interface ComplaintFormData {
   accountNumber: string;
@@ -37,116 +31,139 @@ interface ComplaintFormData {
   attachment?: File;
 }
 
-const MeterComplaints = ({ data }: Props) => {
-  const consumerData = use(data)
-  const [selectedConsumer, setSelectedConsumer] = useState<ConsumerData[] | []>([]);
-  const [formData, setFormData] = useState<ComplaintFormData>({
-    accountNumber: "",
-    issue: "",
-    details: "",
-    lon: undefined,
-    lat: undefined,
-    attachment: undefined
-  });
-  const router = useRouter()
-  const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [deBounceAccountNumber] = useDebounce(formData.accountNumber, 500);
-  const [showMap, setShowMap] = useState(false);
+const MeterComplaints = () => {
+
+  // DEFINE STATE VARIABLES
   const [loading, setLoading] = useState(false);
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (e.target instanceof HTMLInputElement && name === "attachment") {
-      const file = e.target.files?.[0];
-      setFormData({ ...formData, [name]: file });
+  const [showMap, setShowMap] = useState(false);
+  const [consumer, setConsumer] = useState<ConsumerData[]>([]);
+  const [selectedConsumer, setSelectedConsumer] = useState<string>("");
+  // CREATE FORM HOOK
+  const { register, control, handleSubmit, setValue, setError, formState: { errors } } = useForm<ComplaintFormData>()
 
-    } else {
-      setFormData({ ...formData, [name]: value });
-    };
+  // DEFINE EFFECT FUNCTIONS
 
 
-    if (name === "accountNumber") {
-      if (value === "") {
-        setFormData({ ...formData, [name]: value, ['lon']: undefined, ['lat']: undefined })
-        setSelectedConsumer([]);
-        setShowMap(false);
-        return;
-      }
-      setSelectedConsumer(consumerData?.data ?? []);
-    }
-  };
+  // WATCH ATTACHNMENT
+  const attachment = useWatch({
+    control: control,
+    name: "attachment"
+  })
 
-  // handle Consumer Selection
-  const handleConsumerSelect = (accountNumber: string, coords: coordinates) => {
-    setFormData({ ...formData, accountNumber: accountNumber, lon: coords[0], lat: coords[1] });
-    setSelectedConsumer([]);
-    setShowMap(true)
+
+  // WATCH LATITUDE AND LONGITUDE
+  const lat = useWatch({
+    control: control,
+    name: "lat"
+
+  })
+  const lon = useWatch({
+    control: control,
+    name: "lon"
+  })
+
+
+  // WATCH ACCOUNT NUMBER INPUT
+  const consumerSearch = useWatch({
+    control: control,
+    name: "accountNumber",
+    defaultValue: ""
+  })
+
+  // DEBOUNCE CONSUMER QUERY
+  const [debounceSearch] = useDebounce(consumerSearch, 500);
+
+  // ROUTER
+
+
+  // CHANGE ROUTER WHEN CONSUMER QUERY CHANGES
+  useEffect(() => {
+  if (!debounceSearch) {
+    queueMicrotask(() => {
+      setConsumer([]);
+    })
+    return;
   }
 
-  // CHANGE URL WHEN ACCOUNT NUMBER CHANGES USING DEBOUNCE
+  if (debounceSearch === selectedConsumer) {
+    queueMicrotask(() => {
+      setConsumer([]);
+    })
+    return;
+  }
+  const fetchConsumer = async () => {
+    const res = await queryConsumer(debounceSearch);
+    if (res.status === 200) {
+      setConsumer(res.data);
+    }
+  };
+  fetchConsumer();
+}, [debounceSearch, selectedConsumer]);
+
   useEffect(() => {
-    if (deBounceAccountNumber) {
-      router.push(`/complaints?consumer=${deBounceAccountNumber}`);
-      
-    } else {
-      router.push(`/complaints`);
-    };
-  }, [deBounceAccountNumber, router]);
-
-
-
-
-  // SIMPLE VALIDATION
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    if (!formData.accountNumber) {
-      newErrors.accountNumber = "Account number is required.";
+    if (consumerSearch === "") {
+      const showMap = () => {
+        setShowMap(false)
+        setValue("lon", undefined);
+        setValue("lat", undefined);
+      };
+      showMap();
     }
+  }, [consumerSearch, setValue]);
 
-    if (!formData.issue) {
-      newErrors.issue = "Please select an issue type.";
-    }
 
-    if (!formData.details) {
-      newErrors.details = "Please provide complaint details.";
-    }
-
-    if (!formData.lon || !formData.lat) {
-      newErrors.geolocation = "Please select a location.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  // handle Form Submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // HANDLE SELECTED CONSUMER
+  const selectConsumer = (account: string, geolocation: coordinates) => {
+    setSelectedConsumer(account);
+    setValue("accountNumber", account);
+    setValue("lon", geolocation[0]);
+    setValue("lat", geolocation[1]);
     setShowMap(true);
-    if (!validate()) return;
+    setConsumer([]);
+  }
 
-    // Here you would normally send data to your API
-    const data = new FormData(e.currentTarget as HTMLFormElement);
-    data.set("lon", formData.lon?.toString() ?? "");
-    data.set("lat", formData.lat?.toString() ?? "");
-    const res = await PostComplaints(data);
-    setLoading(true);
-    switch (res?.status) {
-      case 201:
-        setSubmitted(true);
-        setLoading(false);
-        break;
-      case 403:
-        const newErrors: { [key: string]: string } = {};
-        newErrors.geolocation = res.data;
-        setErrors(newErrors);
-        setLoading(false);
-        break;
-      default:
-        break;
+  // 
+  useEffect(() => {
+    if (errors.lat || errors.lon) {
+      const showMap = () => {
+        setShowMap(true);
+      };
+      showMap();
     }
-  };
+  }, [errors.lat, errors.lon]);
 
+
+  // HANDLE SUBMIT
+  const [submitted, setSubmitted] = useState(false);
+  const onSubmit: SubmitHandler<ComplaintFormData> = (data) => {
+    setLoading(true);
+    const newDATA = new FormData();
+    newDATA.append("accountNumber", data.accountNumber);
+    newDATA.append("issue", data.issue);
+    newDATA.append("details", data.details);
+    newDATA.append("lon", data.lon?.toString() ?? "");
+    newDATA.append("lat", data.lat?.toString() ?? "");
+    if (data.attachment?.[0]) {
+      newDATA.append("attachment", data.attachment[0]);
+    }
+
+    PostComplaints(newDATA).then((res) => {
+      switch (res?.status) {
+        case 201:
+          setSubmitted(true);
+          setLoading(false);
+
+          break;
+        case 403:
+          setError("lat", { message: res.data });
+          setError("lon", { message: res.data });
+          setLoading(false);
+          break;
+        default:
+          break;
+      }
+    });
+  }
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Meter Services Complaint</h2>
@@ -156,32 +173,33 @@ const MeterComplaints = ({ data }: Props) => {
         </div>
       ) : loading ?
         (<div className="w-full text-center">
-          <span className="loading loading-infinity loading-xl text-primary">
-            Submitting Your Concern
-          </span>
+          <h4>
+            Please wait... <span className="loading loading-infinity loading-xl text-primary"/>
+          </h4>
+          <h5>
+            We are Verifying the Complaints Location...
+          </h5>
         </div>)
         :
         (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Consumer Meter Account Number */}
             <div className="relative">
               <label className="block mb-1 font-medium">Consumer Meter Account No</label>
               <input
                 type="text"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleChange}
+                {...register("accountNumber", { required: true })}
                 placeholder="Search your meter account here..."
                 className={`w-full px-3 py-2 border rounded ${errors.accountNumber ? "border-red-500" : "border-gray-300"
                   } dropdown dropdown-center dropdown-bottom input input-primary`}
               />
-              {errors.accountNumber && <p className="text-red-500 text-sm">{errors.accountNumber}</p>}
-              {selectedConsumer.length > 0 ? (
+              {errors.accountNumber && <p className="text-red-500 text-sm">Account Number Must Provided</p>}
+              {consumer?.length > 0 ? (
                 <ul className="dropdown-content shadow-md z-10 grid top-16 bg-base-100 w-full grid-cols-1 menu absolute rounded-box drop-shadow-md max-h-50 overflow-y-scroll">
-                  {consumerData?.data.map((consumer: ConsumerData) => (
+                  {consumer?.map((consumer: ConsumerData) => (
                     <li
                       key={consumer.account_no}
-                      onClick={() => handleConsumerSelect(consumer.account_no, consumer.geolocation.coordinates)}
+                      onClick={() => selectConsumer(consumer.account_no, consumer.geolocation.coordinates)}
                     ><a>
                         {consumer.account_no + " | " + consumer.account_name}
                       </a>
@@ -196,9 +214,7 @@ const MeterComplaints = ({ data }: Props) => {
               <select
                 enterKeyHint="next"
                 title="Select Issue"
-                name="issue"
-                value={formData.issue}
-                onChange={handleChange}
+                {...register("issue", { required: true })}
                 className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
                   } select `}
               >
@@ -210,24 +226,24 @@ const MeterComplaints = ({ data }: Props) => {
                 <option value="low voltage">Low Voltage</option>
                 <option value="other">Other</option>
               </select>
-              {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
+              {errors.issue && <p className="text-red-500 text-sm">Please Select an Issue</p>}
             </div>
 
             {/* Complaint Details */}
             <div>
               <label className="block mb-1 font-medium">Details</label>
               <textarea
-                name="details"
-                value={formData.details}
-                onChange={handleChange}
+                {...register("details", { required: true })}
                 placeholder="Describe your complaint"
                 className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
                   } textarea`}
               />
-              {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
+              {errors.details && <p className="text-red-500 text-sm">Details Must Provided</p>}
             </div>
 
             {/* Map */}
+            <input type="hidden" {...register("lat", { required: "Please Pin Your Meter Location on the Map" })} />
+            <input type="hidden" {...register("lon", { required: "Please Pin Your Meter Location on the Map" })} />
             {showMap &&
               <div className="w-full">
                 <label className="label w-full text-wrap font-bold text-black">
@@ -236,28 +252,27 @@ const MeterComplaints = ({ data }: Props) => {
                 <BiselcoMap
                   animatePing
                   markerPopup="Electric Meter Location"
-                  consumermeters={formData.lon && formData.lat ? [formData.lon, formData.lat] : undefined}
+                  consumermeters={lon && lat ? [lon, lat] : undefined}
                   onSelectLocation={(lat, lon) => {
-                    setFormData({ ...formData, ["lat"]: lat, ["lon"]: lon })
+                    setValue("lon", lon);
+                    setValue("lat", lat);
                   }}
                 />
-                {errors.geolocation && <p className="text-red-500 text-sm">{errors.geolocation}</p>}
+                {errors.lon && errors.lat && <p className="text-red-500 text-sm">{errors.lon.message}</p>}
               </div>}
-
             {/* Image */}
             <div className="w-full flex flex-col gap-4">
               <input
                 capture="environment"
-                name="attachment"
-                onChange={handleChange}
+                {...register("attachment")}
                 accept="image/*"
                 title="Complaints Image"
                 className="w-full file-input"
                 type="file"
                 placeholder="Upload Image" />
-              {formData.attachment && (
+              {attachment?.[0] && (
                 <Image
-                  src={URL.createObjectURL(formData.attachment)}
+                  src={URL.createObjectURL(attachment[0])}
                   alt="Complaints Image"
                   width={200}
                   height={200}

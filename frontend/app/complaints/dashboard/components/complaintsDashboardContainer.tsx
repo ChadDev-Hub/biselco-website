@@ -172,7 +172,7 @@ const ComplaintsContainer = ({
                             <td>{complaint.village}</td>
                             <td>{complaint.municipality}</td>
                             <td align='center'>
-                                <MapButton location={complaint.location} />
+                                <MapButton municipality={complaint.municipality} village={complaint.village} location={complaint.location} />
                             </td>
                             <td className='text-center'>
                                 <ComplaintStatusButton

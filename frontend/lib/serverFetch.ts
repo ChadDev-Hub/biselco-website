@@ -107,6 +107,7 @@ export async function UserComplaints() {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${accessToken}`
+    
             }
         }
     )
@@ -129,7 +130,8 @@ export async function ComplaintStatusName() {
     const res = await fetch(
         `${baseUrl}/v1/complaints/status/name`,
         {
-            method: "GET"
+            method: "GET",
+            next: {revalidate: 300}
         }
     )
     const data = await res.json()
@@ -149,7 +151,10 @@ export async function ComplaintStatusName() {
 
 // VERIFY CONSUMER
 export const queryConsumer = async(query?:string)=>{
-    const res = await fetch(`${baseUrl}/v1/consumers/?consumer=${query}`,{
+
+    const url = query? `${baseUrl}/v1/consumers/?consumer=${query}`:`${baseUrl}/v1/consumers/`
+    const res = await fetch(url,{
+        next: { revalidate: 300 },
         method:"GET"})
     const data = await res.json()
     if (!res.ok){

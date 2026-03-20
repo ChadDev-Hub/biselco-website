@@ -4,11 +4,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from ....db.base import BaseModel
 from typing import TYPE_CHECKING, List
-from ...technical.model.consumer_meter import NewConnection, ChangeMeter
+from ...technical.model.consumer_meter import NewConnection
+from ...technical.change_meter.model.change_meter import ChangeMeter
 
 if TYPE_CHECKING:
     from ...departments.model.departments import Departments
-    from ...technical.model.consumer_meter import NewConnection, ChangeMeter
     
 class CompanyForm(BaseModel):
     __tablename__= "form"

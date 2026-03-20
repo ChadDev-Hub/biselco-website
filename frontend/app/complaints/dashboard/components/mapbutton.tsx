@@ -5,6 +5,8 @@ import React, { useRef } from 'react'
 import ComplaintMap from './complaintsMap'
 type Props = {
     location: location;
+    municipality: string;
+    village: string;
 }
 type location = {
     latitude: number;
@@ -12,7 +14,7 @@ type location = {
     srid: number;
 }
 
-const MapButton = ({ location }: Props) => {
+const MapButton = ({ location, municipality, village }: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const handleOpenModal = () => {
         modalRef.current?.showModal()
@@ -105,11 +107,11 @@ const MapButton = ({ location }: Props) => {
                         <button type='button' onClick={handleCloseModal} className="btn btn-circle absolute btn-sm right-3 top-2">X</button>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <div className='flex flex-col justify-start items-start border'>
+                        <div className='flex flex-col justify-start items-start'>
                             <h4 className="text-md">
-                                <span className='font-bold text-blue-700'>Municipality: </span> s<span>d</span>
+                                Municipality: <span>{municipality}</span>
                             </h4>
-                            <h4 className="text-md">Municipality: <span>d</span></h4>
+                            <h4 className="text-md">Village: <span>{village}</span></h4>
                         </div>
                         <ComplaintMap
                             latitude={location.latitude}

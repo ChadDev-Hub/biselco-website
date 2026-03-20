@@ -11,6 +11,7 @@ import { AuthProvider } from "./utils/authProvider";
 import { getCurrentUser } from "../lib/serverFetch";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import AlertComponent from "./common/alert";
+import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default async function RootLayout({
         <GoogleOAuthProvider clientId={googleClient ?? ""}>
           <WebsocketProvider>
             <AlertComponent>
+              <LoadingIndicator>
               <ThemeController />
               <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased `}
@@ -51,6 +53,7 @@ export default async function RootLayout({
                   <DocNavigation />
                 </Drawer>
               </body>
+              </LoadingIndicator>
             </AlertComponent>
           </WebsocketProvider>
         </GoogleOAuthProvider>

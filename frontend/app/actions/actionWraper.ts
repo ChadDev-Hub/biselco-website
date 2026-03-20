@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 // SERVER ACTION WITH AUTO REFRESH TOKEN
 const baseUrl = process.env.BASESERVERURL
 
-export const serverFetchAutoRefresh = async (url: string, method: string, body?: BodyInit, headers?: HeadersInit) => {
+export const serverFetchAutoRefresh = async (url: string, method: string, body?: BodyInit, headers?: HeadersInit,  cache: RequestCache = "no-store") => {
     // Check if Access Token is expired
     const cookieStore = await cookies()
     const accessToken = cookieStore.get('access_token')?.value
@@ -28,6 +28,7 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
         // Fetch DATA WITH NEW ACCESS TOKEN
         const res = await fetch(url, {
             method: method,
+            cache: cache,
             headers: {
                 ...headers,
                 'Authorization': `Bearer ${newAccessToken}`
@@ -51,6 +52,7 @@ export const serverFetchAutoRefresh = async (url: string, method: string, body?:
         // IF THERE'S VALID ACCESS TOKEN THEN FETCH
     const res = await fetch(url, {
         method: method,
+        cache: cache,
         headers: {
             ...headers,
             'Authorization': `Bearer ${accessToken}`

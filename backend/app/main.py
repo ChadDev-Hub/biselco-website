@@ -4,7 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 load_dotenv()
-app = FastAPI()
+app = FastAPI(
+    max_request_size=52428800
+)
 FRONTENDBASEURL = os.getenv("FRONTEND_BASE_URL")
 if not FRONTENDBASEURL:
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Frontend Base URL Not Found")

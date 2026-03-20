@@ -22,7 +22,6 @@ from ....modules.gis.franchise_area.model.boundary import Boundary
 from ....modules.gis.consumer.model.consumer import ConsumerMeter
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
-import time
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -58,8 +57,6 @@ async def get_complaints_status_name(session: AsyncSession = Depends(get_session
     return status_name
 
 # CREATE COMPLAINTS ON SPECIFIC USER  (METER)
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
     user: UserModel = Depends(get_current_user),
@@ -70,7 +67,7 @@ async def create_complaints(
     lon: str = Form(...),
     lat: str = Form(...),
     attachment: Optional[UploadFile] = File(None)
-):
+):  
     geom = ST_SetSRID(ST_Point(float(lon), float(lat)), 4326)
     # VERIFY COMPLAINTS LOCATION
     location = (await session.execute(select(Boundary)

@@ -8,8 +8,8 @@ from geoalchemy2.shape import to_shape
 from uuid import UUID
 from ...departments.model.departments import Departments
 from ..model.form import CompanyForm
-from ...technical.model.consumer_meter import NewConnection, ChangeMeter
-
+from ...technical.model.consumer_meter import NewConnection
+from ...technical.change_meter.model.change_meter import ChangeMeter
 async def get_technical_forms(session:AsyncSession):
     tech_dep = (await session.execute(select(Departments).where(Departments.name == "TSD"))).scalar_one_or_none()
     if not tech_dep:

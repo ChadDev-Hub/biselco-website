@@ -13,5 +13,4 @@ class VerifiedLocation(BaseModel):
     village:str
     municipality:str
     geom: WKTElement
-    
     model_config = ConfigDict(arbitrary_types_allowed=True)

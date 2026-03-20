@@ -12,10 +12,12 @@ const nextConfig: NextConfig = {
 };
 
 module.exports = {
+  reactStrictMode: false,
   experimental:{
     serverActions:{
       bodySizeLimit:"30mb"
-    }
+    },
+    proxyClientMaxBodySize: 52428800
   },
   allowedDevOrigins: ['local-origin.dev', '*.local-origin.dev'],
   images:{

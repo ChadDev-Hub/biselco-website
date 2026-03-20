@@ -139,7 +139,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             overlay.setPosition(fromLonLat(initialCoordinates.current))
             mapRef.current?.getView().animate({
                 center: fromLonLat(initialCoordinates.current),
-                zoom: 18,
+                zoom: 16,
                 duration: 500
             })
         }
@@ -154,6 +154,13 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             )
             onSelectLocationRef.current?.(lat, lon)
             overlay.setPosition(coord)
+
+            // Animate map to new location
+            mapRef.current?.getView().animate({
+                center: coord,
+                zoom: 16,
+                duration: 600
+            })
         })
 
 
@@ -188,7 +195,9 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
     }, [markerSvg])
 
     useEffect(() => {
-        if (!mapRef.current || !consumermeters) return;
+        if (!mapRef.current || !consumermeters){
+            markerSourceRef.current?.clear()
+             return};
         markerSourceRef.current?.clear()
 
         // Add New Marker
@@ -202,8 +211,8 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         // Animate map to new location
         mapRef.current.getView().animate({
             center: fromLonLat(consumermeters),
-            zoom: 18,
-            duration: 500
+            zoom: 16,
+            duration: 50
         });
     }, [consumermeters])
 
