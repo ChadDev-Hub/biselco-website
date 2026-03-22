@@ -16,13 +16,20 @@ class ChangeMeterResponse(BaseModel):
     pull_out_meter_reading:int
     new_meter_serial_no:str
     new_meter_brand:str
-    inital_reading:int
-    remarks: str
+    initial_reading:int
+    remarks: Optional[str] = str
     accomplished_by:str
+    
     geom: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
     
+class Stats(BaseModel):
+    title: str
+    value: int
+    description: str
+    
 class ChangeMeterResponseList(BaseModel):
     data:List[ChangeMeterResponse]
     total_page:int
+    stats: List[Stats]

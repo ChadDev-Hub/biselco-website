@@ -2,9 +2,9 @@
 import { serverFetchAutoRefresh } from "./actionWraper"
 
 const baseUrl = process.env.BASESERVERURL
-export const SubmitChangeMeter = async (formData: FormData) => {
+export const SubmitChangeMeter = async (formData: FormData, page:number) => {
     const data = await serverFetchAutoRefresh(
-        `${baseUrl}/v1/change_meter/`, 
+        `${baseUrl}/v1/change_meter/?page=${page}`, 
         "POST", 
         formData,
     )
@@ -12,14 +12,14 @@ export const SubmitChangeMeter = async (formData: FormData) => {
 };
 
 
-export const GetChangeMeter = async (page?:number,query?: string) => {
-    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page? `${baseUrl}/v1/change_meter/?p=${page}` : `${baseUrl}/v1/change_meter/`;
+export const DeleteChangeMeter = async (items:Set<number>) => {
     const data = await serverFetchAutoRefresh(
-        url,
-        "GET",
-        undefined,
-        
+        `${baseUrl}/v1/change_meter/`, 
+        "DELETE", 
+        JSON.stringify(Array.from(items)),
+        {
+            "content-type": "application/json"
+        }
     )
-    await new Promise((resolve) => setTimeout(resolve, 3000));
     return data;
-};
+}

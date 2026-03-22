@@ -1,43 +1,30 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import React ,{ useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { useWebsocket } from "@/app/utils/websocketprovider";
 
 
 
-
-type PromiseType = {
-    status: number;
-    data: Data;
-} | undefined
-
-type Data = {
-    data: unknown[];
-    total_page: number;
-}
 
 type Props = {
-    data: Promise<PromiseType>;
+    data: number;
+    loading: boolean;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    children: React.ReactNode;
 }
-const TableFooter = ({ data }: Props) => {
-    use(data);
+const TableFooter = ({ data, loading, setLoading, children }: Props) => {
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [totalPages, setTotalPages] = useState(data);
     const [showListPages, setShowListPages] = useState(false);
     const listPages = Array.from({ length: totalPages }, (_, index) => index + 1);
-
     // RESOLVE INITIAL DATA AND SET LOADING AFTER SETTING INTIAL DATA
     useEffect(() => {
-        data.then((res) => {
-            if (res?.status === 200) {
-                queueMicrotask(() => {
-                    setTotalPages(res.data.total_page);
-                    setLoading(false);
-                })
-            }
-        })
-    }, [data]);
+        queueMicrotask(() => {
+            setTotalPages((prev) => Math.max(prev, data));
+            setLoading(false);
+        })},
+         [data]);
 
     // HANDLE PREVIOUS PAGE
     const handlePreviousPage = () => {
@@ -71,24 +58,39 @@ const TableFooter = ({ data }: Props) => {
     useEffect(() => {
         router.replace(`/technical/change-meter/?page=${currentPage}`, { scroll: false });
     }, [currentPage, router]);
-    
+
+
+    const message = useWebsocket()
+
+    useEffect(() => {
+        switch (message?.detail) {
+            case "post_change_meter":
+                queueMicrotask(() => {
+                    if (totalPages === message.total_page) return;
+                    setTotalPages((prev) => Math.max(prev, message.total_page));
+                })
+                break;
+            default:
+                break;
+        }
+    }, [message]);
     return (
         <tfoot className="glass whitespace-nowrap P-4">
-            <tr className="glass bg-transparent">
-                <td colSpan={12} >
+            <tr  className="glass">
+                <th colSpan={12}>
                     <div className="flex gap-2 justify-items-center items-center">
                         <div className="join drop-shadow-md border-white">
                             <button onClick={handlePreviousPage} type="button" className="join-item btn btn-sm">«</button>
                             <div className="dropdown dropdown-top dropdown-center">
                                 <button tabIndex={0} onClick={handleShowListPages} type="button" className="join-item  btn btn-sm">Page {currentPage}</button>
-                                    <ul tabIndex={-1} className="dropdown-content join bg-base-100 rounded-md grid grid-cols-1 max-h-20 w-24  overflow-y-scroll">
-                                        {listPages.map((page) => (
-                                            <li key={page}  onClick={() => handleSelectPage(page)} className="btn btn-sm"  >
-                                                Page {page}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                
+                                <ul tabIndex={-1} className="dropdown-content join bg-base-100 rounded-md grid grid-cols-1 max-h-20 w-24  overflow-y-scroll">
+                                    {listPages.map((page) => (
+                                        <li key={page} onClick={() => handleSelectPage(page)} className="btn btn-sm"  >
+                                            Page {page}
+                                        </li>
+                                    ))}
+                                </ul>
+
                             </div>
                             <button onClick={handleNextPage} type="button" className="join-item btn btn-sm">»</button>
                         </div>
@@ -96,7 +98,10 @@ const TableFooter = ({ data }: Props) => {
                             Loading data...
                         </div>}
                     </div>
-                </td>
+                </th>
+                <th align="right">
+                    {children}
+                </th>
             </tr>
         </tfoot>
     )

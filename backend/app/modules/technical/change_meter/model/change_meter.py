@@ -19,7 +19,7 @@ class ChangeMeter(BaseModel):
     __table_args__ = {"schema": "technical_dep"}
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
     form_id: Mapped[int] = mapped_column(ForeignKey("form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
-    times_tamped: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
+    timestamped: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     date_accomplished: Mapped[date] = mapped_column(type_=Date, nullable=False)
     account_no: Mapped[str] = mapped_column(type_=Text, nullable=True)
     consumer_name: Mapped[str] = mapped_column(type_=Text, nullable=False)
@@ -29,7 +29,7 @@ class ChangeMeter(BaseModel):
     new_meter_serial_no: Mapped[str] = mapped_column(type_=Text, nullable=False)
     new_meter_brand: Mapped[str] = mapped_column(type_=Text, nullable=False)
     meter_sealed: Mapped[int] = mapped_column(type_=Integer, nullable=False)
-    inital_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
+    initial_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     accomplished_by: Mapped[str] = mapped_column(type_=Text, nullable=True)
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))

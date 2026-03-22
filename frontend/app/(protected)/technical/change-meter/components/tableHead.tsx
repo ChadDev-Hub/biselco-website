@@ -6,7 +6,8 @@ const TableHead = () => {
   return (
     <thead>
     <tr className="font-bold text-black text-center">
-        <th className='p-2'>id</th>
+        <th className='p-2'>✅</th>
+        <th className='p-2'>ID</th>
         <td className='p-2'>DATE ACCOMPLISHED</td>
         <td className='p-2'>ACCOUNT NUMBER</td>
         <td className='p-2'>CONSUMER NAME</td>

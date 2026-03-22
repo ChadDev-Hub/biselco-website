@@ -8,6 +8,7 @@ export async function getCurrentUser() {
     const accessToken = cookieStore.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/auth/user/me`,{
         method: "GET",
+        cache: "no-store",
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
@@ -168,3 +169,26 @@ export const queryConsumer = async(query?:string)=>{
         data: data
     }
 }
+
+
+
+
+export const GetChangeMeter = async (page?:number,query?: string) => {
+    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page? `${baseUrl}/v1/change_meter/?p=${page}` : `${baseUrl}/v1/change_meter/`;
+    const res = await fetch(url, {
+        next: { revalidate: 1 },
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    return {
+        status: res.status,
+        data: data
+    }
+};

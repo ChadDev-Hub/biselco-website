@@ -29,11 +29,36 @@ type WSMessage = {
 } | {
   detail: "presence";
   data: UserPresence;
-}
+} | {
+  detail: "post_change_meter" | "deleted_change_meter";
+  data: ChangeMeter[];
+  total_page:number;
+
+} 
 
 type UserPresence = {
   "user_id": number;
   "user_status": string;
+}
+
+
+type ChangeMeter = {
+  id: number;
+  date_accomplished: string;
+  account_no: string;
+  consumer_name: string;
+  location: string;
+  pull_out_meter: string;
+  pull_out_meter_reading: number;
+  new_meter_serial_no: string;
+  new_meter_brand: string;
+  initial_reading: number;
+  remarks: string;
+  accomplished_by: string;
+  geom: {
+    type: string;
+    coordinates: number[];
+  };
 }
 
 type NewsData = {
