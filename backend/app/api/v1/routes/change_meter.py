@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Query, Depends, HTTPException, Form, UploadFile, File, Body
+from fastapi.responses import StreamingResponse
 from ....dependencies.db_session import get_session
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -12,11 +13,12 @@ from typing import Annotated
 from ....modules.user.service.get_user import get_users_by_roles
 from ....common.geo import extract_address_from_image
 from ....modules.technical import  ChangeMeter
+from ....modules.technical.change_meter.schema.requests_model import ChangeMeterReport
 from ....modules.technical.change_meter.schema.response_model import ChangeMeterResponseList, ChangeMeterResponse
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 import datetime
-from ....modules.technical.change_meter.services.get_change_meter import get_change_meter, deleteChangeMeter, get_change_meter_stats
+from ....modules.technical.change_meter.services.get_change_meter import get_change_meter, deleteChangeMeter, get_change_meter_stats, changeMeterReport
 from sqlalchemy import select, func
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
@@ -120,7 +122,24 @@ async def delete_change_meter(session:AsyncSession = Depends(get_session), items
     return{
         "detail" : "Change Meter Deleted Successfully"}
 
-@router.get("/sample")
-async def change_meter_stats(session: AsyncSession = Depends(get_session)):
-    return await get_change_meter_stats(session=session)
+@router.post("/excel/report", status_code=status.HTTP_200_OK)
+async def change_meter_stats(data:ChangeMeterReport, session: AsyncSession = Depends(get_session)):
+    file_stream = await changeMeterReport(
+        session=session, 
+        items=data.items,
+        prepare_name=data.prepared_by,
+        prepare_position=data.prepared_position,
+        check_name=data.checked_by,
+        check_position=data.checked_position,
+        approve_name=data.approved_by,
+        approve_position=data.approved_position
+        
+        )
+    if file_stream is None:
+        raise HTTPException(status_code=404, detail="No data available for report")
+    return StreamingResponse(
+        content=file_stream, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment; filename=report.xlsx"
+        })
 

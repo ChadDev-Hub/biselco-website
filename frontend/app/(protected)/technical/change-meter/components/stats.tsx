@@ -1,10 +1,7 @@
 "use client";
-import { div } from "framer-motion/client";
-import { Fascinate } from "next/font/google";
+
 import { use, useEffect, useState } from "react"
 
-
-const fascinate = Fascinate({ weight: "400", subsets: ["latin"] });
 
 type stats = {
   title: string;
@@ -41,13 +38,10 @@ const Stats = ({ data }: Props) => {
     }
   }, [stats])
   return (
-    <fieldset className='fieldset rounded-box'>
-      <legend className='fieldset-legend'>
-        <h2 className={`text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${fascinate.className}`}>Stats</h2>
-      </legend>
-      <div className="stats glass">
+    
+      <div className="stats gap-2 ">
         {statistics.map((stat, index) => (
-          <div key={index} className="stat shadow drop-shadow-md  drop-shadow-amber-600">
+          <div key={index} className="stat glass border-2 border-gray-700 shadow drop-shadow-md  drop-shadow-amber-600">
             <div className="stat-figure text-secondary">
               {
                 stat.title === "Total" ? (
@@ -122,7 +116,7 @@ const Stats = ({ data }: Props) => {
         ))}
       </div>
 
-    </fieldset>
+
 
   )
 }

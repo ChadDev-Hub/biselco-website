@@ -17,7 +17,7 @@ class ChangeMeterResponse(BaseModel):
     new_meter_serial_no:str
     new_meter_brand:str
     initial_reading:int
-    remarks: Optional[str] = str
+    remarks: Optional[str] = None
     accomplished_by:str
     
     geom: Dict[str, Any]
@@ -33,3 +33,19 @@ class ChangeMeterResponseList(BaseModel):
     data:List[ChangeMeterResponse]
     total_page:int
     stats: List[Stats]
+
+class ChangeMeterReportResponse(BaseModel):
+    date_accomplished: date
+    account_no: str
+    consumer_name: str
+    location: str
+    pull_out_meter: str
+    pull_out_meter_reading: int
+    new_meter_serial_no: str
+    new_meter_brand: str
+    meter_sealed: int
+    initial_reading: int
+    remarks: Optional[str] = None
+    accomplished_by: str
+    
+    model_config = ConfigDict(from_attributes=True)

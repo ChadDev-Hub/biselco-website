@@ -1,5 +1,5 @@
 "use client";
-import React ,{ useState, useEffect, use } from "react";
+import React, { useState, useEffect  } from "react";
 import { useRouter } from "next/navigation";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 
@@ -18,13 +18,15 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
     const [totalPages, setTotalPages] = useState(data);
     const [showListPages, setShowListPages] = useState(false);
     const listPages = Array.from({ length: totalPages }, (_, index) => index + 1);
+    
     // RESOLVE INITIAL DATA AND SET LOADING AFTER SETTING INTIAL DATA
     useEffect(() => {
         queueMicrotask(() => {
             setTotalPages((prev) => Math.max(prev, data));
             setLoading(false);
-        })},
-         [data]);
+        })
+    },
+        [data, setLoading]);
 
     // HANDLE PREVIOUS PAGE
     const handlePreviousPage = () => {
@@ -76,7 +78,7 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
     }, [message]);
     return (
         <tfoot className="glass whitespace-nowrap P-4">
-            <tr  className="glass">
+            <tr className="glass">
                 <th colSpan={12}>
                     <div className="flex gap-2 justify-items-center items-center">
                         <div className="join drop-shadow-md border-white">

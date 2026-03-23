@@ -5,6 +5,8 @@ import { useWebsocket } from '@/app/utils/websocketprovider'
 import TableFooter from './tableFooter'
 import Delete from './deleteChangeMeter'
 import { DeleteChangeMeter } from '@/app/actions/changeMeter'
+import DownloadReport from './download'
+import { DownloadChangeMeterReport } from '@/app/actions/changeMeter'
 type PromiseType = {
   status: number;
   data: Data;
@@ -42,7 +44,7 @@ const TableData = ({ data }: Props) => {
   const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set())
   const [totalPage, setTotalPage] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [showDelete, setShowDelete] = useState(()=>{
+  const [showAction, setShowAction] = useState(()=>{
     if (selectedRow.size > 0) return true
     else return false
   })
@@ -82,8 +84,10 @@ const TableData = ({ data }: Props) => {
   }, [message])
 
   useEffect(() => {
-    if (selectedRow.size > 0) setShowDelete(true)
-    else setShowDelete(false)
+    if (selectedRow.size > 0) {
+      queueMicrotask(() => setShowAction(true))}
+    else 
+      queueMicrotask(() => setShowAction(false))
   }, [selectedRow])
 
   const handleSelection = (item: number) => {
@@ -103,6 +107,24 @@ const TableData = ({ data }: Props) => {
     if (res?.status === 200) {
       setSelectedRow(new Set())
       setChangeMeterData((prev) => prev.filter((item) => item.id !== res.data))
+    }
+  }
+
+  const handleDownload = async(formData:object) => {
+    const data = {
+      ...formData,
+      items: Array.from(selectedRow),
+    };
+    const res = await DownloadChangeMeterReport(data)
+    if (res?.status === 200) {
+      const blob = res.data;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "change_meter_report.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setSelectedRow(new Set())
     }
   }
 
@@ -128,10 +150,10 @@ const TableData = ({ data }: Props) => {
             <td className='border-r border-dashed border-r-gray-600'>{item.accomplished_by}</td>
           </tr>
         ))}
-        
       </tbody>
       <TableFooter data={totalPage} loading={loading}  setLoading={setLoading}>
-        <Delete show={showDelete} handleDelete = {handleDelete}/>
+        <Delete show={showAction} handleDelete = {handleDelete}/>
+        <DownloadReport show={showAction} download={handleDownload}/>
         </TableFooter>
     </>
   )

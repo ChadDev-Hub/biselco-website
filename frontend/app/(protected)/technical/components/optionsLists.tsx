@@ -36,19 +36,18 @@ const TechniclaFormLists = ({ initialData }: Props) => {
         router.push(`${currentPath}/${destinationPath}?page=1`);
     }
     return (
-        <>
-            <div className='flex flex-wrap gap-4 w-fit justify-center  items-center mx-4 sm:mx-4 md-mx-20 lg:mx-35'>
+        <div className='flex flex-col justify-center items-center'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2  gap-4 w-fit justify-center  items-center mx-4 sm:mx-4 md-mx-20 lg:mx-35'>
                     {forms?.map((form: TechnicalForms) =>
                     (
                         <div key={form.id}>
                             <FormCard cardTitle={form.form_name} cardDescription={form.form_description}>
                                 <button onClick={()=>handleNavigation(form.form_name)} type='button' className='btn neutral '>Submit Report</button>
-                                <button type='button' className='btn btn-primary'>View Data</button>
                             </FormCard>
                         </div>
                     ))}
             </div>
-        </>
+        </div>
     )
 }
 
