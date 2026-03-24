@@ -1,20 +1,14 @@
 "use client"
 import React, { useState, useEffect, use } from 'react'
-import DashBoardTable from '../../../common/table'
+
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-import { Fascinate } from 'next/font/google'
+
 import MessageDetailView from './messageDetailView'
-import TableSearch from './tableSearch'
-const fascinate = Fascinate({
-    weight: '400',
-    subsets: ['latin'],
-    variable: '--font-fascinate'
-},
-)
+
 
 type PromiseType = {
     status?: number
@@ -121,30 +115,7 @@ const ComplaintsContainer = ({
         }
     }, [message])
     return (
-        <><fieldset className='fieldset rounded-box'>
-            <legend className={`fieldset-legend flex w-full`}>
-                <h3 className={`text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800 ${fascinate.className}`}>
-                    Real-Time Complaints Table
-                </h3>
-                <TableSearch />
-            </legend>
-            <DashBoardTable>
-                <thead className='text-md font-bold text-center text-yellow-400'>
-                    <tr >
-                        <th>id</th>
-                        <td>Profile</td>
-                        <td>First Name</td>
-                        <td>Last Name</td>
-                        <td className='min-w-50'>Submitted At</td>
-                        <td className='min-w-60'>Subject</td>
-                        <td>Description</td>
-                        <td className='min-w-50'>Village</td>
-                        <td>Municipalit</td>
-                        <td>Location</td>
-                        <td>Update Status</td>
-                        <td>Current Status</td>
-                    </tr>
-                </thead>
+
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
                     {allComplaints.map((complaint: Complaint, index: number) => (
                         <tr key={index}>
@@ -185,11 +156,6 @@ const ComplaintsContainer = ({
                         </tr>
                     ))}
                 </tbody>
-            </DashBoardTable>
-        </fieldset>
-
-
-        </>
 
     )
 }

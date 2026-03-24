@@ -2,11 +2,13 @@
 "use client"
 import { use, useState, useEffect } from 'react'
 import { useWebsocket } from '@/app/utils/websocketprovider'
-import TableFooter from './tableFooter'
 import Delete from './deleteChangeMeter'
 import { DeleteChangeMeter } from '@/app/actions/changeMeter'
 import DownloadReport from './download'
 import { DownloadChangeMeterReport } from '@/app/actions/changeMeter'
+
+
+
 type PromiseType = {
   status: number;
   data: Data;
@@ -42,9 +44,8 @@ const TableData = ({ data }: Props) => {
   const changeMeter = use(data)
   const [changeMeterData, setChangeMeterData] = useState<ChangeMeter[] | []>([])
   const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set())
-  const [totalPage, setTotalPage] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [showAction, setShowAction] = useState(()=>{
+
+  const [showAction, setShowAction] = useState(() => {
     if (selectedRow.size > 0) return true
     else return false
   })
@@ -53,8 +54,7 @@ const TableData = ({ data }: Props) => {
       case 200:
         queueMicrotask(() => {
           setChangeMeterData(changeMeter.data.data);
-          setTotalPage(changeMeter.data.total_page);
-          setLoading(false);
+
         })
         break;
       default:
@@ -68,16 +68,16 @@ const TableData = ({ data }: Props) => {
       case "post_change_meter":
         queueMicrotask(() => {
           setChangeMeterData(message.data)
-          setTotalPage(message.total_page)
+
         })
         break;
       case "deleted_change_meter":
         queueMicrotask(() => {
           setChangeMeterData(message.data)
-          setTotalPage(message.total_page)
+
         })
         break;
-        
+
       default:
         break;
     }
@@ -85,8 +85,9 @@ const TableData = ({ data }: Props) => {
 
   useEffect(() => {
     if (selectedRow.size > 0) {
-      queueMicrotask(() => setShowAction(true))}
-    else 
+      queueMicrotask(() => setShowAction(true))
+    }
+    else
       queueMicrotask(() => setShowAction(false))
   }, [selectedRow])
 
@@ -102,7 +103,7 @@ const TableData = ({ data }: Props) => {
     })
   }
 
-  const handleDelete = async() => {
+  const handleDelete = async () => {
     const res = await DeleteChangeMeter(selectedRow)
     if (res?.status === 200) {
       setSelectedRow(new Set())
@@ -110,7 +111,7 @@ const TableData = ({ data }: Props) => {
     }
   }
 
-  const handleDownload = async(formData:object) => {
+  const handleDownload = async (formData: object) => {
     const data = {
       ...formData,
       items: Array.from(selectedRow),
@@ -133,7 +134,7 @@ const TableData = ({ data }: Props) => {
       <tbody className='font-stretch-extra-condensed'>
         {changeMeterData.map((item: ChangeMeter, index: number) => (
           <tr className='glass whitespace-nowrap' key={index}>
-            <th title='' className='border-r border-dashed border-r-gray-600'>
+            <th title='' className='border-r z-10 border-dashed border-r-gray-600'>
               <input checked={selectedRow.has(item.id)} onChange={() => handleSelection(item.id)} title='choose item' type="checkbox" />
             </th>
             <td className='p-2 glass'>{index}</td>
@@ -151,10 +152,19 @@ const TableData = ({ data }: Props) => {
           </tr>
         ))}
       </tbody>
-      <TableFooter data={totalPage} loading={loading}  setLoading={setLoading}>
-        <Delete show={showAction} handleDelete = {handleDelete}/>
-        <DownloadReport show={showAction} download={handleDownload}/>
-        </TableFooter>
+
+      <tfoot>
+        {showAction &&
+          <tr>
+            <th colSpan={13}>
+              <div className='sticky left-2 flex gap-2'>
+                <Delete show={showAction} handleDelete={handleDelete} />
+                <DownloadReport show={showAction} download={handleDownload} />
+              </div>
+            </th>
+          </tr>}
+      </tfoot>
+
     </>
   )
 }

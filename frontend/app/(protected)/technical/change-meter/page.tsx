@@ -8,7 +8,8 @@ import TableHead from './components/tableHead'
 import { GetChangeMeter } from '@/lib/serverFetch'
 import { Suspense } from 'react'
 import TableDataSkeleton from './components/tableDataSkeleton'
-
+import TableFooter from './components/tableFooter'
+import PageNationLoading from './components/pageNationSkeleton'
 import StatsSkeleton from '@/app/common/statsSkeleton'
 import { Archivo_Black } from 'next/font/google'
 
@@ -21,8 +22,10 @@ type Props = {
   }>
 }
 const ChangeMeterFormPage = async ({ searchParams }: Props) => {
-  const page = (await searchParams).page ?? 1
+  const page = (await searchParams).page
   const data = GetChangeMeter(page);
+  const pageUrl = '/technical/change-meter/'
+  const columns = ["ID", "DATE ACCOMPLISHED", "ACCOUNT NUMBER", "CONSUMER NAME", "LOCATION", "PULLOUT METER", "PULLOUT METER NUMBER", "NEW METER SERIAL NUMBER", "NEW METER BRAND", "INITIAL READING", "REMARKS", "ACCOMPLISHED BY"];
   return (
     <>
       <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4'>
@@ -43,9 +46,12 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
               Change Meter Table
             </legend>
               <DashBoardTable >
-              <TableHead />
+              <TableHead columns={columns} selectable={true} />
               <Suspense fallback={<TableDataSkeleton />}>
                 <TableData data={data} />
+              </Suspense>
+              <Suspense fallback={<PageNationLoading />}>
+                <TableFooter pageUrl={pageUrl} data={data} />
               </Suspense>
             </DashBoardTable>
           </fieldset>

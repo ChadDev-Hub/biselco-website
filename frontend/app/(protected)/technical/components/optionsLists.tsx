@@ -33,7 +33,7 @@ const TechniclaFormLists = ({ initialData }: Props) => {
     // HANDLE NAVIGATIONS
     const handleNavigation = (formNavigate:string) => {
         const destinationPath = formNavigate.replace(" ", "-").toLowerCase()
-        router.push(`${currentPath}/${destinationPath}?page=1`);
+        router.push(`${currentPath}/${destinationPath}`);
     }
     return (
         <div className='flex flex-col justify-center items-center'>

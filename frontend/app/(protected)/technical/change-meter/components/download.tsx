@@ -64,10 +64,10 @@ const DownloadReport = ({ show, download }: Props) => {
 
     return (
         <>
-            <button onClick={handleOpen} title='Download Report' type='button' className={`btn btn-ghost btn-circle btn-sm ${show ? "" : "hidden"}`}>
+            <button onClick={handleOpen} title='Download Report' type='button' className={`btn shadow sticky left-14 btn-ghost btn-circle btn-sm ${show ? "" : "hidden"}`}>
                 <svg
-                    width={24}
-                    height={24}
+                    width={20}
+                    height={20}
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg">

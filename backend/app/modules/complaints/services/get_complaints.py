@@ -14,8 +14,8 @@ from uuid import UUID
 from typing import Optional
 import pytz
 
-
-async def complaints(session: AsyncSession, query: Optional[str] = None):
+PAGESIZE = 20
+async def complaints(session: AsyncSession, query: Optional[str] = None, page:Optional[int] = 1):
     latest_status = (
         select(
             ComplaintsStatusUpdates.complaint_id,
@@ -31,11 +31,21 @@ async def complaints(session: AsyncSession, query: Optional[str] = None):
         .join(ComplaintsStatusName, ComplaintsStatusName.id == latest_status.c.status_id)
         .cte("latest_status_name")
     )
+    pages = (
+        select(
+            Complaints.id.label("id"),
+            func.ceil(func.row_number().over(
+                order_by=Complaints.id.desc()) / PAGESIZE).label("page")
+        )
+    ).cte("pages")
     stmt = (
-        select(Complaints, latest_status_name.c.status_name)
+        select(Complaints,
+               pages.c.page.label("page"),
+               latest_status_name.c.status_name)
         .select_from(Complaints)
         .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id, isouter=True)
         .join(Users, Users.id == Complaints.user_id)
+        .join(pages, pages.c.id == Complaints.id)
         .options(
             selectinload(Complaints.status_updates)
             .selectinload(ComplaintsStatusUpdates.status),
@@ -58,9 +68,11 @@ async def complaints(session: AsyncSession, query: Optional[str] = None):
             Users.email.ilike(f"%{query}%"),
             latest_status_name.c.status_name.ilike(f"%{query}%"),
         ))
+    else:
+        stmt = stmt.where(stmt.c.page == page)
     data = (await session.execute(stmt)).unique().all()
     results = []
-    for complaints, latest_status in data:
+    for complaints, page, latest_status in data:
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,

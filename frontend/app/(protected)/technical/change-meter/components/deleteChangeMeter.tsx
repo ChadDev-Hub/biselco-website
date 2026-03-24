@@ -10,10 +10,10 @@ const Delete = ({ handleDelete, show }: Props) => {
             onClick={handleDelete}
             title='Delete Selected'
             type='button'
-            className={`btn shadow btn-circle btn-sm btn-ghost ${show ? "" : "hidden"}`}>
+            className={`btn sticky left-4 shadow btn-circle btn-sm btn-ghost ${show ? "" : "hidden"}`}>
             <svg
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">

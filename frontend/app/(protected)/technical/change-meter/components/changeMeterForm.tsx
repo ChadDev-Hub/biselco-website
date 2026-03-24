@@ -148,7 +148,8 @@ const ChangeMeterForm = () => {
             NewData.append("attachment", data.attachment[0]);
         }
         showLoading(true, "Submitting Change Meter...")
-        SubmitChangeMeter(NewData, useParams.get("page") as unknown as number).then((res) => {
+        const page = useParams.get("page") as unknown as number;
+        SubmitChangeMeter(NewData,page ? page : 1 ).then((res) => {
             switch (res?.status) {
                 case 201:
                     reset();

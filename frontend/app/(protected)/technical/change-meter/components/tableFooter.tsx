@@ -1,38 +1,49 @@
 "use client";
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect, use  } from "react";
 import { useRouter } from "next/navigation";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 
 
 
+type PromiseType = {
+    status: number;
+    data: Page;
+}
+
 
 type Props = {
-    data: number;
-    loading: boolean;
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    children: React.ReactNode;
+    data: Promise<PromiseType>;
+    pageUrl: string;
 }
-const TableFooter = ({ data, loading, setLoading, children }: Props) => {
+
+type Page = {
+    total_page: number
+}
+const TableFooter = ({ data, pageUrl }: Props) => {
+    const pages = use(data);
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(data);
+    const [totalPages, setTotalPages] = useState<number>(1);
     const [showListPages, setShowListPages] = useState(false);
-    const listPages = Array.from({ length: totalPages }, (_, index) => index + 1);
+    const [loading, setLoading] = useState(false);
+    const listPages = Array.from( totalPages ? { length: totalPages } : { length: 1 }, (_, index) => index + 1);
     
     // RESOLVE INITIAL DATA AND SET LOADING AFTER SETTING INTIAL DATA
     useEffect(() => {
-        queueMicrotask(() => {
-            setTotalPages((prev) => Math.max(prev, data));
-            setLoading(false);
-        })
-    },
-        [data, setLoading]);
+        if (pages?.status === 200) {
+            queueMicrotask(()=>{
+                setTotalPages(pages.data.total_page);
+                setLoading(false);
+            })  
+        }
+    },[pages]);
 
     // HANDLE PREVIOUS PAGE
     const handlePreviousPage = () => {
-        if (currentPage > 1) {
+        if (currentPage > totalPages) {
             setLoading(true);
             setCurrentPage(currentPage - 1);
+            router.replace(`${pageUrl}?page=${currentPage - 1}`, { scroll: false });
         }
     };
 
@@ -40,8 +51,8 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
     const handleNextPage = () => {
         if (currentPage < totalPages) {
             setLoading(true);
-            setCurrentPage(currentPage + 1)
-
+            setCurrentPage(currentPage + 1);
+            router.replace(`${pageUrl}?page=${currentPage + 1}`, { scroll: false });
         };
     }
     // HANDLE MANUAL PAGE SELECTION
@@ -49,6 +60,7 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
         if (page === currentPage) return;
         setLoading(true);
         setCurrentPage(page);
+        router.replace(`${pageUrl}?page=${page}`, { scroll: false });
     }
 
     // SHOW LISTS OF PAGES WHEN DROPDOWN BUTTON IS CLICKED
@@ -56,32 +68,31 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
         setShowListPages(!showListPages);
     }
 
-    // ROUTER CHANGE TO FETCH NEW CHANGE METER DATA
-    useEffect(() => {
-        router.replace(`/technical/change-meter/?page=${currentPage}`, { scroll: false });
-    }, [currentPage, router]);
-
-
     const message = useWebsocket()
 
     useEffect(() => {
         switch (message?.detail) {
             case "post_change_meter":
                 queueMicrotask(() => {
-                    if (totalPages === message.total_page) return;
+                    
                     setTotalPages((prev) => Math.max(prev, message.total_page));
                 })
                 break;
+            case "deleted_change_meter":
+                queueMicrotask(() => {
+                    
+                    setTotalPages((prev) => Math.max(prev, message.total_page));
+            })
             default:
                 break;
         }
     }, [message]);
     return (
-        <tfoot className="glass whitespace-nowrap P-4">
-            <tr className="glass">
-                <th colSpan={12}>
+        <tfoot className="whitespace-nowrap P-4">
+            <tr >
+                <th colSpan={15}>
                     <div className="flex gap-2 justify-items-center items-center">
-                        <div className="join drop-shadow-md border-white">
+                        <div className="join drop-shadow-md sticky left-2">
                             <button onClick={handlePreviousPage} type="button" className="join-item btn btn-sm">«</button>
                             <div className="dropdown dropdown-top dropdown-center">
                                 <button tabIndex={0} onClick={handleShowListPages} type="button" className="join-item  btn btn-sm">Page {currentPage}</button>
@@ -92,7 +103,6 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
                                         </li>
                                     ))}
                                 </ul>
-
                             </div>
                             <button onClick={handleNextPage} type="button" className="join-item btn btn-sm">»</button>
                         </div>
@@ -100,9 +110,6 @@ const TableFooter = ({ data, loading, setLoading, children }: Props) => {
                             Loading data...
                         </div>}
                     </div>
-                </th>
-                <th align="right">
-                    {children}
                 </th>
             </tr>
         </tfoot>

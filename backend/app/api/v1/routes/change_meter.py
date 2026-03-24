@@ -122,6 +122,7 @@ async def delete_change_meter(session:AsyncSession = Depends(get_session), items
     return{
         "detail" : "Change Meter Deleted Successfully"}
 
+
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
 async def change_meter_stats(data:ChangeMeterReport, session: AsyncSession = Depends(get_session)):
     file_stream = await changeMeterReport(

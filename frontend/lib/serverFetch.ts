@@ -1,5 +1,6 @@
 "use server"
 import { cookies } from "next/headers"
+
 const baseUrl = process.env.BASESERVERURL
 
 //  GET CURRENT USER
@@ -89,7 +90,6 @@ export async function GetAllComplaints(q?:string|number|boolean) {
             data: data.detail
         }
     }
-    
     return {
         status: res.status,
         data: data
@@ -174,9 +174,8 @@ export const queryConsumer = async(query?:string)=>{
 
 
 export const GetChangeMeter = async (page?:number,query?: string) => {
-    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page? `${baseUrl}/v1/change_meter/?p=${page}` : `${baseUrl}/v1/change_meter/`;
+    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?p=${page}` : `${baseUrl}/v1/change_meter/`;
     const res = await fetch(url, {
-        next: { revalidate: 1 },
         method: "GET"
     })
     const data = await res.json()
@@ -186,7 +185,6 @@ export const GetChangeMeter = async (page?:number,query?: string) => {
             data: data.detail
         }
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000))
     return {
         status: res.status,
         data: data

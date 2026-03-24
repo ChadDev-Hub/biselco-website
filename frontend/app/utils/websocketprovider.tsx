@@ -26,6 +26,7 @@ type WSMessage = {
 } | {
   detail: "deleted_complaints";
   data: ComplaintData;
+  
 } | {
   detail: "presence";
   data: UserPresence;
@@ -33,8 +34,14 @@ type WSMessage = {
   detail: "post_change_meter" | "deleted_change_meter";
   data: ChangeMeter[];
   total_page:number;
-
+  stats: ChangeMeterStats[];
 } 
+
+type ChangeMeterStats= {
+  title: string;
+  value: number;
+  description: string
+}
 
 type UserPresence = {
   "user_id": number;
