@@ -14,8 +14,12 @@ from uuid import UUID
 from typing import Optional
 import pytz
 
-PAGESIZE = 20
-async def complaints(session: AsyncSession, query: Optional[str] = None, page:Optional[int] = 1):
+PAGESIZE = 10
+
+
+async def complaints(session: AsyncSession, query: Optional[str] = None, page: Optional[int]=None):
+    if page is None:
+        page = 1
     latest_status = (
         select(
             ComplaintsStatusUpdates.complaint_id,
@@ -31,21 +35,15 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page:Op
         .join(ComplaintsStatusName, ComplaintsStatusName.id == latest_status.c.status_id)
         .cte("latest_status_name")
     )
-    pages = (
-        select(
-            Complaints.id.label("id"),
-            func.ceil(func.row_number().over(
-                order_by=Complaints.id.desc()) / PAGESIZE).label("page")
-        )
-    ).cte("pages")
-    stmt = (
+    complaints = (
         select(Complaints,
-               pages.c.page.label("page"),
-               latest_status_name.c.status_name)
+               latest_status_name.c.status_name,
+               func.ceil(func.row_number().over(
+                   order_by=Complaints.id.desc())/PAGESIZE).label("page")
+               )
         .select_from(Complaints)
         .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id, isouter=True)
         .join(Users, Users.id == Complaints.user_id)
-        .join(pages, pages.c.id == Complaints.id)
         .options(
             selectinload(Complaints.status_updates)
             .selectinload(ComplaintsStatusUpdates.status),
@@ -54,7 +52,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page:Op
         .order_by(Complaints.id.desc())
     )
     if query:
-        stmt = stmt.where(or_(
+        stmt = complaints.where(or_(
             func.to_char(Complaints.time_stamped,
                          "YYYY-MM-DD").ilike(f"%{query}%"),
             func.to_char(Complaints.time_stamped,
@@ -67,12 +65,12 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page:Op
             Users.last_name.ilike(f"%{query}%"),
             Users.email.ilike(f"%{query}%"),
             latest_status_name.c.status_name.ilike(f"%{query}%"),
-        ))
+        )).limit(PAGESIZE)
     else:
-        stmt = stmt.where(stmt.c.page == page)
+        stmt = complaints.offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
     data = (await session.execute(stmt)).unique().all()
     results = []
-    for complaints, page, latest_status in data:
+    for complaints, latest_status, page in data:
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,
@@ -102,7 +100,15 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page:Op
             "latest_status": latest_status
         }
         results.append(complaints_data)
-    return results
+    
+    stmt_total = (await session.execute(select(func.count(Complaints.id)))).scalar()
+    if not stmt_total:
+        stmt_total = 0
+    total_page = stmt_total//PAGESIZE if stmt_total % PAGESIZE == 0 else stmt_total//PAGESIZE + 1
+    return {
+        "data": results,
+        "total_page": total_page
+    }
 
 
 # NEW COMPLAINT
@@ -114,12 +120,12 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
                       .where(ComplaintsStatusUpdates.complaint_id == complaint_id)
                       .group_by(ComplaintsStatusUpdates.complaint_id)
                       .cte("latest_status"))
-    
-    latest_statu_name = (select(latests_status.c.complaint_id,ComplaintsStatusName.status_name)
+
+    latest_statu_name = (select(latests_status.c.complaint_id, ComplaintsStatusName.status_name)
                          .select_from(latests_status)
                          .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
                          .cte("latest_status_name"))
-    
+
     stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"))
             .select_from(Complaints)
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
@@ -132,7 +138,7 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-    
+
     n_complaint, latests_status = row
     if not n_complaint:
         raise HTTPException(
@@ -214,7 +220,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
                     "srid": srid},
                 "status": status_list}
             if complaint:
-                 data.append(complaint)
+                data.append(complaint)
     return data
 
 
@@ -227,12 +233,12 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
                       .where(ComplaintsStatusUpdates.complaint_id == complaint_id)
                       .group_by(ComplaintsStatusUpdates.complaint_id)
                       .cte("latest_status"))
-    
-    latest_statu_name = (select(latests_status.c.complaint_id,ComplaintsStatusName.status_name)
+
+    latest_statu_name = (select(latests_status.c.complaint_id, ComplaintsStatusName.status_name)
                          .select_from(latests_status)
                          .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
                          .cte("latest_status_name"))
-    
+
     stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"))
             .select_from(Complaints)
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)

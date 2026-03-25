@@ -1,18 +1,32 @@
 "use client"
 import React, { useRef, useState } from 'react'
 import GenericComplaints from './genericComplaintsForm'
-type Props = {
-    meterComplaints: React.ReactNode;
-}
+import MeterComplaints from './meterComplaintsForm'
 
-const CreateComplaints = ({ meterComplaints }: Props) => {
+const CreateComplaints = () => {
     // COMPLAINTS CHOICES
     const complaintsChoices = [
         "Meter Services",
         "Pole & Support Structure",
         "Wiring & Cabling",
         "Transformer Unit",
+        "Report Illegal Connection",       
         "Other"];
+    
+
+    // COMPLAINTS ISSUES
+    const meterIssueChoices = [
+        "Reconnection",
+        "Calibration",
+        "Fluctuating",
+        "Relocation", 
+        "High Bill",
+        "Service Disruption",
+        "High Voltage",
+        "Low Voltage",
+        "No Power",
+        "Other"
+    ]
 
     const poleIsueChoices = [
         "leaning pole", 
@@ -40,9 +54,8 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
         "high voltage",
         "other",
 
-
-
     ]
+
     // MODAL REF 
     const complaintsModalRef = useRef<HTMLDialogElement>(null);
     const [complaints, setComplaints] = useState("");
@@ -69,7 +82,11 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
     let complaintComponentForm: React.ReactNode = null
     switch (complaints) {
         case "Meter Services":
-            complaintComponentForm = meterComplaints
+            complaintComponentForm = 
+            <MeterComplaints
+            title={complaints} 
+            choices={meterIssueChoices} 
+            isother={false}/>
             break;
         case "Pole & Support Structure":
             complaintComponentForm = <GenericComplaints 
@@ -86,10 +103,17 @@ const CreateComplaints = ({ meterComplaints }: Props) => {
                             title={complaints}
                             choices={TransformerIssueChoices} />
             break;
+
+        case "Report Illegal Connection":
+            console.log(complaints)
+            complaintComponentForm = <MeterComplaints
+            title={complaints} isother={true}/>
+            break;
         case "Other":
             complaintComponentForm = <GenericComplaints 
                             title={complaints}
                             isother={true} />
+            break;
         default:
             break;
     }

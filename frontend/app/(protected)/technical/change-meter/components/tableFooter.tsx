@@ -27,7 +27,6 @@ const TableFooter = ({ data, pageUrl }: Props) => {
     const [showListPages, setShowListPages] = useState(false);
     const [loading, setLoading] = useState(false);
     const listPages = Array.from( totalPages ? { length: totalPages } : { length: 1 }, (_, index) => index + 1);
-    
     // RESOLVE INITIAL DATA AND SET LOADING AFTER SETTING INTIAL DATA
     useEffect(() => {
         if (pages?.status === 200) {
@@ -38,9 +37,10 @@ const TableFooter = ({ data, pageUrl }: Props) => {
         }
     },[pages]);
 
+    console.log(currentPage, totalPages)
     // HANDLE PREVIOUS PAGE
     const handlePreviousPage = () => {
-        if (currentPage > totalPages) {
+        if (currentPage > 1)  {
             setLoading(true);
             setCurrentPage(currentPage - 1);
             router.replace(`${pageUrl}?page=${currentPage - 1}`, { scroll: false });

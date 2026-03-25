@@ -6,12 +6,17 @@ import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
-
+import { useAlert } from '@/app/common/alert'
 import MessageDetailView from './messageDetailView'
+import { useRouter } from 'next/navigation'
 
 
 type PromiseType = {
     status?: number
+    data: ComplaintsListData
+}
+
+type ComplaintsListData ={
     data: Complaint[]
 }
 
@@ -59,6 +64,9 @@ const ComplaintsContainer = ({
 }: Props) => {
     const complaintsIinitialData = use(data)
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
+    const router = useRouter();
+    const {showAlert} = useAlert()
+   
     // SET INITIAL DATA ON MOUNT
     useEffect(() => {
         switch (complaintsIinitialData.status) {
@@ -70,7 +78,7 @@ const ComplaintsContainer = ({
                 break;
             case 200:
                 queueMicrotask(() =>
-                    setallComplaints(complaintsIinitialData.data));
+                    setallComplaints(complaintsIinitialData.data.data));
                 break;
             default:
                 break;
@@ -85,13 +93,15 @@ const ComplaintsContainer = ({
                 queueMicrotask(() =>
                     setallComplaints((prev) => {
                         const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
-                        return [message.data, ...existing_complaint];
+                        return [message.data, ...existing_complaint]
                     }));
+                    showAlert("success", "New Concerns Submitted")
+                    router.refresh();
                 break;
             case "complaint_status":
                 queueMicrotask(() =>
                     setallComplaints((prev) => {
-                        return prev.map((complaint) =>
+                        return prev.map((complaint: Complaint) =>
                             complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
                         )
                     }))
@@ -101,6 +111,7 @@ const ComplaintsContainer = ({
                     setallComplaints((prev) => {
                         return prev.filter((complaint) => complaint.id !== message.data.id);
                     }));
+                    router.refresh();
                 break;
             case "presence":
                 queueMicrotask(() =>
@@ -113,7 +124,7 @@ const ComplaintsContainer = ({
             default:
                 break;
         }
-    }, [message])
+    }, [message, router]);
     return (
 
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>

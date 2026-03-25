@@ -33,8 +33,6 @@ const ComplaintStatusButton = ({ status, complaints_id}: Props) => {
             modalRef.current.close()
         }
     }
-    console.log(status.map(s=>s.name))
-
     return (
         <>
             <button aria-label='modal-button' data-tip="Update Status" type='button' className="btn btn-circle btn-ghost tooltip tooltip-right " onClick={handleOpen}>

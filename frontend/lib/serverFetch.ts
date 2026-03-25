@@ -71,11 +71,12 @@ export async function getNewsPage() {
 
 
 // GET ALL COMPLAINTS 
-export async function GetAllComplaints(q?:string|number|boolean) {
+export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get("access_token")?.value
+    const url = q ? `${baseUrl}/v1/complaints/all?q=${encodeURIComponent(q)}` :  page ? `${baseUrl}/v1/complaints/all?page=${page}` : `${baseUrl}/v1/complaints/all`;
     const res = await fetch(
-        `${baseUrl}/v1/complaints/all?q=${encodeURIComponent(q??"")}`,{
+        `${url}`,{
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${accessToken}`
@@ -174,7 +175,7 @@ export const queryConsumer = async(query?:string)=>{
 
 
 export const GetChangeMeter = async (page?:number,query?: string) => {
-    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?p=${page}` : `${baseUrl}/v1/change_meter/`;
+    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?page=${page}` : `${baseUrl}/v1/change_meter/`;
     const res = await fetch(url, {
         method: "GET"
     })

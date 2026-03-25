@@ -35,3 +35,8 @@ class ComplaintStatusName(BaseModel):
     id: int
     status_name: str
     description: str
+    
+    
+class ComplaintsModelLists(BaseModel):
+    data: List[ComplaintsModel]
+    total_page:int

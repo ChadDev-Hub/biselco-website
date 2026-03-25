@@ -8,6 +8,7 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { queryConsumer } from "@/lib/serverFetch";
 
 
+
 type ConsumerData = {
   account_no: string;
   account_name: string;
@@ -31,7 +32,13 @@ interface ComplaintFormData {
   attachment?: File;
 }
 
-const MeterComplaints = () => {
+type Props = {
+  title: string;
+  choices?: string[];
+  isother?: boolean
+}
+
+const MeterComplaints = ({title, choices, isother}: Props) => {
 
   // DEFINE STATE VARIABLES
   const [loading, setLoading] = useState(false);
@@ -139,7 +146,7 @@ const MeterComplaints = () => {
     setLoading(true);
     const newDATA = new FormData();
     newDATA.append("accountNumber", data.accountNumber);
-    newDATA.append("issue", data.issue);
+    newDATA.append("issue",(data.issue ? data.issue : "Illegal Connection"));
     newDATA.append("details", data.details);
     newDATA.append("lon", data.lon?.toString() ?? "");
     newDATA.append("lat", data.lat?.toString() ?? "");
@@ -166,7 +173,7 @@ const MeterComplaints = () => {
   }
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Meter Services Complaint</h2>
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
       {submitted ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
@@ -209,7 +216,7 @@ const MeterComplaints = () => {
               ) : null}
             </div>
             {/* Issue Type */}
-            <div className="relative overflow-visible">
+            {!isother &&<div className="relative overflow-visible">
               <label className="block mb-1 font-medium">Issue</label>
               <select
                 enterKeyHint="next"
@@ -219,15 +226,14 @@ const MeterComplaints = () => {
                   } select `}
               >
                 <option value="" disabled={true}>Select Issue</option>
-                <option value="billing">Billing</option>
-                <option value="reconnection">Reconnection</option>
-                <option value="meter issue">Meter Issue</option>
-                <option value="service disruption">Service Disruption</option>
-                <option value="low voltage">Low Voltage</option>
-                <option value="other">Other</option>
+                {choices?.map((choice) => (
+                  <option key={choice} value={choice}>
+                    {choice}
+                  </option>
+                ))}
               </select>
               {errors.issue && <p className="text-red-500 text-sm">Please Select an Issue</p>}
-            </div>
+            </div>}
 
             {/* Complaint Details */}
             <div>

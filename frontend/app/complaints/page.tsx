@@ -5,7 +5,6 @@ import FabIcon from '@/app/common/Fab'
 import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './loading'
-import MeterComplaints from './components/meterComplaintsForm'
 import ComplaintHeader from './components/header'
 const ComplaintsPage = () => {
   const data = UserComplaints()
@@ -34,11 +33,7 @@ const ComplaintsPage = () => {
         {/* Feature Pills */}
         <section className='w-full flex justify-center'>
           <div data-tip="Submit Complaints" className='tooltip tooltip-bottom'>
-            <CreateComplaints
-              meterComplaints={
-                <MeterComplaints/>}
-            >
-            </CreateComplaints>
+            <CreateComplaints/>
           </div>
         </section>
         <Suspense fallback={<ComplaintsLoading />}>

@@ -7,9 +7,11 @@ import DashBoardTable from '@/app/common/table'
 import TableHead from '@/app/(protected)/technical/change-meter/components/tableHead'
 import TableFooter from '@/app/(protected)/technical/change-meter/components/tableFooter'
 import TableDataSkeleton from '@/app/(protected)/technical/change-meter/components/tableDataSkeleton'
-const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ [key: string]: string }> }) => {
+
+
+const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number; q: string }> }) => {
   const params = use(searchParams)
-  const complaintsData = GetAllComplaints(params.q)
+  const complaintsData = GetAllComplaints(params.page,params.q)
   const pageUrl = '/complaints/dashboard'
   const columns = [
             'ID', 

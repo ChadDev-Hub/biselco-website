@@ -15,7 +15,7 @@ from ....core.websocket_manager import manager
 from ....modules.complaints import *
 from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
-from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName
+from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName, ComplaintsModelLists
 from ....modules.user.schema.response_model import UserModel
 from typing import Optional
 from ....modules.gis.franchise_area.model.boundary import Boundary
@@ -33,9 +33,10 @@ async def get_user_complaints(user:UserModel  = Depends(get_current_user), sessi
     return complaint
 
 # GET ALL COMPLAINTS
-@router.get("/all", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
+@router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
         q: Optional[str] = Query(None),
+        page: Optional[int] = Query(None),
         session: AsyncSession = Depends(get_session),
         user: UserModel = Depends(get_current_user)):
     current_user = (await session.execute(select(Users)
@@ -47,7 +48,7 @@ async def get_all_complaint(
     if "admin" not in [role.name.lower() for role in current_user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
-    return await complaints(session=session, query=q)
+    return await complaints(session=session, query=q, page=page)
 
 
 # GET ALL COMPLAINTS STATUS NAME
