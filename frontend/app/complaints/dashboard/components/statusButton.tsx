@@ -3,9 +3,11 @@ import React, { useRef } from 'react'
 import EnableButton from './complaintStatusToggle'
 
 
+
 type Props = {
     status: status[];
     complaints_id: number;
+    onOpen: (complaint_id:number) => void
 
 }
 type status = {
@@ -19,13 +21,14 @@ type status = {
 
 
 
-const ComplaintStatusButton = ({ status, complaints_id}: Props) => {
+const ComplaintStatusButton = ({ status, complaints_id, onOpen }: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const complaintStatusName = ['Received', 'Pending', 'Working', 'Complete']
 
     const handleOpen = () => {
         if (modalRef.current) {
             modalRef.current.showModal()
+            onOpen(complaints_id)
         }
     }
     const handleClose = () => {
@@ -95,7 +98,7 @@ const ComplaintStatusButton = ({ status, complaints_id}: Props) => {
                                     <EnableButton
                                         id={complaints_id}
                                         enabled={
-                                            status.find((stats: status)=>stats.name == item) ? true : false
+                                            status.find((stats: status) => stats.name == item) ? true : false
                                         }
                                         name={item}
                                     />

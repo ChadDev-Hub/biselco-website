@@ -17,14 +17,16 @@ const CreateComplaints = () => {
     // COMPLAINTS ISSUES
     const meterIssueChoices = [
         "Reconnection",
-        "Calibration",
+        "Calibration/ Meter Test",
         "Fluctuating",
         "Relocation", 
         "High Bill",
         "Service Disruption",
         "High Voltage",
         "Low Voltage",
+        "No Bill",
         "No Power",
+        "Burned Meter",
         "Other"
     ]
 

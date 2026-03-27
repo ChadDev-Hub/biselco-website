@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, use  } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 
 
@@ -26,6 +26,7 @@ const TableFooter = ({ data, pageUrl }: Props) => {
     const [totalPages, setTotalPages] = useState<number>(1);
     const [showListPages, setShowListPages] = useState(false);
     const [loading, setLoading] = useState(false);
+    const query = useSearchParams();
     const listPages = Array.from( totalPages ? { length: totalPages } : { length: 1 }, (_, index) => index + 1);
     // RESOLVE INITIAL DATA AND SET LOADING AFTER SETTING INTIAL DATA
     useEffect(() => {
@@ -37,30 +38,37 @@ const TableFooter = ({ data, pageUrl }: Props) => {
         }
     },[pages]);
 
-    console.log(currentPage, totalPages)
     // HANDLE PREVIOUS PAGE
     const handlePreviousPage = () => {
         if (currentPage > 1)  {
+            const params = new URLSearchParams();
+            if (query.get("q")) params.set("q", query.get("q") as string);
+            params.set("page", String(currentPage - 1));
             setLoading(true);
             setCurrentPage(currentPage - 1);
-            router.replace(`${pageUrl}?page=${currentPage - 1}`, { scroll: false });
+            router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
         }
     };
 
     // HANDLE NEXT PAGE
     const handleNextPage = () => {
         if (currentPage < totalPages) {
+            const params = new URLSearchParams();
+            if (query.get("q")) params.set("q", query.get("q") as string);
+            params.set("page", String(currentPage + 1));
             setLoading(true);
             setCurrentPage(currentPage + 1);
-            router.replace(`${pageUrl}?page=${currentPage + 1}`, { scroll: false });
+            router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
         };
     }
     // HANDLE MANUAL PAGE SELECTION
     const handleSelectPage = (page: number) => {
         if (page === currentPage) return;
+        const params = new URLSearchParams();
+        if (query.get("q")) params.set("q", query.get("q") as string);
         setLoading(true);
         setCurrentPage(page);
-        router.replace(`${pageUrl}?page=${page}`, { scroll: false });
+        router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
     }
 
     // SHOW LISTS OF PAGES WHEN DROPDOWN BUTTON IS CLICKED

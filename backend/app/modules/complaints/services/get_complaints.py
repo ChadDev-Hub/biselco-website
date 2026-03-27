@@ -17,6 +17,11 @@ import pytz
 PAGESIZE = 10
 
 
+
+async def getComplaintsStats(session:AsyncSession):
+    stmt = (select)
+
+
 async def complaints(session: AsyncSession, query: Optional[str] = None, page: Optional[int]=None):
     if page is None:
         page = 1
@@ -65,10 +70,11 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             Users.last_name.ilike(f"%{query}%"),
             Users.email.ilike(f"%{query}%"),
             latest_status_name.c.status_name.ilike(f"%{query}%"),
-        )).limit(PAGESIZE)
+        )).offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
     else:
         stmt = complaints.offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
     data = (await session.execute(stmt)).unique().all()
+    total_page = (len(data) // PAGESIZE) + 1
     results = []
     for complaints, latest_status, page in data:
         status_list = [{
@@ -100,11 +106,6 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "latest_status": latest_status
         }
         results.append(complaints_data)
-    
-    stmt_total = (await session.execute(select(func.count(Complaints.id)))).scalar()
-    if not stmt_total:
-        stmt_total = 0
-    total_page = stmt_total//PAGESIZE if stmt_total % PAGESIZE == 0 else stmt_total//PAGESIZE + 1
     return {
         "data": results,
         "total_page": total_page

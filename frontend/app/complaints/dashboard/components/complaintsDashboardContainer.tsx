@@ -5,10 +5,13 @@ import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import Image from 'next/image'
-import { redirect } from 'next/navigation'
+import { redirect, useSearchParams } from 'next/navigation'
 import { useAlert } from '@/app/common/alert'
 import MessageDetailView from './messageDetailView'
 import { useRouter } from 'next/navigation'
+
+
+
 
 
 type PromiseType = {
@@ -64,7 +67,14 @@ const ComplaintsContainer = ({
 }: Props) => {
     const complaintsIinitialData = use(data)
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
+    const searchParms = useSearchParams();
+    const page = Number(searchParms.get("page")) ?? 1;
     const router = useRouter();
+    const [activeComplaintsId, setactiveComplaintsId] = useState<number | null>(null)
+    const handleSelectedComplaintsId =(complaintsId:number)=>{
+        setactiveComplaintsId(complaintsId)
+    }
+
     const {showAlert} = useAlert()
    
     // SET INITIAL DATA ON MOUNT
@@ -85,18 +95,25 @@ const ComplaintsContainer = ({
         }
 
     }, [complaintsIinitialData]);
+    
     const message = useWebsocket();
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
             case "complaints_admin":
-                queueMicrotask(() =>
-                    setallComplaints((prev) => {
-                        const existing_complaint = prev.filter((complaint) => complaint.id !== message.data.id);
-                        return [message.data, ...existing_complaint]
-                    }));
-                    showAlert("success", "New Concerns Submitted")
-                    router.refresh();
+                    console.log(page)
+                    if (page !== 1 && page !== 0){
+                        showAlert("success", "New Concerns Submitted")
+                        return;
+                    }
+                    else{
+                        queueMicrotask(()=>{
+                            setallComplaints((prev) => {
+                                const existingComplaints = prev.filter((complaint) => complaint.id !== message.data.id);
+                                return [message.data, ...existingComplaints].slice(0,10);
+                            });
+                        })
+                    }
                 break;
             case "complaint_status":
                 queueMicrotask(() =>
@@ -107,10 +124,7 @@ const ComplaintsContainer = ({
                     }))
                 break;
             case "deleted_complaints":
-                queueMicrotask(() =>
-                    setallComplaints((prev) => {
-                        return prev.filter((complaint) => complaint.id !== message.data.id);
-                    }));
+                    showAlert("success", "Complaint Deleted")
                     router.refresh();
                 break;
             case "presence":
@@ -124,12 +138,12 @@ const ComplaintsContainer = ({
             default:
                 break;
         }
-    }, [message, router]);
+    }, [message,router, showAlert, page]);
     return (
 
                 <tbody className='bg-base-100/45 backdrop-blur-2xl text-xs'>
-                    {allComplaints.map((complaint: Complaint, index: number) => (
-                        <tr key={index}>
+                    {allComplaints.map((complaint: Complaint, index:number) => (
+                        <tr key={complaint.id}>
                             <th className='z-10'>{index}</th>
                             <td>
                                 <div className={`avatar avatar-${complaint.user_status}`}>
@@ -158,8 +172,9 @@ const ComplaintsContainer = ({
                             </td>
                             <td className='text-center'>
                                 <ComplaintStatusButton
-                                    status={complaint.status}
-                                    complaints_id={complaint.id} />
+                                    status={allComplaints.find((complaint) => complaint.id === activeComplaintsId)?.status ?? []}
+                                    complaints_id={complaint.id}
+                                    onOpen={handleSelectedComplaintsId}/>
                             </td>
                             <td className='animate-pulse text-red-700 drop-shadow-md drop-shadow-amber-900 font-bold'>{
                                 complaint.latest_status
