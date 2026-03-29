@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from ...meters.model.meters import MeterAccount
     from .roles import Roles
     from ...news.model.news import News
+    from ...complaints.model.complaints_history import ComplaintsStatusHistory
+    from ...complaints.model.complaints_message import ComplaintsMessage
 class Users(BaseModel):
     
     '''
@@ -37,4 +39,6 @@ class Users(BaseModel):
     complaints: Mapped[List['Complaints']] = relationship(back_populates="user", cascade="all, delete-orphan")
     roles: Mapped[List["Roles"]] = relationship(back_populates="users", secondary="user_roles")
     news: Mapped[List["News"]] = relationship(back_populates="user")
-    
+    complaint_status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="user")
+    complaint_messages_sender: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="sender")
+    complaint_messages_receiver: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="receiver")

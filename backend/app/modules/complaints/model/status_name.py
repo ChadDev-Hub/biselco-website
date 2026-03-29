@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .complaints import Complaints
     from .status_update import ComplaintsStatusUpdates
-
+    from .complaints_history import ComplaintsStatusHistory
 
 # COMPLAINTS STATUS NAME TABLE 
 class ComplaintsStatusName(BaseModel):
@@ -17,4 +17,6 @@ class ComplaintsStatusName(BaseModel):
     description:Mapped[str] = mapped_column(type_=Text, nullable=True)
     # relationships
     status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
+        back_populates="status")
+    status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(
         back_populates="status")

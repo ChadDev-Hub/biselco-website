@@ -45,7 +45,6 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
       setFormData({ ...formData, [name]: value });
     };
   };
-  console.log(formData);
   // SIMPLE VALIDATION
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};

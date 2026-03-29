@@ -28,7 +28,7 @@ class ChangeMeter(BaseModel):
     pull_out_meter_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
     new_meter_serial_no: Mapped[str] = mapped_column(type_=Text, nullable=False)
     new_meter_brand: Mapped[str] = mapped_column(type_=Text, nullable=False)
-    meter_sealed: Mapped[int] = mapped_column(type_=Integer, nullable=False)
+    meter_sealed: Mapped[int] = mapped_column(type_=Text, nullable=False)
     initial_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
     accomplished_by: Mapped[str] = mapped_column(type_=Text, nullable=True)

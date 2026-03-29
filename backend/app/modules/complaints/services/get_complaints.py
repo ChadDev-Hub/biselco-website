@@ -58,9 +58,9 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
     )
     if query:
         stmt = complaints.where(or_(
-            func.to_char(Complaints.time_stamped,
+            func.to_char(Complaints.timestamped,
                          "YYYY-MM-DD").ilike(f"%{query}%"),
-            func.to_char(Complaints.time_stamped,
+            func.to_char(Complaints.timestamped,
                          "HH12:MI AM").ilike(f"%{query}%"),
             Complaints.subject.ilike(f"%{query}%"),
             Complaints.description.ilike(f"%{query}%"),
@@ -94,7 +94,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "user_photo": complaints.user.photo,
             "subject": complaints.subject,
             "description": complaints.description,
-            "date_time_submitted": complaints.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+            "date_time_submitted": complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
             "village": complaints.village,
             "municipality": complaints.municipality,
             "location": {
@@ -166,7 +166,7 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
         "user_photo": n_complaint.user.photo,
         "subject": n_complaint.subject,
         "description": n_complaint.description,
-        "date_time_submitted": n_complaint.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+        "date_time_submitted": n_complaint.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": n_complaint.village,
         "municipality": n_complaint.municipality,
         "location": {
@@ -188,7 +188,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
                  .selectinload(ComplaintsStatusUpdates.status))
         .options(selectinload(Complaints.user))
         .where(Complaints.user_id == user_id)
-        .order_by(desc(Complaints.time_stamped))
+        .order_by(desc(Complaints.timestamped))
     )).scalars().all()
     data = []
     for c in complaints:
@@ -212,7 +212,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
                 "user_photo": c.user.photo,
                 "subject": c.subject,
                 "description": c.description,
-                "date_time_submitted": c.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+                "date_time_submitted": c.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
                 "village": c.village,
                 "municipality": c.municipality,
                 "location": {
@@ -273,7 +273,7 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
         "user_photo": new_complaint_status.user.photo,
         "subject": new_complaint_status.subject,
         "description": new_complaint_status.description,
-        "date_time_submitted": new_complaint_status.time_stamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+        "date_time_submitted": new_complaint_status.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": new_complaint_status.village,
         "municipality": new_complaint_status.municipality,
         "location": {

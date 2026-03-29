@@ -62,13 +62,13 @@ const TableData = ({ data }: Props) => {
     }
   }, [changeMeter])
 
-  const message = useWebsocket()
+  const {message} = useWebsocket()
+  console.log(message)
   useEffect(() => {
     switch (message?.detail) {
       case "post_change_meter":
         queueMicrotask(() => {
           setChangeMeterData(message.data)
-
         })
         break;
       case "deleted_change_meter":

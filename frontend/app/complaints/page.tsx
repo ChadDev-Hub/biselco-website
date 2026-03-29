@@ -39,6 +39,7 @@ const ComplaintsPage = () => {
         <Suspense fallback={<ComplaintsLoading />}>
           <ComplaintsContainer complaintsData={data} complaintsStatusName={statusName} />
         </Suspense>
+
         <FabIcon>
           <div data-tip="Navigate Dashboard" className='tooltip tooltip-left'>
             <ComplaintsDashboardRouteButton />

@@ -93,6 +93,7 @@ export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
             cache: "no-store"
         }
     )
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const data = await res.json()
     if(!res.ok){
         return {

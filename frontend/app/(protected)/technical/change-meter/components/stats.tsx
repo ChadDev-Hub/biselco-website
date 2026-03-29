@@ -39,8 +39,8 @@ const Stats = ({ data }: Props) => {
 
 
   // WEBSOCKET
-  const message = useWebsocket()
-
+  const {message}= useWebsocket()
+  console.log(message)
   // EFFECT WHEN NEW MESSAGE BROADCASTS
   useEffect(() => {
     switch (message?.detail) {

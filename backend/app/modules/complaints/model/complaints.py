@@ -12,7 +12,8 @@ if TYPE_CHECKING:
     from .status_update import ComplaintsStatusUpdates
     from .complaint_image import ComplaintsImage
     from .complete_image import ComplaintsImageCompleted
-
+    from .complaints_history import ComplaintsHistory, ComplaintsStatusHistory
+    from .complaints_message import ComplaintsMessage
 # COMPLAINTS MODEL
 class Complaints(BaseModel):
     """
@@ -46,7 +47,7 @@ class Complaints(BaseModel):
     village: Mapped[str] = mapped_column(type_=Text)
     municipality: Mapped[str] = mapped_column(type_=Text)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
-    time_stamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True, default=func.now())
+    timestamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True, default=func.now())
     
     # relationships
     user: Mapped["Users"] = relationship(back_populates="complaints")
@@ -54,10 +55,10 @@ class Complaints(BaseModel):
     completed_images: Mapped[List["ComplaintsImageCompleted"]] = relationship(back_populates="complaints")
     status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
         back_populates="complaints",
-        cascade="all, delete-orphan",
         order_by="ComplaintsStatusUpdates.date, ComplaintsStatusUpdates.time")
-
-
+    complaints_history: Mapped[List["ComplaintsHistory"]] = relationship(back_populates="complaints")
+    status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="complaints")
+    complaint_messages: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="complaints")
 
 
     

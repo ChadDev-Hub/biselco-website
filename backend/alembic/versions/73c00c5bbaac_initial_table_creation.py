@@ -103,7 +103,7 @@ def upgrade() -> None:
     sa.Column('village', sa.Text(), nullable=False),
     sa.Column('municipality', sa.Text(), nullable=False),
     sa.Column('remarks', sa.Text(), nullable=True),
-    sa.Column('time_stamped', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('timestamped', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users_account.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -202,7 +202,7 @@ def upgrade() -> None:
     sa.Column('pull_out_meter_reading', sa.Integer(), nullable=False),
     sa.Column('new_meter_serial_no', sa.Text(), nullable=False),
     sa.Column('new_meter_brand', sa.Text(), nullable=False),
-    sa.Column('meter_sealed', sa.Integer(), nullable=False),
+    sa.Column('meter_sealed', sa.Text(), nullable=False),
     sa.Column('initial_reading', sa.Integer(), nullable=False),
     sa.Column('remarks', sa.Text(), nullable=True),
     sa.Column('accomplished_by', sa.Text(), nullable=True),

@@ -15,10 +15,10 @@ class ComplaintsStatusUpdates(BaseModel):
     __tablename__ = "complaints_status"
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
     complaint_id: Mapped[int] = mapped_column(
-        ForeignKey("consumer_complaints.id", ondelete="CASCADE", onupdate="CASCADE"),
+        ForeignKey("consumer_complaints.id"),
         type_=Integer)
     status_id: Mapped[int] = mapped_column(
-        ForeignKey("complaints_status_name.id", ondelete="CASCADE", onupdate="CASCADE"),
+        ForeignKey("complaints_status_name.id"),
         type_=Integer)
     date: Mapped[date] = mapped_column(type_=Date)
     time: Mapped[time] = mapped_column(type_=Time)

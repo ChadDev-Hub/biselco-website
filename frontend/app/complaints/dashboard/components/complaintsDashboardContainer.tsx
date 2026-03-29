@@ -96,7 +96,7 @@ const ComplaintsContainer = ({
 
     }, [complaintsIinitialData]);
     
-    const message = useWebsocket();
+    const {message} = useWebsocket();
     useEffect(() => {
         if (!message) return
         switch (message.detail) {

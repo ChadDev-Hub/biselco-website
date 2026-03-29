@@ -40,7 +40,7 @@ const NewsFeedContainer = ({ initialData }: Props) => {
         return NewsInitialData.data
     });
 
-    const message = useWebsocket();
+    const {message} = useWebsocket();
 
     useEffect(() => {
         if (!message) return

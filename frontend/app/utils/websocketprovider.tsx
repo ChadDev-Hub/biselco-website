@@ -1,6 +1,7 @@
 'use client'
 import React, {createContext, useRef, useContext,useEffect,useState} from 'react'
 import { useAuth } from './authProvider'
+
 type Props = {
     children: React.ReactNode;
 }
@@ -107,15 +108,18 @@ type ComplaintData = {
 
 }
 
+type WSContextType = {
+  message: WSMessage | null;
+  sendMessage: (data:unknown) => void
+}
 
-
-const WebsocketContext = createContext<WSMessage | null>(null)
+const WebsocketContext = createContext<WSContextType | undefined>(undefined)
 
 const WebsocketProvider = ({children}: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
   const {user} = useAuth()
   const wsRef = useRef<WebSocket | null>(null)
-  const WSURL = 'ws://localhost:8000/v1/socket/ws'
+  const WSURL = process.env.NEXT_PUBLIC_WEBSOCKET_URL as string
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttempts = useRef(0)
   useEffect(()=>{
@@ -128,7 +132,7 @@ const WebsocketProvider = ({children}: Props) => {
       ws.onopen = () => {
         reconnectAttempts.current = 0
       }
-
+      
 
       ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
@@ -162,8 +166,17 @@ const WebsocketProvider = ({children}: Props) => {
       }
     }
   },[user])
+
+
+  const sendMessage = (data:unknown) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(data))
+    }
+  }
+
+
   return (
-    <WebsocketContext.Provider value={message}>
+    <WebsocketContext.Provider value={{message, sendMessage}}>
         {children}
     </WebsocketContext.Provider>
   )

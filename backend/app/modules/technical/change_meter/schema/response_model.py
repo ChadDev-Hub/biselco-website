@@ -43,7 +43,7 @@ class ChangeMeterReportResponse(BaseModel):
     pull_out_meter_reading: int
     new_meter_serial_no: str
     new_meter_brand: str
-    meter_sealed: int
+    meter_sealed: str
     initial_reading: int
     remarks: Optional[str] = None
     accomplished_by: str
