@@ -8,7 +8,7 @@ type Props = {
 
 
 type User = {
-    id: number;
+    id: string;
     user_name: string;
     email: string;
     first_name: string;

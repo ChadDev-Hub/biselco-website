@@ -5,24 +5,9 @@ from datetime import datetime
 from .complaints import Complaints
 from .status_name import ComplaintsStatusName
 from ...user.model.users import Users
-from geoalchemy2 import Geometry, WKBElement
 
-class ComplaintsHistory(BaseModel):
-    __tablename__ = "complaints_history"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    complaints_id: Mapped[int] = mapped_column(ForeignKey("consumer_complaints.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
-    subject: Mapped[str] = mapped_column(Text)
-    description: Mapped[str] = mapped_column(Text)
-    reference_pole: Mapped[str] = mapped_column(Text)
-    location: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326), nullable=True)
-    remarks: Mapped[str] = mapped_column(Text)
-    timestamp: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now())
-    is_deleted: Mapped[bool] = mapped_column(default=False)
-    
-    
-    complaint: Mapped["Complaints"] = relationship(back_populates="complaints_history")
-    user: Mapped["Users"] = relationship(back_populates="complaints_history")
+
+
 
 class ComplaintsStatusHistory(BaseModel):
     __tablename__ = "complaints_status_history"
@@ -31,7 +16,7 @@ class ComplaintsStatusHistory(BaseModel):
     status_id: Mapped[int] = mapped_column(ForeignKey("complaints_status_name.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
     comments: Mapped[str] = mapped_column(Text, nullable=True)
-    timestamp: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now())
+    timestamped: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now())
     
     
     complaint: Mapped["Complaints"] = relationship(back_populates="status_history")

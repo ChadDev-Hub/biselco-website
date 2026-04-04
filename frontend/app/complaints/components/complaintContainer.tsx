@@ -63,7 +63,10 @@ const ComplaintsContainer = (
                 break;
             case 200:
                 queueMicrotask(() =>
-                    setComplaints(complaintsInitialData.data));
+                    setComplaints(complaintsInitialData.data)
+                
+            );
+
                 break;  
             default:
                 break;

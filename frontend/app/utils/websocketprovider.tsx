@@ -36,7 +36,19 @@ type WSMessage = {
   data: ChangeMeter[];
   total_page:number;
   stats: ChangeMeterStats[];
-} 
+} | {
+  detail: "complaint_message";
+  data: ComlaintMessage;
+}
+
+type ComlaintMessage = {
+  complaint_id: number;
+  message: string;
+  reciever_id: string; 
+  sender_id: string;
+  date?: string;
+  time?: string; 
+}
 
 type ChangeMeterStats= {
   title: string;
@@ -89,6 +101,7 @@ type NewsData = {
 
 type ComplaintData = {
     id: number;
+    user_id: number;
     first_name:string;
     last_name:string;
     user_photo:string;
@@ -98,12 +111,14 @@ type ComplaintData = {
     village: string; 
     municipality: string;
     user_status?:string;
+
     location: {
         latitude: number;
         longitude: number;
         srid: number;
     }
     status: [];
+    status_history: [];
     latest_status?: string
 
 }
@@ -165,7 +180,7 @@ const WebsocketProvider = ({children}: Props) => {
         clearTimeout(reconnectTimeout.current)
       }
     }
-  },[user])
+  },[user, WSURL])
 
 
   const sendMessage = (data:unknown) => {

@@ -9,6 +9,14 @@ class ComplaintStatus(BaseModel):
     description: str
     date: str
     time: str
+    
+class ComplaintStatusHistory(BaseModel):
+    id: int
+    first_name: str
+    last_name:str
+    comments: str
+    timestamped: str
+    user_photo:str
 
 class Location(BaseModel):
     latitude: float
@@ -27,8 +35,9 @@ class ComplaintsModel(BaseModel):
     municipality: str
     location: Location
     date_time_submitted: str
-    status: list[ComplaintStatus]
+    status: List[ComplaintStatus]
     latest_status: Optional[str] = None
+    status_history: Optional[List[ComplaintStatusHistory]] = None
 
 
 class ComplaintStatusName(BaseModel):

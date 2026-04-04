@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends, Form, Body, Query, File, UploadFile
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, asc, desc, delete, and_
+from sqlalchemy import select, asc, desc, delete, and_, update
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ....core.security import get_current_user, get_current_user_ws
@@ -22,6 +22,7 @@ from ....modules.gis.franchise_area.model.boundary import Boundary
 from ....modules.gis.consumer.model.consumer import ConsumerMeter
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
+from ....modules.complaints.services.complaints_status_history import add_complaints_history
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -251,10 +252,13 @@ async def delete_complaint(
             "village": data.village,
             "municipality": data.municipality
         }
-        delete_stmt = delete(Complaints).where(Complaints.id == complaint_id)
+        delete_stmt = (
+            update(Complaints)
+            .where(Complaints.id == complaint_id)
+            .values({"is_deleted": True,
+                     "deleted_at": datetime.now()}))
         await session.execute(delete_stmt)
         await session.commit()
-        await session.close()
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
         admin_ids = [str(user.id)
                      for admin_user in admins for user in admin_user.users]
@@ -295,6 +299,8 @@ async def update_complaint_status(
         if not select_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            
+        # ADD NEW STATUS
         new_status = ComplaintsStatusUpdates(
             date=datetime.now().date(),
             time=datetime.now().time(),
@@ -304,7 +310,18 @@ async def update_complaint_status(
         session.add(new_status)
         await session.commit()
         await session.refresh(select_complaint, attribute_names=["status_updates"])
-        await session.close()
+        
+        
+        # ADD STATUS HISTORY
+        data_history = {
+            "complaint_id": select_complaint.id,
+            "status_id": select_status.id,
+            "user_id": user.id,
+            "comments": f"Updated to {data.status_name}",
+            "timestamped": datetime.now()
+        }
+        await add_complaints_history(session=session, data=data_history)
+
 
         # SEND TO ADMIN AND TO SPECIFIC CLIENT
         # ADMINS
@@ -361,6 +378,16 @@ async def delete_complaint_status(
         await session.execute(delete_stmt)
         await session.commit()
         await session.close()
+        
+        # ADD STATUS HISTORY
+        data_history = {
+            "complaint_id": select_complaint.id,
+            "status_id": select_status.id,
+            "user_id": user.id,
+            "comments": f"Removed from {data.status_name}",
+            "timestamped": datetime.now()
+        }
+        await add_complaints_history(session=session, data=data_history)
 
         # BROADCAST
         admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()

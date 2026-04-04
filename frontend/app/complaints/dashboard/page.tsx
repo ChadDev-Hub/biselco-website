@@ -23,11 +23,12 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
     'SUBMITTED AT',
     'SUBJECT',
     'DETAILS',
-    'VILLAGE',
-    'MUNICIPALITY',
     'MAP',
     'STATUS',
-    'LATEST UPDATE']
+    'LATEST UPDATE',
+    'STATUS HISTORY',
+    'MESSAGES'
+  ]
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
       <main className="

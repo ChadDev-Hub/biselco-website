@@ -13,6 +13,13 @@ if TYPE_CHECKING:
     from ...news.model.news import News
     from ...complaints.model.complaints_history import ComplaintsStatusHistory
     from ...complaints.model.complaints_message import ComplaintsMessage
+def _sender_fk():
+    from ...complaints.model.complaints_message import ComplaintsMessage
+    return [ComplaintsMessage.sender_id]
+
+def _receiver_fk():
+    from ...complaints.model.complaints_message import ComplaintsMessage
+    return [ComplaintsMessage.receiver_id]
 class Users(BaseModel):
     
     '''
@@ -40,5 +47,5 @@ class Users(BaseModel):
     roles: Mapped[List["Roles"]] = relationship(back_populates="users", secondary="user_roles")
     news: Mapped[List["News"]] = relationship(back_populates="user")
     complaint_status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="user")
-    complaint_messages_sender: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="sender")
-    complaint_messages_receiver: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="receiver")
+    complaint_messages_sender: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="sender", foreign_keys=_sender_fk)
+    complaint_messages_receiver: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="receiver" ,foreign_keys= _receiver_fk)

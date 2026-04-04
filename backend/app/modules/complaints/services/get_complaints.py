@@ -7,21 +7,22 @@ from sqlalchemy.orm import selectinload
 from .. import *
 from ...user import Users
 from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
+from ..model.complaints_history import ComplaintsStatusHistory
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from datetime import datetime
 from uuid import UUID
 from typing import Optional
 import pytz
-
+import pprint
 PAGESIZE = 10
 
 
 
-async def getComplaintsStats(session:AsyncSession):
-    stmt = (select)
 
 
+
+# GET ALL COMPLAINTS
 async def complaints(session: AsyncSession, query: Optional[str] = None, page: Optional[int]=None):
     if page is None:
         page = 1
@@ -52,9 +53,12 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
         .options(
             selectinload(Complaints.status_updates)
             .selectinload(ComplaintsStatusUpdates.status),
-            selectinload(Complaints.user)
+            selectinload(Complaints.user),
+            selectinload(Complaints.status_history).
+            selectinload(ComplaintsStatusHistory.user)
         )
         .order_by(Complaints.id.desc())
+        .where(Complaints.is_deleted == False)
     )
     if query:
         stmt = complaints.where(or_(
@@ -86,6 +90,14 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "date": s.date.isoformat(),
             "time": s.time.strftime("%I:%M %p")
         } for s in complaints.status_updates]
+        status_history = [{
+            "id": sh.id,
+            "first_name": sh.user.first_name,
+            "last_name": sh.user.last_name,
+            "user_photo": sh.user.photo,
+            "comments": sh.comments,
+            "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+        } for sh in complaints.status_history]
         complaints_data = {
             "id": complaints.id,
             "user_id": str(complaints.user_id),
@@ -103,8 +115,10 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
                 'srid': complaints.location.srid
             },
             "status": status_list,
-            "latest_status": latest_status
+            "latest_status": latest_status,
+            "status_history": status_history
         }
+        
         results.append(complaints_data)
     return {
         "data": results,
@@ -132,7 +146,10 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
-                     selectinload(Complaints.user))
+                     selectinload(Complaints.user),
+                     selectinload(Complaints.status_history)
+                     .selectinload(ComplaintsStatusHistory.user),)
+            .where(Complaints.is_deleted == False)
             )
 
     row = (await (session.execute(stmt))).one_or_none()
@@ -157,6 +174,16 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
         }
         for s in n_complaint.status_updates
     ]
+    
+    status_history = [{
+        "id": sh.id,
+        "first_name": sh.user.first_name,
+        "last_name": sh.user.last_name,
+        "user_photo": sh.user.photo,
+        "comments": sh.comments,
+        "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+    } for sh in n_complaint.status_history]
+ 
     # PROCESS GEOMETRY WBKELEMENTS
     data = {
         "id": n_complaint.id,
@@ -174,6 +201,7 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             'longitude': Point(to_shape(n_complaint.location).coords).x,
             'srid': n_complaint.location.srid},
         "status": status_list,
+        "status_history": status_history,
         "latest_status": latests_status
     }
     await session.close()
@@ -187,7 +215,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
         .options(selectinload(Complaints.status_updates)
                  .selectinload(ComplaintsStatusUpdates.status))
         .options(selectinload(Complaints.user))
-        .where(Complaints.user_id == user_id)
+        .where(and_(Complaints.user_id == user_id, Complaints.is_deleted == False))
         .order_by(desc(Complaints.timestamped))
     )).scalars().all()
     data = []
@@ -245,7 +273,10 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
-                     selectinload(Complaints.user))
+                     selectinload(Complaints.user),
+                     selectinload(Complaints.status_history)
+                     .selectinload(ComplaintsStatusHistory.user),
+                     )
             )
     row = (await session.execute(stmt)).one_or_none()
     if not row:
@@ -265,6 +296,14 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
         "date": s.date.isoformat(),
         "time": s.time.strftime("%I:%M %p"),
     } for s in new_complaint_status.status_updates]
+    status_history = [{
+            "id": sh.id,
+            "first_name": sh.user.first_name,
+            "last_name": sh.user.last_name,
+            "user_photo": sh.user.photo,
+            "comments": sh.comments,
+            "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+        } for sh in new_complaint_status.status_history]
     data = {
         "id": new_complaint_status.id,
         "user_id": str(new_complaint_status.user_id),
@@ -281,6 +320,7 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
             "longitude": Point(to_shape(new_complaint_status.location).coords).x,
             "srid": new_complaint_status.location.srid},
         "status": status_list,
+        "status_history": status_history,
         "latest_status": latest_stats
     }
     return data

@@ -104,6 +104,8 @@ def upgrade() -> None:
     sa.Column('municipality', sa.Text(), nullable=False),
     sa.Column('remarks', sa.Text(), nullable=True),
     sa.Column('timestamped', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users_account.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

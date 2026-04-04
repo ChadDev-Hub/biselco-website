@@ -237,7 +237,7 @@ const ChangeMeterForm = () => {
                             {errors.NewMeterNumber && <span className="text-red-500">{errors.NewMeterNumber.message}</span>}
                             <input {...register("NewMeterBrand", { required: "Please Input New Meters" })} title="New Meter Brand" placeholder="Brand" className="input w-full" type="text" />
                             {errors.NewMeterNumber && <span className="text-red-500">{errors.NewMeterNumber.message}</span>}
-                            <input {...register("NewMeterSealed", { required: "Please Input New Meters" })} title="New Meter Sealed" placeholder="Meter Sealed" className="input  w-full" type="number" />
+                            <input {...register("NewMeterSealed", { required: "Please Input New Meters" })} title="New Meter Sealed" placeholder="Meter Sealed" className="input  w-full" type="text" />
                             {errors.NewMeterSealed && <span className="text-red-500">{errors.NewMeterSealed.message}</span>}
                             <input {...register("InitialMeterReading", { required: "Please Input New Meters" })} title="New Meter Reading" placeholder="Initial Reading" className="input  w-full" type="number" />
                             {errors.InitialMeterReading && <span className="text-red-500">{errors.InitialMeterReading.message}</span>}

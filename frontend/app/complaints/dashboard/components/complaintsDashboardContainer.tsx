@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect, use } from 'react'
-
 import MapButton from './mapbutton'
 import ComplaintStatusButton from './statusButton'
 import { useWebsocket } from '@/app/utils/websocketprovider'
@@ -9,8 +8,8 @@ import { redirect, useSearchParams } from 'next/navigation'
 import { useAlert } from '@/app/common/alert'
 import MessageDetailView from './messageDetailView'
 import { useRouter } from 'next/navigation'
-
-
+import StatusHistoryModal from './statusHistory'
+import MessageModal from './messagingModal'
 
 
 
@@ -27,8 +26,19 @@ type Props = {
     data: Promise<PromiseType>;
 }
 
+
+type StatusHistory = {
+    id: number;
+    first_name: string;
+    last_name: string;
+    timestamped: string;
+    comments: string;
+    user_photo: string;
+}
+
 type Complaint = {
     id: number;
+    user_id: number;
     first_name: string;
     last_name: string;
     user_photo: string;
@@ -38,6 +48,7 @@ type Complaint = {
     village: string;
     municipality: string;
     location: Location;
+    status_history: StatusHistory[];
     status: status[];
     latest_status?: string;
     user_status?: string;
@@ -101,7 +112,6 @@ const ComplaintsContainer = ({
         if (!message) return
         switch (message.detail) {
             case "complaints_admin":
-                    console.log(page)
                     if (page !== 1 && page !== 0){
                         showAlert("success", "New Concerns Submitted")
                         return;
@@ -149,6 +159,7 @@ const ComplaintsContainer = ({
                                 <div className={`avatar avatar-${complaint.user_status}`}>
                                     <div className='w-8'>
                                         <Image
+                                            loading="eager"
                                             src={complaint.user_photo ?? "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"}
                                             alt="User Photo"
                                             width={50}
@@ -165,8 +176,6 @@ const ComplaintsContainer = ({
                             <td className='flex justify-center  w-full'>
                                 <MessageDetailView complaintDescription={complaint.description} />
                             </td>
-                            <td>{complaint.village}</td>
-                            <td>{complaint.municipality}</td>
                             <td align='center'>
                                 <MapButton municipality={complaint.municipality} village={complaint.village} location={complaint.location} />
                             </td>
@@ -176,9 +185,20 @@ const ComplaintsContainer = ({
                                     complaints_id={complaint.id}
                                     onOpen={handleSelectedComplaintsId}/>
                             </td>
-                            <td className='animate-pulse text-red-700 drop-shadow-md drop-shadow-amber-900 font-bold'>{
+                            <td className='animate-pulse text-center text-success drop-shadow-md drop-shadow-amber-900 font-bold'>{
                                 complaint.latest_status
                             }</td>
+                            <td className='flex justify-center'>
+                                <StatusHistoryModal data={complaint.status_history}/>
+                            </td>
+                            <td>
+                                <MessageModal
+                                complaintData={{
+                                    complaint_id: complaint.id,
+                                    reciever_id: complaint.user_id
+                                }}
+                                />
+                            </td>
                         </tr>
                     ))}
                 </tbody>

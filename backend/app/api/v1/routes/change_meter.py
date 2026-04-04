@@ -77,12 +77,13 @@ async def create_change_meter(
             pull_out_meter_reading=int(pullOutMeterReading),
             new_meter_serial_no=NewMeterNumber,
             new_meter_brand=NewMeterBrand,
-            meter_sealed=int(NewMeterSealed),
+            meter_sealed=NewMeterSealed,
             initial_reading=int(InitialMeterReading),
             remarks=remarks,
             accomplished_by=accomplishedBy,
             geom=location.geom
         )
+        print(new_change_meter)
         session.add(new_change_meter)
         await session.commit()
         await session.refresh(new_change_meter)
@@ -96,6 +97,7 @@ async def create_change_meter(
         for admin in admin_user:
             await manager.broad_cast_personal_json(user_id=str(admin), data=data)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     return {"detail" : "Change Meter Created Successfully"}
