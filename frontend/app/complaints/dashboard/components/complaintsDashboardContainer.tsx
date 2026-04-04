@@ -27,6 +27,7 @@ type Props = {
 }
 
 
+<<<<<<< HEAD
 type StatusHistory = {
     id: number;
     first_name: string;
@@ -36,6 +37,8 @@ type StatusHistory = {
     user_photo: string;
 }
 
+=======
+>>>>>>> fd251e8 (dfdfds)
 type Complaint = {
     id: number;
     user_id: number;
@@ -77,6 +80,7 @@ const ComplaintsContainer = ({
     data
 }: Props) => {
     const complaintsIinitialData = use(data)
+    console.log(complaintsIinitialData.data.data);
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
     const searchParms = useSearchParams();
     const page = Number(searchParms.get("page")) ?? 1;

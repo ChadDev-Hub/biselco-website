@@ -92,6 +92,7 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
             order_by=ChangeMeter.timestamped.desc()) / PAGE_SIZE).label("page"),
         ST_AsGeoJSON(ChangeMeter.geom).label("geom")
     )).cte("change_meter_cte")
+    # GET TOTAL PAGE 
     stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
     total_page = 1
     if stmt_total:
