@@ -1,8 +1,10 @@
 "use server";
-const baseUrl = process.env.BASESERVERURL;
+
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const baseUrl = process.env.BASESERVERURL;
 // SIGNUP ACTION
 export const Signup = async (formdata: FormData) => {
   const data = formdata;
@@ -56,6 +58,13 @@ export const Logout = async () => {
 
 // GOOGLE LOGIN
 export const GoogleLoginRoute = async(secretKey?:string)=>{
-  const url = secretKey? `${baseUrl}/v1/auth/google/login?secret=${secretKey}`:`${baseUrl}/v1/auth/google/login`
-  redirect(url)
+  const url = secretKey? `${baseUrl}/v1/auth/google/validate?secret=${secretKey}`:`${baseUrl}/v1/auth/google/validate`
+  const res = await fetch(url, { method: "POST" });
+  const results = await res.json();
+  if (!res.ok) {
+    return {
+      error: results.detail,
+    };
+  }
+  redirect(results.url);
 }

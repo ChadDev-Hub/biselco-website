@@ -22,6 +22,7 @@ type Props = {
 
 type Complaints = {
     id: number;
+    user_id: number;
     first_name: string;
     last_name: string;
     user_photo: string;
@@ -115,6 +116,7 @@ const ComplaintsContainer = (
                 <ComplaintsCard
                     key={complaint.id}
                     id={complaint.id}
+                    user_id ={complaint.user_id}
                     subject={complaint.subject}
                     description={complaint.description}
                     status={complaint.status}

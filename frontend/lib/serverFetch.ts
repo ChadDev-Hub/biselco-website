@@ -71,7 +71,6 @@ export async function getNewsPage() {
 
 
 // GET ALL COMPLAINTS 
-<<<<<<< HEAD
 export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
     const cookieStore = await cookies()
     const accessToken = cookieStore.get("access_token")?.value
@@ -85,12 +84,6 @@ export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
      const url = `${baseUrl}/v1/complaints/all${
         params.toString() ? `?${params.toString()}` : ""
     }`;
-=======
-export async function GetAllComplaints(q?:string|number|boolean, page?:number) {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get("access_token")?.value
-    const url = page ? `${baseUrl}/v1/complaints/all?page=${page}` : q ? `${baseUrl}/v1/complaints/all?q=${q}` : `${baseUrl}/v1/complaints/all`
->>>>>>> fd251e8 (dfdfds)
     const res = await fetch(
         `${url}`,{
             method: "GET",
@@ -100,7 +93,6 @@ export async function GetAllComplaints(q?:string|number|boolean, page?:number) {
             cache: "no-store"
         }
     )
-    await new Promise((resolve) => setTimeout(resolve, 3000));
     const data = await res.json()
     if(!res.ok){
         return {

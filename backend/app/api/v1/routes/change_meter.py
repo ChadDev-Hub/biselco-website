@@ -4,7 +4,7 @@ from ....dependencies.db_session import get_session
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from typing import Optional
-from ....core.websocket_manager import manager
+from ....modules.websocket.websocket_manager import manager
 from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
 from ....modules.user.schema.response_model import UserModel
 from ....core.security import get_current_user

@@ -160,19 +160,28 @@ async def get_user(user: UserModel = Depends(get_current_user)):
 
 
 # GOOGLE LOGIN
-
-@router.get("/google/login")
-async def google_login(secret: Optional[str] = Query(None)):
+@router.post("/google/validate", status_code=status.HTTP_200_OK)
+async def validate_role(secret: Optional[str] = Query(None)):
     role = "mco"
-    if secret:
-        if secret == ADMINLOGINSECRETKEY:
-            role = "admin"
-        else:
+    if secret: 
+        if secret != ADMINLOGINSECRETKEY:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Invalid Secret Key",
-            )
+            )    
+        else:
+            role = "admin"
+    queryParams = {
+        "role": role
+    }
+    url = f"http://localhost:8001/v1/auth/google/login?{urlencode(queryParams)}"
+    return {
+        "url": url
+    }
 
+
+@router.get("/google/login")
+async def google_login(role: Optional[str] = Query(None)):
     queryparms = {
         "client_id": GOOGLE_CLIENT,
         "redirect_uri": REDIRECT_URI,

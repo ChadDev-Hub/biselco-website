@@ -42,12 +42,24 @@ type WSMessage = {
 }
 
 type ComlaintMessage = {
-  complaint_id: number;
+  complaints_id: number;
   message: string;
-  reciever_id: string; 
-  sender_id: string;
-  date?: string;
-  time?: string; 
+  receiver: User; 
+  sender: User;
+  sender_status: string;
+  receiver_status: string;
+  date: string;
+  time: string;
+}
+
+type User ={
+  id: string;
+  user_name: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  roles: string[];
+  photo: string;
 }
 
 type ChangeMeterStats= {
@@ -141,7 +153,7 @@ const WebsocketProvider = ({children}: Props) => {
     if(!user) return
     let isMounted = true
     const connect = () => {
-      const ws = new WebSocket(WSURL)
+      const ws = new WebSocket(`${WSURL}/v1/socket/ws`)
       wsRef.current = ws
 
       ws.onopen = () => {

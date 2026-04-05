@@ -5,11 +5,12 @@ import Delete from './modal/deletemodal'
 
 type Props = {
     deletecomplaint: (onClose: () => void) => React.ReactNode;
+    dropdownOrientation?: "dropdown-left" | "dropdown-right" | "dropdown-top" | "dropdown-bottom";
 }
 
-const Options = ({deletecomplaint}:Props) => {
+const Options = ({deletecomplaint, dropdownOrientation = "dropdown-left"}:Props) => {
     return (
-        <div className="dropdown dropdown-left">
+        <div className={`dropdown ${dropdownOrientation}`}>
             <div aria-label='options' tabIndex={0} role="button" className="btn m-1 btn-circle btn-ghost">
                 <svg
                     width={25}

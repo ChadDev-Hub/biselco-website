@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import AdminGoogleLogin from './adminGoogleLogin'
 import { GoogleLoginRoute } from '@/app/actions/auth'
-import { set } from 'ol/transform'
+
 
 const LoginForm = () => {
     const [adminLoginSecretKey, setAdminLoginSecretKey] = useState<string>("")
@@ -18,12 +18,12 @@ const LoginForm = () => {
     }
     const handleLogin = async () => {
         if (!validate()) return
-        try {
-             const res = await GoogleLoginRoute(adminLoginSecretKey)
-        } catch (error) {
+        const res = await GoogleLoginRoute(adminLoginSecretKey)
+        if (res?.error) {
             const newErrors: { [key: string]: string } = {}
-            newErrors.adminLoginSecretKey = "Invalid Admin Login Secret Key."
+            newErrors.adminLoginSecretKey = res.error
             setErrors(newErrors)
+            return
         }
     }
         return (

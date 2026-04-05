@@ -7,6 +7,8 @@ from ...user.model.users import Users
 from .complaints import Complaints
 from typing import TYPE_CHECKING
 from uuid import UUID
+from datetime import datetime
+
 class ComplaintsMessage(BaseModel):
     __tablename__ = "complaints_message"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -17,7 +19,7 @@ class ComplaintsMessage(BaseModel):
     sender_status: Mapped[str] = mapped_column(Text, nullable=True)
     receiver_status: Mapped[str] = mapped_column(Text, nullable=True)
     message: Mapped[str] = mapped_column(Text, nullable=True)
-    timestamped: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now())
+    timestamped: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
     
     
     complaints: Mapped["Complaints"] = relationship(back_populates="complaint_messages")

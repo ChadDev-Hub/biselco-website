@@ -2,7 +2,15 @@
 
 import React, { useRef } from 'react'
 
-import ComplaintMap from './complaintsMap'
+
+import dynamic from 'next/dynamic'
+
+const MapComponent = dynamic(() => import("./complaintsMap"), {
+  ssr: false,
+  loading: () => <div className="h-40 bg-gray-200 animate-pulse" />,
+});
+
+
 type Props = {
     location: location;
     municipality: string;
@@ -113,7 +121,7 @@ const MapButton = ({ location, municipality, village }: Props) => {
                             </h4>
                             <h4 className="text-md">Village: <span>{village}</span></h4>
                         </div>
-                        <ComplaintMap
+                        <MapComponent
                             latitude={location.latitude}
                             longitude={location.longitude}
                             srid={location.srid} />

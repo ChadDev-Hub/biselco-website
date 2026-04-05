@@ -1,10 +1,13 @@
 "use client"
 
+type Props = {
+    row : number;
+    col: number;
+}
 
-
-const TableDataSkeleton = () => {
-    const rangeRow = Array.from({ length: 9 }, (_, index) => index );
-    const rangeColumn = Array.from({ length: 12 }, (_, index) => index);
+const TableDataSkeleton = ({row, col}: Props) => {
+    const rangeRow = Array.from({ length: row}, (_, index) => index );
+    const rangeColumn = Array.from({ length: col }, (_, index) => index);
   return (
     <tbody>
         {rangeRow.map((row) => (

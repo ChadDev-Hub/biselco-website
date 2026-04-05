@@ -9,7 +9,7 @@ from ....modules.news.schema.requests_model import CreateNews
 from ....core.security import get_current_user, get_current_user_ws
 from ....dependencies.db_session import get_session
 from ....dependencies.time_ago import TimeAgo
-from ....core.websocket_manager import manager
+from ....modules.websocket.websocket_manager import manager
 from datetime import datetime
 from ....modules.news.schema.response_model import NewsModel, User
 from ....modules.user.schema.response_model import UserModel

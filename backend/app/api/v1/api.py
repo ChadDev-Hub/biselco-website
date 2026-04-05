@@ -1,5 +1,7 @@
 from fastapi import APIRouter
-from .routes import complaints, landing, login, logout, meter, news, signup, websocket, user, technical_form, change_meter, consumers
+
+from ...modules.websocket.route import websocket
+from .routes import complaints, landing, login, logout, meter, news, signup, user, technical_form, change_meter, consumers
 
 
 

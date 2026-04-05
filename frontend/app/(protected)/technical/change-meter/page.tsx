@@ -47,7 +47,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
             </legend>
               <DashBoardTable >
               <TableHead columns={columns} selectable={true} />
-              <Suspense fallback={<TableDataSkeleton />}>
+              <Suspense fallback={<TableDataSkeleton  row={9} col={12}/>}>
                 <TableData data={data} />
               </Suspense>
               <Suspense fallback={<PageNationLoading />}>

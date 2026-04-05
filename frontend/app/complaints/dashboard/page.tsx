@@ -9,8 +9,11 @@ import TableFooter from '@/app/(protected)/technical/change-meter/components/tab
 import TableDataSkeleton from '@/app/(protected)/technical/change-meter/components/tableDataSkeleton'
 import TableSearch from './components/tableSearch'
 import PageNationLoading from '@/app/(protected)/technical/change-meter/components/pageNationSkeleton'
-
 import TableSearchSkeleton from './components/tableSearchSkeleton'
+
+
+
+
 const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number; q: string }> }) => {
   const params = use(searchParams)
   const complaintsData = GetAllComplaints(params.page, params.q)
@@ -47,26 +50,25 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
       lg:mt-20 
       pb-21">
         <ComplaintDashBoardHeader />
-         <Stats />
-       
-        
+        <Stats />
         <fieldset className='fieldset rounded-box'>
           <legend className={`fieldset-legend flex w-full`}>
-            <h3 className={`text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800 `}>
+            <h3 className='text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800'>
               Real-Time Complaints Table
             </h3>
-            <Suspense fallback={<TableSearchSkeleton/>}>
+            <Suspense fallback={<TableSearchSkeleton />}>
               <TableSearch data={complaintsData} />
             </Suspense>
           </legend>
           <DashBoardTable>
             <TableHead columns={columns} selectable={false} />
             <Suspense fallback={
-              <TableDataSkeleton />
+              <TableDataSkeleton row={8} col={12} />
             }>
               <ComplaintsContainer data={complaintsData} />
             </Suspense>
-            <Suspense fallback={<PageNationLoading />}>
+            <Suspense
+              fallback={<PageNationLoading />}>
               <TableFooter data={complaintsData} pageUrl={pageUrl} />
             </Suspense>
           </DashBoardTable>
