@@ -62,3 +62,13 @@ export async function DeleteComplaintStatus(complaint_id: number, status_name: s
     )
     return data
 }
+
+
+// GET COMPLAINTS MESSAGE
+export async function GetComplaintsMessage(complaint_id: number | undefined) {
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/complaints/message?complaints_id=${complaint_id}`,
+        "GET",
+    )
+    return data
+}

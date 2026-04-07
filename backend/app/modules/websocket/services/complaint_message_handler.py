@@ -1,9 +1,9 @@
 from sqlalchemy.dialects.postgresql import insert
 from ...complaints.model.complaints_message import ComplaintsMessage
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..schema.response_model import Message, User
+from ..schema.response_model import Message, User, SeenMessage
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select
+from sqlalchemy import select, update
 import datetime
 
 
@@ -34,10 +34,10 @@ async def add_message(session: AsyncSession, data: dict):
             photo=message.sender.photo
         ),
         receiver=User(
-            id=str(message.receiver.id),
-            first_name=message.receiver.first_name,
-            last_name=message.receiver.last_name,
-            photo=message.receiver.photo
+            id=str(message.receiver.id) if message.receiver else None,
+            first_name=message.receiver.first_name if message.receiver else None,
+            last_name=message.receiver.last_name if message.receiver else None,
+            photo=message.receiver.photo if message.receiver else None
         ),
         sender_status=message.sender_status,
         receiver_status=message.receiver_status,
@@ -45,3 +45,23 @@ async def add_message(session: AsyncSession, data: dict):
         date=message.timestamped.strftime("%Y-%m-%d"),
         time=message.timestamped.strftime("%I:%M %p")
     )
+
+
+async def update_message_status(session: AsyncSession,data:dict):
+    stmt = await session.execute(update(ComplaintsMessage).values(
+        receiver_status=data['receiver_status'])
+        .where(ComplaintsMessage.id.in_(data['ids']))
+        .returning(ComplaintsMessage))
+    await session.commit()
+    results = stmt.scalars().all()
+    
+    return [
+        SeenMessage(
+            id=res.id,
+            receiver_status=res.receiver_status,
+            receiver_id = str(res.receiver_id)
+        )
+        for res in results 
+    ]
+    
+    

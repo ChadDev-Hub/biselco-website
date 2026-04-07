@@ -90,7 +90,7 @@ const ComplaintsContainer = (
             case "complaint_status":
                 queueMicrotask(() =>
                     setComplaints((prev) => {
-                        return prev.map((complaint) =>
+                        return prev.map((complaint:any) =>
                             complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
                         )
                     }))

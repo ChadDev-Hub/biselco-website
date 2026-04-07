@@ -23,6 +23,8 @@ from ....modules.gis.consumer.model.consumer import ConsumerMeter
 from ....modules.gis.franchise_area.services.get_location import verifyLocation
 from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
 from ....modules.complaints.services.complaints_status_history import add_complaints_history
+from ....modules.complaints.services.complaints_messages import get_message
+from ....modules.websocket.schema.response_model import Message
 import time
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
@@ -50,7 +52,6 @@ async def get_all_complaint(
     if "admin" not in [role.name.lower() for role in current_user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
-    time.sleep(3)
     return await complaints(session=session, query=q, page=page)
 
 
@@ -413,3 +414,9 @@ async def delete_complaint_status(
     return {
         "detail": f"{data.status_name} Successfully Updated"
     }
+
+
+# Complaints Message
+@router.get("/message", status_code=status.HTTP_200_OK)
+async def get_complaints_message(session: AsyncSession = Depends(get_session), complaints_id: int = Query(...)):
+    return await get_message(session=session, complaints_id=complaints_id)

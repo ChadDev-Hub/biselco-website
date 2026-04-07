@@ -53,7 +53,6 @@ const ComplaintsCard = ({
           <MessageModal complaintData={
             {
               complaints_id: id,
-              receiver_id: user_id
             }
           } />
 

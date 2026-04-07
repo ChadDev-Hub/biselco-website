@@ -76,7 +76,7 @@ const TableFooter = ({ data, pageUrl }: Props) => {
         setShowListPages(!showListPages);
     }
 
-    const message = useWebsocket()
+    const {message} = useWebsocket()
 
     useEffect(() => {
         switch (message?.detail) {

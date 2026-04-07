@@ -39,9 +39,18 @@ type WSMessage = {
 } | {
   detail: "complaint_message";
   data: ComlaintMessage;
+} | {
+  detail: "seen_message";
+  data: SeenMessage[];
+}
+
+type SeenMessage = {
+  id: number
+  receiver_status: string;
 }
 
 type ComlaintMessage = {
+  id: number;
   complaints_id: number;
   message: string;
   receiver: User; 
