@@ -1,7 +1,18 @@
-import React from 'react'
+"use clients"
 
+import { use } from "react"
 
-const Stats = () => {
+type PromiseType = {
+    status: number
+    data: object
+}
+type Props = {
+    data: Promise<PromiseType>
+}
+
+const Stats = ({data}: Props) => {
+    const stats = use(data)
+    console.log(stats)
     return (
         <div className="stats shadow">
             <div className="stat">

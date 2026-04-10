@@ -181,10 +181,29 @@ export const queryConsumer = async(query?:string)=>{
 
 
 
-
+//  GET CHANGE METER DATA
 export const GetChangeMeter = async (page?:number,query?: string) => {
     const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?page=${page}` : `${baseUrl}/v1/change_meter/`;
     const res = await fetch(url, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+};
+
+
+// GET STATS FOR COMPLAINTS DASHBOARD
+export const GetComplaintStats = async () => {
+    const res = await fetch(`${baseUrl}/v1/complaints/stats`, {
         method: "GET"
     })
     const data = await res.json()

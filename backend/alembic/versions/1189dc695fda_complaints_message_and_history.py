@@ -25,7 +25,7 @@ def upgrade() -> None:
     # -----------------------------------------------------------------------------------------------------------------------
     # Complaint Message
     op.create_table('complaints_message',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('id', sa.UUID(), autoincrement=False, nullable=False),
     sa.Column('complaints_id', sa.Integer(), nullable=False),
     sa.Column('sender_id', sa.UUID(), nullable=False),
     sa.Column('receiver_id', sa.UUID(), nullable=True),
@@ -33,7 +33,7 @@ def upgrade() -> None:
     sa.Column('is_admin', sa.Boolean(), nullable=True),
     sa.Column("sender_status", sa.Text(), nullable=True),
     sa.Column("receiver_status", sa.Text(), nullable=True),
-    sa.Column('timestamped', sa.DateTime(), nullable=False),
+    sa.Column('timestamped', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['complaints_id'], ['consumer_complaints.id'], ),
     sa.ForeignKeyConstraint(['receiver_id'], ['users_account.id'], ),
     sa.ForeignKeyConstraint(['sender_id'], ['users_account.id'], ),
@@ -45,13 +45,14 @@ def upgrade() -> None:
     sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('comments', sa.Text(), nullable=True),
-    sa.Column('timestamped', sa.DateTime(), nullable=False),
+    sa.Column('timestamped', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['complaint_id'], ['consumer_complaints.id'], ),
     sa.ForeignKeyConstraint(['status_id'], ['complaints_status_name.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users_account.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
- 
+    
+    
     # ### end Alembic commands ###
 
 def downgrade() -> None:

@@ -87,8 +87,8 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "status_id": s.status_id,
             "name": s.status.status_name,
             "description": s.status.description,
-            "date": s.date.isoformat(),
-            "time": s.time.strftime("%I:%M %p")
+            "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+            "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
         } for s in complaints.status_updates]
         status_history = [{
             "id": sh.id,
@@ -169,8 +169,8 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             "status_id": s.status_id,
             "name": s.status.status_name,
             "description": s.status.description,
-            "date": s.date.isoformat(),
-            "time": s.time.strftime("%I:%M %p")
+            "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+            "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
         }
         for s in n_complaint.status_updates
     ]
@@ -228,8 +228,8 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
             "status_id": s.status_id,
             "name": s.status.status_name,
             "description": s.status.description,
-            "date": s.date.isoformat(),
-            "time": s.time.strftime("%I:%M %p"),
+            "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+            "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
         } for s in c.status_updates]
         if isinstance(geom, Point):
             complaint = {
@@ -293,8 +293,8 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
         "status_id": s.status_id,
         "name": s.status.status_name,
         "description": s.status.description,
-        "date": s.date.isoformat(),
-        "time": s.time.strftime("%I:%M %p"),
+        "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+        "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
     } for s in new_complaint_status.status_updates]
     status_history = [{
             "id": sh.id,

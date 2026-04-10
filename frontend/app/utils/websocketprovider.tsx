@@ -45,15 +45,15 @@ type WSMessage = {
 }
 
 type SeenMessage = {
-  id: number
+  id: string;
   receiver_status: string;
 }
 
 type ComlaintMessage = {
-  id: number;
+  id: string;
   complaints_id: number;
   message: string;
-  receiver: User; 
+  receiver: User | undefined; 
   sender: User;
   sender_status: string;
   receiver_status: string;

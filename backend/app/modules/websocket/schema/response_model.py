@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
+from uuid import UUID
 
 class User(BaseModel):
     id: Optional[str]
@@ -10,7 +11,7 @@ class User(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
 class Message(BaseModel):
-    id: int
+    id: str
     complaints_id: int
     sender: User
     receiver: Optional[User] = None
@@ -23,6 +24,6 @@ class Message(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
 class SeenMessage(BaseModel):
-    id: int;
-    receiver_status: str;
-    receiver_id: Optional[str] = None;
+    id: str
+    receiver_status: str
+    receiver_id: Optional[str] = None

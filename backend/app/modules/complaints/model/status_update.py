@@ -1,10 +1,10 @@
 from __future__ import annotations
-from sqlalchemy import Integer, Text, ForeignKey, DateTime, Date, Time
+from sqlalchemy import Integer, Text, ForeignKey, DateTime, Date, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ....db.base import BaseModel
 from datetime import time, date
 from typing import List, TYPE_CHECKING
-
+from datetime import datetime
 if TYPE_CHECKING:
     from .complaints import Complaints
     from .status_name import ComplaintsStatusName
@@ -20,8 +20,7 @@ class ComplaintsStatusUpdates(BaseModel):
     status_id: Mapped[int] = mapped_column(
         ForeignKey("complaints_status_name.id"),
         type_=Integer)
-    date: Mapped[date] = mapped_column(type_=Date)
-    time: Mapped[time] = mapped_column(type_=Time)
+    timestamped : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     # relationships
     complaints: Mapped["Complaints"] = relationship(back_populates="status_updates")
     status: Mapped["ComplaintsStatusName"] = relationship(back_populates="status_updates")

@@ -10,7 +10,7 @@ import TableDataSkeleton from '@/app/(protected)/technical/change-meter/componen
 import TableSearch from './components/tableSearch'
 import PageNationLoading from '@/app/(protected)/technical/change-meter/components/pageNationSkeleton'
 import TableSearchSkeleton from './components/tableSearchSkeleton'
-
+import { GetComplaintStats } from '@/lib/serverFetch'
 
 
 
@@ -18,6 +18,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
   const params = use(searchParams)
   const complaintsData = GetAllComplaints(params.page, params.q)
   const pageUrl = '/complaints/dashboard'
+  const statsData = GetComplaintStats()
   const columns = [
     'ID',
     'PROFILE',
@@ -50,7 +51,10 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
       lg:mt-20 
       pb-21">
         <ComplaintDashBoardHeader />
-        <Stats />
+        <Suspense fallback={<div>Loading...</div>}>
+          <Stats data={statsData} />
+        </Suspense>
+        
         <fieldset className='fieldset rounded-box'>
           <legend className={`fieldset-legend flex w-full`}>
             <h3 className='text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800'>

@@ -1,11 +1,11 @@
 from __future__ import annotations
-from sqlalchemy import Integer, BIGINT, Text, ForeignKey, DateTime, Date, Time, Boolean
+from sqlalchemy import Integer, BIGINT, Text, ForeignKey, DateTime, Interval, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ....db.base import BaseModel
 from typing import TYPE_CHECKING, List
 from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import func
-from datetime import datetime, time, date, timezone
+from datetime import datetime, time, date, timezone, timedelta
 from sqlalchemy.dialects.postgresql import UUID
 if TYPE_CHECKING:
     from ...user.model.users import Users
@@ -50,6 +50,7 @@ class Complaints(BaseModel):
     timestamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True, default=func.now())
     is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
     deleted_at: Mapped[bool] = mapped_column(type_=DateTime(timezone=True), nullable=True)
+    resolution_time: Mapped[timedelta] = mapped_column(type_=Interval(), nullable=True)
     
     # relationships
     user: Mapped["Users"] = relationship(back_populates="complaints")
@@ -57,7 +58,7 @@ class Complaints(BaseModel):
     completed_images: Mapped[List["ComplaintsImageCompleted"]] = relationship(back_populates="complaints")
     status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
         back_populates="complaints",
-        order_by="ComplaintsStatusUpdates.date, ComplaintsStatusUpdates.time")
+        order_by="ComplaintsStatusUpdates.timestamped")
     status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="complaint", order_by="ComplaintsStatusHistory.timestamped.desc()")
     complaint_messages: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="complaints")
 

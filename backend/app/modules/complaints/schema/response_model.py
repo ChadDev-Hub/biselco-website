@@ -49,3 +49,20 @@ class ComplaintStatusName(BaseModel):
 class ComplaintsModelLists(BaseModel):
     data: List[ComplaintsModel]
     total_page:int
+    
+    
+    
+class Stat(BaseModel):
+    id: int
+    title: str
+    value: int
+    description: str
+    
+class TopComplaints(BaseModel):
+    complaint: str
+    count: int
+    
+class TopComplaintsList(BaseModel):
+    stats: List[Stat]
+    top_complaints: List[TopComplaints]
+    

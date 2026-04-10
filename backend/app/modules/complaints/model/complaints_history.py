@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, ForeignKey, Text, DateTime, Date, Time
+from sqlalchemy import Integer, ForeignKey, Text, DateTime, Date, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ....db.base import BaseModel
 from datetime import datetime
@@ -16,7 +16,7 @@ class ComplaintsStatusHistory(BaseModel):
     status_id: Mapped[int] = mapped_column(ForeignKey("complaints_status_name.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
     comments: Mapped[str] = mapped_column(Text, nullable=True)
-    timestamped: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now())
+    timestamped: Mapped[DateTime] = mapped_column(DateTime(timezone=True), default=func.now())
     
     
     complaint: Mapped["Complaints"] = relationship(back_populates="status_history")

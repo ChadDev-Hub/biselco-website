@@ -10,6 +10,7 @@ from ...user.model.roles import Roles
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 router = APIRouter(prefix="/socket", tags=['Socket'])
+
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depends(get_session)):
     user = await get_current_user_ws(websocket)
@@ -30,13 +31,20 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                 data = json.get("data")
                 data['sender_id'] = str(user_id)
                 result = await add_message(session=session, data=data)
-                users = set([result.receiver.id, result.sender.id])
+                if result.receiver:
+                    users = set([result.receiver.id])
+                else:
+                    users = set()
+                if result.sender:
+                    users.add(result.sender.id)
                 users = users.union(adm)
                 to_send = {
                     "detail": "complaint_message",
                     "data": result.model_dump()
                 }
                 for user in users: 
+                    if not user:
+                        continue
                     await manager.broad_cast_personal_json(user, data=to_send)
             elif json.get("detail") == "seen_message":
                 data = json.get("data")

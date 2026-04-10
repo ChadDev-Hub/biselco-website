@@ -106,6 +106,7 @@ def upgrade() -> None:
     sa.Column('timestamped', sa.DateTime(timezone=True), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=True),
     sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('resolution_time', sa.Interval(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users_account.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -167,8 +168,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('complaint_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
-    sa.Column('time', sa.Time(), nullable=False),
+    sa.Column('timestamped', sa.DateTime(timezone=True), nullable=True, default=sa.func.now()),
     sa.ForeignKeyConstraint(['complaint_id'], ['consumer_complaints.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['status_id'], ['complaints_status_name.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')

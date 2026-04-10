@@ -25,6 +25,8 @@ from ....modules.gis.franchise_area.schema.response_model import VerifiedLocatio
 from ....modules.complaints.services.complaints_status_history import add_complaints_history
 from ....modules.complaints.services.complaints_messages import get_message
 from ....modules.websocket.schema.response_model import Message
+from ....modules.complaints.services.complaints_stats import get_complaints_stats
+from ....modules.complaints.schema.response_model import TopComplaintsList
 import time
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
@@ -125,8 +127,6 @@ async def create_complaints(
     )
     # COMPLAINT STATUS UPDATE
     status_updates = ComplaintsStatusUpdates(
-        date=datetime.now().date(),
-        time=datetime.now().time(),
         status=received)
     new_complaints.status_updates.append(status_updates)
     session.add(new_complaints)
@@ -177,8 +177,6 @@ async def create_generic_complaints(
                             detail="Complaints Status Not Found")
         
     status_updates = ComplaintsStatusUpdates(
-        date=datetime.now().date(),
-        time=datetime.now().time(),
         status=received)
         
         
@@ -305,8 +303,6 @@ async def update_complaint_status(
             
         # ADD NEW STATUS
         new_status = ComplaintsStatusUpdates(
-            date=datetime.now().date(),
-            time=datetime.now().time(),
             complaints=select_complaint,
             status=select_status
         )
@@ -417,6 +413,12 @@ async def delete_complaint_status(
 
 
 # Complaints Message
-@router.get("/message", status_code=status.HTTP_200_OK)
+@router.get("/message", status_code=status.HTTP_200_OK, response_model=list[Message])
 async def get_complaints_message(session: AsyncSession = Depends(get_session), complaints_id: int = Query(...)):
     return await get_message(session=session, complaints_id=complaints_id)
+
+
+# Complaints Stats
+@router.get("/stats", status_code=status.HTTP_200_OK, response_model=TopComplaintsList)
+async def complaints_stats(session: AsyncSession = Depends(get_session)):
+    return await get_complaints_stats(session=session)

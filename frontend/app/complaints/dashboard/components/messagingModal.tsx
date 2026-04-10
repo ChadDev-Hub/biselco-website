@@ -1,11 +1,13 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useWebsocket } from "@/app/utils/websocketprovider";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useAuth } from "@/app/utils/authProvider";
 import { GetComplaintsMessage } from "@/app/actions/complaint";
+
+
 
 type Props = {
   complaintData: ComplaintDataType;
@@ -21,10 +23,10 @@ type FormType = {
 };
 
 type ComplaintMessage = {
-  id: number;
+  id: string;
   complaints_id: number;
   message: string;
-  receiver: User;
+  receiver: User | undefined;
   sender: User;
   sender_status: string;
   receiver_status: string;
@@ -41,19 +43,25 @@ type User = {
 };
 const MessageModal = ({ complaintData }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [ComplaintMessage, setComplaintMessage] = useState<ComplaintMessage[]>(
+  const [ComplaintMessages, setComplaintMessage] = useState<ComplaintMessage[]>(
     [],
   );
   const [open, setOpen] = useState(false);
-  const { register, handleSubmit, reset } = useForm<FormType>();
+  const { register, handleSubmit, reset, control, setValue } = useForm<FormType>();
   const { user } = useAuth();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const notif = useRef<HTMLAudioElement | null>(null);
-//   NUMBER OF UNSEEN MESSAGES
-  const numberOfUnseenMessages = ComplaintMessage.filter(
-    (item) => {if (item.sender.id !== user?.id) return item.receiver_status === "Unread"},
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messageValue = useWatch({
+    control,
+    name: "message",
+  })
+  //   NUMBER OF UNSEEN MESSAGES
+  const numberOfUnseenMessages = ComplaintMessages.filter(
+    (item) => { if (item.sender.id !== user?.id) return item.receiver_status === "Unread" },
   ).length;
-  
+
+  // OPEN MODAL
   const handleOpen = () => {
     modalRef.current?.showModal();
     setOpen(true);
@@ -77,13 +85,18 @@ const MessageModal = ({ complaintData }: Props) => {
         queueMicrotask(() => {
           if (message.data.complaints_id !== complaintData.complaints_id)
             return;
-          setComplaintMessage((prev) => [...prev, message.data]);
+          setComplaintMessage((prev) => {
+            const messages = prev.filter((item) => item.id !== message.data.id);
+            return [...messages, message.data]
+          });
         });
         // Play notification
-        notif.current?.play();
+        if (user?.id !== message.data.sender.id && (user?.id === message.data.receiver?.id || message.data.receiver?.id === undefined)) {
+          notif.current?.play();
+        }
         break;
       case "seen_message":
-        const seenMap= new Map(message.data.map((item)=>[item.id, item]));
+        const seenMap = new Map(message.data.map((item) => [item.id, item]));
         queueMicrotask(() => {
           setComplaintMessage((prev) =>
             prev.map((item) => {
@@ -104,32 +117,49 @@ const MessageModal = ({ complaintData }: Props) => {
     }
   }, [message, complaintData.complaints_id, user?.id]);
 
- 
+
   // IF MODAL IS OPEN SENDS A MESSAGE TO WEBSOCKET THAT NEW ARRIVES MESSAGE IS SEEN
   useEffect(() => {
-    if (!open || !ComplaintMessage.length) return;
-    const lastMessage = ComplaintMessage[ComplaintMessage.length - 1];
+    if (!open || !ComplaintMessages.length) return;
+    const lastMessage = ComplaintMessages[ComplaintMessages.length - 1];
     if (lastMessage.sender.id === user?.id) return;
-    sendMessage({ detail: "seen_message", data: { ...ComplaintMessage } });
-  }, [open, ComplaintMessage]);
+    sendMessage({ detail: "seen_message", data: { ...ComplaintMessages } });
+  }, [open, ComplaintMessages, sendMessage, user?.id]);
 
   // SCROLL TO BOTTOM WHEN NEW MESSAGE ARRIVES
   useEffect(() => {
-    if (!open || !ComplaintMessage.length) return;
+    if (!open || !ComplaintMessages.length) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
-  }, [ComplaintMessage, open, user?.id]);
+  }, [ComplaintMessages, open, user?.id]);
 
   const onSubmit: SubmitHandler<FormType> = (data) => {
     if (!data.message) return;
+    const id = crypto.randomUUID();
+    // ASSIGN INTIAL MESSAGE SENDING
+  
+    const newMessage = {
+      id: id,
+      complaints_id: complaintData.complaints_id!,
+      message: data.message,
+      receiver: undefined,
+      sender: user!,
+      sender_status: "Sending",
+      receiver_status: "Unread",
+      date: new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila", day: "2-digit", month: "2-digit", year: "numeric", }),
+      time: new Date().toLocaleTimeString("en-PH", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit" }),
+    };
+    setComplaintMessage((prev) => [...prev, newMessage]);
     sendMessage({
       detail: "complaint_message",
-      data: { ...complaintData, ...data },
+      data: { ...complaintData, ...data, id: id },
     });
-    reset();
+    reset({message:""});
   };
+
+
   return (
     <>
-    <audio ref={notif} src="/notif.mp3" preload="metadata" />
+      <audio ref={notif} src="/notif.mp3" preload="metadata" />
       <button
         title="Messages"
         type="button"
@@ -212,10 +242,10 @@ const MessageModal = ({ complaintData }: Props) => {
             X
           </button>
           <div className="max-h-50 overflow-y-auto">
-            {ComplaintMessage?.map((m, index) => (
+            {ComplaintMessages?.map((m, index) => (
               <div key={index}>
                 {index === 0 ||
-                new Date(ComplaintMessage[index - 1].date).toDateString() !==
+                  new Date(ComplaintMessages[index - 1].date).toDateString() !==
                   new Date(m.date).toDateString() ? (
                   <p className="text-center text-gray-400 text-xs my-1">
                     {m.date}
@@ -243,7 +273,7 @@ const MessageModal = ({ complaintData }: Props) => {
                     {m.sender.first_name}
                     <time className="text-xs opacity-50">{m.time}</time>
                   </div>
-                  <div className="chat-bubble">{m.message}</div>
+                  <div className="chat-bubble max-w-[50%] wrap-break-word whitespace-pre-wrap">{m.message}</div>
                   <div className="chat-footer opacity-50">
                     {m.sender.id === user?.id
                       ? m.sender_status
@@ -254,13 +284,27 @@ const MessageModal = ({ complaintData }: Props) => {
             ))}
             <div ref={bottomRef} />
           </div>
-          <form  name="messaging" onSubmit={handleSubmit(onSubmit)} className="flex gap-2 mt-4">
+          <form name="messaging" onSubmit={handleSubmit(onSubmit)} className="flex gap-2 mt-4">
             <textarea
               {...register("message")}
-              placeholder="Type message here.."
-              autoComplete="on"
+              value={messageValue}
+              ref={textAreaRef}
+              onChange={(e) => {
+                // Update form value
+                const val = e.target.value;
+                // react-hook-form update
+                setValue("message", val);
+
+                // Adjust height
+                const el = textAreaRef.current;
+                if (!el) return;
+                el.style.height = "auto"; // reset height
+                el.style.height = Math.min(el.scrollHeight, 128) + "px";
+              }}
+              placeholder="Type message here..."
               rows={1}
-              className="textarea w-full"
+
+              className="w-full resize-none overflow-y-auto max-h-md p-2 border rounded"
             />
             <button type="submit" className="btn btn-primary">
               Send

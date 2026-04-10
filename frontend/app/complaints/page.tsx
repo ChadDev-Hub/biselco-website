@@ -4,7 +4,7 @@ import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
 import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
-import ComplaintsLoading from './loading'
+import ComplaintsLoading from './dashboard/components/loading'
 import ComplaintHeader from './components/header'
 const ComplaintsPage = () => {
   const data = UserComplaints()

@@ -1,8 +1,6 @@
 "use client";
 
-import { useRef, memo, useEffect } from "react";
-
-import dynamic from "next/dynamic";
+import { useRef, memo} from "react";
 
 import ComplaintMap from "./complaintsMap";
 

@@ -1,7 +1,7 @@
 import NewsNavBar from "./components/newsNavBar";
 import { Suspense} from "react";
 
-import NewFeedLoading from "./loading";
+import NewFeedLoading from "./components/loading";
 import { getNewsPage } from "@/lib/serverFetch";
 import NewsFeedContainer from "./components/newsFeed";
 export default  function Home() {
