@@ -1,25 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useWebsocket } from "@/app/utils/websocketprovider";
-import { useForm, SubmitHandler, useWatch } from "react-hook-form";
+import { useRef, useEffect, useMemo } from "react";
 import { useAuth } from "@/app/utils/authProvider";
-import { GetComplaintsMessage } from "@/app/actions/complaint";
+import { SubmitHandler, useWatch, useForm } from "react-hook-form";
 
 type Props = {
-  complaintData: ComplaintDataType;
+  messages: ComplaintMessage[];
+  onOpen: () => void;
+  onClosed: () => void;
+  isOpen: boolean;
+  numberOfUnseenMessages: number;
 };
-
-type ComplaintDataType = {
-  complaints_id?: number;
-  receiver_id?: number;
-};
-
-type FormType = {
-  message: string;
-};
-
 type ComplaintMessage = {
   id: string;
   complaints_id: number;
@@ -39,153 +31,47 @@ type User = {
   first_name: string;
   photo: string;
 };
-const MessageModal = ({ complaintData }: Props) => {
+
+type FormType = {
+  message: string;
+};
+const Messaging = ({ messages, onOpen, isOpen, onClosed, numberOfUnseenMessages }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [ComplaintMessages, setComplaintMessage] = useState<ComplaintMessage[]>(
-    [],
-  );
-  const [isOpen, setIsOpen] = useState(false);
-  const { register, handleSubmit, reset, control, setValue } = useForm<FormType>();
+  const { register, handleSubmit, reset, control, setValue } =
+    useForm<FormType>();
   const { user } = useAuth();
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const notif = useRef<HTMLAudioElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const messageValue = useWatch({
-    control,
-    name: "message",
-  });
-  //   NUMBER OF UNSEEN MESSAGES
-  const numberOfUnseenMessages = ComplaintMessages.filter((item) => {
-    if (item.sender.id !== user?.id) return item.receiver_status === "Unread";
-  }).length;
-
-  // OPEN MODAL
+  const messageValue = useWatch({ control, name: "message" });
   const handleOpen = () => {
-    const data = GetComplaintsMessage(complaintData.complaints_id);
-    data.then((res) => {
-      setComplaintMessage(res?.data);
-    });
-    setIsOpen(true);
+    if (modalRef.current) {
+      modalRef.current.showModal();
+      onOpen();
+    }
   };
-
-  // CLOSE MODAL
   const handleClose = () => {
-    setIsOpen(false)
+    if (modalRef.current) {
+      modalRef.current.close();
+      onClosed();
+    }
   };
 
-  useEffect(() => {
-    const dialog = modalRef.current;
-    if (!dialog) return;
-    if (isOpen && !dialog.open) {
-      dialog.showModal();
-    }
-    if (!isOpen && dialog.open) {
-      dialog.close();
-    }
-  }, [isOpen]);
 
-  // WEBSOCKET CONTEXT
-  const { message, sendMessage } = useWebsocket();
- 
-  // GET MESSAGES AND ASSIGN TO STATE
-  useEffect(() => {
-    if (!message) return;
-    switch (message?.detail) {
-      case "sent_message":
-        queueMicrotask(() => {
-          if (message.data.complaints_id !== complaintData.complaints_id) return;
-          setComplaintMessage((prev) => {
-            const messages = prev.filter((item) => item.id !== message.data.id);
-            return [...messages, message.data];
-          });
-        });
-        // Play notification
-        if (
-          user?.id !== message.data.sender.id &&
-          (user?.id === message.data.receiver?.id ||
-            message.data.receiver?.id === null)
-        ) {
-          if (!isOpen) {
-            notif.current?.play().catch(() => {});
-          }
-        }
-        break;
-      case "seen_message":
-        const seenMap = new Map(message.data.map((item) => [item.id, item]));
-        queueMicrotask(() => {
-          setComplaintMessage((prev) =>
-            prev.map((item) => {
-              const isSeen = seenMap.get(item.id);
-              if (isSeen) {
-                return {
-                  ...item,
-                  ...isSeen,
-                };
-              }
-              return item;
-            }),
-          );
-        });
-        break;
-      default:
-        break;
-    }
-  }, [message, complaintData.complaints_id, user?.id]);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // IF MODAL IS OPEN SENDS A MESSAGE TO WEBSOCKET THAT NEW ARRIVES MESSAGE IS SEEN
   useEffect(() => {
-    if (!isOpen || !ComplaintMessages.length) return;
-    const lastMessage = ComplaintMessages[ComplaintMessages.length - 1];
-    if (lastMessage.sender.id === user?.id) return;
-    sendMessage({ detail: "seen_message", data: { ...ComplaintMessages } });
-  }, [isOpen, ComplaintMessages, sendMessage, user?.id]);
-
-  // SCROLL TO BOTTOM WHEN NEW MESSAGE ARRIVES
-  useEffect(() => {
-    if (!isOpen || !ComplaintMessages.length) return;
+    if (!isOpen || !messages.length) return;
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
       inline: "nearest",
     });
-  }, [ComplaintMessages, isOpen]);
+  }, [messages, isOpen]);
 
   const onSubmit: SubmitHandler<FormType> = (data) => {
-    if (!data.message) return;
-    const id = crypto.randomUUID();
-    // ASSIGN INTIAL MESSAGE SENDING
-
-    const newMessage = {
-      id: id,
-      complaints_id: complaintData.complaints_id!,
-      message: data.message,
-      receiver: undefined,
-      sender: user!,
-      sender_status: "Sending",
-      receiver_status: "Unread",
-      date: new Date().toLocaleDateString("en-CA", {
-        timeZone: "Asia/Manila",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }),
-      time: new Date().toLocaleTimeString("en-PH", {
-        timeZone: "Asia/Manila",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    setComplaintMessage((prev) => [...prev, newMessage]);
-    sendMessage({
-      detail: "complaint_message",
-      data: { ...complaintData, ...data, id: id },
-    });
-    reset({ message: "" });
+    console.log(data);
   };
-
   return (
     <>
-      <audio ref={notif} src="/notif.mp3" preload="metadata" />
       <button
         title="Messages"
         type="button"
@@ -260,7 +146,7 @@ const MessageModal = ({ complaintData }: Props) => {
           </g>
         </svg>
       </button>
-      <dialog  ref={modalRef} className="modal">
+      <dialog ref={modalRef} className="modal">
         <div className="modal-box">
           <h1 className="text-lg font-bold">Messages</h1>
           <button
@@ -272,10 +158,10 @@ const MessageModal = ({ complaintData }: Props) => {
             X
           </button>
           <div className="max-h-50 overflow-y-auto">
-            {ComplaintMessages?.map((m, index) => (
+            {messages?.map((m, index) => (
               <div key={index}>
                 {index === 0 ||
-                new Date(ComplaintMessages[index - 1].date).toDateString() !==
+                new Date(messages[index - 1].date).toDateString() !==
                   new Date(m.date).toDateString() ? (
                   <p className="text-center text-gray-400 text-xs my-1">
                     {m.date}
@@ -352,4 +238,4 @@ const MessageModal = ({ complaintData }: Props) => {
   );
 };
 
-export default MessageModal;
+export default Messaging;

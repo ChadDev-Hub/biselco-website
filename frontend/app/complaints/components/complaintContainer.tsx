@@ -35,6 +35,8 @@ type Complaints = {
     status: [];
     latest_status?: string;
     user_status?: string;
+    resolution_time: string;
+    unread_messages: number;
 }
 
 type location = {

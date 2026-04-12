@@ -23,7 +23,11 @@ class Message(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
     
+class UnreadMessages(BaseModel):
+    complaints_id: int
+    unread_messages: int
+    
 class SeenMessage(BaseModel):
     id: str
-    receiver_status: str
+    complaints_id: int
     receiver_id: Optional[str] = None

@@ -11,7 +11,7 @@ async def get_message(session: AsyncSession, complaints_id: int):
     message = (await session.execute(select(ComplaintsMessage)
                                      .options(selectinload(ComplaintsMessage.sender), selectinload(ComplaintsMessage.receiver))
                                      .where(ComplaintsMessage.complaints_id == complaints_id)
-                                     .order_by(ComplaintsMessage.id))).scalars().all()
+                                     .order_by(ComplaintsMessage.timestamped))).scalars().all()
     data = [
 
         Message(

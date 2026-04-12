@@ -14,10 +14,28 @@ from datetime import datetime
 from uuid import UUID
 from typing import Optional
 import pytz
-import pprint
+from ....modules.websocket.schema.response_model import User, Message
+from pprint import pprint
 PAGESIZE = 10
 
 
+def format_timedelta(td):
+    total_seconds = int(td.total_seconds())
+
+    days, remainder = divmod(total_seconds, 86400)  # 1 day = 86400s
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    parts = []
+
+    if days > 0:
+        parts.append(f"{days}d")
+    if hours > 0:
+        parts.append(f"{hours}h")
+    if minutes > 0:
+        parts.append(f"{minutes}m")
+
+    return " ".join(parts) if parts else "0m"
 
 
 
@@ -41,15 +59,27 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
         .join(ComplaintsStatusName, ComplaintsStatusName.id == latest_status.c.status_id)
         .cte("latest_status_name")
     )
+    
+    unread_messages = (
+        select(
+            ComplaintsMessage.complaints_id,
+            func.count(ComplaintsMessage.id).label("count"  
+        ))
+        .where(ComplaintsMessage.receiver_status == "Unread")
+        .group_by(ComplaintsMessage.complaints_id)
+        .cte("unread_messages")
+        )
     complaints = (
         select(Complaints,
                latest_status_name.c.status_name,
+               unread_messages.c.count,
                func.ceil(func.row_number().over(
                    order_by=Complaints.id.desc())/PAGESIZE).label("page")
                )
         .select_from(Complaints)
         .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id, isouter=True)
         .join(Users, Users.id == Complaints.user_id)
+        .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
         .options(
             selectinload(Complaints.status_updates)
             .selectinload(ComplaintsStatusUpdates.status),
@@ -80,7 +110,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
     data = (await session.execute(stmt)).unique().all()
     total_page = (len(data) // PAGESIZE) + 1
     results = []
-    for complaints, latest_status, page in data:
+    for complaints, latest_status,unread_messages, page in data:
         status_list = [{
             "id": s.id,
             "complaint_id": s.complaint_id,
@@ -98,6 +128,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "comments": sh.comments,
             "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         } for sh in complaints.status_history]
+        
         complaints_data = {
             "id": complaints.id,
             "user_id": str(complaints.user_id),
@@ -106,6 +137,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "user_photo": complaints.user.photo,
             "subject": complaints.subject,
             "description": complaints.description,
+            "reference_pole": complaints.reference_pole,
             "date_time_submitted": complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
             "village": complaints.village,
             "municipality": complaints.municipality,
@@ -116,7 +148,9 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             },
             "status": status_list,
             "latest_status": latest_status,
-            "status_history": status_history
+            "status_history": status_history,
+            "resolution_time": format_timedelta(complaints.resolution_time) if complaints.resolution_time else None,
+            "unread_messages": unread_messages
         }
         
         results.append(complaints_data)
@@ -140,10 +174,21 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
                          .select_from(latests_status)
                          .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
                          .cte("latest_status_name"))
+    
+    unread_messages = (
+        select(
+            ComplaintsMessage.complaints_id,
+            func.count(ComplaintsMessage.id).label("count"  
+        ))
+        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.complaints_id == complaint_id))
+        .group_by(ComplaintsMessage.complaints_id)
+        .cte("unread_messages")
+        )
 
-    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"))
+    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"),unread_messages.c.count)
             .select_from(Complaints)
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
+            .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
                      selectinload(Complaints.user),
@@ -153,11 +198,12 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             )
 
     row = (await (session.execute(stmt))).one_or_none()
+    
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
 
-    n_complaint, latests_status = row
+    n_complaint, latests_status, unread_messages = row
     if not n_complaint:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
@@ -193,6 +239,7 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
         "user_photo": n_complaint.user.photo,
         "subject": n_complaint.subject,
         "description": n_complaint.description,
+        "reference_pole": n_complaint.reference_pole,
         "date_time_submitted": n_complaint.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": n_complaint.village,
         "municipality": n_complaint.municipality,
@@ -202,7 +249,10 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             'srid': n_complaint.location.srid},
         "status": status_list,
         "status_history": status_history,
-        "latest_status": latests_status
+        "latest_status": latests_status,
+        "resolution_time": format_timedelta(n_complaint.resolution_time) if n_complaint.resolution_time else None,
+        "unread_messages": unread_messages
+        
     }
     await session.close()
     return data
@@ -210,16 +260,27 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
 
 # GET COMPLAINTS FOR SPECIFIC USER
 async def user_complaints(session: AsyncSession, user_id: UUID):
+    unread_messages = (
+    select(
+        ComplaintsMessage.complaints_id,
+        func.count(ComplaintsMessage.id).label("count"  
+    ))
+    .where(ComplaintsMessage.receiver_status == "Unread")
+    .group_by(ComplaintsMessage.complaints_id)
+    .cte("unread_messages")
+    )
+
     complaints = (await session.execute(
-        select(Complaints)
+        select(Complaints, unread_messages.c.count)
+        .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
         .options(selectinload(Complaints.status_updates)
                  .selectinload(ComplaintsStatusUpdates.status))
         .options(selectinload(Complaints.user))
         .where(and_(Complaints.user_id == user_id, Complaints.is_deleted == False))
         .order_by(desc(Complaints.timestamped))
-    )).scalars().all()
+    )).all()
     data = []
-    for c in complaints:
+    for c, unread_messages in complaints:
         geom = to_shape(c.location)
         srid = c.location.srid
         status_list = [{
@@ -240,6 +301,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
                 "user_photo": c.user.photo,
                 "subject": c.subject,
                 "description": c.description,
+                "reference_pole": c.reference_pole,
                 "date_time_submitted": c.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
                 "village": c.village,
                 "municipality": c.municipality,
@@ -247,7 +309,10 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
                     "latitude": geom.y,
                     "longitude": geom.x,
                     "srid": srid},
-                "status": status_list}
+                "status": status_list,
+                "resolution_time": format_timedelta(c.resolution_time) if c.resolution_time else None,
+                "unread_messages": unread_messages,
+                }
             if complaint:
                 data.append(complaint)
     return data
@@ -267,10 +332,21 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
                          .select_from(latests_status)
                          .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
                          .cte("latest_status_name"))
+    
+    unread_messages = (
+    select(
+        ComplaintsMessage.complaints_id,
+        func.count(ComplaintsMessage.id).label("count"  
+    ))
+    .where(ComplaintsMessage.receiver_status == "Unread")
+    .group_by(ComplaintsMessage.complaints_id)
+    .cte("unread_messages")
+    )
 
-    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"))
+    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"), unread_messages.c.count)
             .select_from(Complaints)
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
+            .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
                      selectinload(Complaints.user),
@@ -279,10 +355,12 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
                      )
             )
     row = (await session.execute(stmt)).one_or_none()
+    
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-    new_complaint_status, latest_stats = row
+    new_complaint_status, latest_stats, unread_messages = row
+    
     if not new_complaint_status:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
@@ -312,6 +390,7 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
         "user_photo": new_complaint_status.user.photo,
         "subject": new_complaint_status.subject,
         "description": new_complaint_status.description,
+        "reference_pole": new_complaint_status.reference_pole,
         "date_time_submitted": new_complaint_status.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": new_complaint_status.village,
         "municipality": new_complaint_status.municipality,
@@ -321,6 +400,9 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
             "srid": new_complaint_status.location.srid},
         "status": status_list,
         "status_history": status_history,
-        "latest_status": latest_stats
+        "latest_status": latest_stats,
+        "resolution_time": format_timedelta(new_complaint_status.resolution_time) if new_complaint_status.resolution_time else None,
+        "unread_messages": unread_messages
     }
+    pprint(data)
     return data

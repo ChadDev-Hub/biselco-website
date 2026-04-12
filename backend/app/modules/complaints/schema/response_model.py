@@ -31,6 +31,7 @@ class ComplaintsModel(BaseModel):
     user_photo:str
     subject: str
     description: str
+    reference_pole: Optional[str]
     village: str
     municipality: str
     location: Location
@@ -38,6 +39,8 @@ class ComplaintsModel(BaseModel):
     status: List[ComplaintStatus]
     latest_status: Optional[str] = None
     status_history: Optional[List[ComplaintStatusHistory]] = None
+    resolution_time:Optional[str] = None
+    unread_messages: Optional[int] = None
 
 
 class ComplaintStatusName(BaseModel):
@@ -45,7 +48,7 @@ class ComplaintStatusName(BaseModel):
     status_name: str
     description: str
     
-    
+        
 class ComplaintsModelLists(BaseModel):
     data: List[ComplaintsModel]
     total_page:int
@@ -58,11 +61,4 @@ class Stat(BaseModel):
     value: int
     description: str
     
-class TopComplaints(BaseModel):
-    complaint: str
-    count: int
-    
-class TopComplaintsList(BaseModel):
-    stats: List[Stat]
-    top_complaints: List[TopComplaints]
     

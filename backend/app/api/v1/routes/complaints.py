@@ -26,19 +26,22 @@ from ....modules.complaints.services.complaints_status_history import add_compla
 from ....modules.complaints.services.complaints_messages import get_message
 from ....modules.websocket.schema.response_model import Message
 from ....modules.complaints.services.complaints_stats import get_complaints_stats
-from ....modules.complaints.schema.response_model import TopComplaintsList
-import time
+from ....modules.complaints.schema.response_model import Stat
+from asyncio import gather
+from typing import List
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[ComplaintsModel])
-async def get_user_complaints(user:UserModel  = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
+async def get_user_complaints(user: UserModel = Depends(get_current_user), session: AsyncSession = Depends(get_session)):
     complaint = await user_complaints(session=session, user_id=user.id)
     return complaint
 
 # GET ALL COMPLAINTS
+
+
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
         q: Optional[str] = Query(None),
@@ -64,6 +67,8 @@ async def get_complaints_status_name(session: AsyncSession = Depends(get_session
     return status_name
 
 # CREATE COMPLAINTS ON SPECIFIC USER  (METER)
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
     user: UserModel = Depends(get_current_user),
@@ -74,7 +79,7 @@ async def create_complaints(
     lon: str = Form(...),
     lat: str = Form(...),
     attachment: Optional[UploadFile] = File(None)
-):  
+):
     geom = ST_SetSRID(ST_Point(float(lon), float(lat)), 4326)
     # VERIFY COMPLAINTS LOCATION
     location = (await session.execute(select(Boundary)
@@ -123,7 +128,7 @@ async def create_complaints(
         location=geom,
         village=location.villages.name,
         municipality=location.municipal.name,
-        user_id = user.id
+        user_id=user.id
     )
     # COMPLAINT STATUS UPDATE
     status_updates = ComplaintsStatusUpdates(
@@ -143,14 +148,21 @@ async def create_complaints(
     new_complaint_data_admin = {
         "detail": "complaints_admin",
         "data": ComplaintsModel(**data).model_dump()}
-    
+    new_complaint_stats = {
+        "detail": "complaints_stats",
+        "data": await get_complaints_stats(session=session)
+    }
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
     admin_ids = [str(us.id) for admin in admins for us in admin.users]
-    
+
     for admin_id in admin_ids:
-        await manager.broad_cast_personal_json(user_id=admin_id, data=new_complaint_data_admin)
-    await session.close()
+        await manager.broad_cast_personal_json(
+            user_id=admin_id, data=new_complaint_data_admin)
+        await manager.broad_cast_personal_json(
+            user_id=admin_id, data=new_complaint_stats)
+
+
     return {
         "detail": "Complaints Submitted"
     }
@@ -165,26 +177,25 @@ async def create_generic_complaints(
     session: AsyncSession = Depends(get_session),
     issue: str = Form(...),
     details: str = Form(...),
-    location:VerifiedLocation = Depends(verifyLocation),
+    location: VerifiedLocation = Depends(verifyLocation),
     attachment: Optional[UploadFile] = File(None)
 ):
     # GET RECIEVED COMPLAINTS
     received = (await session.execute(
         select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
     ).scalars().first()
+    
     if not received:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Complaints Status Not Found")
-        
+
     status_updates = ComplaintsStatusUpdates(
         status=received)
-        
-        
+
     # COMPLAINT DESCRIPTION
     description = f"""
     Details: {details}"""
-    
-    
+
     # CREATE COMPLAINT
     new_complaints = Complaints(
         subject=issue.upper(),
@@ -193,38 +204,47 @@ async def create_generic_complaints(
         location=location.geom,
         village=location.village,
         municipality=location.municipality,
-        user_id = user.id
-        
+        user_id=user.id
+
     )
     new_complaints.status_updates.append(status_updates)
     session.add(new_complaints)
     await session.commit()
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
-    
+
     # QUERY THE LATEST COMPLAINT
     data = await new_complaint(session=session, complaint_id=new_complaints.id)
+
     json_data = {
         "detail": "complaints",
         "data": ComplaintsModel(**data).model_dump()}
-    
+
     # SEND TO SPECIFIC  CLIENT
     await manager.broad_cast_personal_json(user_id=str(user.id), data=json_data)
-    
+
     new_complaints_admin = {
         "detail": "complaints_admin",
         "data": ComplaintsModel(**data).model_dump()}
-    
+    new_complaints_stat = {
+        "details": "complaints_stats",
+        "data": await get_complaints_stats(session=session)
+    }
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-    admin_ids = [str(user.id) for admin_user in admins for user in admin_user.users]
-
+    admin_ids = [str(user.id)
+                 for admin_user in admins for user in admin_user.users]
+   
     for admin_id in admin_ids:
-        await manager.broad_cast_personal_json(user_id=admin_id, data=new_complaints_admin)
-    await session.close()
+        await manager.broad_cast_personal_json(
+            user_id=admin_id, data=new_complaints_admin)
+        await manager.broad_cast_personal_json(
+            user_id=admin_id, data=new_complaints_stat)
+  
+
     return {
         "detail": "Complaints Submitted"
     }
-    
+
 
 # DELETE COMPLAINT
 
@@ -240,7 +260,7 @@ async def delete_complaint(
         if not data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-
+        # DELETED COMPLAINTS DATA
         deleted_complaint = {
             "id": data.id,
             "subject": data.subject,
@@ -266,12 +286,22 @@ async def delete_complaint(
 
         if str(user.id) not in admin_ids:
             admin_ids.append(str(user.id))
+        deleted = {
+            "detail": "deleted_complaints",
+            "data": deleted_complaint,
+        }
+        new_complaints_stat = {
+            "details": "complaints_stats",
+            "data": await get_complaints_stats(session=session)
+        }
+
         for admin in admin_ids:
-            to_send = {
-                "detail": "deleted_complaints",
-                "data": deleted_complaint,
-            }
-            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=deleted)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=new_complaints_stat)
+        
+
     except Exception as e:
         return e
     return {
@@ -287,7 +317,7 @@ async def update_complaint_status(
         data: ComplaintsStatus = Body(),
         session: AsyncSession = Depends(get_session),
         user: UserModel = Depends(get_current_user)):
-    
+
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
@@ -300,7 +330,7 @@ async def update_complaint_status(
         if not select_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
-            
+
         # ADD NEW STATUS
         new_status = ComplaintsStatusUpdates(
             complaints=select_complaint,
@@ -308,9 +338,8 @@ async def update_complaint_status(
         )
         session.add(new_status)
         await session.commit()
-        await session.refresh(select_complaint, attribute_names=["status_updates"])
-        
-        
+        await session.refresh(select_complaint)
+
         # ADD STATUS HISTORY
         data_history = {
             "complaint_id": select_complaint.id,
@@ -321,24 +350,32 @@ async def update_complaint_status(
         }
         await add_complaints_history(session=session, data=data_history)
 
-
         # SEND TO ADMIN AND TO SPECIFIC CLIENT
         # ADMINS
         admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [str(user.id) for admin_user in admins for user in admin_user.users]
-        new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
+        admin_ids = [str(user.id)
+                     for admin_user in admins for user in admin_user.users]
 
         # APPEND USER ID IF IT IS NOT IN ADMIN
         if str(select_complaint.user_id) not in admin_ids:
             admin_ids.append(str(select_complaint.user_id))
-        
+        new_complaint_status = {
+            "detail": "complaint_status",
+            "data": await new_complaints_status(session=session, complaint_id=complaint_id)
+        }
+        new_stats = {
+            "detail": "complaint_stats",
+            "data": await get_complaints_stats(session=session)
+        }
+
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
-            to_send = {
-                "detail": "complaint_status",
-                "data": new_status,
-            }
-            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=new_stats)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=new_complaint_status)
+            
+
     except Exception as e:
         return e
     return {
@@ -354,7 +391,7 @@ async def delete_complaint_status(
     data: ComplaintsStatus = Body(),
     user: UserModel = Depends(get_current_user),
 ):
-    
+
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
@@ -367,7 +404,7 @@ async def delete_complaint_status(
         if not select_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
-            
+
         # DELETE STATEMENT
         delete_stmt = delete(ComplaintsStatusUpdates).where(
             and_(
@@ -376,8 +413,8 @@ async def delete_complaint_status(
         )
         await session.execute(delete_stmt)
         await session.commit()
-        await session.close()
-        
+        await session.refresh(select_complaint)
+
         # ADD STATUS HISTORY
         data_history = {
             "complaint_id": select_complaint.id,
@@ -392,19 +429,33 @@ async def delete_complaint_status(
         admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
         admin_ids = [str(user.id)
                      for admin_user in admin for user in admin_user.users]
-        new_status = await new_complaints_status(session=session, complaint_id=complaint_id)
-
+        
+    
+        
         # APPEND USER ID IF IT IS NOT IN ADMIN
         if str(select_complaint.user_id) not in admin_ids:
             admin_ids.append(str(select_complaint.user_id))
 
+        # TASK
+        new_status = {
+            "detail": "complaint_status",
+            "data": await new_complaints_status(session=session, complaint_id=complaint_id)
+        }
+        new_stats = {
+            "detail": "complaint_stats",
+            "data": await get_complaints_stats(session=session)
+        }
+     
+        
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admin_ids:
-            to_send = {
-                "detail": "complaint_status",
-                "data": new_status,
-            }
-            await manager.broad_cast_personal_json(user_id=admin, data=to_send)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=new_stats)
+            await manager.broad_cast_personal_json(
+                user_id=admin, data=new_status)
+            
+        
+        
     except Exception as e:
         return e
     return {
@@ -419,6 +470,6 @@ async def get_complaints_message(session: AsyncSession = Depends(get_session), c
 
 
 # Complaints Stats
-@router.get("/stats", status_code=status.HTTP_200_OK, response_model=TopComplaintsList)
+@router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[Stat])
 async def complaints_stats(session: AsyncSession = Depends(get_session)):
     return await get_complaints_stats(session=session)

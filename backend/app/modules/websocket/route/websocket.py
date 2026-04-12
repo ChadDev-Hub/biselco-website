@@ -35,32 +35,35 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                     users = set([result.receiver.id])
                 else:
                     users = set()
+                    
                 if result.sender:
                     users.add(result.sender.id)
                 users = users.union(adm)
                 to_send = {
-                    "detail": "complaint_message",
+                    "detail": "sent_message",
                     "data": result.model_dump()
                 }
                 for user in users: 
-                    if not user:
-                        continue
-                    await manager.broad_cast_personal_json(user, data=to_send)
+                    if user is not None:
+                        await manager.broad_cast_personal_json(user, data=to_send)
             elif json.get("detail") == "seen_message":
                 data = json.get("data")
+                pprint(data)
                 message_id = [value['id'] for key, value in data.items() if value['receiver_status'] == 'Unread']
                 results = await update_message_status(session=session, data={
                     'ids': message_id,
+                    'complaints_id': data.get('0')['complaints_id'],
                     'receiver_status': "Seen"
                 })
+                seen = results['seen']
                 seen_message = {
                     "detail": "seen_message",
-                    "data": [result.model_dump() for result in results]
+                    "data": results
                 }
                 users = set()
-                for result in results:
-                    if result.receiver_id is not None:
-                        users.add(result.receiver_id)
+                for result in seen:
+                    if result["receiver_id"] is not None:
+                        users.add(result["receiver_id"])
                     users = users.union(adm)
                 for user in users:
                     await manager.broad_cast_personal_json(user, data=seen_message)

@@ -37,16 +37,40 @@ type WSMessage = {
   total_page:number;
   stats: ChangeMeterStats[];
 } | {
-  detail: "complaint_message";
+  detail: "complaint_message" | "sent_message";
   data: ComlaintMessage;
 } | {
   detail: "seen_message";
-  data: SeenMessage[];
+  data: SeenMessage;
+} | {
+  detail: "complaint_stats";
+  data: ComplaintStatsType[];
 }
 
+// COMPLAINT STATSD TYPE
+type ComplaintStatsType = {
+  id: number;
+  title: string;
+  value: number;
+  description: string;
+};
+
+
 type SeenMessage = {
+  unread: Unread;
+  seen: Seen[];
+}
+
+type Seen = {
   id: string;
+  complaints_id:number;
   receiver_status: string;
+  receiver_id: string; 
+}
+
+type Unread = {
+  complaints_id: number;
+  unread_messages: number;
 }
 
 type ComlaintMessage = {
@@ -128,6 +152,7 @@ type ComplaintData = {
     user_photo:string;
     subject: string;
     description: string;
+    reference_pole: string;
     date_time_submitted: string;
     village: string; 
     municipality: string;
@@ -140,7 +165,9 @@ type ComplaintData = {
     }
     status: [];
     status_history: [];
-    latest_status?: string
+    latest_status?: string;
+    resolution_time: string;
+    unread_messages: number;
 
 }
 
