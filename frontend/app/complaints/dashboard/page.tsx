@@ -27,11 +27,13 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
     'SUBMITTED AT',
     'SUBJECT',
     'DETAILS',
+    'REFERENCE POLE',
     'MAP',
     'STATUS',
     'LATEST UPDATE',
     'STATUS HISTORY',
-    'MESSAGES'
+    'MESSAGES',
+    'RESOLUTION TIME'
   ]
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
@@ -67,7 +69,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
           <DashBoardTable>
             <TableHead columns={columns} selectable={false} />
             <Suspense fallback={
-              <TableDataSkeleton row={8} col={12} />
+              <TableDataSkeleton row={8} col={14} />
             }>
               <ComplaintsContainer data={complaintsData} />
             </Suspense>

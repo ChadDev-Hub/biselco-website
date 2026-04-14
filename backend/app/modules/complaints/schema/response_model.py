@@ -53,7 +53,9 @@ class ComplaintsModelLists(BaseModel):
     data: List[ComplaintsModel]
     total_page:int
     
-    
+class NewComplaintsModel(BaseModel):
+    data: ComplaintsModel
+    total_page:int
     
 class Stat(BaseModel):
     id: int
@@ -61,4 +63,21 @@ class Stat(BaseModel):
     value: int
     description: str
     
-    
+
+class ComplaintHistoryModel(BaseModel):
+    id: int
+    user_id: str
+    first_name: str
+    last_name: str
+    user_photo:str
+    subject: str
+    description: str
+    reference_pole: Optional[str]
+    village: str
+    municipality: str
+    location: Location
+    date_time_submitted: str
+    status: List[ComplaintStatus]
+    latest_status: Optional[str] = None
+    status_history: Optional[List[ComplaintStatusHistory]] = None
+    resolution_time:Optional[str] = None

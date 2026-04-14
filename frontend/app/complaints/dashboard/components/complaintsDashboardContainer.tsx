@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use} from "react";
 import MapButton from "./mapbutton";
 import ComplaintStatusButton from "./statusButton";
 import { useWebsocket } from "@/app/utils/websocketprovider";
@@ -9,10 +9,10 @@ import { useAlert } from "@/app/common/alert";
 import MessageDetailView from "./messageDetailView";
 import { useRouter } from "next/navigation";
 import StatusHistoryModal from "./statusHistory";
-import MessageModal from "./messagingModal";
 import { GetComplaintsMessage } from "@/app/actions/complaint";
 import Messaging from "./messagingModal2";
 import { useAuth } from "@/app/utils/authProvider";
+import { useNotification } from "@/app/common/NotificationProvider";
 
 type PromiseType = {
   status?: number;
@@ -38,7 +38,7 @@ type StatusHistory = {
 
 type Complaint = {
   id: number;
-  user_id: number;
+  user_id: string;
   first_name: string;
   last_name: string;
   user_photo: string;
@@ -93,12 +93,20 @@ type User = {
   photo: string;
 };
 
+type FormType = {
+  complaints_id: number;
+  receiver_id: string;
+  message: string;
+};
+
 const ComplaintsContainer = ({ data }: Props) => {
   const complaintsIinitialData = use(data);
   const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
   const searchParms = useSearchParams();
   const page = Number(searchParms.get("page")) ?? 1;
   const router = useRouter();
+  const {playMessageNotification} = useNotification();
+  const [messageLoading, setMessageLoading] = useState(false);
   const [activeComplaintsId, setactiveComplaintsId] = useState<number | null>(
     null,
   );
@@ -128,35 +136,78 @@ const ComplaintsContainer = ({ data }: Props) => {
     }
   }, [complaintsIinitialData]);
 
-  
+
 
   // MESSAGING MODAL
   const [complaintsMessage, setComplaintsMessage] = useState<
     ComplaintMessage[] | []
   >([]);
   const [isMessaginModalOpen, setIsMessagingModalOpen] = useState(false);
+
+
+  // MESSAGING MODAL OPEN HANDLER
   const MessageOpen = (complaintsId: number) => {
     if (complaintsId) {
+      setMessageLoading(true);
       GetComplaintsMessage(complaintsId).then((res) => {
         if (res?.status === 200) {
           setComplaintsMessage(res.data);
+          setMessageLoading(false);
         }
       });
       setIsMessagingModalOpen(true);
     }
   };
+
+
+  // MESSAGING MODAL CLOSE HANDLER
   const MessageClose = () => {
     setComplaintsMessage([]);
     setIsMessagingModalOpen(false);
   };
 
 
+  //  HANDLE INITIAL DATA SENT
+  const handleInitialDataSending = (data: FormType) => {
+    const id = crypto.randomUUID();
+    // ASSIGN INTIAL MESSAGE SENDING
+
+    const newMessage = {
+      id: id,
+      complaints_id: data.complaints_id,
+      message: data.message,
+      receiver: undefined,
+      sender: user!,
+      sender_status: "Sending",
+      receiver_status: "Unread",
+      date: new Date().toLocaleDateString("en-CA", {
+        timeZone: "Asia/Manila",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+      time: new Date().toLocaleTimeString("en-PH", {
+        timeZone: "Asia/Manila",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setComplaintsMessage((prev) => [...prev, newMessage]);
+    sendMessage({
+      detail: "complaint_message",
+      data: { ...data, id: id },
+    });
+  };
+
+
   // WEBSOCKETS
 
   const { message, sendMessage } = useWebsocket();
+
   useEffect(() => {
     if (!message) return;
     switch (message.detail) {
+      
       case "complaints_admin":
         if (page !== 1 && page !== 0) {
           showAlert("success", "New Concerns Submitted");
@@ -165,9 +216,9 @@ const ComplaintsContainer = ({ data }: Props) => {
           queueMicrotask(() => {
             setallComplaints((prev) => {
               const existingComplaints = prev.filter(
-                (complaint) => complaint.id !== message.data.id,
+                (complaint) => complaint.id !== message.data.data.id,
               );
-              return [message.data, ...existingComplaints].slice(0, 10);
+              return [message.data.data, ...existingComplaints].slice(0, 10);
             });
           });
         }
@@ -198,29 +249,76 @@ const ComplaintsContainer = ({ data }: Props) => {
           }),
         );
         break;
+      case "sent_message":
+        queueMicrotask(() => {
+          setComplaintsMessage((prev) => {
+            const exists = prev.some((msg) => msg.id === message.data.new_message.id);
+            if (exists) {
+              return prev.map((msg: ComplaintMessage) => msg.id === message.data.new_message.id ? { ...msg, ...message.data.new_message } : msg)
+            }
+            return [...prev, message.data.new_message]
+          });
+          setallComplaints((prev) => {
+            if (message.data.unread.sender_id===user?.id) return prev
+            return prev.map((item: Complaint) => {
+              return item.id === message.data.unread.complaints_id ? { ...item, unread_messages: message.data.unread.unread_messages } : item
+            })
+          })
+        });
+        // PLAY NOTIFICATION
+        if(!isMessaginModalOpen){
+          if(message.data.new_message.sender.id===user?.id) return
+          playMessageNotification();
+        }
+        break;
       case "seen_message":
         queueMicrotask(() => {
           setallComplaints((prev) => {
-            return prev.map((complaint: Complaint) => 
+            return prev.map((complaint: Complaint) =>
               complaint.id === message.data.unread.complaints_id
-                ? { ...complaint, unread_messages: message.data.unread.unread_messages  }
+                ? { ...complaint, unread_messages: message.data.unread.unread_messages }
                 : complaint);
           });
+          setComplaintsMessage((prev) => {
+            const seenMap = new Map(
+              message.data.seen.map((msg) => [msg.id, msg])
+            );
+            return prev.map((msg: ComplaintMessage) =>
+              seenMap.has(msg.id)
+                ? { ...msg, ...seenMap.get(msg.id) }
+                : msg
+            );
+          })
         });
         break;
       default:
         break;
     }
-  }, [message, router, showAlert, page]);
-  console.log(allComplaints);
+  }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification]);
+
   useEffect(() => {
     if (!isMessaginModalOpen || !complaintsMessage.length) return;
+
     const lastMessage = complaintsMessage[complaintsMessage.length - 1];
+    // don't mark your own message as seen
     if (lastMessage.sender.id === user?.id) return;
-    sendMessage({ detail: "seen_message", data: { ...complaintsMessage } });
-  }, [isMessaginModalOpen, complaintsMessage, user?.id]);
+
+    const UnseenMessages = complaintsMessage.filter((msg) => msg.receiver_status === "Unread" && msg.sender?.id !== user?.id);
+    const data_ids = UnseenMessages.map((m) => m.id);
+
+    sendMessage({
+      detail: "seen_message",
+      data: {
+        message_ids: data_ids,
+        receiver_status: "Seen",
+        complaints_id: lastMessage.complaints_id
+      },
+    });
+
+  }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
 
   return (
+    <>
     <tbody className="bg-base-100/45 backdrop-blur-2xl text-xs">
       {allComplaints.map((complaint: Complaint, index: number) => (
         <tr key={complaint.id}>
@@ -249,6 +347,7 @@ const ComplaintsContainer = ({ data }: Props) => {
           <td className="flex justify-center  w-full">
             <MessageDetailView complaintDescription={complaint.description} />
           </td>
+          <td>{complaint.reference_pole}</td>
           <td align="center">
             <MapButton
               municipality={complaint.municipality}
@@ -273,26 +372,28 @@ const ComplaintsContainer = ({ data }: Props) => {
           <td className="flex justify-center">
             <StatusHistoryModal data={complaint.status_history} />
           </td>
-          {/* <td>
-                                <MessageModal
-                                complaintData={{
-                                    complaints_id: complaint.id,
-                                    receiver_id: complaint.user_id
-                                }}
-                                />
-                            </td> */}
           <td>
             <Messaging
-              messages={complaintsMessage}
+              messageLoading={messageLoading}
+              complaint_id={complaint.id}
+              messages={complaintsMessage.filter((msg) => msg.complaints_id === complaint.id)}
               onOpen={() => MessageOpen(complaint.id)}
               onClosed={MessageClose}
               isOpen={isMessaginModalOpen}
               numberOfUnseenMessages={complaint.unread_messages}
+              setInitialData={(data) => handleInitialDataSending({ complaints_id: data.complaints_id, message: data.message, receiver_id: data.receiver_id })
+              } receiver_id={complaint.user_id}
             />
+          </td>
+          <td>
+            {complaint.resolution_time ? complaint.resolution_time : "Unresolved"}
           </td>
         </tr>
       ))}
     </tbody>
+    
+    </>
+    
   );
 };
 export default ComplaintsContainer;

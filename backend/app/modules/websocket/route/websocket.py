@@ -31,37 +31,40 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                 data = json.get("data")
                 data['sender_id'] = str(user_id)
                 result = await add_message(session=session, data=data)
-                if result.receiver:
-                    users = set([result.receiver.id])
+               
+                if result['new_message']:
+                    users = set([result['new_message']["receiver"]["id"]])
                 else:
                     users = set()
-                    
-                if result.sender:
-                    users.add(result.sender.id)
+                
+                if result['new_message']['sender'] is not None:
+                    users.add(result['new_message']["sender"]["id"])
                 users = users.union(adm)
                 to_send = {
                     "detail": "sent_message",
-                    "data": result.model_dump()
+                    "data": result
                 }
                 for user in users: 
                     if user is not None:
                         await manager.broad_cast_personal_json(user, data=to_send)
             elif json.get("detail") == "seen_message":
                 data = json.get("data")
-                pprint(data)
-                message_id = [value['id'] for key, value in data.items() if value['receiver_status'] == 'Unread']
+                message_id = data.get("message_ids")
+                
                 results = await update_message_status(session=session, data={
                     'ids': message_id,
-                    'complaints_id': data.get('0')['complaints_id'],
-                    'receiver_status': "Seen"
+                    'complaints_id': data.get('complaints_id'),
+                    'receiver_status': "Seen",
+                    "sender_id": str(user_id)
                 })
-                seen = results['seen']
+                
+            
                 seen_message = {
                     "detail": "seen_message",
                     "data": results
                 }
                 users = set()
-                for result in seen:
+                for result in results["seen"]   :
                     if result["receiver_id"] is not None:
                         users.add(result["receiver_id"])
                     users = users.union(adm)

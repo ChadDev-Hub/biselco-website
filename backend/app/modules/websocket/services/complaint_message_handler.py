@@ -3,7 +3,7 @@ from ...complaints.model.complaints_message import ComplaintsMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.response_model import Message, User, SeenMessage, UnreadMessages
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, update, func, and_
+from sqlalchemy import select, update, func, and_, or_
 import pytz
 
 
@@ -23,8 +23,23 @@ async def add_message(session: AsyncSession, data: dict):
             .options(selectinload(ComplaintsMessage.sender),
                      selectinload(ComplaintsMessage.receiver))
             .where(ComplaintsMessage.id == new_data))
+    
+    unread = (await session.execute(select
+              (
+               func.count(ComplaintsMessage.id).label("count"))
+              .where(
+                  and_(ComplaintsMessage.receiver_status == "Unread",
+                       ComplaintsMessage.complaints_id == data['complaints_id'],
+                       or_((ComplaintsMessage.receiver_id != data['sender_id']), ComplaintsMessage.receiver_id == None)
+                       )))).scalar()
     message = (await session.execute(stmt)).scalar_one()
-    return Message(
+    return {
+        "unread": UnreadMessages(
+            complaints_id=data['complaints_id'],
+            unread_messages=unread if unread else 0,
+            sender_id=data['sender_id']
+        ).model_dump(),
+        "new_message":Message(
         id=str(message.id),
         complaints_id=message.complaints_id,
         sender=User(
@@ -46,7 +61,7 @@ async def add_message(session: AsyncSession, data: dict):
             pytz.timezone('Asia/Manila')).strftime("%Y-%m-%d"),
         time=message.timestamped.astimezone(
             pytz.timezone('Asia/Manila')).strftime("%I:%M %p")
-    )
+    ).model_dump(),}
 
 
 async def update_message_status(session: AsyncSession, data: dict):
@@ -68,7 +83,8 @@ async def update_message_status(session: AsyncSession, data: dict):
         
             "unread": UnreadMessages(
                 complaints_id=data['complaints_id'],
-                unread_messages=unread if unread else 0
+                unread_messages=unread if unread else 0,
+                sender_id=data['sender_id']
             ).model_dump(),
             "seen":
             [

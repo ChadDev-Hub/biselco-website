@@ -13,6 +13,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import AlertComponent from "./common/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
+import { NotificationProvider } from "./common/NotificationProvider";
 const baseurl = process.env.BASESERVERURL
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,11 +47,12 @@ export default async function RootLayout({
             <AlertComponent>
               <LoadingIndicator>
               <ThemeController />
+              <NotificationProvider>
                 <Drawer baseurl={baseurl} title={data.hero.title}>
                   {children}
                   <DocNavigation />
                 </Drawer>
-              
+              </NotificationProvider>
               </LoadingIndicator>
             </AlertComponent>
           </WebsocketProvider>

@@ -83,7 +83,6 @@ async def create_change_meter(
             accomplished_by=accomplishedBy,
             geom=location.geom
         )
-        print(new_change_meter)
         session.add(new_change_meter)
         await session.commit()
         await session.refresh(new_change_meter)

@@ -19,7 +19,8 @@ const Stats = ({ data }: Props) => {
   const stats = use(data);
   const [statsData, setStatsData] = useState<ComplaintStatsType[]>([]);
   useEffect(() => {
-    queueMicrotask(() => setStatsData(stats.data));
+    queueMicrotask(() => 
+      setStatsData(stats.data));
   }, [stats]);
 
   // WEBSOCKET

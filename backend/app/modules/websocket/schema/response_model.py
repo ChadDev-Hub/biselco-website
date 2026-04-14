@@ -26,8 +26,10 @@ class Message(BaseModel):
 class UnreadMessages(BaseModel):
     complaints_id: int
     unread_messages: int
+    sender_id: str
     
 class SeenMessage(BaseModel):
     id: str
     complaints_id: int
+    receiver_status: str
     receiver_id: Optional[str] = None

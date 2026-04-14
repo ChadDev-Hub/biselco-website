@@ -40,7 +40,7 @@ class ConnectionManager:
 
     async def broadcast(self, json: dict):
 
-        for user_id, websockets in self.active_connections.items():
+        for user_id, websockets in list(self.active_connections.items()):
             for socket in list(websockets):
                 try:
                     await socket.send_json(json)

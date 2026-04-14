@@ -9,13 +9,14 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_SetSRID, ST_Intersects
 from shapely.geometry import Point
 from ....modules.complaints.services.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
+from ....modules.complaints.services.complaints_dashboard import get_complaints_history
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
 from ....modules.websocket.websocket_manager import manager
 from ....modules.complaints import *
 from ....modules.user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
-from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName, ComplaintsModelLists
+from ....modules.complaints.schema.response_model import ComplaintsModel, ComplaintStatusName, ComplaintsModelLists, NewComplaintsModel
 from ....modules.user.schema.response_model import UserModel
 from typing import Optional
 from ....modules.gis.franchise_area.model.boundary import Boundary
@@ -50,14 +51,14 @@ async def get_all_complaint(
         user: UserModel = Depends(get_current_user)):
     current_user = (await session.execute(select(Users)
                                           .options(selectinload(Users.roles))
-                                          .where(Users.id == user.id))).scalar_one_or_none()
+                                          .where(Users.id == str(user.id)))).scalar_one_or_none()
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
     if "admin" not in [role.name.lower() for role in current_user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
-    return await complaints(session=session, query=q, page=page)
+    return await complaints(session=session, query=q, page=page, user_id= str(user.id))
 
 
 # GET ALL COMPLAINTS STATUS NAME
@@ -139,15 +140,15 @@ async def create_complaints(
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
 
     # QUERY THE LATEST COMPLAINT
-    data = await new_complaint(session=session, complaint_id=new_complaints.id)
+    data = await new_complaint(session=session, complaint_id=new_complaints.id, user_id=str(user.id))
     new_complaint_data = {
         "detail": "complaints",
-        "data": ComplaintsModel(**data).model_dump()}
+        "data": NewComplaintsModel(**data).model_dump()}
     # SEND TO SPECIFIC  CLIENT
     await manager.broad_cast_personal_json(user_id=str(user.id), data=new_complaint_data)
     new_complaint_data_admin = {
         "detail": "complaints_admin",
-        "data": ComplaintsModel(**data).model_dump()}
+        "data": NewComplaintsModel(**data).model_dump()}
     new_complaint_stats = {
         "detail": "complaints_stats",
         "data": await get_complaints_stats(session=session)
@@ -161,7 +162,6 @@ async def create_complaints(
             user_id=admin_id, data=new_complaint_data_admin)
         await manager.broad_cast_personal_json(
             user_id=admin_id, data=new_complaint_stats)
-
 
     return {
         "detail": "Complaints Submitted"
@@ -213,18 +213,18 @@ async def create_generic_complaints(
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
 
     # QUERY THE LATEST COMPLAINT
-    data = await new_complaint(session=session, complaint_id=new_complaints.id)
+    data = await new_complaint(session=session, complaint_id=new_complaints.id, user_id=str(user.id))
 
     json_data = {
         "detail": "complaints",
-        "data": ComplaintsModel(**data).model_dump()}
+        "data": NewComplaintsModel(**data).model_dump()}
 
     # SEND TO SPECIFIC  CLIENT
     await manager.broad_cast_personal_json(user_id=str(user.id), data=json_data)
 
     new_complaints_admin = {
         "detail": "complaints_admin",
-        "data": ComplaintsModel(**data).model_dump()}
+        "data": NewComplaintsModel(**data).model_dump()}
     new_complaints_stat = {
         "details": "complaints_stats",
         "data": await get_complaints_stats(session=session)
@@ -361,7 +361,7 @@ async def update_complaint_status(
             admin_ids.append(str(select_complaint.user_id))
         new_complaint_status = {
             "detail": "complaint_status",
-            "data": await new_complaints_status(session=session, complaint_id=complaint_id)
+            "data": await new_complaints_status(session=session, complaint_id=complaint_id, user_id=str(user.id))
         }
         new_stats = {
             "detail": "complaint_stats",
@@ -439,7 +439,7 @@ async def delete_complaint_status(
         # TASK
         new_status = {
             "detail": "complaint_status",
-            "data": await new_complaints_status(session=session, complaint_id=complaint_id)
+            "data": await new_complaints_status(session=session, complaint_id=complaint_id, user_id=str(user.id))
         }
         new_stats = {
             "detail": "complaint_stats",
@@ -473,3 +473,8 @@ async def get_complaints_message(session: AsyncSession = Depends(get_session), c
 @router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[Stat])
 async def complaints_stats(session: AsyncSession = Depends(get_session)):
     return await get_complaints_stats(session=session)
+
+# COMPLAINTS HISTORY INCLUDES DELETED COMPLAINTS
+@router.get("/history", status_code=status.HTTP_200_OK)
+async def get_history(session: AsyncSession = Depends(get_session)):
+    return await get_complaints_history(session=session)

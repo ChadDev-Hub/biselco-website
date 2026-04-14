@@ -45,14 +45,14 @@ async def get_complaints_stats(
                 func.concat(
                     case(
                         (func.round(
-                            (complaints_subquery.c.completed / complaints_subquery.c.total) * 100, 2) > 50, "📈"),
+                            (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total,0)) * 100, 2) > 50, "📈"),
                         else_="📉"),
                     complaints_subquery.c.total,
                     ' ',
 
                     '(',
                     func.round(
-                        (complaints_subquery.c.completed / complaints_subquery.c.total) * 100, 2),
+                        (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total,0)) * 100, 2),
                     '%',
                     ')')
             ).label("data"))

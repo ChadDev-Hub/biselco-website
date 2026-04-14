@@ -16,6 +16,7 @@ from typing import Optional
 import pytz
 from ....modules.websocket.schema.response_model import User, Message
 from pprint import pprint
+from math import ceil
 PAGESIZE = 10
 
 
@@ -34,14 +35,15 @@ def format_timedelta(td):
         parts.append(f"{hours}h")
     if minutes > 0:
         parts.append(f"{minutes}m")
-
-    return " ".join(parts) if parts else "0m"
+    if seconds > 0:
+        parts.append(f"{seconds}s")
+    return " ".join(parts) if parts else "0s"
 
 
 
 
 # GET ALL COMPLAINTS
-async def complaints(session: AsyncSession, query: Optional[str] = None, page: Optional[int]=None):
+async def complaints(session: AsyncSession, query: Optional[str] = None, page: Optional[int]=None, user_id: Optional[str] = None):
     if page is None:
         page = 1
     latest_status = (
@@ -65,7 +67,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             ComplaintsMessage.complaints_id,
             func.count(ComplaintsMessage.id).label("count"  
         ))
-        .where(ComplaintsMessage.receiver_status == "Unread")
+        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.sender_id != user_id))
         .group_by(ComplaintsMessage.complaints_id)
         .cte("unread_messages")
         )
@@ -108,7 +110,8 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
     else:
         stmt = complaints.offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
     data = (await session.execute(stmt)).unique().all()
-    total_page = (len(data) // PAGESIZE) + 1
+    total_page = ceil((await session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalars().one() / PAGESIZE)
+
     results = []
     for complaints, latest_status,unread_messages, page in data:
         status_list = [{
@@ -161,7 +164,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
 
 
 # NEW COMPLAINT
-async def new_complaint(session: AsyncSession, complaint_id: int):
+async def new_complaint(session: AsyncSession, complaint_id: int, user_id:str):
     latests_status = (select(ComplaintsStatusUpdates.complaint_id,
                              func.max(ComplaintsStatusUpdates.status_id).label(
                                  "status_id")
@@ -180,7 +183,8 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
             ComplaintsMessage.complaints_id,
             func.count(ComplaintsMessage.id).label("count"  
         ))
-        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.complaints_id == complaint_id))
+        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.complaints_id == complaint_id,
+                    or_(ComplaintsMessage.receiver_id != user_id, ComplaintsMessage.receiver_id == None)))
         .group_by(ComplaintsMessage.complaints_id)
         .cte("unread_messages")
         )
@@ -207,6 +211,10 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
     if not n_complaint:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+    
+    
+    # PAGINATION
+    total_page = ceil((await session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalars().one() / PAGESIZE)
     # GET STATUS
     status_list = [
         {
@@ -255,7 +263,10 @@ async def new_complaint(session: AsyncSession, complaint_id: int):
         
     }
     await session.close()
-    return data
+    return {
+        "data": data,
+        "total_page": total_page
+    }
 
 
 # GET COMPLAINTS FOR SPECIFIC USER
@@ -265,7 +276,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
         ComplaintsMessage.complaints_id,
         func.count(ComplaintsMessage.id).label("count"  
     ))
-    .where(ComplaintsMessage.receiver_status == "Unread")
+    .where(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.sender_id != user_id)
     .group_by(ComplaintsMessage.complaints_id)
     .cte("unread_messages")
     )
@@ -319,7 +330,7 @@ async def user_complaints(session: AsyncSession, user_id: UUID):
 
 
 # GET NEW COMPLAINTS ALL USERS STATUS
-async def new_complaints_status(session: AsyncSession, complaint_id):
+async def new_complaints_status(session: AsyncSession, complaint_id, user_id:str):
     latests_status = (select(ComplaintsStatusUpdates.complaint_id,
                              func.max(ComplaintsStatusUpdates.status_id).label(
                                  "status_id")
@@ -333,20 +344,11 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
                          .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
                          .cte("latest_status_name"))
     
-    unread_messages = (
-    select(
-        ComplaintsMessage.complaints_id,
-        func.count(ComplaintsMessage.id).label("count"  
-    ))
-    .where(ComplaintsMessage.receiver_status == "Unread")
-    .group_by(ComplaintsMessage.complaints_id)
-    .cte("unread_messages")
-    )
 
-    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"), unread_messages.c.count)
+    
+    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"))
             .select_from(Complaints)
             .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
-            .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
                      selectinload(Complaints.user),
@@ -359,7 +361,7 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-    new_complaint_status, latest_stats, unread_messages = row
+    new_complaint_status, latest_stats = row
     
     if not new_complaint_status:
         raise HTTPException(
@@ -401,8 +403,6 @@ async def new_complaints_status(session: AsyncSession, complaint_id):
         "status": status_list,
         "status_history": status_history,
         "latest_status": latest_stats,
-        "resolution_time": format_timedelta(new_complaint_status.resolution_time) if new_complaint_status.resolution_time else None,
-        "unread_messages": unread_messages
+        "resolution_time": format_timedelta(new_complaint_status.resolution_time) if new_complaint_status.resolution_time else None
     }
-    pprint(data)
     return data

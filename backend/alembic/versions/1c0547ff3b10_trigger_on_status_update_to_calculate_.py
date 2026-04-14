@@ -28,10 +28,10 @@ def upgrade() -> None:
                     end_ts TIMESTAMP;
                BEGIN
                 IF (TG_OP = 'INSERT' AND NEW.status_id = 4) OR
-                    (TG_OP = 'UPDATE' AND OLD.status_id = 2 AND NEW.status_id = 4) THEN
+                    (TG_OP = 'UPDATE' AND OLD.status_id = 1 AND NEW.status_id = 4) THEN
                     SELECT timestamped INTO start_ts
                     FROM complaints_status
-                    WHERE complaint_id = NEW.complaint_id AND status_id = 2
+                    WHERE complaint_id = NEW.complaint_id AND status_id = 1
                     ORDER BY timestamped DESC
                     limit 1; 
                     

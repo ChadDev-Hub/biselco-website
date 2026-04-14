@@ -12,15 +12,21 @@ type WSMessage = {
   data: NewsData;
 } | {
   detail: "complaints";
-  data: ComplaintData;
+  data: {
+    data: ComplaintData;
+    total_page: number;
+  };
 } | {
   detail: "complaints_admin";
-  data: ComplaintData;
+  data: {
+    data: ComplaintData;
+    total_page: number;
+  };
 }
   |
 {
   detail: "complaint_status";
-  data: ComplaintData;
+  data: ComplaintStatusData;
 } | {
   detail : "deleted_news";
   data: NewsData;
@@ -37,7 +43,7 @@ type WSMessage = {
   total_page:number;
   stats: ChangeMeterStats[];
 } | {
-  detail: "complaint_message" | "sent_message";
+  detail: "complaint_message"
   data: ComlaintMessage;
 } | {
   detail: "seen_message";
@@ -45,6 +51,12 @@ type WSMessage = {
 } | {
   detail: "complaint_stats";
   data: ComplaintStatsType[];
+} | {
+  detail: "sent_message";
+  data: {
+    new_message: ComlaintMessage;
+    unread: Unread;
+  }
 }
 
 // COMPLAINT STATSD TYPE
@@ -71,6 +83,7 @@ type Seen = {
 type Unread = {
   complaints_id: number;
   unread_messages: number;
+  sender_id: string;
 }
 
 type ComlaintMessage = {
@@ -146,7 +159,7 @@ type NewsData = {
 
 type ComplaintData = {
     id: number;
-    user_id: number;
+    user_id: string;
     first_name:string;
     last_name:string;
     user_photo:string;
@@ -168,8 +181,35 @@ type ComplaintData = {
     latest_status?: string;
     resolution_time: string;
     unread_messages: number;
-
 }
+
+type ComplaintStatusData = {
+    id: number;
+    user_id: string;
+    first_name:string;
+    last_name:string;
+    user_photo:string;
+    subject: string;
+    description: string;
+    reference_pole: string;
+    date_time_submitted: string;
+    village: string; 
+    municipality: string;
+    user_status?:string;
+
+    location: {
+        latitude: number;
+        longitude: number;
+        srid: number;
+    }
+    status: [];
+    status_history: [];
+    latest_status?: string;
+    resolution_time: string;
+  
+}
+
+
 
 type WSContextType = {
   message: WSMessage | null;

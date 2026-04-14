@@ -82,15 +82,18 @@ const TableFooter = ({ data, pageUrl }: Props) => {
         switch (message?.detail) {
             case "post_change_meter":
                 queueMicrotask(() => {
-                    
                     setTotalPages((prev) => Math.max(prev, message.total_page));
                 })
                 break;
             case "deleted_change_meter":
                 queueMicrotask(() => {
-                    
                     setTotalPages((prev) => Math.max(prev, message.total_page));
             })
+                break;
+            case "complaints_admin":
+                queueMicrotask(() => {
+                    setTotalPages((prev) => Math.max(prev, message.data.total_page));
+                })
             default:
                 break;
         }

@@ -1,16 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { useAuth } from "@/app/utils/authProvider";
 import { SubmitHandler, useWatch, useForm } from "react-hook-form";
-
+import MessagingSkeleton from "@/app/common/MessagingSkeleton";
 type Props = {
+  complaint_id: number;
   messages: ComplaintMessage[];
   onOpen: () => void;
   onClosed: () => void;
   isOpen: boolean;
   numberOfUnseenMessages: number;
+  setInitialData: (data: { complaints_id: number; message: string, receiver_id: string }) => void;
+  receiver_id?: string;
+  messageLoading: boolean;
 };
 type ComplaintMessage = {
   id: string;
@@ -35,23 +39,26 @@ type User = {
 type FormType = {
   message: string;
 };
-const Messaging = ({ messages, onOpen, isOpen, onClosed, numberOfUnseenMessages }: Props) => {
+const Messaging = ({ complaint_id, messages, onOpen, isOpen, onClosed, numberOfUnseenMessages, setInitialData, receiver_id, messageLoading}: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const { register, handleSubmit, reset, control, setValue } =
+  const { register, handleSubmit, control, reset, setValue } =
     useForm<FormType>();
   const { user } = useAuth();
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const messageValue = useWatch({ control, name: "message" });
   const handleOpen = () => {
     if (modalRef.current) {
-      modalRef.current.showModal();
+      document.body.style.overflow = "hidden";
       onOpen();
+      modalRef.current.showModal();
     }
   };
   const handleClose = () => {
     if (modalRef.current) {
-      modalRef.current.close();
+      document.body.style.overflow = "";
       onClosed();
+      modalRef.current.close();
+      
     }
   };
 
@@ -60,15 +67,25 @@ const Messaging = ({ messages, onOpen, isOpen, onClosed, numberOfUnseenMessages 
 
   useEffect(() => {
     if (!isOpen || !messages.length) return;
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-      inline: "nearest",
-    });
+    const container = bottomRef.current?.parentElement;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      })
+    }
   }, [messages, isOpen]);
 
   const onSubmit: SubmitHandler<FormType> = (data) => {
-    console.log(data);
+    if (!data.message) return;
+
+    setInitialData({
+      complaints_id: complaint_id,
+      receiver_id: receiver_id!,
+      message: data.message,
+
+    });
+    reset({ message: "" });
   };
   return (
     <>
@@ -146,92 +163,104 @@ const Messaging = ({ messages, onOpen, isOpen, onClosed, numberOfUnseenMessages 
           </g>
         </svg>
       </button>
-      <dialog ref={modalRef} className="modal">
+      <dialog tabIndex={-1} ref={modalRef} className="modal">
         <div className="modal-box">
-          <h1 className="text-lg font-bold">Messages</h1>
-          <button
-            title="Close"
-            type="button"
-            onClick={handleClose}
-            className="absolute top-2 right-2 btn btn-circle btn-sm"
-          >
-            X
-          </button>
-          <div className="max-h-50 overflow-y-auto">
-            {messages?.map((m, index) => (
-              <div key={index}>
-                {index === 0 ||
-                new Date(messages[index - 1].date).toDateString() !==
-                  new Date(m.date).toDateString() ? (
-                  <p className="text-center text-gray-400 text-xs my-1">
-                    {m.date}
-                  </p>
-                ) : null}
-                <div
-                  className={
-                    user?.id === m.sender.id
-                      ? "chat chat-end"
-                      : "chat chat-start"
-                  }
-                >
-                  <div className="chat-image avatar">
-                    <div className="w-10 rounded-full">
-                      <Image
-                        width={20}
-                        height={20}
-                        className="rounded-full"
-                        alt="Tailwind CSS chat bubble component"
-                        src={m.sender.photo}
-                      />
+          
+            <>
+              <h1 className="text-lg font-bold">Messages</h1>
+              <button
+                title="Close"
+                type="button"
+                onClick={handleClose}
+                className="absolute top-2 right-2 btn btn-circle btn-sm"
+              >
+                X
+              </button>
+  
+              {messageLoading ? 
+              <MessagingSkeleton/> : 
+              messages.length > 0 ?
+              <div className="max-h-50 overflow-y-auto">
+                {messages?.map((m, index) => (
+                  <div key={index}>
+                    {index === 0 ||
+                      new Date(messages[index - 1].date).toDateString() !==
+                      new Date(m.date).toDateString() ? (
+                      <p className="text-center text-gray-400 text-xs my-1">
+                        {m.date}
+                      </p>
+                    ) : null}
+                    <div
+                      className={
+                        user?.id === m.sender.id
+                          ? "chat chat-end"
+                          : "chat chat-start"
+                      }
+                    >
+                      <div className="chat-image avatar">
+                        <div className="w-10 rounded-full">
+                          <Image
+                            width={20}
+                            height={20}
+                            className="rounded-full"
+                            alt="Tailwind CSS chat bubble component"
+                            src={m.sender.photo}
+                          />
+                        </div>
+                      </div>
+                      <div className="chat-header">
+                        {m.sender.first_name}
+                        <time className="text-xs opacity-50">{m.time}</time>
+                      </div>
+                      <div className="chat-bubble max-w-[50%] wrap-break-word whitespace-pre-wrap">
+                        {m.message}
+                      </div>
+                      <div className="chat-footer opacity-50">
+                        {m.sender.id === user?.id
+                          ? m.sender_status
+                          : m.receiver_status}
+                      </div>
                     </div>
                   </div>
-                  <div className="chat-header">
-                    {m.sender.first_name}
-                    <time className="text-xs opacity-50">{m.time}</time>
-                  </div>
-                  <div className="chat-bubble max-w-[50%] wrap-break-word whitespace-pre-wrap">
-                    {m.message}
-                  </div>
-                  <div className="chat-footer opacity-50">
-                    {m.sender.id === user?.id
-                      ? m.sender_status
-                      : m.receiver_status}
-                  </div>
-                </div>
+                ))}
+                <div ref={bottomRef} />
               </div>
-            ))}
-            <div ref={bottomRef} />
-          </div>
-          <form
-            name="messaging"
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex gap-2 mt-4"
-          >
-            <textarea
-              {...register("message")}
-              value={messageValue}
-              ref={textAreaRef}
-              onChange={(e) => {
-                e.preventDefault();
-                // Update form value
-                const val = e.target.value;
-                // react-hook-form update
-                setValue("message", val);
+              : <div className="w-full text-center">
+                <h1>No Message Yet</h1>
+                </div>}
+              <form
+                name="messaging"
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex gap-2 mt-4"
+              >
+                <textarea
+                  {...register("message")}
+                  value={messageValue}
+                  ref={textAreaRef}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    // Update form value
+                    const val = e.target.value;
+                    // react-hook-form update
+                    setValue("message", val);
 
-                // Adjust height
-                const el = textAreaRef.current;
-                if (!el) return;
-                el.style.height = "auto"; // reset height
-                el.style.height = Math.min(el.scrollHeight, 128) + "px";
-              }}
-              placeholder="Type message here..."
-              rows={1}
-              className="w-full resize-none overflow-y-auto max-h-md p-2 border rounded"
-            />
-            <button type="submit" className="btn btn-primary">
-              Send
-            </button>
-          </form>
+                    // Adjust height
+                    const el = textAreaRef.current;
+                    if (!el) return;
+                    el.style.height = "auto"; // reset height
+                    el.style.height = Math.min(el.scrollHeight, 128) + "px";
+                  }}
+                  placeholder="Type message here..."
+                  rows={1}
+                  className="w-full resize-none overflow-y-auto max-h-md p-2 border rounded"
+                />
+                <button type="submit" className="btn btn-primary">
+                  Send
+                </button>
+              </form>
+              
+            </>
+            
         </div>
       </dialog>
     </>

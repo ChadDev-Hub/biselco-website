@@ -130,7 +130,7 @@ const MessageModal = ({ complaintData }: Props) => {
       default:
         break;
     }
-  }, [message, complaintData.complaints_id, user?.id]);
+  }, [message, complaintData.complaints_id, user?.id, isOpen]);
 
   // IF MODAL IS OPEN SENDS A MESSAGE TO WEBSOCKET THAT NEW ARRIVES MESSAGE IS SEEN
   useEffect(() => {
