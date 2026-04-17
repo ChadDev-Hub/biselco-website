@@ -1,5 +1,7 @@
 "use server"
+
 import { cookies } from "next/headers"
+
 
 const baseUrl = process.env.BASESERVERURL
 
@@ -213,6 +215,45 @@ export const GetComplaintStats = async () => {
             data: data.detail
         }
     }
+    return {
+        status: res.status,
+        data: data
+    }
+};
+
+// GET TOP 10 COMPLAINTS
+export const GetTopComplaints = async () => {
+    const res = await fetch(`${baseUrl}/v1/complaints/top`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+   
+    return {
+        status: res.status,
+        data: data
+    }
+};
+
+
+// COMPLAINTS OVERTIME
+export const GetComplaintOvertime = async () => {
+    const res = await fetch(`${baseUrl}/v1/complaints/overtime`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+   
     return {
         status: res.status,
         data: data

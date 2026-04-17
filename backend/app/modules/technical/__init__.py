@@ -1,4 +1,4 @@
-from .model.consumer_meter import NewConnection
+from .new_connection.model.new_connection import NewConnection
 from .change_meter import ChangeMeter, ChangeMeterImage
 
 __all__ = [

@@ -72,19 +72,7 @@ async def get_complaints_stats(
         .where(and_(Complaints.is_deleted == False,(func.date(Complaints.timestamped) == func.current_date())))
     ).cte("daily_complaints")
 
-    # # TOP 10 COMPLAINTS
-    # top_complaints = (
-    #     select(
-    #         func.jsonb_build_object(
-    #             'complaint', Complaints.subject,
-    #             'count', func.count(Complaints.id)
-    #         ).label("top_complaints"),
-    #         func.count(Complaints.id).label("total")
-    #     ).select_from(Complaints)
-    #     .group_by(Complaints.subject)
-    #     .order_by(desc("total"))
-    #     .limit(10)
-    # ).cte("top_complaints")
+    
 
     # UNION ALL CTE
     cte_union = (

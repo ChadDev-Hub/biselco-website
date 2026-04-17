@@ -96,9 +96,7 @@ async def create_change_meter(
         for admin in admin_user:
             await manager.broad_cast_personal_json(user_id=str(admin), data=data)
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
     return {"detail" : "Change Meter Created Successfully"}
     
         

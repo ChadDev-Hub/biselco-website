@@ -114,7 +114,7 @@ const MapButton = ({ location, municipality, village }: Props) => {
         </svg>
       </button>
       <dialog ref={modalRef} className="modal">
-        <div className="modal-box h-fit w-full bg-base-100/75">
+        <div className="modal-box h-fit w-full">
           <h3 className="font-bold text-lg flex gap-2 items-center">
             <span>
               <svg

@@ -51,3 +51,34 @@ async def get_complaints_history(session: AsyncSession, page: Optional[int] = No
     return model
 
 # GET COMMON COMPLAINTS
+
+async def get_top_10_complaints(session: AsyncSession):
+# TOP 10 COMPLAINTS
+    top_complaints = (
+        select(
+            func.jsonb_build_object(
+                'name', Complaints.subject,
+                'value', func.count(Complaints.id)
+            ).label("top_complaints"),
+            func.count(Complaints.id).label("total")
+        ).select_from(Complaints)
+        .where(Complaints.is_deleted == False)
+        .group_by(Complaints.subject)
+        .order_by(desc("total"))
+        .limit(5)
+    )
+    data = (await session.execute(top_complaints)).scalars().all()
+    return data
+
+async def get_complaint_overtime(session: AsyncSession):
+    stmt = (select(
+        func.jsonb_build_object(
+            'name', func.date(Complaints.timestamped),
+            'value', func.count(Complaints.id)
+                  
+        ).label("data")
+    ).where(Complaints.is_deleted == False)
+    .group_by(func.date(Complaints.timestamped))
+    .order_by(func.date(Complaints.timestamped)))
+    data = (await session.execute(stmt)).scalars().all()
+    return data

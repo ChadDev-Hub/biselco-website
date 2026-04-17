@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_SetSRID, ST_Intersects
 from shapely.geometry import Point
 from ....modules.complaints.services.get_complaints import complaints, new_complaint, user_complaints, new_complaints_status
-from ....modules.complaints.services.complaints_dashboard import get_complaints_history
+from ....modules.complaints.services.complaints_dashboard import get_complaints_history, get_top_10_complaints, get_complaint_overtime
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
 from ....modules.websocket.websocket_manager import manager
@@ -474,7 +474,17 @@ async def get_complaints_message(session: AsyncSession = Depends(get_session), c
 async def complaints_stats(session: AsyncSession = Depends(get_session)):
     return await get_complaints_stats(session=session)
 
+
 # COMPLAINTS HISTORY INCLUDES DELETED COMPLAINTS
 @router.get("/history", status_code=status.HTTP_200_OK)
 async def get_history(session: AsyncSession = Depends(get_session)):
     return await get_complaints_history(session=session)
+
+
+@router.get("/top", status_code=status.HTTP_200_OK)
+async def get_top_complaints(session: AsyncSession = Depends(get_session)):
+    return await get_top_10_complaints(session=session)
+
+@router.get("/overtime", status_code=status.HTTP_200_OK)
+async def complaint_overtime(session: AsyncSession = Depends(get_session)):
+    return await get_complaint_overtime(session=session)

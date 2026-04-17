@@ -1,6 +1,6 @@
 import React, { Suspense, use } from 'react'
 import Stats from './components/status'
-import { GetAllComplaints } from '@/lib/serverFetch'
+import { GetAllComplaints, GetComplaintStats, GetTopComplaints } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintsDashboardContainer'
 import ComplaintDashBoardHeader from './components/header'
 import DashBoardTable from '@/app/common/table'
@@ -10,15 +10,19 @@ import TableDataSkeleton from '@/app/(protected)/technical/change-meter/componen
 import TableSearch from './components/tableSearch'
 import PageNationLoading from '@/app/(protected)/technical/change-meter/components/pageNationSkeleton'
 import TableSearchSkeleton from './components/tableSearchSkeleton'
-import { GetComplaintStats } from '@/lib/serverFetch'
-
+import RadarChartSimple from '@/app/common/Radar'
+import ChartSkeleton from '@/app/common/ChartSkeleton'
+import { GetComplaintOvertime } from '../../../lib/serverFetch';
+import SimpleAreaChart from '@/app/common/AreaChart'
 
 
 const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number; q: string }> }) => {
-  const params = use(searchParams)
-  const complaintsData = GetAllComplaints(params.page, params.q)
-  const pageUrl = '/complaints/dashboard'
-  const statsData = GetComplaintStats()
+  const params = use(searchParams);
+  const complaintsData = GetAllComplaints(params.page, params.q);
+  const pageUrl = '/complaints/dashboard';
+  const statsData = GetComplaintStats();
+  const topComplaints = GetTopComplaints();
+  const overtimeData = GetComplaintOvertime();
   const columns = [
     'ID',
     'PROFILE',
@@ -56,11 +60,11 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
         <Suspense fallback={<div>Loading...</div>}>
           <Stats data={statsData} />
         </Suspense>
-        
+
         <fieldset className='fieldset rounded-box'>
           <legend className={`fieldset-legend flex w-full`}>
             <h3 className='text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800'>
-              Real-Time Complaints Table
+              Real-Time Concerns Table
             </h3>
             <Suspense fallback={<TableSearchSkeleton />}>
               <TableSearch data={complaintsData} />
@@ -79,6 +83,21 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
             </Suspense>
           </DashBoardTable>
         </fieldset>
+
+        <section className='w-full'>
+
+          <div className='flex flex-col sm:flex-col md:flex-row gap-4 w-full'>
+            <Suspense fallback={<ChartSkeleton />}>
+              <RadarChartSimple prom={topComplaints} valueName='Count' title='Common Concerns' />
+            </Suspense>
+
+            <Suspense fallback={<ChartSkeleton />}>
+              <SimpleAreaChart prom={overtimeData} title='Concerns Overtime'/>
+            </Suspense>
+          </div>
+
+
+        </section>
       </main>
     </div>
   )

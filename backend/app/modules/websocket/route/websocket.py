@@ -31,7 +31,6 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                 data = json.get("data")
                 data['sender_id'] = str(user_id)
                 result = await add_message(session=session, data=data)
-               
                 if result['new_message']:
                     users = set([result['new_message']["receiver"]["id"]])
                 else:

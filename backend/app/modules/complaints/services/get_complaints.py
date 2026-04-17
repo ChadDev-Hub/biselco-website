@@ -93,6 +93,7 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
         .where(Complaints.is_deleted == False)
     )
     if query:
+        page=1
         stmt = complaints.where(or_(
             func.to_char(Complaints.timestamped,
                          "YYYY-MM-DD").ilike(f"%{query}%"),

@@ -8,7 +8,6 @@ import Image from "next/image";
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
 import { useAlert } from "@/app/common/alert";
 import { useLoading } from "@/app/common/loadingIndication";
-
 import { useSearchParams } from "next/navigation";
 import { Archivo_Black } from "next/font/google";
 type FormField = {

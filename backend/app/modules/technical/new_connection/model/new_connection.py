@@ -4,11 +4,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geometry,WKBElement
 from datetime import date
-from ....db.base import BaseModel
+from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from ...forms.model.form import CompanyForm
+    from ....forms.model.form import CompanyForm
 
 
 # FORM AND TABLE FOR NEW CONNECTIONS 
@@ -24,13 +24,15 @@ class NewConnection (BaseModel):
     location: Mapped[str] = mapped_column(type_=Text, nullable=False)
     meter_serial_no: Mapped[str] = mapped_column(type_=Text, nullable=False)
     meter_brand: Mapped[str] = mapped_column(type_=Text, nullable=False)
-    meter_sealed: Mapped[int] = mapped_column(type_=Integer, nullable=False)
-    inital_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
+    meter_sealed: Mapped[str] = mapped_column(type_=Text, nullable=False)
+    initial_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
+    multiplier: Mapped[int] = mapped_column(type_=Integer, nullable=True)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    
     accomplished_by: Mapped[str] = mapped_column(type_=Text, nullable=True)
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))
     
-    
+
     # Relationship
     form: Mapped["CompanyForm"] = relationship(back_populates="new_connections")
     images: Mapped[List["NewConnectionImage"]] = relationship(back_populates="new_connection", cascade="all, delete-orphan")
