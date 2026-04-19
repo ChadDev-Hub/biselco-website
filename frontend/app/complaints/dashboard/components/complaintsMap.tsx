@@ -138,8 +138,9 @@ const ComplaintMap = ({ longitude, latitude, srid }: Props) => {
     }, [tracking])
     // HANDLE TRACKING WHEN BUTTON IS CLICK
     const handleClick = () => {
-        usegeolocation.current?.setTracking(true)
         setTracking(true)
+        usegeolocation.current?.setTracking(true)
+        
     }
 
     return (

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Integer, Text, ForeignKey, DateTime, Date, Time
+from sqlalchemy import Integer, Text, ForeignKey, DateTime, Date, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ....db.base import BaseModel
 from datetime import datetime
@@ -16,7 +16,7 @@ class ComplaintsImage(BaseModel):
     __tablename__ = "complaints_images"
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
     complaints_id: Mapped[int]  = mapped_column(ForeignKey("consumer_complaints.id"), type_=Integer)
-    uploaded_at: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True))
+    uploaded_at: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True),nullable=True, default=func.now())
     image_url:Mapped[str] = mapped_column(type_=Text, nullable=True)
     
     # relationships

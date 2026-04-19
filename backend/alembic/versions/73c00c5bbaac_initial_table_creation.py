@@ -157,7 +157,7 @@ def upgrade() -> None:
     op.create_table('complaints_images',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('complaints_id', sa.Integer(), nullable=False),
-    sa.Column('uploaded_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('uploaded_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('image_url', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['complaints_id'], ['consumer_complaints.id'], ),
     sa.PrimaryKeyConstraint('id')

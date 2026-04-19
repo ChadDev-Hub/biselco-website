@@ -3,6 +3,7 @@ from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
 from ..services.post import create_new_connection
+from ..services.get import get_new_connection
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
 from typing import Optional
@@ -43,5 +44,9 @@ async def new_connection(session: AsyncSession = Depends(get_session),
         "remarks": remarks
     }
     response = await create_new_connection(session=session, new_connection=data)
-    print(response)
     return {"detail": "New Connection Created Successfully"}
+
+@router.get("/",status_code=status.HTTP_200_OK)
+async def get_nconnection(session:AsyncSession=Depends(get_session)):
+    data = await get_new_connection(session=session)
+    return data

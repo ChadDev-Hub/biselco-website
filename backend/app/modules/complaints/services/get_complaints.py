@@ -87,7 +87,8 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             .selectinload(ComplaintsStatusUpdates.status),
             selectinload(Complaints.user),
             selectinload(Complaints.status_history).
-            selectinload(ComplaintsStatusHistory.user)
+            selectinload(ComplaintsStatusHistory.user),
+            selectinload(Complaints.complaints_image)
         )
         .order_by(Complaints.id.desc())
         .where(Complaints.is_deleted == False)
@@ -154,9 +155,12 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
             "latest_status": latest_status,
             "status_history": status_history,
             "resolution_time": format_timedelta(complaints.resolution_time) if complaints.resolution_time else None,
+            "images": [{
+                "id": im.id,
+                "url": im.image_url
+            }for im in complaints.complaints_image],
             "unread_messages": unread_messages
         }
-        
         results.append(complaints_data)
     return {
         "data": results,
@@ -198,7 +202,8 @@ async def new_complaint(session: AsyncSession, complaint_id: int, user_id:str):
                      .selectinload(ComplaintsStatusUpdates.status),
                      selectinload(Complaints.user),
                      selectinload(Complaints.status_history)
-                     .selectinload(ComplaintsStatusHistory.user),)
+                     .selectinload(ComplaintsStatusHistory.user),
+                     selectinload(Complaints.complaints_image))
             .where(Complaints.is_deleted == False)
             )
 
@@ -252,6 +257,10 @@ async def new_complaint(session: AsyncSession, complaint_id: int, user_id:str):
         "date_time_submitted": n_complaint.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
         "village": n_complaint.village,
         "municipality": n_complaint.municipality,
+        "images": [{
+                "id": im.id,
+                "url": im.image_url
+            }for im in n_complaint.complaints_image],
         "location": {
             'latitude': Point(to_shape(n_complaint.location).coords).y,
             'longitude': Point(to_shape(n_complaint.location).coords).x,

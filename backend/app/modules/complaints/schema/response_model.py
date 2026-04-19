@@ -22,7 +22,9 @@ class Location(BaseModel):
     latitude: float
     longitude: float
     srid: int
-
+class ComplaintsImages(BaseModel):
+    id:int
+    url:str
 class ComplaintsModel(BaseModel):
     id: int
     user_id: str
@@ -39,6 +41,7 @@ class ComplaintsModel(BaseModel):
     status: List[ComplaintStatus]
     latest_status: Optional[str] = None
     status_history: Optional[List[ComplaintStatusHistory]] = None
+    images: Optional[List[ComplaintsImages]] = None
     resolution_time:Optional[str] = None
     unread_messages: Optional[int] = None
 

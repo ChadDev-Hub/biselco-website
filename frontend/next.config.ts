@@ -1,3 +1,4 @@
+
 import type { NextConfig } from "next";
 
 
@@ -38,6 +39,14 @@ module.exports = {
       {
         protocol: "https",
         hostname: "img.daisyui.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "biselco.s3.ap-southeast-1.amazonaws.com",
       }
 
     ]

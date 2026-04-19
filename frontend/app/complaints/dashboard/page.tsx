@@ -33,6 +33,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
     'DETAILS',
     'REFERENCE POLE',
     'MAP',
+    'IMAGE',
     'STATUS',
     'LATEST UPDATE',
     'STATUS HISTORY',
@@ -73,7 +74,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
           <DashBoardTable>
             <TableHead columns={columns} selectable={false} />
             <Suspense fallback={
-              <TableDataSkeleton row={8} col={14} />
+              <TableDataSkeleton row={8} col={columns.length} />
             }>
               <ComplaintsContainer data={complaintsData} />
             </Suspense>

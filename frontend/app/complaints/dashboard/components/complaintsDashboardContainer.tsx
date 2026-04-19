@@ -13,7 +13,7 @@ import { GetComplaintsMessage } from "@/app/actions/complaint";
 import Messaging from "./messagingModal2";
 import { useAuth } from "@/app/utils/authProvider";
 import { useNotification } from "@/app/common/NotificationProvider";
-
+import ImageViewer from "./imageViewerModal";
 type PromiseType = {
   status?: number;
   data: ComplaintsListData;
@@ -54,6 +54,7 @@ type Complaint = {
   latest_status?: string;
   user_status?: string;
   resolution_time: string;
+  images?: ComplaintsImages[];
   unread_messages: number;
 };
 
@@ -99,6 +100,13 @@ type FormType = {
   message: string;
 };
 
+
+type ComplaintsImages = {
+    id:number;
+    url:string; 
+}
+
+
 const ComplaintsContainer = ({ data }: Props) => {
   const complaintsIinitialData = use(data);
   const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
@@ -137,7 +145,7 @@ const ComplaintsContainer = ({ data }: Props) => {
   }, [complaintsIinitialData]);
 
 
-
+ 
   // MESSAGING MODAL
   const [complaintsMessage, setComplaintsMessage] = useState<
     ComplaintMessage[] | []
@@ -164,6 +172,7 @@ const ComplaintsContainer = ({ data }: Props) => {
   const MessageClose = () => {
     setComplaintsMessage([]);
     setIsMessagingModalOpen(false);
+    setactiveComplaintsId(null);
   };
 
 
@@ -251,13 +260,14 @@ const ComplaintsContainer = ({ data }: Props) => {
         break;
       case "sent_message":
         queueMicrotask(() => {
+          if (isMessaginModalOpen && message.data.new_message.complaints_id === activeComplaintsId){
           setComplaintsMessage((prev) => {
             const exists = prev.some((msg) => msg.id === message.data.new_message.id);
             if (exists) {
               return prev.map((msg: ComplaintMessage) => msg.id === message.data.new_message.id ? { ...msg, ...message.data.new_message } : msg)
             }
             return [...prev, message.data.new_message]
-          });
+          })};
           setallComplaints((prev) => {
             if (message.data.unread.sender_id===user?.id) return prev
             return prev.map((item: Complaint) => {
@@ -294,16 +304,20 @@ const ComplaintsContainer = ({ data }: Props) => {
       default:
         break;
     }
-  }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification]);
+  }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
 
   useEffect(() => {
     if (!isMessaginModalOpen || !complaintsMessage.length) return;
 
     const lastMessage = complaintsMessage[complaintsMessage.length - 1];
+    const activeComplaintId = lastMessage.complaints_id;
     // don't mark your own message as seen
     if (lastMessage.sender.id === user?.id) return;
 
-    const UnseenMessages = complaintsMessage.filter((msg) => msg.receiver_status === "Unread" && msg.sender?.id !== user?.id);
+    const UnseenMessages = complaintsMessage.filter((msg) => 
+      msg.complaints_id === activeComplaintId &&
+      msg.receiver_status === "Unread" && 
+      msg.sender?.id !== user?.id);
     const data_ids = UnseenMessages.map((m) => m.id);
 
     sendMessage({
@@ -314,7 +328,6 @@ const ComplaintsContainer = ({ data }: Props) => {
         complaints_id: lastMessage.complaints_id
       },
     });
-
   }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
 
   return (
@@ -355,6 +368,9 @@ const ComplaintsContainer = ({ data }: Props) => {
               location={complaint.location}
             />
           </td>
+            <td>
+              <ImageViewer data={complaint.images}/>
+            </td>
           <td className="text-center">
             <ComplaintStatusButton
               status={
@@ -377,7 +393,10 @@ const ComplaintsContainer = ({ data }: Props) => {
               messageLoading={messageLoading}
               complaint_id={complaint.id}
               messages={complaintsMessage.filter((msg) => msg.complaints_id === complaint.id)}
-              onOpen={() => MessageOpen(complaint.id)}
+              onOpen={() => {
+                MessageOpen(complaint.id);
+                setactiveComplaintsId(complaint.id);}
+              }
               onClosed={MessageClose}
               isOpen={isMessaginModalOpen}
               numberOfUnseenMessages={complaint.unread_messages}

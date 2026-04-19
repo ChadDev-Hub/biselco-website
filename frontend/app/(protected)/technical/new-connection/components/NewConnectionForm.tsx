@@ -20,23 +20,22 @@ type FormField = {
 
 }
 const NewConnectionForm = () => {
-    const { register, control, formState: { errors, isValid }, handleSubmit, setValue } = useForm<FormField>()
+    const { register, control, formState: { errors}, handleSubmit, setValue } = useForm<FormField>()
     const attachment = useWatch({ control, name: "image" })
     const onSubmit: SubmitHandler<FormField> = (data) => {
-        if (isValid) {
-            const form = new FormData();
-            console.log(data)
-            Object.entries(data).forEach(([key, value]) => {
-                if (value == null) return;
 
-                form.append(
-                    key,
-                    value instanceof FileList ? value[0] : String(value)
-                );
-            })
-            newConnectionMeter(form);
 
-        }
+        const form = new FormData();
+
+        Object.entries(data).forEach(([key, value]) => {
+            if (value == null) return;
+
+            form.append(
+                key,
+                value instanceof FileList ? value[0] : String(value)
+            );
+        })
+        newConnectionMeter(form);
     }
 
     return (
@@ -46,7 +45,7 @@ const NewConnectionForm = () => {
                     New Connection Form
                 </h2>
             </legend>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
                     {/* DATE */}
@@ -162,19 +161,19 @@ const NewConnectionForm = () => {
                     </div>
 
 
-                    
+
 
                 </div>
 
 
                 <div className="col-span-2">
                     {/* SUBMIT */}
-                <button type="submit" className="btn w-full btn-accent">
-                    Submit New Connection
-                </button>
+                    <button type="submit" className="btn w-full btn-accent">
+                        Submit New Connection
+                    </button>
 
                 </div>
-                
+
             </form>
         </fieldset>
     )

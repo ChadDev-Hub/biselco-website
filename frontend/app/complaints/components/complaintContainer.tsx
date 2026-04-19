@@ -1,5 +1,5 @@
 "use client"
-import { use, useEffect, useState} from 'react'
+import { use, useEffect, useState } from 'react'
 import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import { redirect } from 'next/navigation'
@@ -7,6 +7,8 @@ import Messaging from '../dashboard/components/messagingModal2'
 import { GetComplaintsMessage } from '@/app/actions/complaint'
 import { useAuth } from '@/app/utils/authProvider'
 import { useNotification } from '@/app/common/NotificationProvider'
+
+
 type PromiseType = {
     status?: number;
     data: Complaints[];
@@ -39,6 +41,7 @@ type Complaints = {
     status: [];
     latest_status?: string;
     user_status?: string;
+    
     resolution_time: string;
     unread_messages: number;
 }
@@ -94,7 +97,8 @@ const ComplaintsContainer = (
     const [isMessagingModalOpen, setIsMessagingModalOpen] = useState(false);
     const [complaintsMessage, setComplaintsMessage] = useState<ComplaintMessage[] | []>([]);
     const [messageLoading, setMessageLoading] = useState(false)
-    const {playMessageNotification} = useNotification()
+    const [activeComplaintsId, setactiveComplaintsId] = useState<number | null>(null);
+    const { playMessageNotification } = useNotification()
     useEffect(() => {
         switch (complaintsInitialData.status) {
             case 401:
@@ -112,7 +116,7 @@ const ComplaintsContainer = (
                 break;
         }
     }, [complaintsInitialData])
-
+    
     // WEBSOCKET
     const { message, sendMessage } = useWebsocket();
     useEffect(() => {
@@ -122,7 +126,7 @@ const ComplaintsContainer = (
                 queueMicrotask(() =>
                     setComplaints((prev) => {
                         const existingComplaints = prev.filter((complaint: Complaints) => complaint.id !== message.data.data.id)
-                        return [message.data.data,...existingComplaints]
+                        return [message.data.data, ...existingComplaints]
                     })
                 )
                 break;
@@ -142,13 +146,14 @@ const ComplaintsContainer = (
                 break;
             case "sent_message":
                 queueMicrotask(() => {
+                    if(isMessagingModalOpen && message.data.new_message.complaints_id === activeComplaintsId){
                     setComplaintsMessage((prev) => {
                         const exists = prev.some((msg) => msg.id === message.data.new_message.id);
                         if (exists) {
                             return prev.map((msg: ComplaintMessage) => msg.id === message.data.new_message.id ? { ...msg, ...message.data.new_message } : msg)
                         }
                         return [...prev, message.data.new_message]
-                    });
+                    })};
                     setComplaints((prev) => {
                         if (message.data.unread.sender_id === user?.id) return prev;
                         return prev.map((item: Complaints) => {
@@ -186,7 +191,7 @@ const ComplaintsContainer = (
             default:
                 break;
         }
-    }, [message, user, isMessagingModalOpen, playMessageNotification]);
+    }, [message, user, isMessagingModalOpen, playMessageNotification, activeComplaintsId]);
 
 
 
@@ -200,6 +205,7 @@ const ComplaintsContainer = (
     const MessageClose = () => {
         setComplaintsMessage([]);
         setIsMessagingModalOpen(false);
+        setactiveComplaintsId(null);
     };
 
 
@@ -213,6 +219,7 @@ const ComplaintsContainer = (
                     setMessageLoading(false);
                 }
             });
+            setactiveComplaintsId(complaintsId)
             setIsMessagingModalOpen(true);
         }
     };
@@ -253,9 +260,13 @@ const ComplaintsContainer = (
         if (!isMessagingModalOpen || !complaintsMessage.length) return;
 
         const lastMessage = complaintsMessage[complaintsMessage.length - 1];
+        const activeComplaintsId = lastMessage.complaints_id;
         // don't mark your own message as seen
         if (lastMessage.sender.id === user?.id) return;
-        const UnseenMessages = complaintsMessage.filter((msg) => msg.receiver_status === "Unread" && msg.sender?.id !== user?.id);
+        const UnseenMessages = complaintsMessage.filter((msg) =>
+            msg.complaints_id === activeComplaintsId &&
+            msg.receiver_status === "Unread"
+            && msg.sender?.id !== user?.id);
         const data_ids = UnseenMessages.map((m) => m.id);
         sendMessage({
             detail: "seen_message",

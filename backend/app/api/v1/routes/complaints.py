@@ -28,8 +28,10 @@ from ....modules.complaints.services.complaints_messages import get_message
 from ....modules.websocket.schema.response_model import Message
 from ....modules.complaints.services.complaints_stats import get_complaints_stats
 from ....modules.complaints.schema.response_model import Stat
+from ....modules.complaints.model.complaint_image import ComplaintsImage
 from asyncio import gather
 from typing import List
+from ....dependencies.bucket3 import upload_image
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -81,6 +83,10 @@ async def create_complaints(
     lat: str = Form(...),
     attachment: Optional[UploadFile] = File(None)
 ):
+    uploaded_url = None
+    if attachment:
+        uploaded_url = await upload_image(file=attachment, folder="complaints")
+        
     geom = ST_SetSRID(ST_Point(float(lon), float(lat)), 4326)
     # VERIFY COMPLAINTS LOCATION
     location = (await session.execute(select(Boundary)
@@ -129,12 +135,19 @@ async def create_complaints(
         location=geom,
         village=location.villages.name,
         municipality=location.municipal.name,
-        user_id=user.id
+        user_id=user.id,
     )
     # COMPLAINT STATUS UPDATE
     status_updates = ComplaintsStatusUpdates(
         status=received)
     new_complaints.status_updates.append(status_updates)
+    
+    # ADD COMPLAINTS IMAGE
+    if uploaded_url: 
+        image = ComplaintsImage(
+            image_url=uploaded_url
+        )
+        new_complaints.complaints_image.append(image)
     session.add(new_complaints)
     await session.commit()
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
@@ -180,6 +193,10 @@ async def create_generic_complaints(
     location: VerifiedLocation = Depends(verifyLocation),
     attachment: Optional[UploadFile] = File(None)
 ):
+    # UPLOAD IMAGE
+    uploaded_url = None
+    if attachment:
+        uploaded_url = await upload_image(file=attachment, folder="complaints")
     # GET RECIEVED COMPLAINTS
     received = (await session.execute(
         select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == "Received"))
@@ -209,6 +226,13 @@ async def create_generic_complaints(
     )
     new_complaints.status_updates.append(status_updates)
     session.add(new_complaints)
+    
+    # ADD COMPLAINTS IMAGE
+    if uploaded_url: 
+        image = ComplaintsImage(
+            image_url=uploaded_url
+        )
+        new_complaints.complaints_image.append(image)
     await session.commit()
     await session.refresh(new_complaints, attribute_names=["user", "status_updates"])
 

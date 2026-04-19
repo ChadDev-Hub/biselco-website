@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
@@ -36,7 +36,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
     const userSourceRef = useRef<VectorSource | null>(null)
     const PopupRef = useRef<HTMLDivElement>(null)
     const initialCoordinates = useRef<[number, number] | [] | null>(coordinates ?? null)
-
+    const [tracking, setTracking] = useState(false)
     // Initialize the map
     useEffect(() => {
         if (!mapDivRef.current || mapRef.current) return
@@ -174,20 +174,20 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         })
 
         //  GET REALTIME-GEOLOCATION DATA
-        geoLocationRef.current.on('change:position', () => {
-            const coord = geoLocationRef.current?.getPosition()
-            if (coord) {
-                userSourceRef.current?.clear()
-                userSourceRef.current?.addFeature(
-                    new Feature({ geometry: new Point(coord) })
-                )
-                mapRef.current?.getView().animate({
-                    center: coord,
-                    zoom: 16,
-                    duration: 600
-                })
-            }
-        })
+        // geoLocationRef.current.on('change:position', () => {
+        //     const coord = geoLocationRef.current?.getPosition()
+        //     if (coord) {
+        //         userSourceRef.current?.clear()
+        //         userSourceRef.current?.addFeature(
+        //             new Feature({ geometry: new Point(coord) })
+        //         )
+        //         mapRef.current?.getView().animate({
+        //             center: coord,
+        //             zoom: 16,
+        //             duration: 600
+        //         })
+        //     }
+        // })
         return () => {
             mapRef.current?.setTarget(undefined)
             mapRef.current = null
@@ -217,8 +217,30 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         });
     }, [consumermeters])
 
+    useEffect(()=>{
+        if(!geoLocationRef) return;
+        geoLocationRef.current?.on('change:position', () => {
+            const coord = geoLocationRef.current?.getPosition()
+            if (coord) {
+                userSourceRef.current?.clear()
+                userSourceRef.current?.addFeature(
+                    new Feature({ geometry: new Point(coord) })
+                )
+                mapRef.current?.getView().animate({
+                    center: coord,
+                    zoom: 16,
+                    duration: 600
+                })
+                setTracking(false);
+                geoLocationRef.current?.setTracking(false);
+            }
+        })
+
+    },[tracking])
+
     // HANDLE THE REALTIME-LOCATION
     const handleClick = () => {
+        setTracking(true)
         geoLocationRef.current?.setTracking(true)
     }
     return <div ref={mapDivRef} className="w-full h-64 rounded-lg relative cursor-pointer">
@@ -256,6 +278,9 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         <div ref={PopupRef} className={`${animatePing ? 'animate-ping' : ''}`}>
             <h1 className='font-bold text-blue-800'>{markerPopup}</h1>
         </div>
+        {tracking && <p className='absolute top-2 left-2 z-10'>
+            Tracking Current Location...
+        </p>}
     </div>
 }
 
