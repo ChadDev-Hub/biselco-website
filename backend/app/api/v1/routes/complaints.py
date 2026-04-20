@@ -388,7 +388,7 @@ async def update_complaint_status(
             "data": await new_complaints_status(session=session, complaint_id=complaint_id, user_id=str(user.id))
         }
         new_stats = {
-            "detail": "complaint_stats",
+            "detail": "complaints_stats",
             "data": await get_complaints_stats(session=session)
         }
 
@@ -466,7 +466,7 @@ async def delete_complaint_status(
             "data": await new_complaints_status(session=session, complaint_id=complaint_id, user_id=str(user.id))
         }
         new_stats = {
-            "detail": "complaint_stats",
+            "detail": "complaints_stats",
             "data": await get_complaints_stats(session=session)
         }
      

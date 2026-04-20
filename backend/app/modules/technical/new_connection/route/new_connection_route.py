@@ -6,6 +6,7 @@ from ..services.post import create_new_connection
 from ..services.get import get_new_connection
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
+from .....dependencies.bucket3 import upload_image
 from typing import Optional
 from datetime import datetime
 from pprint import pprint
@@ -28,7 +29,8 @@ async def new_connection(session: AsyncSession = Depends(get_session),
                          location: VerifiedLocation = Depends(verifyLocation),
                          remarks: Optional[str] = Form(None),
                          ):
-
+    if image:
+        image_url = await upload_image(file=image, folder="new_connection")
     data = {
         "form_id": 4,
         "date_accomplished": datetime.strptime(date, "%Y-%m-%d").date(),
@@ -43,7 +45,7 @@ async def new_connection(session: AsyncSession = Depends(get_session),
         "geom": location.geom,
         "remarks": remarks
     }
-    response = await create_new_connection(session=session, new_connection=data)
+    response = await create_new_connection(session=session, new_connection=data, image=image_url)
     return {"detail": "New Connection Created Successfully"}
 
 @router.get("/",status_code=status.HTTP_200_OK)

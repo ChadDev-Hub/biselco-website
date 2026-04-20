@@ -2,12 +2,14 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..model.new_connection import NewConnection
+from ..model.new_connection import NewConnection, NewConnectionImage
 from geoalchemy2.functions import ST_Point
 
-async def create_new_connection(session: AsyncSession, new_connection: dict):
+async def create_new_connection(session: AsyncSession, new_connection: dict, image: str = None):
     stmt = NewConnection(
         **new_connection)
+    if image:
+        stmt.images.append(NewConnectionImage(image=image))
     try:
         session.add(stmt)
         await session.commit()

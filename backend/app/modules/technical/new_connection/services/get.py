@@ -21,8 +21,25 @@ async def get_new_connection(session: AsyncSession):
                 NewConnection.initial_reading,
                 NewConnection.multiplier,
                 NewConnection.accomplished_by,
-                NewConnection.remarks
+                NewConnection.remarks,
+                NewConnection.geom
                 ))
             .order_by(NewConnection.times_tamped.desc()))
-    data = (await session.execute(stmt)).scalars().all()  
-    return data
+    data = (await session.execute(stmt)).scalars().all()
+    results = [
+        {
+            "id": nc.id,
+            "date_accomplished": nc.date_accomplished,
+            "consumer_name": nc.consumer_name,
+            "location": nc.location,
+            "meter_serial_no": nc.meter_serial_no,
+            "meter_brand": nc.meter_brand,
+            "meter_sealed": nc.meter_sealed,
+            "initial_reading": nc.initial_reading,
+            "multiplier": nc.multiplier,
+            "accomplished_by": nc.accomplished_by,
+            "remarks": nc.remarks,
+            "geom": ST_AsGeoJSON(to_shape(nc.geom))}
+        for nc in data
+    ]
+    return results

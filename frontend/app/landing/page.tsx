@@ -23,7 +23,7 @@ const Landing = async () => {
       </section>
 
       {/* VISION AND MISSION SECTION */}
-      <section className="py-5 w-full bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.png)] bg-no-repeat">
+      <section className="py-5 w-full bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
         <VisionMission />
       </section>
 

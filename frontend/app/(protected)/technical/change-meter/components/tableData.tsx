@@ -70,7 +70,9 @@ const TableData = ({ data }: Props) => {
     switch (message?.detail) {
       case "post_change_meter":
         queueMicrotask(() => {
-          setChangeMeterData((prev)=>[message.data,...prev])
+          setChangeMeterData((prev)=>{
+            const existing = prev.filter((item) => item.id !== message.data.id)
+            return [message.data,...existing]})
         })
         break;
       case "deleted_change_meter":
