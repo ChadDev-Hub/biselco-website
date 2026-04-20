@@ -25,7 +25,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
   const page = (await searchParams).page
   const data = GetChangeMeter(page);
   const pageUrl = '/technical/change-meter/'
-  const columns = ["ID", "DATE ACCOMPLISHED", "ACCOUNT NUMBER", "CONSUMER NAME", "LOCATION", "PULLOUT METER", "PULLOUT METER NUMBER", "NEW METER SERIAL NUMBER", "NEW METER BRAND", "INITIAL READING", "REMARKS", "ACCOMPLISHED BY"];
+  const columns = ["ID", "DATE ACCOMPLISHED", "ACCOUNT NUMBER", "CONSUMER NAME", "LOCATION", "PULLOUT METER", "PULLOUT METER NUMBER", "NEW METER SERIAL NUMBER", "NEW METER BRAND", "INITIAL READING", "REMARKS", "ACCOMPLISHED BY", "IMAGES"];
   return (
     <>
       <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4'>
@@ -47,7 +47,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
             </legend>
             <DashBoardTable >
               <TableHead columns={columns} selectable={true} />
-              <Suspense fallback={<TableDataSkeleton row={9} col={12} />}>
+              <Suspense fallback={<TableDataSkeleton row={9} col={columns.length} />}>
                 <TableData data={data} />
               </Suspense>
               <Suspense fallback={<PageNationLoading />}>

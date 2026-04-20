@@ -6,7 +6,7 @@ import Delete from './deleteChangeMeter'
 import { DeleteChangeMeter } from '@/app/actions/changeMeter'
 import DownloadReport from './download'
 import { DownloadChangeMeterReport } from '@/app/actions/changeMeter'
-
+import ImageViewer from '@/app/common/imageViewer'
 
 
 type PromiseType = {
@@ -32,6 +32,10 @@ type ChangeMeter = {
   initial_reading: number;
   remarks: string;
   accomplished_by: string;
+  images: {
+    id: number;
+    image: string;
+  }[];
   geom: {
     type: string
     coordinates: number[]
@@ -54,7 +58,6 @@ const TableData = ({ data }: Props) => {
       case 200:
         queueMicrotask(() => {
           setChangeMeterData(changeMeter.data.data);
-
         })
         break;
       default:
@@ -63,21 +66,18 @@ const TableData = ({ data }: Props) => {
   }, [changeMeter])
 
   const {message} = useWebsocket()
-  console.log(message)
   useEffect(() => {
     switch (message?.detail) {
       case "post_change_meter":
         queueMicrotask(() => {
-          setChangeMeterData(message.data)
+          setChangeMeterData((prev)=>[message.data,...prev])
         })
         break;
       case "deleted_change_meter":
         queueMicrotask(() => {
-          setChangeMeterData(message.data)
-
+          setChangeMeterData((prev)=> prev.filter((item) => message.data.includes(item.id) === false))
         })
         break;
-
       default:
         break;
     }
@@ -128,7 +128,6 @@ const TableData = ({ data }: Props) => {
       setSelectedRow(new Set())
     }
   }
-
   return (
     <>
       <tbody className='font-stretch-extra-condensed'>
@@ -149,6 +148,9 @@ const TableData = ({ data }: Props) => {
             <td className='border-r border-dashed border-r-gray-600'>{item.initial_reading}</td>
             <td className='border-r border-dashed border-r-gray-600'>{item.remarks}</td>
             <td className='border-r border-dashed border-r-gray-600'>{item.accomplished_by}</td>
+            <td className='border-r flex text-center items-center jusitify-center border-dashed border-r-gray-600'>
+              {item.images.length > 0 ? <ImageViewer image={item.images[0].image} /> : "No Image"}
+            </td>
           </tr>
         ))}
       </tbody>

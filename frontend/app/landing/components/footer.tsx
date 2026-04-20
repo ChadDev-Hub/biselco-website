@@ -13,15 +13,34 @@ const Footer = () => {
             </aside>
             <nav>
                 <h6 className="footer-title opacity-50">Contact Us</h6>
+                {/* PHONE */}
                 <div>
-                    <h4 className="text-blue-600"><span>📞</span> Serbisyo Hotline <span className="text-primary">24/7</span> </h4>
-                    <ul className="">
-                        <li>09176511859</li>
-                        <li>09176396436</li>
+                    <h4 className="text-blue-600"><span>📞</span> Serbisyo Hotline <span className="text-yellow-300">24/7</span> </h4>
+                    <ul role="list" className="list-disc list-inside">
+                        <li className="list-item indent-5">09176511859</li>
+                        <li className="list-item indent-5">09176396436</li>
+                        <li className="list-item indent-5">09107101909</li>
+                    </ul>
+                </div>
+                {/* EMAIL */}
+                <div>
+                    <h6>
+                        <span>📧</span> Email
+                    </h6>
+                    <ul className="list-disc list-inside">
+                        <li className="list-item indent-5">
+                            biselco79@yahoo.com
+                        </li>
+                    </ul>
+                </div>
+                {/* SOCIAL MEDIA */}
+                <div>
+                    <h6><span>📸</span>Social Media</h6>
+                    <ul className="list-disc list-inside">
+                        <li className="list-item indent-5"><a className="link link-hover" target="_blank" rel="noopener noreferrer" href="https://www.facebook.com/biselco.coronpalawan/"><span>ⓕ</span> BISELCO EC</a></li>
                     </ul>
                 </div>
 
-                <p>biselco79@yahoo.com</p>
 
             </nav>
             <nav>

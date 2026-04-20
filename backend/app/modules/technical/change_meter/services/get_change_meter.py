@@ -1,6 +1,6 @@
 from sqlalchemy import select, or_, cast, Text, func, delete, join, true
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from ..model.change_meter import ChangeMeter
+from ..model.change_meter import ChangeMeter, ChangeMeterImage
 from geoalchemy2.functions import ST_AsGeoJSON
 from typing import Optional
 from fastapi import HTTPException, status
@@ -9,9 +9,13 @@ from ..schema.response_model import ChangeMeterReportResponse
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from sqlalchemy.orm import selectinload
 from openpyxl.worksheet.page import PrintPageSetup
+from geoalchemy2.shape import to_shape
+from shapely.geometry import Point
+from pprint import pprint
 import io
-import json
+
 PAGE_SIZE = 8
 
 
@@ -71,34 +75,21 @@ async def get_change_meter_stats(session: AsyncSession):
 
 
 async def get_change_meter(session: AsyncSession, query: Optional[str] = None, page: Optional[int] = None):
+    print(page)
     if not page:
         page = 1
-    change_meter_cte = (select(
-        ChangeMeter.id,
-        ChangeMeter.timestamped,
-        ChangeMeter.date_accomplished,
-        ChangeMeter.account_no,
-        ChangeMeter.consumer_name,
-        ChangeMeter.location,
-        ChangeMeter.pull_out_meter,
-        ChangeMeter.pull_out_meter_reading,
-        ChangeMeter.new_meter_serial_no,
-        ChangeMeter.new_meter_brand,
-        ChangeMeter.meter_sealed,
-        ChangeMeter.initial_reading,
-        ChangeMeter.remarks,
-        ChangeMeter.accomplished_by,
-        func.ceil(func.row_number().over(
-            order_by=ChangeMeter.timestamped.desc()) / PAGE_SIZE).label("page"),
-        ST_AsGeoJSON(ChangeMeter.geom).label("geom")
-    )).cte("change_meter_cte")
+    change_meter = (select(
+        ChangeMeter
+    ).options(selectinload(ChangeMeter.images))
+    .order_by(ChangeMeter.timestamped.desc()))
+    
     # GET TOTAL PAGE 
     stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
     total_page = 1
     if stmt_total:
         total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
     if query:
-        stmt = select(change_meter_cte).where(
+        stmt = change_meter.where(
             or_(
                 cast(ChangeMeter.timestamped, Text).ilike(f"%{query}%"),
                 cast(ChangeMeter.date_accomplished, Text).ilike(f"%{query}%"),
@@ -114,31 +105,115 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
                 cast(ChangeMeter.initial_reading, Text).ilike(f"%{query}%"),
                 ChangeMeter.remarks.ilike(f"%{query}%"),
                 ChangeMeter.accomplished_by.ilike(f"%{query}%"),
-            )).order_by(change_meter_cte.c.timestamped.desc())
+            )).offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE)
     else:
-        stmt = select(change_meter_cte).where(change_meter_cte.c.page == page).order_by(
-            change_meter_cte.c.timestamped.desc())
-    result = (await session.execute(stmt)).mappings().all()
+        stmt = change_meter.offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE)
+    result = (await session.execute(stmt)).scalars().all()
+
     data = []
     for row in result:
-        item = dict(row)
-        if item['geom']:
-            item['geom'] = json.loads(row['geom'])
-        data.append(item)
-
+        items = {
+            "id": row.id,
+            "timestamped": row.timestamped,
+            "date_accomplished": row.date_accomplished,
+            "account_no": row.account_no,
+            "consumer_name": row.consumer_name,
+            "location": row.location,
+            "pull_out_meter": row.pull_out_meter,
+            "pull_out_meter_reading": row.pull_out_meter_reading,
+            "new_meter_serial_no": row.new_meter_serial_no,
+            "new_meter_brand": row.new_meter_brand,
+            "meter_sealed": row.meter_sealed,
+            "initial_reading": row.initial_reading,
+            "remarks": row.remarks,
+            "accomplished_by": row.accomplished_by,
+            "images": [{"id": im.id, "image": im.image} for im in row.images],
+            "geom": {
+                "type": "Point",
+                "coordinates": [Point(to_shape(row.geom).coords).x, Point(to_shape(row.geom).coords).y],
+                "srid": row.geom.srid
+            }
+        }
+        data.append(items)
     change_meter_stats = await get_change_meter_stats(session=session)
     return {
         "data": data,
         "total_page": total_page,
         "stats": change_meter_stats
     }
+    
+async def get_new_change_meter(session:AsyncSession, data:dict, image:Optional[str] = None):
+    try:
+        new_change_meter = ChangeMeter(**data)
+        if image:
+            new_change_meter.images.append(ChangeMeterImage(image=image))
+        session.add(new_change_meter)
+        
+        await session.commit()
+        await session.refresh(new_change_meter)
+        # GET TOTAL PAGE 
+        total_page = 1
+        stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
+        change_meter_stats = await get_change_meter_stats(session=session)
+        if stmt_total:
+            total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
+            
+        new_stmt = (await session.execute(select(ChangeMeter).where(ChangeMeter.id == new_change_meter.id).options(selectinload(ChangeMeter.images)))).scalars().one()
+        new_change_meter_data = {
+            "id": new_stmt.id,
+            "timestamped": new_stmt.timestamped,
+            "date_accomplished": new_stmt.date_accomplished,
+            "account_no": new_stmt.account_no,
+            "consumer_name": new_stmt.consumer_name,
+            "location": new_stmt.location,
+            "pull_out_meter": new_stmt.pull_out_meter,
+            "pull_out_meter_reading": new_stmt.pull_out_meter_reading,
+            "new_meter_serial_no": new_stmt.new_meter_serial_no,
+            "new_meter_brand": new_stmt.new_meter_brand,
+            "meter_sealed": new_stmt.meter_sealed,
+            "initial_reading": new_stmt.initial_reading,
+            "remarks": new_stmt.remarks,
+            "accomplished_by": new_stmt.accomplished_by,
+            "images": [{"id": im.id, "image": im.image} for im in new_stmt.images],
+            "geom": {
+                "type": "Point",
+                "coordinates": [Point(to_shape(new_stmt.geom).coords).x, Point(to_shape(new_stmt.geom).coords).y],
+                "srid": new_stmt.geom.srid
+        }}
+        
+        return {
+            "data": new_change_meter_data,
+            "total_page": total_page,
+            "stats": change_meter_stats
+        }
+            
+        
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    finally:
+        await session.close()
+    
 
 
 async def deleteChangeMeter(session: AsyncSession, items: set, page: Optional[int] = None):
     try:
         await session.execute(delete(ChangeMeter).where(ChangeMeter.id.in_(items)))
         await session.commit()
-        return await get_change_meter(session=session, page=page)
+        
+        total_page = 1
+        stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
+        change_meter_stats = await get_change_meter_stats(session=session)
+        if stmt_total:
+            total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
+            
+        return {
+            "data": list(items),
+            "total_page": total_page,
+            "stats": change_meter_stats
+        }
+
     except Exception as e:
         await session.rollback()
         raise HTTPException(

@@ -2,6 +2,9 @@
 
 import { use, useEffect, useState } from "react";
 import { useWebsocket } from "@/app/utils/websocketprovider";
+import StatsCard from "./statsCard";
+
+
 type PromiseType = {
   status: number;
   data: ComplaintStatsType[];
@@ -22,12 +25,17 @@ const Stats = ({ data }: Props) => {
     queueMicrotask(() =>
       setStatsData(stats.data));
   }, [stats]);
-
+  
   // WEBSOCKET
   const { message } = useWebsocket();
   useEffect(() => {
-    if (message?.detail === "complaint_stats") {
-      queueMicrotask(() => setStatsData(message.data));
+    switch (message?.detail) {
+      case "complaints_stats":
+        queueMicrotask(() => 
+          setStatsData(message.data));
+        break;
+      default:
+        break;
     }
   }, [message]);
 
@@ -128,14 +136,13 @@ const Stats = ({ data }: Props) => {
   return (
     <div className="stats shadow">
       {statsData.map((m) => (
-        <div key={m.id} className="stat glass ">
-          <div className="stat-figure text-secondary">
-            {SpecificSvg(m.title)}
-          </div>
-          <div className="stat-title text-yellow-400">{m.title}</div>
-          <div className="stat-value text-center">{m.value}</div>
-          <div className="stat-desc">{m.description}</div>
-        </div>
+        <StatsCard
+        key={m.id}
+          label={m.title}
+          value={m.value}
+          svg={SpecificSvg(m.title)}
+          description={m.description}
+        />
       ))}
     </div>
   );

@@ -38,18 +38,25 @@ type WSMessage = {
   detail: "presence";
   data: UserPresence;
 } | {
-  detail: "post_change_meter" | "deleted_change_meter";
-  data: ChangeMeter[];
+  detail: "post_change_meter"
+  data: ChangeMeter;
   total_page:number;
   stats: ChangeMeterStats[];
 } | {
+  detail: "deleted_change_meter";
+  data: number[];
+  total_page: number;
+  stats: ChangeMeterStats[];
+}
+  |
+{
   detail: "complaint_message"
   data: ComlaintMessage;
 } | {
   detail: "seen_message";
   data: SeenMessage;
 } | {
-  detail: "complaint_stats";
+  detail: "complaints_stats";
   data: ComplaintStatsType[];
 } | {
   detail: "sent_message";
@@ -133,12 +140,17 @@ type ChangeMeter = {
   initial_reading: number;
   remarks: string;
   accomplished_by: string;
+  images: {
+    id: number;
+    image: string;
+  }[];
   geom: {
     type: string;
     coordinates: number[];
   };
 }
 
+// NEWS
 type NewsData = {
   id: number
     title: string;

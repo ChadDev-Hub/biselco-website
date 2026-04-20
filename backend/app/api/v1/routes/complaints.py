@@ -250,7 +250,7 @@ async def create_generic_complaints(
         "detail": "complaints_admin",
         "data": NewComplaintsModel(**data).model_dump()}
     new_complaints_stat = {
-        "details": "complaints_stats",
+        "detail": "complaints_stats",
         "data": await get_complaints_stats(session=session)
     }
     # ADMIN USER
@@ -315,7 +315,7 @@ async def delete_complaint(
             "data": deleted_complaint,
         }
         new_complaints_stat = {
-            "details": "complaints_stats",
+            "detail": "complaints_stats",
             "data": await get_complaints_stats(session=session)
         }
 

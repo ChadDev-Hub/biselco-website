@@ -62,7 +62,7 @@ export default function Hero({ subtitle, description, children }: Props) {
                 initial={{ visibility: "hidden" }}
                 animate={{ visibility: "visible" }}
                 style={{ y }}
-                className="text-2xl  lg:text-5xl text-center text-blue-700 font-bold text-shadow-lg">{subtitle}</motion.h1>
+                className="text-2xl sm:text-3xl md:text-5xl  lg:text-6xl text-center text-blue-700 font-bold text-shadow-lg">{subtitle}</motion.h1>
             </motion.div>
 
             <div className='grid  mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-3'>
@@ -73,7 +73,7 @@ export default function Hero({ subtitle, description, children }: Props) {
                     variants={fadeLeftSide}
                     className=" flex flex-col col-span-2 items-center gap-4 lg:items-start text-center sm:text-center md:text-start lg:text-start order-2 lg:order-1">
                     <div className="badge text-center sm:text-center md:text-start lg:text-start badge-primary badge-outline">Empowering Our Community</div>
-                    <h1 className=" text-5xl whitespace-normal wrap-break-words md:text-5xl font-black mb-6s leading-tight">
+                    <h1 className=" text-5xl lg:text-6xl whitespace-normal wrap-break-words md:text-5xl font-black mb-6s leading-tight">
                         Sustainable Energy for a <span className="text-primary italic">Brighter Tomorrow.</span>
                     </h1>
                     <p className="text-black text-base break-normal">{description}</p>

@@ -1,13 +1,20 @@
 "use client"
+
+import { useRef } from "react";
+
 type Props = {
     handleDelete: () => void
     show: boolean;
 }
 
 const Delete = ({ handleDelete, show }: Props) => {
+    const modalRef = useRef<HTMLDialogElement>(null)
+    const handleOpen = () => modalRef.current?.showModal()
+    const handleClose = () => modalRef.current?.close()
     return (
+        <>
         <button
-            onClick={handleDelete}
+            onClick={handleOpen}
             title='Delete Selected'
             type='button'
             className={`btn sticky left-4 shadow btn-circle btn-sm btn-ghost ${show ? "" : "hidden"}`}>
@@ -64,6 +71,18 @@ const Delete = ({ handleDelete, show }: Props) => {
                 </g>
             </svg>
         </button>
+        <dialog ref={modalRef} className="modal">
+            <form method="dialog" className="modal-box">
+                <h3 className="font-bold text-lg text-warning">Delete Change Meter</h3>
+                <p className="py-4 text-warning">Are you sure you want to delete this change meter?</p>
+                <div className="modal-action">
+                    <button type="button" onClick={handleClose} className="btn">Cancel</button>
+                    <button type="button" onClick={handleDelete} className="btn btn-error">Delete</button>
+                </div>
+            </form>
+        </dialog>
+        </>
+        
     )
 }
 

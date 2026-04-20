@@ -14,7 +14,7 @@ import RadarChartSimple from '@/app/common/Radar'
 import ChartSkeleton from '@/app/common/ChartSkeleton'
 import { GetComplaintOvertime } from '../../../lib/serverFetch';
 import SimpleAreaChart from '@/app/common/AreaChart'
-
+import StatsSkeleton from '@/app/common/statsSkeleton'
 
 const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number; q: string }> }) => {
   const params = use(searchParams);
@@ -58,7 +58,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
       lg:mt-20 
       pb-21">
         <ComplaintDashBoardHeader />
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
           <Stats data={statsData} />
         </Suspense>
 

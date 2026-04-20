@@ -2,10 +2,12 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import date
 
-class Geometry:
+class Geometry(BaseModel):
     type:str
     coordinates:List[float]
-
+class Images(BaseModel):
+    id:int
+    image:str
 class ChangeMeterResponse(BaseModel):
     id:int
     date_accomplished:date
@@ -19,8 +21,8 @@ class ChangeMeterResponse(BaseModel):
     initial_reading:int
     remarks: Optional[str] = None
     accomplished_by:str
-    
-    geom: Dict[str, Any]
+    images: List[Images]
+    geom: Geometry
 
     model_config = ConfigDict(from_attributes=True)
     
@@ -32,6 +34,16 @@ class Stats(BaseModel):
 class ChangeMeterResponseList(BaseModel):
     data:List[ChangeMeterResponse]
     total_page:int
+    stats: List[Stats]
+    
+class NewChangeMeterResponse(BaseModel):
+    data: ChangeMeterResponse
+    total_page: int
+    stats: List[Stats]
+    
+class DeletedChangeMeterResponse(BaseModel):
+    data: List[int]
+    total_page: int
     stats: List[Stats]
 
 class ChangeMeterReportResponse(BaseModel):

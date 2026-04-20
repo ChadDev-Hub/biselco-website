@@ -12,14 +12,14 @@ from pydantic import BaseModel
 from typing import Annotated
 from ....modules.user.service.get_user import get_users_by_roles
 from ....common.geo import extract_address_from_image
-from ....modules.technical import  ChangeMeter
 from ....modules.technical.change_meter.schema.requests_model import ChangeMeterReport
-from ....modules.technical.change_meter.schema.response_model import ChangeMeterResponseList, ChangeMeterResponse
+from ....modules.technical.change_meter.schema.response_model import ChangeMeterResponseList, NewChangeMeterResponse, DeletedChangeMeterResponse
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 import datetime
-from ....modules.technical.change_meter.services.get_change_meter import get_change_meter, deleteChangeMeter, get_change_meter_stats, changeMeterReport
+from ....modules.technical.change_meter.services.get_change_meter import get_change_meter, deleteChangeMeter, get_new_change_meter, changeMeterReport
 from sqlalchemy import select, func
+from ....dependencies.bucket3 import upload_image
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
 
@@ -42,7 +42,14 @@ async def create_change_meter(
     verified_location:VerifiedLocation = Depends(verifyLocation),
     session: AsyncSession = Depends(get_session),
     page:Optional[int] = Query(None),
-    ):  
+    ):
+    # UPLOAD IMAGE TO S3 BUCKET
+    
+    image_url = None
+    
+    if attachment:
+        image_url = await upload_image(file=attachment, folder="change_meter")
+        
     # CHECK IF THE USER IS ADMIN IF NOT RAISE AN ERROR
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -66,36 +73,34 @@ async def create_change_meter(
     # CHECK IF THE USER IS ADMIN IF NOT RAISE AN ERROR
     # CREATE NEW CHANGE METER
     try: 
-        new_change_meter = ChangeMeter(
-            form_id = 3,
-            timestamped = datetime.datetime.now(),
-            date_accomplished=datetime.datetime.strptime(dateAccomplished, "%Y-%m-%d").date(),  
-            account_no=accountNumber,
-            consumer_name=consumerName,
-            location=f"{location.village} | {location.municipality}",
-            pull_out_meter=f"{pullOutMeterNumber} | {pullOutMeterBrand}",
-            pull_out_meter_reading=int(pullOutMeterReading),
-            new_meter_serial_no=NewMeterNumber,
-            new_meter_brand=NewMeterBrand,
-            meter_sealed=NewMeterSealed,
-            initial_reading=int(InitialMeterReading),
-            remarks=remarks,
-            accomplished_by=accomplishedBy,
-            geom=location.geom
-        )
-        session.add(new_change_meter)
-        await session.commit()
-        await session.refresh(new_change_meter)
+        new_change_meter = {
+            "form_id" : 3,
+            "timestamped":datetime.datetime.now(),
+            "date_accomplished":datetime.datetime.strptime(dateAccomplished, "%Y-%m-%d").date(),  
+            "account_no":accountNumber,
+            "consumer_name":consumerName,
+            "location":f"{location.village} | {location.municipality}",
+            "pull_out_meter":f"{pullOutMeterNumber} | {pullOutMeterBrand}",
+            "pull_out_meter_reading":int(pullOutMeterReading),
+            "new_meter_serial_no":NewMeterNumber,
+            "new_meter_brand":NewMeterBrand,
+            "meter_sealed":NewMeterSealed,
+            "initial_reading":int(InitialMeterReading),
+            "remarks":remarks,
+            "accomplished_by":accomplishedBy,
+            "geom":location.geom}
+        
+        change_meter_data = await get_new_change_meter(session=session, data=new_change_meter, image=image_url)
         
         # GET ADMIN USER
         admin_user = await get_users_by_roles(session=session, roles="admin")
        
-        change_meter_data = await get_change_meter(session=session, page=page)
-        data = ChangeMeterResponseList.model_validate(change_meter_data).model_dump(mode="json")
+        data = NewChangeMeterResponse.model_validate(change_meter_data).model_dump(mode="json")
         data['detail'] = "post_change_meter"
         for admin in admin_user:
             await manager.broad_cast_personal_json(user_id=str(admin), data=data)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return {"detail" : "Change Meter Created Successfully"}
     
@@ -104,9 +109,9 @@ async def create_change_meter(
 async def fetch_change_meter(
     session: AsyncSession = Depends(get_session), 
     q: Optional[str] = Query(None),
-    p: Optional[int] = Query(None)):
+    page: Optional[int] = Query(None)):
     # GET CHANGE METER
-    return await get_change_meter(session=session, query=q, page=p)
+    return await get_change_meter(session=session, query=q, page=page)
 
 
 
@@ -114,7 +119,7 @@ async def fetch_change_meter(
 async def delete_change_meter(session:AsyncSession = Depends(get_session), items:set = Body(...), page:Optional[int] = Query(None)):
     data = await deleteChangeMeter(session=session, items=items, page=page)
     admins = await get_users_by_roles(session=session, roles="admin")
-    new_data = ChangeMeterResponseList.model_validate(data).model_dump(mode="json")
+    new_data = DeletedChangeMeterResponse.model_validate(data).model_dump(mode="json")
     new_data['detail'] = "deleted_change_meter"
     for admin in admins:
         await manager.broad_cast_personal_json(str(admin), new_data)
