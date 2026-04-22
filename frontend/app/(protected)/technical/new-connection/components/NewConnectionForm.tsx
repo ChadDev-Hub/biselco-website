@@ -4,6 +4,8 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form"
 import BiselcoMap from "@/app/common/Map"
 import Image from "next/image"
 import { newConnectionMeter } from "@/app/actions/newConnectionMeter"
+
+
 type FormField = {
     date: string;
     consumer_name: string;
@@ -15,39 +17,46 @@ type FormField = {
     remarks: string;
     lon: number | undefined;
     lat: number | undefined;
-    image: File | undefined;
+    attachment: File | undefined;
     accomplished_by: string
 
 }
 const NewConnectionForm = () => {
-    const { register, control, formState: { errors}, handleSubmit, setValue } = useForm<FormField>()
-    const attachment = useWatch({ control, name: "image" })
-    const onSubmit: SubmitHandler<FormField> = (data) => {
+    const { register, setError, control, formState: { errors, isSubmitting }, handleSubmit, setValue, reset, getValues} = useForm<FormField>()
+    const attachment = useWatch({ control, name: "attachment" });
 
-
+    const onSubmit: SubmitHandler<FormField> = async () => {
+        const data = getValues();
         const form = new FormData();
-
         Object.entries(data).forEach(([key, value]) => {
-            if (value == null) return;
-
-            form.append(
-                key,
-                value instanceof FileList ? value[0] : String(value)
-            );
+            if (value instanceof FileList){
+                form.append(key, value[0]);
+            }else{
+                form.append(key, String(value));
+            }
         })
-        newConnectionMeter(form);
+        const res = await newConnectionMeter(form);
+        switch (res?.status) {
+            case 201:
+                reset();
+                break;
+            case 403:
+                setError("lat", { message: res.data });
+            default:
+                break;
+        }
     }
 
     return (
-        <fieldset className="fieldset w-full glass rounded-box p-4">
-            <legend className="fieldset-legend">
+        <div className="fieldset w-full glass rounded-box p-4">
+            <legend>
                 <h2 className="text-3xl text-blue-800 text-shadow-md text-shadow-amber-600">
                     New Connection Form
                 </h2>
             </legend>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div>
+                <div >
                     {/* DATE */}
                     <div className="flex flex-col">
                         <label className="label">
@@ -96,7 +105,13 @@ const NewConnectionForm = () => {
                         <label>
                             Initial Reading
                         </label>
-                        <input type="number" accept="number" {...register("initial_reading", { valueAsNumber: true, required: "Initial Reading is required" })} className="input w-full" />
+                        <input type="number" accept="number" {...register("initial_reading", {
+                             valueAsNumber: true, 
+                             required: "Initial Reading is required",
+                             setValueAs: (v) => {
+                                if (v === "" || v === undefined) return undefined;
+                                const num =Number(v)
+                                return isNaN(num) ? undefined : num}})} className="input w-full" />
                         {errors.initial_reading && <span className="text-red-600">{errors.initial_reading.message}</span>}
                     </div>
 
@@ -105,7 +120,10 @@ const NewConnectionForm = () => {
                         <label>
                             Multiplier
                         </label>
-                        <input type="number" accept="number" defaultValue={1} {...register("multiplier", { valueAsNumber: true, required: "Multiplier is required" })} className="input w-full" />
+                        <input type="number" accept="number" defaultValue={1} {...register("multiplier", { 
+                            valueAsNumber: true, 
+                            required: "Multiplier is required",
+                            setValueAs:(value) => Number(value)})} className="input w-full" />
                         {errors.multiplier && <span className="text-red-600">{errors.multiplier.message}</span>}
                     </div>
 
@@ -148,7 +166,7 @@ const NewConnectionForm = () => {
                         <label >
                             Image
                         </label>
-                        <input {...register("image", { required: "Image is required" })} multiple={false} accept="image/*" type="file" capture className="file-input w-full" />
+                        <input {...register("attachment", { required: "Image is required" })} multiple={false} accept="image/*" type="file" capture className="file-input w-full" />
                         {attachment?.[0] &&
                             <Image
                                 src={attachment ? URL.createObjectURL(attachment[0]) : ""}
@@ -157,7 +175,7 @@ const NewConnectionForm = () => {
                                 height={200}
                                 sizes="(min-width: 1024px) 200px, 100vw"
                                 className="max-h-40 w-auto h-auto mt-4 drop-shadow-2xl drop-shadow-gray-700" />}
-                        {errors.image && <span className="text-red-600">{errors.image.message}</span>}
+                        {errors.attachment && <span className="text-red-600">{errors.attachment.message}</span>}
                     </div>
 
 
@@ -166,16 +184,19 @@ const NewConnectionForm = () => {
                 </div>
 
 
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-1 md:col-span-2">
                     {/* SUBMIT */}
-                    <button type="submit" className="btn w-full btn-accent">
-                        Submit New Connection
+                    <button type="submit" disabled={isSubmitting} className={`btn w-full btn-accent`}>
+                        {isSubmitting ?
+                            <p className="skeleton skeleton-text">Submitting..</p>
+                            :
+                            <p>Submit New Connection</p>
+                        }
                     </button>
-
                 </div>
 
             </form>
-        </fieldset>
+        </div>
     )
 }
 

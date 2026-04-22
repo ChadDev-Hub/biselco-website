@@ -40,16 +40,16 @@ async def create_change_meter(
     remarks:Annotated[Optional[str], Form()] = None,
     attachment: Annotated[Optional[UploadFile], File()] = None,
     verified_location:VerifiedLocation = Depends(verifyLocation),
+    image_location:VerifiedLocation = Depends(extract_address_from_image),
     session: AsyncSession = Depends(get_session),
-    page:Optional[int] = Query(None),
     ):
     # UPLOAD IMAGE TO S3 BUCKET
     
     image_url = None
-    
     if attachment:
         image_url = await upload_image(file=attachment, folder="change_meter")
-        
+
+    
     # CHECK IF THE USER IS ADMIN IF NOT RAISE AN ERROR
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,12 +58,11 @@ async def create_change_meter(
     
     # CHECK AND VERIFY IF THE IMAGE HAS GEOLOCATION IF NOT THEN USE THE VERIFIED LOCATION FROM MAP PIN
     location = None
-    if attachment:
-        extracted_point = await extract_address_from_image(attachment, session=session)
-        location = extracted_point
-        
-        if not extracted_point:
-            location = verified_location
+    
+    if image_location:
+        location = image_location
+    else:
+        location = verified_location
     
     # RAISE EXCEPTION IF LOCATION IS NONE
     if not location:

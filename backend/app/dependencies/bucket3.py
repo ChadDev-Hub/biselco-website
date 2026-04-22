@@ -19,8 +19,12 @@ s3_client= boto3.client( "s3",
 
 # UPLOAD IMAGES
 async def upload_image(file: UploadFile, folder:str):
-    if file.filename:
-        complaint_key = f"{folder}/{uuid4()}.{file.filename.split('.')[-1]}"
-        s3_client.upload_fileobj(file.file, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
-        return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{complaint_key}"
+    print(file)
+    if not file or not file.filename:
+        return
+    file.file.seek(0)
+    file_format = file.filename.split('.')[-1]
+    complaint_key = f"{folder}/{uuid4()}.{file_format}"
+    s3_client.upload_fileobj(file.file, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
+    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{complaint_key}"
 

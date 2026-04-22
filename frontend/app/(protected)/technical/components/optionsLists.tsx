@@ -42,7 +42,7 @@ const TechniclaFormLists = ({ initialData }: Props) => {
     };
     return (
         <div className='flex flex-col justify-center items-center'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2  gap-4 w-fit justify-center  items-center mx-4 sm:mx-4 md-mx-20 lg:mx-35'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2  gap-4 w-fit justify-center  items-center'>
                     {forms?.map((form: TechnicalForms) =>
                     (
                         <div key={form.id}>

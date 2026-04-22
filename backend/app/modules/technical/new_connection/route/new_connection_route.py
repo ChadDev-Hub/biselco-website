@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile, Form
+from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile, Form, Query
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
@@ -6,10 +6,13 @@ from ..services.post import create_new_connection
 from ..services.get import get_new_connection
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
+from .....common.geo import extract_address_from_image
+from ....user.service.get_user import get_users_by_roles
 from .....dependencies.bucket3 import upload_image
+from ..services.delete import delete_new_connection
 from typing import Optional
 from datetime import datetime
-from pprint import pprint
+from ....websocket.websocket_manager import manager
 
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
 
@@ -24,13 +27,17 @@ async def new_connection(session: AsyncSession = Depends(get_session),
                          meter_sealed: Optional[str] = Form(None),
                          multiplier: Optional[int] = Form(None),
                          initial_reading: int = Form(...),
-                         image:UploadFile = File(...),
+                         attachment:UploadFile = File(...),
                          accomplished_by: str = Form(...),
                          location: VerifiedLocation = Depends(verifyLocation),
+                         image_location: VerifiedLocation = Depends(extract_address_from_image),
                          remarks: Optional[str] = Form(None),
                          ):
-    if image:
-        image_url = await upload_image(file=image, folder="new_connection")
+    loc  = None
+    if image_location:
+        loc = image_location
+    else:
+        loc = location
     data = {
         "form_id": 4,
         "date_accomplished": datetime.strptime(date, "%Y-%m-%d").date(),
@@ -42,13 +49,30 @@ async def new_connection(session: AsyncSession = Depends(get_session),
         "initial_reading": initial_reading,
         "location": f"{location.village} | {location.municipality}",
         "accomplished_by": accomplished_by,
-        "geom": location.geom,
+        "geom": loc.geom,
         "remarks": remarks
     }
+    image_url = None
+    if attachment:
+        image_url = await upload_image(file=attachment, folder="new_connection")
     response = await create_new_connection(session=session, new_connection=data, image=image_url)
+    admins = await get_users_by_roles(session=session, roles="admin")
+    for admin in admins:
+        await manager.broad_cast_personal_json(str(admin), response)
+    # QUERY ADMINS
     return {"detail": "New Connection Created Successfully"}
 
 @router.get("/",status_code=status.HTTP_200_OK)
-async def get_nconnection(session:AsyncSession=Depends(get_session)):
-    data = await get_new_connection(session=session)
+async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optional[int] = Query(None)):
+    data = await get_new_connection(session=session, page=page)
     return data
+
+@router.delete("/", status_code=status.HTTP_200_OK)
+async def del_n_connection(deleted=Depends(delete_new_connection), session:AsyncSession=Depends(get_session)):
+    admins = await get_users_by_roles(session=session, roles="admin")
+    for admin in admins:
+        await manager.broad_cast_personal_json(str(admin), deleted)
+    return 
+    {
+        "detail" : "New Connection Deleted Successfully"
+    }

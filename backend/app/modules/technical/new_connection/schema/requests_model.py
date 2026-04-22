@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import File
-
+from typing import List
 
 
 class NewConnectionRequest(BaseModel):
@@ -15,3 +15,7 @@ class NewConnectionRequest(BaseModel):
     lat: float
     inital_reading: int
     remarks: Optional[str] = None
+    
+class NewConnectionDelete(BaseModel):
+    items: List[int]
+    page: int

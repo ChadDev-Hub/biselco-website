@@ -16,7 +16,7 @@ from shapely.geometry import Point
 from pprint import pprint
 import io
 
-PAGE_SIZE = 8
+PAGE_SIZE = 6
 
 
 async def get_change_meter_stats(session: AsyncSession):
@@ -75,7 +75,6 @@ async def get_change_meter_stats(session: AsyncSession):
 
 
 async def get_change_meter(session: AsyncSession, query: Optional[str] = None, page: Optional[int] = None):
-    print(page)
     if not page:
         page = 1
     change_meter = (select(
@@ -151,40 +150,8 @@ async def get_new_change_meter(session:AsyncSession, data:dict, image:Optional[s
         
         await session.commit()
         await session.refresh(new_change_meter)
-        # GET TOTAL PAGE 
-        total_page = 1
-        stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
-        change_meter_stats = await get_change_meter_stats(session=session)
-        if stmt_total:
-            total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
-            
-        new_stmt = (await session.execute(select(ChangeMeter).where(ChangeMeter.id == new_change_meter.id).options(selectinload(ChangeMeter.images)))).scalars().one()
-        new_change_meter_data = {
-            "id": new_stmt.id,
-            "timestamped": new_stmt.timestamped,
-            "date_accomplished": new_stmt.date_accomplished,
-            "account_no": new_stmt.account_no,
-            "consumer_name": new_stmt.consumer_name,
-            "location": new_stmt.location,
-            "pull_out_meter": new_stmt.pull_out_meter,
-            "pull_out_meter_reading": new_stmt.pull_out_meter_reading,
-            "new_meter_serial_no": new_stmt.new_meter_serial_no,
-            "new_meter_brand": new_stmt.new_meter_brand,
-            "meter_sealed": new_stmt.meter_sealed,
-            "initial_reading": new_stmt.initial_reading,
-            "remarks": new_stmt.remarks,
-            "accomplished_by": new_stmt.accomplished_by,
-            "images": [{"id": im.id, "image": im.image} for im in new_stmt.images],
-            "geom": {
-                "type": "Point",
-                "coordinates": [Point(to_shape(new_stmt.geom).coords).x, Point(to_shape(new_stmt.geom).coords).y],
-                "srid": new_stmt.geom.srid
-        }}
-        
         return {
-            "data": new_change_meter_data,
-            "total_page": total_page,
-            "stats": change_meter_stats
+            "data": "New Change Meter Added"
         }
             
         
@@ -201,19 +168,9 @@ async def deleteChangeMeter(session: AsyncSession, items: set, page: Optional[in
     try:
         await session.execute(delete(ChangeMeter).where(ChangeMeter.id.in_(items)))
         await session.commit()
-        
-        total_page = 1
-        stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
-        change_meter_stats = await get_change_meter_stats(session=session)
-        if stmt_total:
-            total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
-            
         return {
-            "data": list(items),
-            "total_page": total_page,
-            "stats": change_meter_stats
+            "data": "Change Meter Deleted Successfully"
         }
-
     except Exception as e:
         await session.rollback()
         raise HTTPException(

@@ -196,6 +196,7 @@ export const GetChangeMeter = async (page?:number,query?: string) => {
             data: data.detail
         }
     }
+    await new Promise((resolve)=>setTimeout(resolve,3000))
     return {
         status: res.status,
         data: data
@@ -259,3 +260,28 @@ export const GetComplaintOvertime = async () => {
         data: data
     }
 };
+
+
+// NEW CONNECTION
+export const GetNewConnection = async (page?:number) => {
+    const params = new URLSearchParams();
+    
+    if(page){
+        params.set("page",page.toString())
+    }
+    console.log(params.toString())
+    const res = await fetch(`${baseUrl}/v1/new_connection/?${params?.toString()}`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

@@ -6,7 +6,6 @@ import { useDebounce } from "use-debounce";
 import { queryConsumer } from "@/lib/serverFetch";
 import Image from "next/image";
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
-import { useAlert } from "@/app/common/alert";
 import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
 import { Archivo_Black } from "next/font/google";
@@ -50,7 +49,6 @@ const ChangeMeterForm = () => {
     const { register, control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm<FormField>();
     const [consumer, setConsumer] = useState<Consumer[]>([]);
     const [selectedConsumer, setSelectedConsumer] = useState<string>("");
-    const { showAlert } = useAlert();
     const { showLoading } = useLoading();
     const useParams = useSearchParams();
     
@@ -153,7 +151,6 @@ const ChangeMeterForm = () => {
                 case 201:
                     reset();
                     showLoading(false);
-                    showAlert("success", "Change Meter Submitted Successfully");
                     break;
                 case 403:
                     showLoading(false);

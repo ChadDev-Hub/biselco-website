@@ -37,14 +37,10 @@ class ChangeMeterResponseList(BaseModel):
     stats: List[Stats]
     
 class NewChangeMeterResponse(BaseModel):
-    data: ChangeMeterResponse
-    total_page: int
-    stats: List[Stats]
+    data: str
     
 class DeletedChangeMeterResponse(BaseModel):
-    data: List[int]
-    total_page: int
-    stats: List[Stats]
+    data: str
 
 class ChangeMeterReportResponse(BaseModel):
     date_accomplished: date

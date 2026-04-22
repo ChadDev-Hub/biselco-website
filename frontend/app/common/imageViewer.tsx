@@ -2,6 +2,7 @@
 
 import { useRef } from "react"
 import Image from "next/image"
+
 type Props = {
     image: string
 }
@@ -12,16 +13,68 @@ const ImageViewer = ({ image }: Props) => {
     const handleClose = () => modalRef.current?.close()
     return (
         <>
-            <button className="btn btn-circle btn-ghost" onClick={handleOpen}>📷</button>
+            <button type="button" title="view image" data-tip="View Image" className="btn drop-shadow-lg shadow  btn-circle btn-sm btn-ghost tooltip tooltip-left" onClick={handleOpen}>
+                <svg
+                    height={24}
+                    width={24}
+                    version="1.1"
+                    id="Layer_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 512.001 512.001"
+                    xmlSpace="preserve">
+                    <g id="SVGRepo_bgCarrier" >
+                    </g>
+                    <g id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round">
+                    </g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path className="fill-[#48AEE2]" d="M494.933,438.72H17.067C7.641,438.72,0,431.078,0,421.653V90.348c0-9.425,7.641-17.067,17.067-17.067 h365.726c4.526,0,8.868,1.798,12.067,4.999l112.142,112.141c3.201,3.201,4.999,7.541,4.999,12.068v219.163 C512,431.078,504.359,438.72,494.933,438.72z">
+                        </path>
+                        <g>
+                            <path className="fill-[#48AEE2]"
+                                d="M507.001,190.421L394.859,78.281c-3.201-3.201-7.541-4.999-12.067-4.999H256V438.72h238.933 c9.425,0,17.067-7.641,17.067-17.067V202.489C512,197.963,510.202,193.622,507.001,190.421z">
+                            </path>
+                            <path className="fill-[#48AEE2]"
+                                d="M511.514,425.632L345.599,221.816c-7.061-8.673-20.315-8.661-27.366,0L256,298.266l-62.233-76.448 c-7.061-8.673-20.314-8.662-27.366,0L0.486,425.632c1.795,7.503,8.529,13.088,16.581,13.088h477.867 C502.987,438.72,509.72,433.134,511.514,425.632z">
+                            </path>
+                        </g>
+                        <path className="fill-[#FFE49C]"
+                            d="M95.776,219.321c-27.716,0-50.265-22.548-50.265-50.264s22.548-50.264,50.265-50.264 c27.715,0,50.265,22.548,50.265,50.264C146.039,196.772,123.491,219.321,95.776,219.321z">
+                        </path>
+                        <g>
+                            <path className="fill-[#3797D3]" d="M345.599,221.816c-7.061-8.673-20.315-8.661-27.366,0L256,298.266V438.72h238.933 c8.053,0,14.787-5.585,16.581-13.088L345.599,221.816z">
+                            </path>
+                            <path className="fill-[#3797D3]" d="M394.86,78.281c-3.201-3.201-7.541-4.999-12.067-4.999h-5.689v117.829 c0,9.425,7.641,17.067,17.067,17.067H512v-5.689c0-4.526-1.798-8.868-4.999-12.068L394.86,78.281z">
+                            </path>
+                        </g>
+                    </g>
+                </svg>
+            </button>
             <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-                <div className="modal-box">
-                    <button type="button" onClick={handleClose} className="btn btn-circle btn-ghost absolute right-2 top-2">X</button>
-                    <Image 
-                    src={image} 
-                    alt="image" 
-                    width={500} 
-                    height={500} 
-                    sizes="(min-width: 1024px) 200px, 100vw"/>
+                <div className="modal-box relative w-full glass">
+
+                    {/* CLOSE BUTTON */}
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className="btn btn-circle btn-secondary absolute top-2 right-2 z-10"
+                    >
+                        X
+                    </button>
+
+                    {/* IMAGE WRAPPER */}
+                    <div className="flex justify-center items-center">
+                        <Image
+                            src={image}
+                            alt="image"
+                            width={500}
+                            height={500}
+                            className="max-h-[80vh] w-auto object-contain"
+                        />
+                    </div>
+
                 </div>
             </dialog>
         </>

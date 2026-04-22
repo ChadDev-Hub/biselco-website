@@ -7,8 +7,8 @@ import { DeleteChangeMeter } from '@/app/actions/changeMeter'
 import DownloadReport from './download'
 import { DownloadChangeMeterReport } from '@/app/actions/changeMeter'
 import ImageViewer from '@/app/common/imageViewer'
-
-
+import { useRouter } from 'next/navigation'
+import { useAlert } from '@/app/common/alert'
 type PromiseType = {
   status: number;
   data: Data;
@@ -46,9 +46,10 @@ type Props = {
 }
 const TableData = ({ data }: Props) => {
   const changeMeter = use(data)
-  const [changeMeterData, setChangeMeterData] = useState<ChangeMeter[] | []>([])
-  const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set())
-
+  const [changeMeterData, setChangeMeterData] = useState<ChangeMeter[] | []>([]);
+  const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set());
+  const router = useRouter();
+  const {showAlert} = useAlert();
   const [showAction, setShowAction] = useState(() => {
     if (selectedRow.size > 0) return true
     else return false
@@ -69,21 +70,17 @@ const TableData = ({ data }: Props) => {
   useEffect(() => {
     switch (message?.detail) {
       case "post_change_meter":
-        queueMicrotask(() => {
-          setChangeMeterData((prev)=>{
-            const existing = prev.filter((item) => item.id !== message.data.id)
-            return [message.data,...existing]})
-        })
+        router.refresh();
+        showAlert("success",message.data)
         break;
       case "deleted_change_meter":
-        queueMicrotask(() => {
-          setChangeMeterData((prev)=> prev.filter((item) => message.data.includes(item.id) === false))
-        })
+        router.refresh();
+        showAlert("success",message.data)
         break;
       default:
         break;
     }
-  }, [message])
+  }, [message, router, showAlert])
 
   useEffect(() => {
     if (selectedRow.size > 0) {
@@ -136,7 +133,7 @@ const TableData = ({ data }: Props) => {
         {changeMeterData.map((item: ChangeMeter, index: number) => (
           <tr className='glass whitespace-nowrap' key={index}>
             <th title='' className='border-r z-10 border-dashed border-r-gray-600'>
-              <input checked={selectedRow.has(item.id)} onChange={() => handleSelection(item.id)} title='choose item' type="checkbox" />
+              <input className='checkbox checkbox-xs checkbox-success' checked={selectedRow.has(item.id)} onChange={() => handleSelection(item.id)} title='choose item' type="checkbox" />
             </th>
             <td className='p-2 glass'>{index}</td>
             <td className='border-r border-dashed border-r-gray-600'>{item.date_accomplished}</td>

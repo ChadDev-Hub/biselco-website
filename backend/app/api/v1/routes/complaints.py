@@ -70,8 +70,6 @@ async def get_complaints_status_name(session: AsyncSession = Depends(get_session
     return status_name
 
 # CREATE COMPLAINTS ON SPECIFIC USER  (METER)
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
     user: UserModel = Depends(get_current_user),
@@ -164,7 +162,7 @@ async def create_complaints(
         "data": NewComplaintsModel(**data).model_dump()}
     new_complaint_stats = {
         "detail": "complaints_stats",
-        "data": await get_complaints_stats(session=session)
+        "data": get_complaints_stats(session=session)
     }
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
@@ -412,10 +410,10 @@ async def update_complaint_status(
 async def delete_complaint_status(
     complaint_id: int,
     session: AsyncSession = Depends(get_session),
-    data: ComplaintsStatus = Body(),
+    data: ComplaintsStatus = Body(...),
     user: UserModel = Depends(get_current_user),
 ):
-
+    
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
@@ -424,31 +422,37 @@ async def delete_complaint_status(
         if not select_complaint:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-        select_status = (await session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == data.status_name))).scalar_one_or_none()
+        select_status = (await session.execute(select(ComplaintsStatusName).where( ComplaintsStatusName.id >= data.status_id))).scalars().all()
+        selected_status_ids = [s.id for s in select_status]
+        
         if not select_status:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
-
+        
         # DELETE STATEMENT
-        delete_stmt = delete(ComplaintsStatusUpdates).where(
-            and_(
-                ComplaintsStatusUpdates.complaints == select_complaint,
-                ComplaintsStatusUpdates.status == select_status)
-        )
-        await session.execute(delete_stmt)
-        await session.commit()
-        await session.refresh(select_complaint)
-
+        try:
+            delete_stmt = delete(ComplaintsStatusUpdates).where(
+                and_(
+                    ComplaintsStatusUpdates.complaints == select_complaint,
+                    ComplaintsStatusUpdates.status_id.in_(selected_status_ids)))
+            await session.execute(delete_stmt)
+            await session.commit()
+        except Exception as e:
+            print(e)
+        finally:
+            await session.refresh(select_complaint)
+        
         # ADD STATUS HISTORY
-        data_history = {
-            "complaint_id": select_complaint.id,
-            "status_id": select_status.id,
-            "user_id": user.id,
-            "comments": f"Removed from {data.status_name}",
-            "timestamped": datetime.now()
-        }
-        await add_complaints_history(session=session, data=data_history)
-
+        for si in selected_status_ids:
+            data_history = {
+                "complaint_id": select_complaint.id,
+                "status_id": si,
+                "user_id": user.id,
+                "comments": f"Removed from {data.status_name}",
+                "timestamped": datetime.now()
+            }
+            await add_complaints_history(session=session, data=data_history)
+            
         # BROADCAST
         admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
         admin_ids = [str(user.id)

@@ -1,6 +1,5 @@
 "use client";
 import { use, useEffect, useState } from "react"
-import { useWebsocket } from "@/app/utils/websocketprovider";
 
 type stats = {
   title: string;
@@ -37,25 +36,6 @@ const Stats = ({ data }: Props) => {
     }
   }, [stats])
 
-
-  // WEBSOCKET
-  const {message}= useWebsocket()   
-  // EFFECT WHEN NEW MESSAGE BROADCASTS
-  useEffect(() => {
-    switch (message?.detail) {
-      case "deleted_change_meter":
-        queueMicrotask(() => {
-          setStatistics(message.stats);
-        });
-        break;
-      case "post_change_meter":
-        queueMicrotask(() => {
-          setStatistics(message.stats);
-        })
-      default:
-        break;
-    }
-  }, [message])
   return (
     
       <div className="stats gap-2 ">

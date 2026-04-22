@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,Brush } from 'recharts';
 
 
 type PromiseType = {
@@ -45,7 +45,9 @@ const SimpleAreaChart = ({ prom, title }: Props) => {
                         stroke="#8884d8"
                         fill="#8884d8"
                     />
+                    <Brush height={30} />
                 </AreaChart>
+                
             </div> :
                  <div className='flex items-center justify-center h-full'>
                     <h1 className='text-2xl font-bold text-shadow-md text-shadow-amber-600 text-blue-600'>No Data Available</h1>

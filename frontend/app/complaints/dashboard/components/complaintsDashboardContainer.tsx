@@ -363,6 +363,7 @@ const ComplaintsContainer = ({ data }: Props) => {
           <td>{complaint.reference_pole}</td>
           <td align="center">
             <MapButton
+              title="Consumer Complaints Map"
               municipality={complaint.municipality}
               village={complaint.village}
               location={complaint.location}
@@ -382,7 +383,7 @@ const ComplaintsContainer = ({ data }: Props) => {
               onOpen={handleSelectedComplaintsId}
             />
           </td>
-          <td className="animate-pulse text-center text-success drop-shadow-md drop-shadow-amber-900 font-bold">
+          <td className="animate-pulse text-center text-blue-800 drop-shadow-md drop-shadow-amber-900 font-bold">
             {complaint.latest_status}
           </td>
           <td className="flex justify-center">

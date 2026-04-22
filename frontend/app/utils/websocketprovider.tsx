@@ -39,14 +39,10 @@ type WSMessage = {
   data: UserPresence;
 } | {
   detail: "post_change_meter"
-  data: ChangeMeter;
-  total_page:number;
-  stats: ChangeMeterStats[];
+  data: string;
 } | {
   detail: "deleted_change_meter";
-  data: number[];
-  total_page: number;
-  stats: ChangeMeterStats[];
+  data: string;
 }
   |
 {
@@ -64,7 +60,14 @@ type WSMessage = {
     new_message: ComlaintMessage;
     unread: Unread;
   }
+} | {
+  detail: "new_connection_created"
+  data: string; 
+} | {
+  detail: "new_connection_deleted"
 }
+
+
 
 // COMPLAINT STATSD TYPE
 type ComplaintStatsType = {
@@ -115,11 +118,6 @@ type User ={
   photo: string;
 }
 
-type ChangeMeterStats= {
-  title: string;
-  value: number;
-  description: string
-}
 
 type UserPresence = {
   "user_id": number;
@@ -127,28 +125,6 @@ type UserPresence = {
 }
 
 
-type ChangeMeter = {
-  id: number;
-  date_accomplished: string;
-  account_no: string;
-  consumer_name: string;
-  location: string;
-  pull_out_meter: string;
-  pull_out_meter_reading: number;
-  new_meter_serial_no: string;
-  new_meter_brand: string;
-  initial_reading: number;
-  remarks: string;
-  accomplished_by: string;
-  images: {
-    id: number;
-    image: string;
-  }[];
-  geom: {
-    type: string;
-    coordinates: number[];
-  };
-}
 
 // NEWS
 type NewsData = {

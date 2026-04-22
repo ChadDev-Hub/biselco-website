@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, memo} from "react";
+import { useRef, memo } from "react";
 
 import ComplaintMap from "./complaintsMap";
 
 type Props = {
+  title: string;
   location: location;
-  municipality: string;
-  village: string;
+  municipality?: string;
+  village?: string;
 };
 type location = {
   latitude: number;
@@ -15,14 +16,14 @@ type location = {
   srid: number;
 };
 
-const MapButton = ({ location, municipality, village }: Props) => {
+const MapButton = ({ location, municipality, village, title }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const handleOpenModal = () => {
     modalRef.current?.showModal();
   };
   const handleCloseModal = () => modalRef.current?.close();
 
- 
+
   return (
     <>
       <button
@@ -30,7 +31,7 @@ const MapButton = ({ location, municipality, village }: Props) => {
         data-tip="View Map"
         type="button"
         onClick={handleOpenModal}
-        className="btn btn-circle btn-ghost tooltip tooltip-right"
+        className="btn btn-circle btn-ghost tooltip tooltip-right "
       >
         <svg
           width="64px"
@@ -113,8 +114,16 @@ const MapButton = ({ location, municipality, village }: Props) => {
           </g>
         </svg>
       </button>
-      <dialog ref={modalRef} className="modal">
-        <div className="modal-box h-fit w-full">
+      <dialog ref={modalRef} className="modal modal-bottom">
+        <div className="modal-box">
+          <div className="flex items-start justify-center w-full absolute top-0 left-0">
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="btn btn-rounded drop-shadow-2xl bg-base-content w-xs sm:w-sm md:w-md h-2.5"
+            >
+            </button>
+          </div>
           <h3 className="font-bold text-lg flex gap-2 items-center">
             <span>
               <svg
@@ -143,26 +152,18 @@ const MapButton = ({ location, municipality, village }: Props) => {
                 </g>
               </svg>
             </span>
-            Complaint Locations
+            {title}
           </h3>
-          <div className="modal-action">
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="btn btn-circle absolute btn-sm right-3 top-2"
-            >
-              X
-            </button>
-          </div>
+          
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col justify-start items-start">
+            {municipality && village && <div className="flex flex-col justify-start items-start">
               <h4 className="text-md">
                 Municipality: <span>{municipality}</span>
               </h4>
               <h4 className="text-md">
                 Village: <span>{village}</span>
               </h4>
-            </div>
+            </div>}
             <ComplaintMap
               latitude={location.latitude}
               longitude={location.longitude}

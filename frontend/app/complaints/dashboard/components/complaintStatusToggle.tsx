@@ -4,14 +4,15 @@ import React, { useEffect, useState } from 'react'
 import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/app/actions/complaint'
 import { useAlert } from '@/app/common/alert'
 type Props = {
+    status_id?: number
     name?: string;
-    id?: number;
+    complaint_id?: number;
     enabled?: boolean;
 }
 
 
 
-const EnableButton = ({ id, name, enabled }: Props) => {
+const EnableButton = ({ status_id, complaint_id, name, enabled }: Props) => {
     const [checked, setChecked] = useState(enabled);
     const [loading, setLoading] = useState(false);
     const { showAlert } = useAlert();
@@ -22,39 +23,44 @@ const EnableButton = ({ id, name, enabled }: Props) => {
 
     // HAND TOGGLE UPDATE OF COMPLAINT STATUS
     const handleUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!complaint_id || !name) return
+        if (!complaint_id || !name || !status_id) return
         const check = event.target.checked
+        
+        setChecked(check)
         setLoading(true)
-        switch (check) {
-            case true:
-                if (!id || !name) return
-                const update = await UpdateComplaintStatus(id, name)
-                if (update?.status === 401) {
-                    setChecked(false)
-                    setLoading(false)
-                    showAlert('error', update.data.detail)
-                } else {
-                    setChecked(true)
-                    setLoading(false)
-                    showAlert('success', update?.data.detail)
-                }
-                break;
-            case false:
-                if (!id || !name) return
-                const del = await DeleteComplaintStatus(id, name)
-                if (del?.status === 401) {
-                    setChecked(true)
-                    setLoading(false)
-                    showAlert('error', del.data.detail)
+        try {
+            switch (check) {
+                case true:
+                    
+                    const update = await UpdateComplaintStatus(complaint_id, name)
+                    if (update?.status === 401) {
+                        setChecked(false)
+                        showAlert('error', update.data.detail)
+                    } else {
+                        showAlert('success', update?.data.detail)
+                    }
+                    break;
+                case false:
+                    
+                    const del = await DeleteComplaintStatus(complaint_id, name, status_id)
+                    if (del?.status === 401) {
+                        setChecked(true)
+                        showAlert('error', del.data.detail)
 
-                } else {
-                    setChecked(false)
-                    setLoading(false)
-                    showAlert('success', del?.data.detail)
-                }
-                break;
-            default:
-                break;
+                    } else {
+                        setChecked(false)
+                        showAlert('success', del?.data.detail)
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        } finally {
+            setLoading(false)
         }
+
     }
 
     return (
