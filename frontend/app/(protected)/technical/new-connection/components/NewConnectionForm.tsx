@@ -1,11 +1,9 @@
-"use client"
+                                                                                                    "use client"
 
 import { useForm, SubmitHandler, useWatch } from "react-hook-form"
 import BiselcoMap from "@/app/common/Map"
 import Image from "next/image"
 import { newConnectionMeter } from "@/app/actions/newConnectionMeter"
-
-
 type FormField = {
     date: string;
     consumer_name: string;

@@ -28,3 +28,17 @@ export const deleteNewConnection = async (id: Set<number>, page: number) => {
   );
   return res;
 };
+
+
+// DOWNLOAD REPORT
+export const DownloadNewConnectionReport = async (items:object) => {
+    const data = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/new_connection/excel/report`, 
+        "POST",
+        JSON.stringify(items),
+        {
+            "content-type": "application/json"
+        }
+    )
+    return data;
+}

@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Body, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +8,8 @@ from typing import Optional
 from shapely import Point
 from geoalchemy2.shape import to_shape
 from pprint import pprint
+from ..schema.requests_model import NewConnectionReportRequests
+from .....dependencies.db_session import get_session
 async def create_new_connection(session: AsyncSession, new_connection: dict, image: Optional[str] = None):
     stmt = NewConnection(**new_connection)
     try:
@@ -54,4 +56,11 @@ async def create_new_connection(session: AsyncSession, new_connection: dict, ima
         await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-   
+
+
+async def download_new_connection_report(session:AsyncSession=Depends(get_session), data:NewConnectionReportRequests=Body(...)):
+    try:
+        print(data)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

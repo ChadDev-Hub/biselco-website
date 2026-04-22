@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile,
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
-from ..services.post import create_new_connection
+from ..services.post import create_new_connection, download_new_connection_report
 from ..services.get import get_new_connection
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
@@ -76,3 +76,8 @@ async def del_n_connection(deleted=Depends(delete_new_connection), session:Async
     {
         "detail" : "New Connection Deleted Successfully"
     }
+    
+@router.post("/excel/report", status_code=status.HTTP_200_OK)
+async def download_report(data = Depends(download_new_connection_report)):
+    print(data)
+    return "success"

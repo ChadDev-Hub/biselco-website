@@ -19,3 +19,14 @@ class NewConnectionRequest(BaseModel):
 class NewConnectionDelete(BaseModel):
     items: List[int]
     page: int
+    
+    
+class NewConnectionReportRequests(BaseModel):
+    items: List[int]
+    prepared_by: str
+    prepared_position: str
+    checked_by: str
+    checked_position: str
+    approved_by: str
+    approved_position: str
+    

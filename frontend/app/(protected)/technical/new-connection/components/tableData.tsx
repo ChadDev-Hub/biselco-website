@@ -9,6 +9,7 @@ import { deleteNewConnection } from "@/app/actions/newConnectionMeter"
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useAlert } from "@/app/common/alert";
+import { DownloadNewConnectionReport } from "@/app/actions/newConnectionMeter";
 type PromiseType = {
     status: number;
     data: data
@@ -119,13 +120,17 @@ const TableData = ({ data }: Props) => {
     // DELETE DATA
     const handleDelete = async () =>{
         const res = await deleteNewConnection(selectedRow, Number(page));
-        console.log(res)
         if (res?.status === 200) {
             setSelectedRow(new Set())
         };
     };
-    const handleDownload = async(formData:object) => {
-        console.log(formData);
+    const handleDownload = async(formData: object) => {
+        const data = {
+            ...formData,
+            items: Array.from(selectedRow),
+        }
+        const res = await DownloadNewConnectionReport(data);
+        console.log(res);
     }
     return (
         <>
