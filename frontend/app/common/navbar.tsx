@@ -69,10 +69,9 @@ export default function NavBar({ title }: Props) {
                         <li>
                             <a className="justify-between">
                                 Profile
-                                <span className="badge">New</span>
+                                <span className="badge">Comming Soon</span>
                             </a>
                         </li>
-                        <li><a>Settings</a></li>
                         <li>
                             <LogoutButton
                              />

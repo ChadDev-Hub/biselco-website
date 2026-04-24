@@ -162,7 +162,7 @@ async def create_complaints(
         "data": NewComplaintsModel(**data).model_dump()}
     new_complaint_stats = {
         "detail": "complaints_stats",
-        "data": get_complaints_stats(session=session)
+        "data": await get_complaints_stats(session=session)
     }
     # ADMIN USER
     admins = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()

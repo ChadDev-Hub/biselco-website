@@ -196,7 +196,6 @@ export const GetChangeMeter = async (page?:number,query?: string) => {
             data: data.detail
         }
     }
-    await new Promise((resolve)=>setTimeout(resolve,3000))
     return {
         status: res.status,
         data: data

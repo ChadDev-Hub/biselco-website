@@ -9,6 +9,7 @@ import { DownloadChangeMeterReport } from '@/app/actions/changeMeter'
 import ImageViewer from '@/app/common/imageViewer'
 import { useRouter } from 'next/navigation'
 import { useAlert } from '@/app/common/alert'
+import Mapbutton from '@/app/complaints/dashboard/components/mapbutton'
 type PromiseType = {
   status: number;
   data: Data;
@@ -39,6 +40,7 @@ type ChangeMeter = {
   geom: {
     type: string
     coordinates: number[]
+    srid: number
   }
 }
 type Props = {
@@ -149,6 +151,18 @@ const TableData = ({ data }: Props) => {
             <td className='border-r border-dashed border-r-gray-600'>{item.accomplished_by}</td>
             <td className='border-r flex text-center items-center jusitify-center border-dashed border-r-gray-600'>
               {item.images.length > 0 ? <ImageViewer image={item.images[0].image} /> : "No Image"}
+            </td>
+            <td>
+              <Mapbutton 
+              title='Change Meter Location'
+              location={
+                {
+                  latitude:item.geom.coordinates[1],
+                  longitude:item.geom.coordinates[0],
+                  srid:item.geom.srid
+                }
+              }
+               />
             </td>
           </tr>
         ))}

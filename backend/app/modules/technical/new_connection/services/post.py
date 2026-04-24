@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status, Body, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,8 @@ from geoalchemy2.shape import to_shape
 from pprint import pprint
 from ..schema.requests_model import NewConnectionReportRequests
 from .....dependencies.db_session import get_session
+from ...services.technical_report import create_technical_report
+from ..schema.response_model import NewConnectionReportResponse
 async def create_new_connection(session: AsyncSession, new_connection: dict, image: Optional[str] = None):
     stmt = NewConnection(**new_connection)
     try:
@@ -58,9 +61,30 @@ async def create_new_connection(session: AsyncSession, new_connection: dict, ima
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
+
+# GET NEW CONNECTION REPORT
+
 async def download_new_connection_report(session:AsyncSession=Depends(get_session), data:NewConnectionReportRequests=Body(...)):
     try:
-        print(data)
-        return data
+        # GET NEW CONNECTION DATA
+        stmt = (await session.execute(select(NewConnection).where(NewConnection.id.in_(data.items)))).scalars().all()
+        results =  [ NewConnectionReportResponse.model_validate(d).model_dump(mode="python") for d in stmt]
+        columns = [col.replace("_", " ").upper() for col in results[0].keys()]
+        rows = [list(d.values()) for d in results]
+        report = create_technical_report(
+            columns=columns,
+            rows=rows, 
+            title="NEW CONNECTION REPORT", 
+            prepare_name=data.prepared_by, 
+            prepare_position=data.prepared_position, 
+            check_name=data.checked_by, 
+            check_position=data.checked_position, 
+            approve_name=data.approved_by, 
+            approve_position=data.approved_position)
+        return StreamingResponse(
+            report,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+            headers={"Content-Disposition": "attachment; filename=report.xlsx"})        
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

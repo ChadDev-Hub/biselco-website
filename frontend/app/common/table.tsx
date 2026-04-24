@@ -7,7 +7,7 @@ type Props = {
 const DashBoardTable = ({children}: Props) => {
   return (
     <div className='overflow-x-auto h-full w-full rounded-box shadow drop-shadow-md'>
-        <table className='table bg-transparent  table-xs table-auto sm:table-sm md:table-md lg:table-md table-zebra table-pin-rows table-pin-cols'>
+        <table className='table bg-transparent  table-xs  table-zebra table-pin-rows table-pin-cols'>
           {children}
         </table>
     </div>

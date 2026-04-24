@@ -79,5 +79,4 @@ async def del_n_connection(deleted=Depends(delete_new_connection), session:Async
     
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
 async def download_report(data = Depends(download_new_connection_report)):
-    print(data)
-    return "success"
+    return data

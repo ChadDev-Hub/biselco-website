@@ -130,7 +130,14 @@ const TableData = ({ data }: Props) => {
             items: Array.from(selectedRow),
         }
         const res = await DownloadNewConnectionReport(data);
-        console.log(res);
+        // DOWNLOAD REPORT IF 
+        if (res?.status === 200) {
+        const aref = document.createElement('a');
+        aref.href = URL.createObjectURL(res.data);
+        aref.download = "new_connection_report.xlsx";
+        document.body.appendChild(aref);
+        aref.click();
+        aref.remove();}
     }
     return (
         <>
