@@ -28,9 +28,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - TZ=Asia/Manila
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8001
     container_name: nextjs_app
     restart: always
     ports:
@@ -39,6 +44,7 @@ services:
       - ./frontend/.env
     depends_on:
       - backend
+    
 
 volumes:
   postgres_data:
