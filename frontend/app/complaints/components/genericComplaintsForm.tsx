@@ -1,9 +1,11 @@
 "use client"
 
-import React, { useState } from "react";
 import BiselcoMap from "../../common/Map";
 import Image from "next/image";
 import { PostGenericComplaints } from "@/app/actions/complaint";
+import { useForm, useWatch, SubmitHandler } from "react-hook-form";
+
+
 // Define the type for form data
 interface ComplaintFormData {
   issue: string;
@@ -22,76 +24,52 @@ type Props = {
 const toTitleCase = (text: string) =>
   text.replace(/\b\w/g, c => c.toUpperCase());
 
+
 const GenericComplaints = ({ title, choices, isother }: Props) => {
-  const [formData, setFormData] = useState<ComplaintFormData>({
-    issue: isother ? "Other" : "",
-    details: "",
-    lon: undefined,
-    lat: undefined,
-    attachment: undefined
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isSubmitted }, setError, reset, control } = useForm<ComplaintFormData>()
+  // Handle form input changes
+
+
+
+  // WATCHED
+
+  const attachment = useWatch({
+    control: control,
+    name: "attachment"
+  })
+  const lon = useWatch({
+    control: control,
+    name: "lon"
   });
 
-  const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState(false);
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (e.target instanceof HTMLInputElement && name === "attachment") {
-      const file = e.target.files?.[0];
-      setFormData({ ...formData, [name]: file });
-
-    } else {
-      setFormData({ ...formData, [name]: value });
-    };
-  };
-  // SIMPLE VALIDATION
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.issue) {
-      newErrors.issue = "Please select an issue type.";
-    }
-
-
-    if (!formData.details) {
-      newErrors.details = "Please provide complaint details.";
-    }
-
-    if (!formData.lon || !formData.lat) {
-      newErrors.geolocation = "Please select a location.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const lat = useWatch({
+    control: control,
+    name: "lat"
+  });
 
   // handle Form Submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const onSubmit: SubmitHandler<ComplaintFormData> = async (formData) => {
+
     // Here you would normally send data to your API
     const data = new FormData();
-    data.append("issue", formData.issue);
+    data.append("issue", formData.issue.trim() || "other");
     data.append("details", formData.details);
-    data.append("lon", formData.lon?.toString() ?? "");
-    data.append("lat", formData.lat?.toString() ?? "");
+    data.append("lon", String(formData.lon));
+    data.append("lat", String(formData.lat));
     if (formData.attachment) {
-      data.append("attachment", formData.attachment);
+      data.append("attachment", formData.attachment[0]);
     }
-    setLoading(true);
     const res = await PostGenericComplaints(data);
 
     switch (res?.status) {
       case 201:
-        setSubmitted(true);
-        setLoading(false);
+        reset();
         break;
       case 403:
         const newErrors: { [key: string]: string } = {};
         newErrors.geolocation = res.data;
-        setErrors(newErrors);
-        setLoading(false);
+        setError("lat", { message: res.data });
+        setError("lon", { message: res.data });
         break;
       default:
         break;
@@ -101,31 +79,30 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      {submitted ? (
+      {isSubmitted ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
         </div>
       ) :
-        loading ? (
+        isSubmitting ? (
           <div className="w-full text-center">
-            <span className="loading loading-infinity loading-xl text-primary">
-              Submitting Your Concern
-            </span>
+            <h4 className="skeleton skeleton-text">
+              Please wait...
+              <span className="loading loading-infinity loading-xl text-primary" />
+            </h4>
+            <h5 className="skeleton skeleton-text">We are Verifying the Complaints Location...</h5>
           </div>)
           :
           (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
 
               {/* Issue Type */}
               <div className={`relative overflow-visible ${isother ? "hidden" : ""}`} >
                 <label className="block mb-1 font-medium">Issue</label>
                 <select
-                  enterKeyHint="next"
+                  {...register("issue", { required: isother ? false : "Please select an issue" })}
                   title="Select Issue"
-                  name="issue"
-                  value={formData.issue}
-                  onChange={handleChange}
                   className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
                     } select `}
                 >
@@ -137,21 +114,19 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                   ))}
 
                 </select>
-                {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
+                {errors.issue && <p className="text-red-500 text-sm">{errors.issue.message}</p>}
               </div>
 
               {/* Complaint Details */}
               <div>
                 <label className="block mb-1 font-medium">Details</label>
                 <textarea
-                  name="details"
-                  value={formData.details}
-                  onChange={handleChange}
+                  {...register("details", { required: "Please describe your complaint" })}
                   placeholder="Describe your complaint"
                   className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
                     } textarea`}
                 />
-                {errors.details && <p className="text-red-500 text-sm">{errors.details}</p>}
+                {errors.details && <p className="text-red-500 text-sm">{errors.details.message}</p>}
               </div>
 
               {/* Map */}
@@ -159,30 +134,33 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                 <label className="label w-full text-wrap font-bold text-black">
                   Please Pin The Location of Your Complaints
                 </label>
+                <input {...register("lon", { required: "Please select a location" })} type="hidden" />
+                <input {...register("lat", { required: "Please select a location" })} type="hidden" />
+
                 <BiselcoMap
                   animatePing
                   markerPopup="Report Location"
-                  consumermeters={formData.lon && formData.lat ? [formData.lon, formData.lat] : undefined}
+                  consumermeters={lon && lat ? [lon, lat] : undefined}
                   onSelectLocation={(lat, lon) => {
-                    setFormData(prev => ({ ...prev, lat, lon }))
+                    setValue("lon", lon);
+                    setValue("lat", lat);
                   }}
                 />
-                {errors.geolocation && <p className="text-red-500 text-sm">{errors.geolocation}</p>}
+                {errors.lat && errors.lon && <p className="text-red-500 text-sm">{errors.lat.message}</p>}
               </div>
               {/* Image */}
               <div className="w-full flex flex-col gap-4">
                 <input
                   capture="environment"
-                  name="attachment"
-                  onChange={handleChange}
+                  {...register("attachment")}
                   accept="image/*"
                   title="Complaints Image"
                   className="w-full file-input"
                   type="file"
                   placeholder="Upload Image" />
-                {formData.attachment && (
+                {attachment && (
                   <Image
-                    src={URL.createObjectURL(formData.attachment)}
+                    src={URL.createObjectURL(attachment?.[0])}
                     alt="Complaints Image"
                     width={200}
                     height={200}
@@ -197,7 +175,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
               >
-                Submit Complaint
+                {isSubmitting ? <span className="skeleton skeleton-text"> Submitting</span> : "Submit"}
               </button>
             </form>
           )}

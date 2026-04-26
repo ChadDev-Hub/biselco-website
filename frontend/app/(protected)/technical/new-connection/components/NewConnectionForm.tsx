@@ -4,6 +4,8 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form"
 import BiselcoMap from "@/app/common/Map"
 import Image from "next/image"
 import { newConnectionMeter } from "@/app/actions/newConnectionMeter"
+import ElectricMeter from "../../components/electricMeterSvg"
+import { Archivo_Black } from "next/font/google"
 type FormField = {
     date: string;
     consumer_name: string;
@@ -17,12 +19,28 @@ type FormField = {
     lat: number | undefined;
     attachment: File | undefined;
     accomplished_by: string
-
 }
+
+const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
+
 const NewConnectionForm = () => {
     const { register, setError, control, formState: { errors, isSubmitting }, handleSubmit, setValue, reset, getValues} = useForm<FormField>()
     const attachment = useWatch({ control, name: "attachment" });
 
+
+    const consumerName = useWatch({
+        control: control,
+        name: "consumer_name",
+        defaultValue: ""
+    });
+    const lon = useWatch({
+        control: control,
+        name: "lon"
+    })
+    const lat = useWatch({
+        control: control,
+        name: "lat"
+    })
     const onSubmit: SubmitHandler<FormField> = async () => {
         const data = getValues();
         const form = new FormData();
@@ -46,12 +64,8 @@ const NewConnectionForm = () => {
     }
 
     return (
-        <div className="fieldset w-full glass rounded-box p-4">
-            <legend>
-                <h2 className="text-3xl text-blue-800 text-shadow-md text-shadow-amber-600">
-                    New Connection Form
-                </h2>
-            </legend>
+        <fieldset className="fieldset w-full glass rounded-box p-4">
+            <legend className={`fieldset-legend text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>New Connection Form</legend>
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div >
@@ -153,6 +167,9 @@ const NewConnectionForm = () => {
                         <input type="hidden" {...register('lon', { required: "Please Select a location" })} />
                         <input type="hidden" {...register('lat', { required: "Please Select a location" })} />
                         <BiselcoMap
+                            markerPopup={`${consumerName ? `${consumerName} "Electric Meter`: ""}`}
+                            markerSvg={<ElectricMeter/>}
+                            consumermeters={lon && lat ? [lon, lat] : undefined}
                             onSelectLocation={(lat, lon) => {
                                 setValue("lat", lat);
                                 setValue("lon", lon);
@@ -194,7 +211,7 @@ const NewConnectionForm = () => {
                 </div>
 
             </form>
-        </div>
+        </fieldset>
     )
 }
 

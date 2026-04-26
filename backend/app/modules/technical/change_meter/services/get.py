@@ -8,13 +8,13 @@ from ...services.technical_report import create_technical_report
 from ..schema.response_model import ChangeMeterReportResponse
 
 from sqlalchemy.orm import selectinload
-
+from .....common.total_page import get_total_page
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from pprint import pprint
 import io
 
-PAGE_SIZE = 8   
+PAGE_SIZE = 9  
 
 
 async def get_change_meter_stats(session: AsyncSession):
@@ -48,23 +48,23 @@ async def get_change_meter_stats(session: AsyncSession):
     for key, value in data.items():
         if key == "total":
             total = {
-                "title": "Total",
+                "label": "Total",
                 "value": value,
-                "description": "All"
+                "description": "Change Meter"
             }
             new_data.append(total)
         elif key == "daily_total":
             daily = {
-                "title": "Daily",
+                "label": "Daily",
                 "value": value,
                 "description": "Today"
             }
             new_data.append(daily)
         elif key == "average_count":
             average = {
-                "title": "Avg.",
+                "label": "Avg.",
                 "value": value,
-                "description": "Per month avg."
+                "description": "Monthly Avg."
             }
             new_data.append(average)
     return new_data
@@ -80,11 +80,8 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
     ).options(selectinload(ChangeMeter.images))
     .order_by(ChangeMeter.timestamped.desc()))
     
-    # GET TOTAL PAGE 
-    stmt_total = (await session.execute(select(func.count(ChangeMeter.id)))).scalar()
-    total_page = 1
-    if stmt_total:
-        total_page = stmt_total//PAGE_SIZE if stmt_total % PAGE_SIZE == 0 else stmt_total//PAGE_SIZE + 1
+    # GET TOTAL PAGE
+    total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=PAGE_SIZE)
     if query:
         stmt = change_meter.where(
             or_(
@@ -111,7 +108,6 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
     for row in result:
         items = {
             "id": row.id,
-            "timestamped": row.timestamped,
             "date_accomplished": row.date_accomplished,
             "account_no": row.account_no,
             "consumer_name": row.consumer_name,
@@ -124,7 +120,7 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
             "initial_reading": row.initial_reading,
             "remarks": row.remarks,
             "accomplished_by": row.accomplished_by,
-            "images": [{"id": im.id, "image": im.image} for im in row.images],
+            "images": [im.image for im in row.images],
             "geom": {
                 "type": "Point",
                 "coordinates": [Point(to_shape(row.geom).coords).x, Point(to_shape(row.geom).coords).y],
@@ -139,26 +135,8 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
         "stats": change_meter_stats
     }
     
-async def get_new_change_meter(session:AsyncSession, data:dict, image:Optional[str] = None):
-    try:
-        new_change_meter = ChangeMeter(**data)
-        if image:
-            new_change_meter.images.append(ChangeMeterImage(image=image))
-        session.add(new_change_meter)
-        
-        await session.commit()
-        await session.refresh(new_change_meter)
-        return {
-            "data": "New Change Meter Added"
-        }
-            
-        
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    finally:
-        await session.close()
+
+
     
 
 

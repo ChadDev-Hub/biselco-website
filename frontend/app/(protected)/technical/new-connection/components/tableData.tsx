@@ -35,7 +35,7 @@ type NewConnectionData = {
     images: string[];
     geom: {
         type: string;
-        geometry: number[];
+        coordinates: number[];
         srid: number;
     }
 }
@@ -55,19 +55,18 @@ const TableData = ({ data }: Props) => {
     const searchParams = useSearchParams()
     const page = searchParams.get("page")
     const router = useRouter()
-    const {showAlert} = useAlert()
-
-    useEffect(()=>{
+    const { showAlert } = useAlert()
+    useEffect(() => {
         if (selectedRow.size > 0) {
-            queueMicrotask(()=>{
+            queueMicrotask(() => {
                 setShowAction(true);
             })
-        }else{
-            queueMicrotask(()=>{
+        } else {
+            queueMicrotask(() => {
                 setShowAction(false);
             })
         }
-    },[selectedRow])
+    }, [selectedRow])
 
 
     useEffect(() => {
@@ -80,27 +79,40 @@ const TableData = ({ data }: Props) => {
             default:
                 break;
         }
-    })
+    },[newConnection])
 
     // WEBSOCKET
-    const {message} = useWebsocket()
-    useEffect(()=>{
+    const { message } = useWebsocket()
+    useEffect(() => {
         switch (message?.detail) {
             case "new_connection_created":
-                queueMicrotask(()=>{
-                        router.refresh();
-                })
-                showAlert("success", message.data)
+                console.log(message.data.new_connection)
+                if (Number(page) === 1 || page === null) {
+                    queueMicrotask(() => {
+                        setNewConnectionData((prev) => {
+                            const existingData = prev.filter((item) => item.id !== message.data.new_connection.id);
+                            const newData = [message.data.new_connection, ...existingData].slice(0, 9);
+                            console.log(newData)
+                            return newData
+                        })
+                    })
+
+                }
+                else {
+                    showAlert("success", message.message)
+                }
+
                 break;
             case "new_connection_deleted":
-                queueMicrotask(()=>{
+                queueMicrotask(() => {
                     router.refresh();
                 })
                 break;
             default:
                 break;
         }
-    },[message, router, showAlert])
+    }, [message, router, showAlert, page])
+
 
 
     // SELECTION OF ROW
@@ -118,13 +130,13 @@ const TableData = ({ data }: Props) => {
 
 
     // DELETE DATA
-    const handleDelete = async () =>{
+    const handleDelete = async () => {
         const res = await deleteNewConnection(selectedRow, Number(page));
         if (res?.status === 200) {
             setSelectedRow(new Set())
         };
     };
-    const handleDownload = async(formData: object) => {
+    const handleDownload = async (formData: object) => {
         const data = {
             ...formData,
             items: Array.from(selectedRow),
@@ -132,12 +144,13 @@ const TableData = ({ data }: Props) => {
         const res = await DownloadNewConnectionReport(data);
         // DOWNLOAD REPORT IF 
         if (res?.status === 200) {
-        const aref = document.createElement('a');
-        aref.href = URL.createObjectURL(res.data);
-        aref.download = "new_connection_report.xlsx";
-        document.body.appendChild(aref);
-        aref.click();
-        aref.remove();}
+            const aref = document.createElement('a');
+            aref.href = URL.createObjectURL(res.data);
+            aref.download = "new_connection_report.xlsx";
+            document.body.appendChild(aref);
+            aref.click();
+            aref.remove();
+        }
     }
     return (
         <>
@@ -166,13 +179,13 @@ const TableData = ({ data }: Props) => {
                             {item.images.length > 0 ?
                                 <ImageViewer image={item.images[0]} /> : "No Image"}
                         </td>
-                        <td>
+                        <td className="text-sm table-cell hover:bg-amber-200 hover:cursor-pointer border-r border-dashed border-r-gray-600">
                             <Mapbutton
                                 title="New Connection Meter Map"
                                 location={
                                     {
-                                        latitude: item.geom.geometry[1],
-                                        longitude: item.geom.geometry[0],
+                                        latitude: item.geom.coordinates[1],
+                                        longitude: item.geom.coordinates[0],
                                         srid: item.geom.srid
                                     }
                                 }

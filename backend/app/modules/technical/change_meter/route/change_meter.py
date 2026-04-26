@@ -1,25 +1,26 @@
 from fastapi import APIRouter, status, Query, Depends, HTTPException, Form, UploadFile, File, Body
 from fastapi.responses import StreamingResponse
-from ....dependencies.db_session import get_session
-from ....modules.gis.franchise_area.services.get_location import verifyLocation
+from .....dependencies.db_session import get_session
+from ....gis.franchise_area.services.get_location import verifyLocation
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from typing import Optional
-from ....modules.websocket.websocket_manager import manager
-from ....modules.gis.franchise_area.schema.response_model import VerifiedLocation
-from ....modules.user.schema.response_model import UserModel
-from ....core.security import get_current_user
+from ....websocket.websocket_manager import manager
+from ....gis.franchise_area.schema.response_model import VerifiedLocation
+from ....user.schema.response_model import UserModel
+from .....core.security import get_current_user
 from pydantic import BaseModel
 from typing import Annotated
-from ....modules.user.service.get_user import get_users_by_roles
-from ....common.geo import extract_address_from_image
-from ....modules.technical.change_meter.schema.requests_model import ChangeMeterReport
-from ....modules.technical.change_meter.schema.response_model import ChangeMeterResponseList, NewChangeMeterResponse, DeletedChangeMeterResponse
+from ....user.service.get_user import get_users_by_roles
+from .....common.geo import extract_address_from_image
+from ..schema.requests_model import ChangeMeterReport
+from ..schema.response_model import ChangeMeterResponseList, NewChangeMeterResponse, DeletedChangeMeterResponse
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 import datetime
-from ....modules.technical.change_meter.services.get_change_meter import get_change_meter, deleteChangeMeter, get_new_change_meter, changeMeterReport
+from ..services.get import get_change_meter, deleteChangeMeter, changeMeterReport
+from ..services.post import post_change_meter
 from sqlalchemy import select, func
-from ....dependencies.bucket3 import upload_image
+from .....dependencies.bucket3 import upload_image
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
 
@@ -89,13 +90,13 @@ async def create_change_meter(
             "accomplished_by":accomplishedBy,
             "geom":location.geom}
         
-        change_meter_data = await get_new_change_meter(session=session, data=new_change_meter, image=image_url)
+        change_meter_data = await post_change_meter(session=session, data=new_change_meter, image=image_url)
         
         # GET ADMIN USER
         admin_user = await get_users_by_roles(session=session, roles="admin")
        
         data = NewChangeMeterResponse.model_validate(change_meter_data).model_dump(mode="json")
-        data['detail'] = "post_change_meter"
+        print(data)
         for admin in admin_user:
             await manager.broad_cast_personal_json(user_id=str(admin), data=data)
     except Exception as e:

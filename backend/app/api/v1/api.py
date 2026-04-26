@@ -1,8 +1,10 @@
 from fastapi import APIRouter
 
+from ...modules.technical.change_meter.route import change_meter
+
 from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
-from .routes import complaints, landing, login, logout, meter, news, signup, user, technical_form, change_meter, consumers
+from .routes import complaints, landing, login, logout, meter, news, signup, user, technical_form, consumers
 
 
 

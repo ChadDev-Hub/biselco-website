@@ -3,7 +3,7 @@ from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
 from ..services.post import create_new_connection, download_new_connection_report
-from ..services.get import get_new_connection
+from ..services.get import get_new_connection, get_new_connection_stats
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
 from .....common.geo import extract_address_from_image
@@ -13,7 +13,7 @@ from ..services.delete import delete_new_connection
 from typing import Optional
 from datetime import datetime
 from ....websocket.websocket_manager import manager
-
+from ..schema.response_model import NewConnectionInitialData
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
 
 
@@ -62,7 +62,7 @@ async def new_connection(session: AsyncSession = Depends(get_session),
     # QUERY ADMINS
     return {"detail": "New Connection Created Successfully"}
 
-@router.get("/",status_code=status.HTTP_200_OK)
+@router.get("/",status_code=status.HTTP_200_OK, response_model=NewConnectionInitialData)
 async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optional[int] = Query(None)):
     data = await get_new_connection(session=session, page=page)
     return data
@@ -72,11 +72,16 @@ async def del_n_connection(deleted=Depends(delete_new_connection), session:Async
     admins = await get_users_by_roles(session=session, roles="admin")
     for admin in admins:
         await manager.broad_cast_personal_json(str(admin), deleted)
-    return 
-    {
+    return {
         "detail" : "New Connection Deleted Successfully"
     }
     
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
 async def download_report(data = Depends(download_new_connection_report)):
     return data
+
+
+
+@router.get("/stats")
+async def new_connection_stats(session: AsyncSession = Depends(get_session)):
+    return await get_new_connection_stats(session=session)

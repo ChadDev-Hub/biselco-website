@@ -284,3 +284,22 @@ export const GetNewConnection = async (page?:number) => {
         data: data
     }
 }
+
+
+
+export const GetNewConnectionStats = async () => {
+    const res = await fetch(`${baseUrl}/v1/new_connection/stats`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

@@ -1,9 +1,9 @@
 'use client'
-import React, {createContext, useRef, useContext,useEffect,useState} from 'react'
+import React, { createContext, useRef, useContext, useEffect, useState } from 'react'
 import { useAuth } from './authProvider'
 
 type Props = {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 
@@ -28,18 +28,20 @@ type WSMessage = {
   detail: "complaint_status";
   data: ComplaintStatusData;
 } | {
-  detail : "deleted_news";
+  detail: "deleted_news";
   data: NewsData;
 } | {
   detail: "deleted_complaints";
   data: ComplaintData;
-  
+
 } | {
   detail: "presence";
   data: UserPresence;
 } | {
   detail: "post_change_meter"
-  data: string;
+  message: string;
+  total_page: number;
+  data: ChangeMeterCreatedType;
 } | {
   detail: "deleted_change_meter";
   data: string;
@@ -61,13 +63,69 @@ type WSMessage = {
     unread: Unread;
   }
 } | {
-  detail: "new_connection_created"
-  data: string; 
+  detail: "new_connection_created";
+  total_page: number;
+  message: string;
+  data: NewConnectionCreatedType;
 } | {
   detail: "new_connection_deleted"
 }
+type ChangeMeterCreatedType = {
+  change_meter_data: ChangeMeter;
+  change_meter_stats: Stats[]
 
+}
 
+type ChangeMeter = {
+  id: number;
+  date_accomplished: string;
+  account_no: string;
+  consumer_name: string;
+  location: string;
+  pull_out_meter: string;
+  pull_out_meter_reading: number
+  new_meter_serial_no: string
+  new_meter_brand: string
+  initial_reading: number
+  remarks?: string
+  accomplished_by: string
+  images: string[]
+  geom: Geometry
+
+}
+
+type Geometry = {
+  type: string;
+  coordinates: number[];
+  srid: number;
+}
+
+type NewConnectionCreatedType = {
+  new_connection: NewConnection;
+  new_connection_stats: Stats[]
+}
+
+type Stats = {
+  label: string;
+  value: number;
+  description: string;
+}
+
+type NewConnection = {
+  id: number;
+  date_accomplished: string;
+  consumer_name: string;
+  location: string;
+  meter_serial_no: string;
+  meter_brand: string;
+  meter_sealed: string;
+  initial_reading: number;
+  multiplier: number;
+  accomplished_by: string;
+  remarks: string;
+  images: string[];
+  geom: Geometry;
+}
 
 // COMPLAINT STATSD TYPE
 type ComplaintStatsType = {
@@ -85,9 +143,9 @@ type SeenMessage = {
 
 type Seen = {
   id: string;
-  complaints_id:number;
+  complaints_id: number;
   receiver_status: string;
-  receiver_id: string; 
+  receiver_id: string;
 }
 
 type Unread = {
@@ -100,7 +158,7 @@ type ComlaintMessage = {
   id: string;
   complaints_id: number;
   message: string;
-  receiver: User | undefined; 
+  receiver: User | undefined;
   sender: User;
   sender_status: string;
   receiver_status: string;
@@ -108,7 +166,7 @@ type ComlaintMessage = {
   time: string;
 }
 
-type User ={
+type User = {
   id: string;
   user_name: string;
   email: string;
@@ -129,92 +187,92 @@ type UserPresence = {
 // NEWS
 type NewsData = {
   id: number
-    title: string;
-    date_posted: string;
-    description: string;
-    time_posted: string;
+  title: string;
+  date_posted: string;
+  description: string;
+  time_posted: string;
 
-    period: string;
-    user: {
-        id: number;
-        user_name: string;
-        last_name: string;
-        first_name: string;
-        photo: string;
-    },
-    news_images: string[]
+  period: string;
+  user: {
+    id: number;
+    user_name: string;
+    last_name: string;
+    first_name: string;
+    photo: string;
+  },
+  news_images: string[]
 }
 
 type ComplaintData = {
-    id: number;
-    user_id: string;
-    first_name:string;
-    last_name:string;
-    user_photo:string;
-    subject: string;
-    description: string;
-    reference_pole: string;
-    date_time_submitted: string;
-    village: string; 
-    municipality: string;
-    user_status?:string;
+  id: number;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  user_photo: string;
+  subject: string;
+  description: string;
+  reference_pole: string;
+  date_time_submitted: string;
+  village: string;
+  municipality: string;
+  user_status?: string;
 
-    location: {
-        latitude: number;
-        longitude: number;
-        srid: number;
-    }
-    status: [];
-    status_history: [];
-    latest_status?: string;
-    resolution_time: string;
-    unread_messages: number;
+  location: {
+    latitude: number;
+    longitude: number;
+    srid: number;
+  }
+  status: [];
+  status_history: [];
+  latest_status?: string;
+  resolution_time: string;
+  unread_messages: number;
 }
 
 type ComplaintStatusData = {
-    id: number;
-    user_id: string;
-    first_name:string;
-    last_name:string;
-    user_photo:string;
-    subject: string;
-    description: string;
-    reference_pole: string;
-    date_time_submitted: string;
-    village: string; 
-    municipality: string;
-    user_status?:string;
+  id: number;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  user_photo: string;
+  subject: string;
+  description: string;
+  reference_pole: string;
+  date_time_submitted: string;
+  village: string;
+  municipality: string;
+  user_status?: string;
 
-    location: {
-        latitude: number;
-        longitude: number;
-        srid: number;
-    }
-    status: [];
-    status_history: [];
-    latest_status?: string;
-    resolution_time: string;
-  
+  location: {
+    latitude: number;
+    longitude: number;
+    srid: number;
+  }
+  status: [];
+  status_history: [];
+  latest_status?: string;
+  resolution_time: string;
+
 }
 
 
 
 type WSContextType = {
   message: WSMessage | null;
-  sendMessage: (data:unknown) => void
+  sendMessage: (data: unknown) => void
 }
 
 const WebsocketContext = createContext<WSContextType | undefined>(undefined)
 
-const WebsocketProvider = ({children}: Props) => {
+const WebsocketProvider = ({ children }: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
-  const {user} = useAuth()
+  const { user } = useAuth()
   const wsRef = useRef<WebSocket | null>(null)
   const WSURL = process.env.NEXT_PUBLIC_WEBSOCKET_URL as string
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttempts = useRef(0)
-  useEffect(()=>{
-    if(!user) return
+  useEffect(() => {
+    if (!user) return
     let isMounted = true
     const connect = () => {
       const ws = new WebSocket(`${WSURL}/v1/socket/ws`)
@@ -223,15 +281,15 @@ const WebsocketProvider = ({children}: Props) => {
       ws.onopen = () => {
         reconnectAttempts.current = 0
       }
-      
+
 
       ws.onmessage = (event) => {
-          const message = JSON.parse(event.data);
-          setMessage(message)
+        const message = JSON.parse(event.data);
+        setMessage(message)
       }
 
 
-       ws.onclose = (event) => {
+      ws.onclose = (event) => {
         console.log("WS Closed", event)
         if (!isMounted) return
         // Exponential backoff (max 10s)
@@ -240,8 +298,9 @@ const WebsocketProvider = ({children}: Props) => {
 
         reconnectTimeout.current = setTimeout(() => {
           connect()
-        }, timeout)}
-      
+        }, timeout)
+      }
+
       ws.onerror = () => {
         console.log("WS Error")
         ws.close()
@@ -256,10 +315,10 @@ const WebsocketProvider = ({children}: Props) => {
         clearTimeout(reconnectTimeout.current)
       }
     }
-  },[user, WSURL])
+  }, [user, WSURL])
 
 
-  const sendMessage = (data:unknown) => {
+  const sendMessage = (data: unknown) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data))
     }
@@ -267,8 +326,8 @@ const WebsocketProvider = ({children}: Props) => {
 
 
   return (
-    <WebsocketContext.Provider value={{message, sendMessage}}>
-        {children}
+    <WebsocketContext.Provider value={{ message, sendMessage }}>
+      {children}
     </WebsocketContext.Provider>
   )
 }
@@ -280,4 +339,4 @@ const useWebsocket = () => {
   }
   return context
 }
-export {WebsocketProvider, useWebsocket};
+export { WebsocketProvider, useWebsocket };

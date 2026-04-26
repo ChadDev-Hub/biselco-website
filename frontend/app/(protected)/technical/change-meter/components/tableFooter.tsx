@@ -83,6 +83,11 @@ const TableFooter = ({ data, pageUrl }: Props) => {
                 queueMicrotask(() => {
                     setTotalPages((prev) => Math.max(prev, message.data.total_page));
                 })
+                break;
+            case "new_connection_created":
+                queueMicrotask(() => {
+                    setTotalPages((prev) => Math.max(prev, message.total_page));
+                })
             default:
                 break;
         }

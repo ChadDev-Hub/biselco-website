@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
@@ -15,6 +15,7 @@ import { Overlay } from 'ol'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { Geolocation } from 'ol'
 import { defaults as defaultControls } from 'ol/control'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 
 
@@ -22,10 +23,18 @@ type Props = {
     onSelectLocation?: (lat: number | undefined, lon: number | undefined) => void
     consumermeters?: [number, number]
     coordinates?: [number, number]
-    markerSvg?: string;
+    markerSvg?: React.ReactNode;
     markerPopup?: string;
     animatePing?: boolean
 }
+
+
+const defaultSvg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="red">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5" fill="white"/>
+                </svg>
+                `;
 
 const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, animatePing, consumermeters }: Props) => {
     const mapRef = useRef<Map | null>(null)
@@ -44,12 +53,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         // Create New Marker Source 
         markerSourceRef.current = new VectorSource()
         userSourceRef.current = new VectorSource()
-        const defaultSvg = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="red">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5" fill="white"/>
-                </svg>
-                `;
+
         const usersvg = `
         <svg 
         height="25" 
@@ -76,13 +80,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         // CREATE NEW LAYER AND ADDING THE SOURCE 
         // marker layer
         const markerLayer = new VectorLayer({
-            source: markerSourceRef.current,
-            style: new Style({
-                image: new Icon({
-                    src: `data:image/svg+xml;utf8,${markerSvg ? encodeURIComponent(markerSvg) : encodeURIComponent(defaultSvg)}`,
-                    anchor: [0.5, 1],
-                }),
-            }),
+            source: markerSourceRef.current
         })
 
         // POPUP OVERLAY
@@ -173,26 +171,14 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             projection: view.getProjection(),
         })
 
-        //  GET REALTIME-GEOLOCATION DATA
-        // geoLocationRef.current.on('change:position', () => {
-        //     const coord = geoLocationRef.current?.getPosition()
-        //     if (coord) {
-        //         userSourceRef.current?.clear()
-        //         userSourceRef.current?.addFeature(
-        //             new Feature({ geometry: new Point(coord) })
-        //         )
-        //         mapRef.current?.getView().animate({
-        //             center: coord,
-        //             zoom: 16,
-        //             duration: 600
-        //         })
-        //     }
-        // })
         return () => {
             mapRef.current?.setTarget(undefined)
             mapRef.current = null
         }
-    }, [markerSvg])
+    }, [])
+
+
+
 
     useEffect(() => {
         if (!mapRef.current || !consumermeters) {
@@ -201,10 +187,27 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
         };
         markerSourceRef.current?.clear()
 
+        const svgString = markerSvg ? renderToStaticMarkup(markerSvg) : defaultSvg;
+        // CREATE NEW ICON
+        const icon = new Icon({
+            src: `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`,
+            anchor: [0.5, 1],
+        });
+
+        // CREATE NEW STYLE
+        const style = new Style({
+            image: icon,
+        });
+
+        const feature = new Feature({
+            geometry: new Point(fromLonLat(consumermeters)),
+            style: style
+        })
+        feature.setStyle(style)
+
         // Add New Marker
-        markerSourceRef.current?.addFeature(
-            new Feature({ geometry: new Point(fromLonLat(consumermeters)) })
-        )
+        markerSourceRef.current?.addFeature(feature)
+
         // Move overlay
         const overlay = mapRef.current.getOverlays().getArray()[0];
         overlay?.setPosition(fromLonLat(consumermeters));
@@ -215,10 +218,10 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             zoom: 16,
             duration: 50
         });
-    }, [consumermeters])
+    }, [consumermeters, markerSvg])
 
-    useEffect(()=>{
-        if(!geoLocationRef) return;
+    useEffect(() => {
+        if (!geoLocationRef) return;
         geoLocationRef.current?.on('change:position', () => {
             const coord = geoLocationRef.current?.getPosition()
             if (coord) {
@@ -236,7 +239,7 @@ const BiselcoMap = ({ onSelectLocation, coordinates, markerSvg, markerPopup, ani
             }
         })
 
-    },[tracking])
+    }, [tracking])
 
     // HANDLE THE REALTIME-LOCATION
     const handleClick = () => {

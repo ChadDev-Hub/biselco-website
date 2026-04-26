@@ -187,10 +187,12 @@ async def create_generic_complaints(
     user: UserModel = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     issue: str = Form(...),
-    details: str = Form(...),
+    details: str = Form(...),   
     location: VerifiedLocation = Depends(verifyLocation),
     attachment: Optional[UploadFile] = File(None)
 ):
+    print(location)
+    
     # UPLOAD IMAGE
     uploaded_url = None
     if attachment:

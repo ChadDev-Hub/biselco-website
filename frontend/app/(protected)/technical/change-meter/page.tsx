@@ -50,19 +50,16 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
         </div>
 
         <div>
-          <section className='flex  flex-col gap-4 mt-4'>
+          <section className='flex  flex-col gap-4'>
             <fieldset className='fieldset rounded-box'>
-              <legend className='fieldset-legend'>
-                <h2 className={`text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Stats</h2>
+              
+                <legend className={`fieldset-legend  text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Stats
               </legend>
               <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
                 <Stats data={data} />
               </Suspense>
             </fieldset>
-            <fieldset className='fieldset h-full'>
-              <legend className={`flieldset-legend text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>
-                Change Meter Table
-              </legend>
+            <div className=' h-full'>
               <DashBoardTable >
                 <TableHead columns={columns} selectable={true} />
                 <Suspense fallback={<TableDataSkeleton row={9} col={columns.length} />}>
@@ -72,7 +69,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
                   <TableFooter pageUrl={pageUrl} data={data} />
                 </Suspense>
               </DashBoardTable>
-            </fieldset>
+            </div>
           </section>
 
         </div>

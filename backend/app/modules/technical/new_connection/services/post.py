@@ -12,7 +12,11 @@ from pprint import pprint
 from ..schema.requests_model import NewConnectionReportRequests
 from .....dependencies.db_session import get_session
 from ...services.technical_report import create_technical_report
-from ..schema.response_model import NewConnectionReportResponse
+from ..schema.response_model import NewConnectionReportResponse, NewConnectionCreatedResponse
+from ..services.get import get_new_connection_stats
+from .....common.total_page import get_total_page
+
+PAGESIZE = 9
 async def create_new_connection(session: AsyncSession, new_connection: dict, image: Optional[str] = None):
     stmt = NewConnection(**new_connection)
     try:
@@ -27,6 +31,8 @@ async def create_new_connection(session: AsyncSession, new_connection: dict, ima
             select(NewConnection)
             .options(selectinload(NewConnection.images))
             .where(NewConnection.id == stmt.id))).scalar_one()
+        
+    
         try:
             coordinates = Point(to_shape(results.geom).coords)
             new_connection_data = {
@@ -42,16 +48,26 @@ async def create_new_connection(session: AsyncSession, new_connection: dict, ima
                 "accomplished_by": results.accomplished_by,
                 "remarks": results.remarks,
                 "images": [image.image for image in results.images],
-                "geom" : {
+                "geom": {
                     "type": "Point",
                     "coordinates": [coordinates.x, coordinates.y],
                     "srid": results.geom.srid
                 }
             }
-            return {
+            new_connection_stats = await get_new_connection_stats(session=session)
+            total_page = await get_total_page(session=session, model=NewConnection, pagesize=PAGESIZE)
+            created_data = {
                 "detail": "new_connection_created",
-                "data": "New Meter Connection Submitted"
+                "message": "New Connection Created",
+                "total_page": total_page,
+                "data": {
+                    "new_connection": new_connection_data,
+                    "new_connection_stats": new_connection_stats
+                }
             }
+            data = NewConnectionCreatedResponse.model_validate(
+                created_data).model_dump(mode="json")
+            return data
         except Exception as e:
             print(e)
         return new_connection
@@ -61,30 +77,31 @@ async def create_new_connection(session: AsyncSession, new_connection: dict, ima
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-
 # GET NEW CONNECTION REPORT
 
-async def download_new_connection_report(session:AsyncSession=Depends(get_session), data:NewConnectionReportRequests=Body(...)):
+async def download_new_connection_report(session: AsyncSession = Depends(get_session), data: NewConnectionReportRequests = Body(...)):
     try:
         # GET NEW CONNECTION DATA
         stmt = (await session.execute(select(NewConnection).where(NewConnection.id.in_(data.items)))).scalars().all()
-        results =  [ NewConnectionReportResponse.model_validate(d).model_dump(mode="python") for d in stmt]
+        results = [NewConnectionReportResponse.model_validate(
+            d).model_dump(mode="python") for d in stmt]
         columns = [col.replace("_", " ").upper() for col in results[0].keys()]
         rows = [list(d.values()) for d in results]
         report = create_technical_report(
             columns=columns,
-            rows=rows, 
-            title="NEW CONNECTION REPORT", 
-            prepare_name=data.prepared_by, 
-            prepare_position=data.prepared_position, 
-            check_name=data.checked_by, 
-            check_position=data.checked_position, 
-            approve_name=data.approved_by, 
+            rows=rows,
+            title="NEW CONNECTION REPORT",
+            prepare_name=data.prepared_by,
+            prepare_position=data.prepared_position,
+            check_name=data.checked_by,
+            check_position=data.checked_position,
+            approve_name=data.approved_by,
             approve_position=data.approved_position)
         return StreamingResponse(
             report,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-            headers={"Content-Disposition": "attachment; filename=report.xlsx"})        
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=report.xlsx"})
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

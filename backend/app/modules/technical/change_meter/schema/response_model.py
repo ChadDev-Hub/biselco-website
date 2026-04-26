@@ -5,9 +5,11 @@ from datetime import date
 class Geometry(BaseModel):
     type:str
     coordinates:List[float]
-class Images(BaseModel):
-    id:int
-    image:str
+    srid: int
+
+    
+
+    
 class ChangeMeterResponse(BaseModel):
     id:int
     date_accomplished:date
@@ -21,13 +23,13 @@ class ChangeMeterResponse(BaseModel):
     initial_reading:int
     remarks: Optional[str] = None
     accomplished_by:str
-    images: List[Images]
+    images: Optional[List[str]] = None
     geom: Geometry
 
     model_config = ConfigDict(from_attributes=True)
     
 class Stats(BaseModel):
-    title: str
+    label: str
     value: int
     description: str
     
@@ -35,9 +37,19 @@ class ChangeMeterResponseList(BaseModel):
     data:List[ChangeMeterResponse]
     total_page:int
     stats: List[Stats]
+
+class ChangeMeterData(BaseModel):
+    change_meter_data: ChangeMeterResponse
+    change_meter_stats: List[Stats]
     
+    model_config = ConfigDict(from_attributes=True)
+
 class NewChangeMeterResponse(BaseModel):
-    data: str
+    detail: str
+    message: str
+    total_page: int
+    data: ChangeMeterData
+    
     
 class DeletedChangeMeterResponse(BaseModel):
     data: str

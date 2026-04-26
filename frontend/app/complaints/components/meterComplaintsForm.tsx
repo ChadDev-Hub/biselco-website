@@ -7,6 +7,7 @@ import { PostComplaints } from "@/app/actions/complaint";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { queryConsumer } from "@/lib/serverFetch";
 
+
 type ConsumerData = {
   account_no: string;
   account_name: string;
@@ -49,7 +50,8 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
     handleSubmit,
     setValue,
     setError,
-    formState: { errors },
+    reset,
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<ComplaintFormData>();
 
   // DEFINE EFFECT FUNCTIONS
@@ -138,8 +140,8 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
   }, [errors.lat, errors.lon]);
 
   // HANDLE SUBMIT
-  const [submitted, setSubmitted] = useState(false);
-  const onSubmit: SubmitHandler<ComplaintFormData> = (data) => {
+
+  const onSubmit: SubmitHandler<ComplaintFormData> = async(data) => {
     setLoading(true);
     const newDATA = new FormData();
     newDATA.append("accountNumber", data.accountNumber);
@@ -150,28 +152,24 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
     if (data.attachment?.[0]) {
       newDATA.append("attachment", data.attachment[0]);
     }
-
-    PostComplaints(newDATA).then((res) => {
+    const res = await PostComplaints(newDATA)
+  
       switch (res?.status) {
         case 201:
-          setSubmitted(true);
-          setLoading(false);
-
+          reset();
           break;
         case 403:
           setError("lat", { message: res.data });
           setError("lon", { message: res.data });
-          setLoading(false);
           break;
         default:
           break;
-      }
-    });
+      };
   };
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      {submitted ? (
+      {isSubmitted ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
         </div>
@@ -324,7 +322,10 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
           >
-            Submit Complaint
+            {isSubmitting 
+            ?<p className="skeleton skeleton-text">Submitting</p> :
+            "Submit"
+            }
           </button>
         </form>
       )}
