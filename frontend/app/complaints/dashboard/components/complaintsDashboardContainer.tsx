@@ -111,7 +111,7 @@ const ComplaintsContainer = ({ data }: Props) => {
   const complaintsIinitialData = use(data);
   const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
   const searchParms = useSearchParams();
-  const page = Number(searchParms.get("page")) ?? 1;
+  const page = searchParms.get("page");
   const router = useRouter();
   const {playMessageNotification} = useNotification();
   const [messageLoading, setMessageLoading] = useState(false);
@@ -216,11 +216,9 @@ const ComplaintsContainer = ({ data }: Props) => {
   useEffect(() => {
     if (!message) return;
     switch (message.detail) {
-      
       case "complaints_admin":
-        if (page !== 1 && page !== 0) {
+        if (Number(page) !== 1 && page !== null) {
           showAlert("success", "New Concerns Submitted");
-          return;
         } else {
           queueMicrotask(() => {
             setallComplaints((prev) => {

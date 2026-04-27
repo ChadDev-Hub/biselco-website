@@ -138,7 +138,6 @@ async def change_meter_stats(data:ChangeMeterReport, session: AsyncSession = Dep
         check_position=data.checked_position,
         approve_name=data.approved_by,
         approve_position=data.approved_position
-        
         )
     if file_stream is None:
         raise HTTPException(status_code=404, detail="No data available for report")

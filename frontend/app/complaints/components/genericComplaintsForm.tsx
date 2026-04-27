@@ -6,13 +6,14 @@ import { PostGenericComplaints } from "@/app/actions/complaint";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 
 
+
 // Define the type for form data
 interface ComplaintFormData {
   issue: string;
   details: string;
   lon: number | undefined;
   lat: number | undefined;
-  attachment?: File;
+  attachment?: FileList;
 }
 
 type Props = {
@@ -56,9 +57,12 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
     data.append("details", formData.details);
     data.append("lon", String(formData.lon));
     data.append("lat", String(formData.lat));
-    if (formData.attachment) {
-      data.append("attachment", formData.attachment[0]);
+    const file = formData.attachment;
+    if (file && file.length > 0) {
+      data.append("attachment", file[0]);
     }
+
+    console.log([...data.entries()]);
     const res = await PostGenericComplaints(data);
 
     switch (res?.status) {
@@ -151,7 +155,6 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
               {/* Image */}
               <div className="w-full flex flex-col gap-4">
                 <input
-                  capture="environment"
                   {...register("attachment")}
                   accept="image/*"
                   title="Complaints Image"

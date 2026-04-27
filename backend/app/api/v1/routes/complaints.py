@@ -189,9 +189,9 @@ async def create_generic_complaints(
     issue: str = Form(...),
     details: str = Form(...),   
     location: VerifiedLocation = Depends(verifyLocation),
-    attachment: Optional[UploadFile] = File(None)
+    attachment: Optional[UploadFile] = File(None),
 ):
-    print(location)
+    print(issue)
     
     # UPLOAD IMAGE
     uploaded_url = None

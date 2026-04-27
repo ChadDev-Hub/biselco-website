@@ -44,13 +44,13 @@ const ComplaintsCard = ({
           <h2 className="text-2xl font-extrabold text-shadow-2xs underline text-blue-800">
             {subject}
           </h2>
-          
+
           <p className="font-thin text-xs italic">
             <span className="font-bold">Submitted At:</span>{" "}
             {date_time_submitted}
           </p>
         </div>
-        <div>
+        <div className="flex items-center absolute top-1 right-3">
           {children}
 
           <Options
