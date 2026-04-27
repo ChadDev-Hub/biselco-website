@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,11 +18,13 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
     container_name: fastapi_app
+    build: ./backend
+    image: chaddevhub/fastapi_app
     restart: always
     ports:
-      - "8001:8001"
+      - "8001:8000"
+
     env_file:
       - ./backend/.env
     depends_on:
@@ -31,11 +33,13 @@ services:
     environment:
       - TZ=Asia/Manila
 
+
   frontend:
     build: 
       context: ./frontend
       args:
-        NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8001
+        NEXT_PUBLIC_WEBSOCKET_URL: wss://biselco.calamianes.cloud/v1/socket/ws
+    image: chaddevhub/nextjs_app
     container_name: nextjs_app
     restart: always
     ports:
@@ -44,7 +48,6 @@ services:
       - ./frontend/.env
     depends_on:
       - backend
-    
 
 volumes:
   postgres_data:

@@ -6,6 +6,7 @@ import LandingStats from "./components/stats";
 import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
+
 const Landing = async () => {
   const landingPageData = await getLandingPageData()
   return (
@@ -28,7 +29,7 @@ const Landing = async () => {
       </section>
 
       {/* SERVICES AND FEATURES */}
-      <section className="px-5 py-10 sm:py-10 md:py-15 lg:py-25 bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
+      <section className="w-full px-5 py-10 sm:py-10 md:py-15 lg:py-25 bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
         <ServiceFeature />
       </section>
 

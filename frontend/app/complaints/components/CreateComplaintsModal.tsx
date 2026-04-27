@@ -173,18 +173,22 @@ const CreateComplaints = () => {
                         </g>
                     </g></svg>
             </button>
-            <dialog ref={complaintsModalRef} id="complaints-modal" className="modal backdrop-blur-2xl transition-all px-2">
-                <fieldset className='fieldset modal-box w-full z-40 p-3'>
-                    <legend className='fieldset-legend text-2xl font-bold w-full'>
+            <dialog ref={complaintsModalRef} id="complaints-modal" className="modal modal-bottom sm:modal-middle backdrop-blur-md transition-all px-2">
+                
+                <fieldset className='fieldset flex flex-col gap-4 p-4 modal-box w-full max-h-[90vh] overflow-y-hidden'>
+                    
+                    <div className=' text-2xl font-bold w-full'>
                         <p className='font-bold text-blue-700 text-shadow-yellow-400 text-shadow-md'>
                             Make a Concern
                         </p>
-                        <button type='button' className='btn btn-circle shadow-lg' onClick={handleClose}>x</button>
-                    </legend>
-                    {!hideChoices && <div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 my-2 '>
+                        <button type='button' className='btn btn-circle shadow-lg absolute top-1 right-2' onClick={handleClose}>x</button>
+                    </div>
+                    {!hideChoices && <div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 '>
                         {
                             complaintsChoices.map((complaint, index) => (
-                                <button onClick={() => handleChooseComplaints(complaint)} type='button' key={index} className='btn  btn-sm  px-4 py-2 btn-soft drop-shadow-md shadow-md'>
+                                <button onClick={() => 
+                                handleChooseComplaints(complaint)} type='button' key={index} 
+                                className='btn  btn-sm  px-4 py-2 btn-soft drop-shadow-md shadow-md'>
                                     <p className='font-bold text-shadow-yellow-400'>
                                         {complaint}
                                     </p>

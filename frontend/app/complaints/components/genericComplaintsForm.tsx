@@ -77,7 +77,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
   };
 
   return (
-    <div className="w-full h-full mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-h-[80vh] overflow-y-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       {isSubmitted ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">

@@ -1,5 +1,5 @@
 "use client"
-import React, { use, useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import FormCard from './formCard'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/app/utils/authProvider'

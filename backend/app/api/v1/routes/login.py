@@ -53,7 +53,7 @@ CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 GOOGLE_ENDPOINT = os.getenv("GOOGLE_AUTH_ENDPOINT")
 FRONTEND = os.getenv("FRONTEND_BASE_URL")
-
+BASESERVERURL=os.getenv("BASESERVERURL")
 
 @router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
@@ -174,7 +174,7 @@ async def validate_role(secret: Optional[str] = Query(None)):
     queryParams = {
         "role": role
     }
-    url = f"http://localhost:8001/v1/auth/google/login?{urlencode(queryParams)}"
+    url = f"{BASESERVERURL}/v1/auth/google/login?{urlencode(queryParams)}"
     return {
         "url": url
     }
@@ -250,7 +250,7 @@ async def google_login_callback(
         value=refresh_token,
         expires=datetime.now(timezone.utc) + timedelta(days=7),
         httponly=True,
-        secure=False,
+        secure=True,
         samesite="lax",
     )
 
@@ -259,7 +259,7 @@ async def google_login_callback(
         value=access_token,
         expires=datetime.now(timezone.utc) + timedelta(minutes=15),
         httponly=True,
-        secure=False,
+        secure=True,
         samesite="lax",
     )
     return redirect

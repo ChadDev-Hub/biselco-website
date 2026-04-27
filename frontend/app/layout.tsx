@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -14,7 +13,7 @@ import AlertComponent from "./common/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
-const baseurl = process.env.BASESERVERURL
+const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,17 +25,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://biselco.com"),
+  metadataBase: new URL("https://biselco.calamianes.cloud.com"),
 
   // Basic SEO
   title: {
     default: "BISELCO",
     template: "%s | BISELCO",
   },
-  description: "App for BISELCO - Manage services, complaints, and updates بسهولة.",
+  description:
+    "App for BISELCO - Manage services, complaints, and updates بسهولة.",
 
   keywords: [
     "BISELCO",
+    "Coron",
+    "Palawan",
+    "electricity",
+    "electricity services",
+    "electricity service",
+    "electricity service provider",
     "electric cooperative",
     "complaints system",
     "utilities",
@@ -49,18 +55,18 @@ export const metadata: Metadata = {
 
   // Canonical URL
   alternates: {
-    canonical: "/",
+    canonical: "https://biselco.calamianes.cloud",
   },
 
   // Open Graph (Facebook, Messenger, LinkedIn, etc.)
   openGraph: {
     title: "BISELCO",
-    description: "App for BISELCO - Manage services and complaints بسهولة.",
-    url: "https://biselco.com",
+    description: "App for BISELCO - Manage services and complaints",
+    url: "https://biselco.calamianes.cloud",
     siteName: "BISELCO",
     images: [
       {
-        url: "/og-image.png", // will resolve to https://biselco.com/og-image.png
+        url: "https://biselco.calamianes.cloud/biselco-icon.png",
         width: 1200,
         height: 630,
         alt: "BISELCO App Preview",
@@ -74,20 +80,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BISELCO",
-    description: "Manage BISELCO services and complaints بسهولة.",
-    images: ["/og-image.png"],
-    creator: "@biselco", // optional
+    description: "Manage services and complaints",
+    images: ["https://biselco.calamianes.cloud/biselco-icon.png"],
   },
 
   // Icons (favicon, apple touch, etc.)
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-icon.png" },
-    ],
+    icon: [{ url: "/biselco-icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png" }],
   },
 
   // PWA / Mobile
@@ -108,17 +108,15 @@ export const metadata: Metadata = {
     },
   },
 
-
-
   // Verification (Google Search Console, etc.)
-  verification: {
-    google: "your-google-verification-code",
-  },
+  // verification: {
+  //   google: "your-google-verification-code",
+  // },
 
   // App links (optional, for mobile deep linking)
   appLinks: {
     web: {
-      url: "https://biselco.com",
+      url: "https://biselco.calamianes.cloud",
     },
   },
 };
@@ -128,29 +126,31 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const data = await getLandingPageData()
-  const user = await getCurrentUser()
-  const googleClient = process.env.GOOGLE_CLIENT_ID
+  const data = await getLandingPageData();
+  const user = await getCurrentUser();
+  const googleClient = process.env.GOOGLE_CLIENT_ID;
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-      <AuthProvider initialUser={user.status === 200 ?   user.detail : null}>
-        <GoogleOAuthProvider clientId={googleClient ?? ""}>
-          <WebsocketProvider>
-            <AlertComponent>
-              <LoadingIndicator>
-              <ThemeController />
-              <NotificationProvider>
-                <Drawer baseurl={baseurl} title={data.hero.title}>
-                  {children}
-                  <DocNavigation />
-                </Drawer>
-              </NotificationProvider>
-              </LoadingIndicator>
-            </AlertComponent>
-          </WebsocketProvider>
-        </GoogleOAuthProvider>
-      </AuthProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+      >
+        <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
+          <GoogleOAuthProvider clientId={googleClient ?? ""}>
+            <WebsocketProvider>
+              <AlertComponent>
+                <LoadingIndicator>
+                  <ThemeController />
+                  <NotificationProvider>
+                    <Drawer baseurl={baseurl} title={data.hero.title}>
+                      {children}
+                      <DocNavigation />
+                    </Drawer>
+                  </NotificationProvider>
+                </LoadingIndicator>
+              </AlertComponent>
+            </WebsocketProvider>
+          </GoogleOAuthProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -38,7 +38,7 @@ const ComplaintsCard = ({
   children
 }: Props) => {
   return (
-    <div className="card card-sm bg-base-100/35 shadow-2xl rounded-md drop-shadow-2xl p-4 w-full ">
+    <div className="card glass card-sm  shadow-md rounded-md drop-shadow-md p-4 w-full ">
       <ComplaintCardHeader>
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-extrabold text-shadow-2xs underline text-blue-800">

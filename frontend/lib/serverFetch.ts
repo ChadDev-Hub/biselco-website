@@ -303,3 +303,22 @@ export const GetNewConnectionStats = async () => {
         data: data
     }
 }
+
+
+//  GET TECHNICAL FORMS
+export const GetTechnicalForms = async () => {
+    const res = await fetch(`${baseUrl}/v1/technical_form/all`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

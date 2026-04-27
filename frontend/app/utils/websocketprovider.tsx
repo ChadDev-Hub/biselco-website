@@ -275,7 +275,7 @@ const WebsocketProvider = ({ children }: Props) => {
     if (!user) return
     let isMounted = true
     const connect = () => {
-      const ws = new WebSocket(`${WSURL}/v1/socket/ws`)
+      const ws = new WebSocket(`${WSURL}`)
       wsRef.current = ws
 
       ws.onopen = () => {

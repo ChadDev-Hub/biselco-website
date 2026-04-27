@@ -1,13 +1,13 @@
 
 import React from 'react'
-import { getTechnicalForms } from '@/app/actions/form_lists'
+import {GetTechnicalForms} from "@/lib/serverFetch"
 import TechniclaFormLists from './components/optionsLists'
 import { Suspense } from 'react'
-
+import OptionListsSkeleton from './components/optionlistsSkeleton'
 const TechnicalPage = () => {
-  const technicalForms = getTechnicalForms()
+  const technicalForms = GetTechnicalForms()
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<OptionListsSkeleton forms={4} />}>
       <TechniclaFormLists initialData={technicalForms} />
     </Suspense>
   )
