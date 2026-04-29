@@ -3,12 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..model.complaints import Complaints
 from pprint import pprint
 from sqlalchemy.orm import selectinload
-from ..schema.response_model import ComplaintHistoryModel, Location
+from ..schema.response_model import Location
 from geoalchemy2.shape import to_shape
 from shapely import Point
 import pytz
 from typing import Optional
-from .get_complaints import format_timedelta
+from .get import format_timedelta
 from math import ceil
 # GET COMPLAINTS HISTORY INCLUDES DELETED COMPLAINTS
 

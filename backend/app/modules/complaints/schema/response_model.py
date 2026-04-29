@@ -1,6 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, computed_field
 from uuid import UUID
 from typing import List, Optional
+from datetime import datetime
+import pytz
+from geoalchemy2.elements import WKBElement
 class ComplaintStatus(BaseModel):
     id: int
     complaint_id: int
@@ -10,12 +13,16 @@ class ComplaintStatus(BaseModel):
     date: str
     time: str
     
-class ComplaintStatusHistory(BaseModel):
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    
+class StatusHistory(BaseModel):
     id: int
     first_name: str
     last_name:str
     comments: str
-    timestamped: str
+    timestamped: str 
     user_photo:str
 
 class Location(BaseModel):
@@ -40,11 +47,16 @@ class ComplaintsModel(BaseModel):
     date_time_submitted: str
     status: List[ComplaintStatus]
     latest_status: Optional[str] = None
-    status_history: Optional[List[ComplaintStatusHistory]] = None
+    status_history: Optional[List[StatusHistory]] = None
     images: Optional[List[ComplaintsImages]] = None
     resolution_time:Optional[str] = None
     unread_messages: Optional[int] = None
-
+    
+class NewComplaintStatus(BaseModel):
+    complaint_id: int
+    status: List[ComplaintStatus]
+    latest_status: Optional[str] = None
+    status_history: Optional[List[StatusHistory]] = None
 
 class ComplaintStatusName(BaseModel):
     id: int
@@ -67,20 +79,20 @@ class Stat(BaseModel):
     description: str
     
 
-class ComplaintHistoryModel(BaseModel):
-    id: int
-    user_id: str
-    first_name: str
-    last_name: str
-    user_photo:str
-    subject: str
-    description: str
-    reference_pole: Optional[str]
-    village: str
-    municipality: str
-    location: Location
-    date_time_submitted: str
-    status: List[ComplaintStatus]
-    latest_status: Optional[str] = None
-    status_history: Optional[List[ComplaintStatusHistory]] = None
-    resolution_time:Optional[str] = None
+# class ComplaintHistoryModel(BaseModel):
+#     id: int
+#     user_id: str
+#     first_name: str
+#     last_name: str
+#     user_photo:str
+#     subject: str
+#     description: str
+#     reference_pole: Optional[str]
+#     village: str
+#     municipality: str
+#     location: Location
+#     date_time_submitted: str
+#     status: List[ComplaintStatus]
+#     latest_status: Optional[str] = None
+#     status_history: Optional[List[StatusHistory]] = None
+#     resolution_time:Optional[str] = None

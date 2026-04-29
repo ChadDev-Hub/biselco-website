@@ -29,6 +29,8 @@ async def GetLocation(geometry:List[float], session:AsyncSession):
 async def verifyLocation(lon:str = Form(...),
                          lat:str = Form(...),
                          session: AsyncSession= Depends(get_session)) -> VerifiedLocation:
+    if not lon or not lat:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please Provide Location")
     geometry = ST_SetSRID(ST_Point(float(lon), float(lat)),4326)
     stmt = (select(Boundary)
             .options(selectinload(Boundary.villages),
@@ -41,5 +43,6 @@ async def verifyLocation(lon:str = Form(...),
     return VerifiedLocation(
         village=data.villages.name,
         municipality=data.municipal.name,
+        
         geom = WKTElement('POINT({} {})'.format(lon, lat), srid=4326)    
     )

@@ -25,8 +25,9 @@ type WSMessage = {
 }
   |
 {
-  detail: "complaint_status";
-  data: ComplaintStatusData;
+  detail: "new_status";
+  complaint_status: ComplaintStatusData;
+  complaints_stats: ComplaintStatsType[];
 } | {
   detail: "deleted_news";
   data: NewsData;
@@ -230,29 +231,11 @@ type ComplaintData = {
 }
 
 type ComplaintStatusData = {
-  id: number;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  user_photo: string;
-  subject: string;
-  description: string;
-  reference_pole: string;
-  date_time_submitted: string;
-  village: string;
-  municipality: string;
-  user_status?: string;
-
-  location: {
-    latitude: number;
-    longitude: number;
-    srid: number;
-  }
+  complaint_id: number;
   status: [];
   status_history: [];
   latest_status?: string;
   resolution_time: string;
-
 }
 
 

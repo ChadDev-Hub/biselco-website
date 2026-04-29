@@ -2,8 +2,6 @@
 import ComplaintsTimeLine from "./complaintsTimeLine";
 import ComplaintCardHeader from "./complaintsCardHeader";
 import Accordion from "../../common/Accordion";
-import Options from "../../common/OptionsLists";
-import DeletConfirmation from "./deleteComplaintsConfirmation";
 import ComplaintsCardBody from "./complaintCardBody";
 
 type Props = {
@@ -15,7 +13,6 @@ type Props = {
   date_time_submitted: string;
   complaintsStatusName: [];
   serverurl?: string;
-  deleteComplaint: (id: number) => void;
   children?: React.ReactNode;
 };
 type status = {
@@ -32,8 +29,6 @@ const ComplaintsCard = ({
   description,
   complaintsStatusName,
   status,
-  deleteComplaint,
-  id,
   date_time_submitted,
   children
 }: Props) => {
@@ -52,17 +47,6 @@ const ComplaintsCard = ({
         </div>
         <div className="flex items-center absolute top-1 right-3">
           {children}
-
-          <Options
-            deletecomplaint={(onclose) => (
-              <DeletConfirmation
-                onClose={onclose}
-                deleteComplaint={deleteComplaint}
-                complaintId={id}
-              />
-            )}
-            dropdownOrientation="dropdown-bottom"
-          />
         </div>
 
       </ComplaintCardHeader>

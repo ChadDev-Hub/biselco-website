@@ -212,7 +212,6 @@ const ComplaintsContainer = ({ data }: Props) => {
   // WEBSOCKETS
 
   const { message, sendMessage } = useWebsocket();
-
   useEffect(() => {
     if (!message) return;
     switch (message.detail) {
@@ -230,12 +229,12 @@ const ComplaintsContainer = ({ data }: Props) => {
           });
         }
         break;
-      case "complaint_status":
+      case "new_status":
         queueMicrotask(() =>
           setallComplaints((prev) => {
             return prev.map((complaint: Complaint) =>
-              complaint.id === message.data.id
-                ? { ...complaint, ...message.data }
+              complaint.id === message.complaint_status.complaint_id
+                ? { ...complaint, ...message.complaint_status }
                 : complaint,
             );
           }),
@@ -303,7 +302,7 @@ const ComplaintsContainer = ({ data }: Props) => {
         break;
     }
   }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
-
+  console.log(message);
   useEffect(() => {
     if (!isMessaginModalOpen || !complaintsMessage.length) return;
 

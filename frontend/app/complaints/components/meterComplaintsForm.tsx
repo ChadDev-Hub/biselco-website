@@ -8,6 +8,8 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { queryConsumer } from "@/lib/serverFetch";
 
 
+
+
 type ConsumerData = {
   account_no: string;
   account_name: string;
@@ -20,14 +22,14 @@ type ConsumerData = {
     coordinates: coordinates;
   };
 };
-type coordinates = [number | undefined, number | undefined];
+type coordinates = number[];
 // Define the type for form data
 interface ComplaintFormData {
   accountNumber: string;
   issue: string;
   details: string;
-  lon: number | undefined;
-  lat: number | undefined;
+  lon?: number
+  lat?: number
   attachment?: File;
 }
 
@@ -39,22 +41,29 @@ type Props = {
 
 const MeterComplaints = ({ title, choices, isother }: Props) => {
   // DEFINE STATE VARIABLES
-  const [loading, setLoading] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [consumer, setConsumer] = useState<ConsumerData[]>([]);
   const [selectedConsumer, setSelectedConsumer] = useState<string>("");
+  const [success, setSuccess] = useState(false);
   // CREATE FORM HOOK
   const {
+
     register,
     control,
     handleSubmit,
     setValue,
     setError,
     reset,
-    formState: { errors, isSubmitting, isSubmitted },
-  } = useForm<ComplaintFormData>();
+    formState: { errors, isSubmitting },
+  } = useForm<ComplaintFormData>({mode:"onSubmit"});
 
   // DEFINE EFFECT FUNCTIONS
+  useEffect(()=>{
+    register("details", {required:"Please Enter Details"});
+    register("lat",{required:"Please Select Location"});
+    register("lon",{required: "Please Select Location"});
+  },)
+  
 
   // WATCH ATTACHNMENT
   const attachment = useWatch({
@@ -76,8 +85,9 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
   const consumerSearch = useWatch({
     control: control,
     name: "accountNumber",
-    defaultValue: "",
   });
+
+
 
   // DEBOUNCE CONSUMER QUERY
   const [debounceSearch] = useDebounce(consumerSearch, 500);
@@ -109,16 +119,15 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
   }, [debounceSearch, selectedConsumer]);
 
   useEffect(() => {
-    if (consumerSearch === "") {
+    if (consumerSearch !== selectedConsumer) {
       const showMap = () => {
-        setShowMap(false);
+        setShowMap(true);
         setValue("lon", undefined);
         setValue("lat", undefined);
       };
       showMap();
     }
-  }, [consumerSearch, setValue]);
-
+  }, [consumerSearch, selectedConsumer, setValue]);
   // HANDLE SELECTED CONSUMER
   const selectConsumer = (account: string, geolocation: coordinates) => {
     setSelectedConsumer(account);
@@ -141,39 +150,47 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
 
   // HANDLE SUBMIT
 
-  const onSubmit: SubmitHandler<ComplaintFormData> = async(data) => {
-    setLoading(true);
+  const onSubmit: SubmitHandler<ComplaintFormData> = async (data) => {
     const newDATA = new FormData();
     newDATA.append("accountNumber", data.accountNumber);
     newDATA.append("issue", data.issue ? data.issue : "Illegal Connection");
     newDATA.append("details", data.details);
-    newDATA.append("lon", data.lon?.toString() ?? "");
-    newDATA.append("lat", data.lat?.toString() ?? "");
+
+    if (lon !== undefined && lat !== undefined) {
+      newDATA.append("lon", lon.toString());
+      newDATA.append("lat", lat.toString());
+    }
+
     if (data.attachment?.[0]) {
       newDATA.append("attachment", data.attachment[0]);
     }
+
     const res = await PostComplaints(newDATA)
-  
-      switch (res?.status) {
-        case 201:
-          reset();
-          break;
-        case 403:
-          setError("lat", { message: res.data });
-          setError("lon", { message: res.data });
-          break;
-        default:
-          break;
-      };
+    switch (res?.status) {
+      case 201:
+        setSuccess(true);
+        setShowMap(false);
+        reset();
+        break;
+      case 403:
+        setError("lat", { message: res.data });
+        setError("lon", { message: res.data });
+        break;
+      case 404:
+        setError("lat", { message: res.data });
+        setError("lon", { message: res.data });
+      default:
+        break;
+    };
   };
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto  p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      {isSubmitted ? (
+      {success ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
         </div>
-      ) : loading ? (
+      ) : isSubmitting ? (
         <div className="w-full text-center">
           <h4>
             Please wait...{" "}
@@ -192,9 +209,8 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
               type="text"
               {...register("accountNumber", { required: true })}
               placeholder="Search your meter account here..."
-              className={`w-full px-3 py-2 border rounded ${
-                errors.accountNumber ? "border-red-500" : "border-gray-300"
-              } dropdown dropdown-center dropdown-bottom input input-primary`}
+              className={`w-full px-3 py-2 border rounded ${errors.accountNumber ? "border-red-500" : "border-gray-300"
+                } dropdown dropdown-center dropdown-bottom input input-primary`}
             />
             {errors.accountNumber && (
               <p className="text-red-500 text-sm">
@@ -227,9 +243,8 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
                 enterKeyHint="next"
                 title="Select Issue"
                 {...register("issue", { required: true })}
-                className={`w-full px-3 py-2 border rounded ${
-                  errors.issue ? "border-red-500" : "border-gray-300"
-                } select `}
+                className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
+                  } select `}
               >
                 <option value="" disabled={true}>
                   Select Issue
@@ -250,11 +265,13 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
           <div>
             <label className="block mb-1 font-medium">Details</label>
             <textarea
-              {...register("details", { required: true })}
+              {...register("details",
+                {
+                  required: true
+                })}
               placeholder="Describe your complaint"
-              className={`w-full px-3 py-2 border rounded ${
-                errors.details ? "border-red-500" : "border-gray-300"
-              } textarea`}
+              className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
+                } textarea`}
             />
             {errors.details && (
               <p className="text-red-500 text-sm">Details Must Provided</p>
@@ -262,18 +279,6 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
           </div>
 
           {/* Map */}
-          <input
-            type="hidden"
-            {...register("lat", {
-              required: "Please Pin Your Meter Location on the Map",
-            })}
-          />
-          <input
-            type="hidden"
-            {...register("lon", {
-              required: "Please Pin Your Meter Location on the Map",
-            })}
-          />
           {showMap && (
             <div className="w-full">
               <label className="label w-full text-wrap font-bold text-black">
@@ -297,7 +302,6 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
           {/* Image */}
           <div className="w-full flex flex-col gap-4">
             <input
-              capture="environment"
               {...register("attachment")}
               accept="image/*"
               title="Complaints Image"
@@ -322,9 +326,9 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
           >
-            {isSubmitting 
-            ?<p className="skeleton skeleton-text">Submitting</p> :
-            "Submit"
+            {isSubmitting
+              ? <p className="skeleton skeleton-text">Submitting</p> :
+              "Submit"
             }
           </button>
         </form>

@@ -1,8 +1,8 @@
+
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy.sql.operators import ilike_op
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, and_, desc, or_, func, cast, Text, Date, Time
+from sqlalchemy import select, and_,  or_, func,  desc
 from sqlalchemy.orm import selectinload
 from .. import *
 from ...user import Users
@@ -168,116 +168,6 @@ async def complaints(session: AsyncSession, query: Optional[str] = None, page: O
     }
 
 
-# NEW COMPLAINT
-async def new_complaint(session: AsyncSession, complaint_id: int, user_id:str):
-    latests_status = (select(ComplaintsStatusUpdates.complaint_id,
-                             func.max(ComplaintsStatusUpdates.status_id).label(
-                                 "status_id")
-                             )
-                      .where(ComplaintsStatusUpdates.complaint_id == complaint_id)
-                      .group_by(ComplaintsStatusUpdates.complaint_id)
-                      .cte("latest_status"))
-
-    latest_statu_name = (select(latests_status.c.complaint_id, ComplaintsStatusName.status_name)
-                         .select_from(latests_status)
-                         .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
-                         .cte("latest_status_name"))
-    
-    unread_messages = (
-        select(
-            ComplaintsMessage.complaints_id,
-            func.count(ComplaintsMessage.id).label("count"  
-        ))
-        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.complaints_id == complaint_id,
-                    or_(ComplaintsMessage.receiver_id != user_id, ComplaintsMessage.receiver_id == None)))
-        .group_by(ComplaintsMessage.complaints_id)
-        .cte("unread_messages")
-        )
-
-    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"),unread_messages.c.count)
-            .select_from(Complaints)
-            .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
-            .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
-            .options(selectinload(Complaints.status_updates)
-                     .selectinload(ComplaintsStatusUpdates.status),
-                     selectinload(Complaints.user),
-                     selectinload(Complaints.status_history)
-                     .selectinload(ComplaintsStatusHistory.user),
-                     selectinload(Complaints.complaints_image))
-            .where(Complaints.is_deleted == False)
-            )
-
-    row = (await (session.execute(stmt))).one_or_none()
-    
-    if not row:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-
-    n_complaint, latests_status, unread_messages = row
-    if not n_complaint:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-    
-    
-    # PAGINATION
-    total_page = ceil((await session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalars().one() / PAGESIZE)
-    # GET STATUS
-    status_list = [
-        {
-            "id": s.id,
-            "complaint_id": s.complaint_id,
-            "status_id": s.status_id,
-            "name": s.status.status_name,
-            "description": s.status.description,
-            "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-            "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-        }
-        for s in n_complaint.status_updates
-    ]
-    
-    status_history = [{
-        "id": sh.id,
-        "first_name": sh.user.first_name,
-        "last_name": sh.user.last_name,
-        "user_photo": sh.user.photo,
-        "comments": sh.comments,
-        "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
-    } for sh in n_complaint.status_history]
- 
-    # PROCESS GEOMETRY WBKELEMENTS
-    data = {
-        "id": n_complaint.id,
-        "user_id": str(n_complaint.user_id),
-        "first_name": n_complaint.user.first_name,
-        "last_name": n_complaint.user.last_name,
-        "user_photo": n_complaint.user.photo,
-        "subject": n_complaint.subject,
-        "description": n_complaint.description,
-        "reference_pole": n_complaint.reference_pole,
-        "date_time_submitted": n_complaint.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
-        "village": n_complaint.village,
-        "municipality": n_complaint.municipality,
-        "images": [{
-                "id": im.id,
-                "url": im.image_url
-            }for im in n_complaint.complaints_image],
-        "location": {
-            'latitude': Point(to_shape(n_complaint.location).coords).y,
-            'longitude': Point(to_shape(n_complaint.location).coords).x,
-            'srid': n_complaint.location.srid},
-        "status": status_list,
-        "status_history": status_history,
-        "latest_status": latests_status,
-        "resolution_time": format_timedelta(n_complaint.resolution_time) if n_complaint.resolution_time else None,
-        "unread_messages": unread_messages
-        
-    }
-    await session.close()
-    return {
-        "data": data,
-        "total_page": total_page
-    }
-
 
 # GET COMPLAINTS FOR SPECIFIC USER
 async def user_complaints(session: AsyncSession, user_id: UUID):
@@ -416,3 +306,117 @@ async def new_complaints_status(session: AsyncSession, complaint_id, user_id:str
         "resolution_time": format_timedelta(new_complaint_status.resolution_time) if new_complaint_status.resolution_time else None
     }
     return data
+
+
+
+
+# NEW COMPLAINT
+async def new_complaint(session: AsyncSession, complaint_id: int, user_id:str):
+    latests_status = (select(ComplaintsStatusUpdates.complaint_id,
+                             func.max(ComplaintsStatusUpdates.status_id).label(
+                                 "status_id")
+                             )
+                      .where(ComplaintsStatusUpdates.complaint_id == complaint_id)
+                      .group_by(ComplaintsStatusUpdates.complaint_id)
+                      .cte("latest_status"))
+
+    latest_statu_name = (select(latests_status.c.complaint_id, ComplaintsStatusName.status_name)
+                         .select_from(latests_status)
+                         .join(ComplaintsStatusName, ComplaintsStatusName.id == latests_status.c.status_id)
+                         .cte("latest_status_name"))
+    
+    unread_messages = (
+        select(
+            ComplaintsMessage.complaints_id,
+            func.count(ComplaintsMessage.id).label("count"  
+        ))
+        .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.complaints_id == complaint_id,
+                    or_(ComplaintsMessage.receiver_id != user_id, ComplaintsMessage.receiver_id == None)))
+        .group_by(ComplaintsMessage.complaints_id)
+        .cte("unread_messages")
+        )
+
+    stmt = (select(Complaints, latest_statu_name.c.status_name.label("latest_status"),unread_messages.c.count)
+            .select_from(Complaints)
+            .join(latest_statu_name, latest_statu_name.c.complaint_id == Complaints.id)
+            .outerjoin(unread_messages, unread_messages.c.complaints_id == Complaints.id)
+            .options(selectinload(Complaints.status_updates)
+                     .selectinload(ComplaintsStatusUpdates.status),
+                     selectinload(Complaints.user),
+                     selectinload(Complaints.status_history)
+                     .selectinload(ComplaintsStatusHistory.user),
+                     selectinload(Complaints.complaints_image))
+            .where(Complaints.is_deleted == False)
+            )
+
+    row = (await (session.execute(stmt))).one_or_none()
+    
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+
+    n_complaint, latests_status, unread_messages = row
+    if not n_complaint:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+    
+    
+    # PAGINATION
+    total_page = ceil((await session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalars().one() / PAGESIZE)
+    # GET STATUS
+    status_list = [
+        {
+            "id": s.id,
+            "complaint_id": s.complaint_id,
+            "status_id": s.status_id,
+            "name": s.status.status_name,
+            "description": s.status.description,
+            "date": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+            "time": s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+        }
+        for s in n_complaint.status_updates
+    ]
+    
+    status_history = [{
+        "id": sh.id,
+        "first_name": sh.user.first_name,
+        "last_name": sh.user.last_name,
+        "user_photo": sh.user.photo,
+        "comments": sh.comments,
+        "timestamped": sh.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+    } for sh in n_complaint.status_history]
+ 
+    # PROCESS GEOMETRY WBKELEMENTS
+    data = {
+        "id": n_complaint.id,
+        "user_id": str(n_complaint.user_id),
+        "first_name": n_complaint.user.first_name,
+        "last_name": n_complaint.user.last_name,
+        "user_photo": n_complaint.user.photo,
+        "subject": n_complaint.subject,
+        "description": n_complaint.description,
+        "reference_pole": n_complaint.reference_pole,
+        "date_time_submitted": n_complaint.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d | %I:%M %p"),
+        "village": n_complaint.village,
+        "municipality": n_complaint.municipality,
+        "images": [{
+                "id": im.id,
+                "url": im.image_url
+            }for im in n_complaint.complaints_image],
+        "location": {
+            'latitude': Point(to_shape(n_complaint.location).coords).y,
+            'longitude': Point(to_shape(n_complaint.location).coords).x,
+            'srid': n_complaint.location.srid},
+        "status": status_list,
+        "status_history": status_history,
+        "latest_status": latests_status,
+        "resolution_time": format_timedelta(n_complaint.resolution_time) if n_complaint.resolution_time else None,
+        "unread_messages": unread_messages
+        
+    }
+    await session.close()
+    return {
+        "data": data,
+        "total_page": total_page
+    }
+

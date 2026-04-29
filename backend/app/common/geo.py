@@ -19,7 +19,9 @@ def dms_to_decimal(dms):
     return deg + min + sec
 
 
-async def extract_address_from_image(attachment:Optional[UploadFile] = File(None), session: AsyncSession = Depends(get_session)):
+async def extract_address_from_image(
+    attachment:Optional[UploadFile] = File(None), 
+    session: AsyncSession = Depends(get_session)):
     try:
         if not attachment:
             return None

@@ -4,15 +4,15 @@ import BiselcoMap from "../../common/Map";
 import Image from "next/image";
 import { PostGenericComplaints } from "@/app/actions/complaint";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
-
+import { useState, useEffect } from "react";
 
 
 // Define the type for form data
 interface ComplaintFormData {
   issue: string;
   details: string;
-  lon: number | undefined;
-  lat: number | undefined;
+  lon?: number
+  lat?: number
   attachment?: FileList;
 }
 
@@ -27,9 +27,14 @@ const toTitleCase = (text: string) =>
 
 
 const GenericComplaints = ({ title, choices, isother }: Props) => {
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting, isSubmitted }, setError, reset, control } = useForm<ComplaintFormData>()
+  const [success, setSuccess] = useState(false);
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting}, setError, reset, control } = useForm<ComplaintFormData>()
   // Handle form input changes
 
+  useEffect(()=>{
+    register("lat",{required:"Please Select Location"});
+    register("lon",{required: "Please Select Location"});
+  },[register])
 
 
   // WATCHED
@@ -40,33 +45,40 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
   })
   const lon = useWatch({
     control: control,
-    name: "lon"
+    name: "lon",
+    defaultValue: undefined
   });
 
   const lat = useWatch({
     control: control,
-    name: "lat"
+    name: "lat",
+    defaultValue: undefined
   });
+
 
   // handle Form Submission
   const onSubmit: SubmitHandler<ComplaintFormData> = async (formData) => {
+    if (lon === undefined || lat === undefined) {
+      setError("lat", { message: "Please select a location on the map" }, { shouldFocus: true });
+      setError("lon", { message: "Please select a location on the map" }, { shouldFocus: true });
+      return;
+    }
 
     // Here you would normally send data to your API
     const data = new FormData();
     data.append("issue", formData.issue.trim() || "other");
     data.append("details", formData.details);
-    data.append("lon", String(formData.lon));
-    data.append("lat", String(formData.lat));
+    data.append("lon", String(lon));
+    data.append("lat", String(lat));
     const file = formData.attachment;
     if (file && file.length > 0) {
       data.append("attachment", file[0]);
     }
-
-    console.log([...data.entries()]);
     const res = await PostGenericComplaints(data);
 
     switch (res?.status) {
       case 201:
+        setSuccess(true);
         reset();
         break;
       case 403:
@@ -83,7 +95,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      {isSubmitted ? (
+      {success ? (
         <div className="p-4 bg-green-100 text-green-800 rounded">
           Thank you! Your complaint has been submitted.
         </div>
@@ -138,16 +150,13 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                 <label className="label w-full text-wrap font-bold text-black">
                   Please Pin The Location of Your Complaints
                 </label>
-                <input {...register("lon", { required: "Please select a location" })} type="hidden" />
-                <input {...register("lat", { required: "Please select a location" })} type="hidden" />
-
                 <BiselcoMap
                   animatePing
                   markerPopup="Report Location"
                   consumermeters={lon && lat ? [lon, lat] : undefined}
                   onSelectLocation={(lat, lon) => {
-                    setValue("lon", lon);
-                    setValue("lat", lat);
+                      setValue("lon", lon);
+                      setValue("lat", lat);
                   }}
                 />
                 {errors.lat && errors.lon && <p className="text-red-500 text-sm">{errors.lat.message}</p>}
@@ -161,7 +170,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                   className="w-full file-input"
                   type="file"
                   placeholder="Upload Image" />
-                {attachment && (
+                {attachment?.length && attachment.length > 0 ? (
                   <Image
                     src={URL.createObjectURL(attachment?.[0])}
                     alt="Complaints Image"
@@ -170,7 +179,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                     sizes="(min-width: 1024px) 200px, 100vw"
                     className="w-auto h-auto"
                   />
-                )}
+                ) : ""}
               </div>
 
               {/* Submit Button */}

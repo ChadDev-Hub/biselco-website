@@ -7,7 +7,7 @@ from ..services.get import get_new_connection, get_new_connection_stats
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
 from .....common.geo import extract_address_from_image
-from ....user.service.get_user import get_users_by_roles
+from ....user.service.get_user import GetUserServices
 from .....dependencies.bucket3 import upload_image
 from ..services.delete import delete_new_connection
 from typing import Optional
@@ -32,6 +32,7 @@ async def new_connection(session: AsyncSession = Depends(get_session),
                          location: VerifiedLocation = Depends(verifyLocation),
                          image_location: VerifiedLocation = Depends(extract_address_from_image),
                          remarks: Optional[str] = Form(None),
+                         get_user_services: GetUserServices = Depends(GetUserServices)
                          ):
     loc  = None
     if image_location:
@@ -56,7 +57,7 @@ async def new_connection(session: AsyncSession = Depends(get_session),
     if attachment:
         image_url = await upload_image(file=attachment, folder="new_connection")
     response = await create_new_connection(session=session, new_connection=data, image=image_url)
-    admins = await get_users_by_roles(session=session, roles="admin")
+    admins = await get_user_services.get_users_by_roles(roles="admin")
     for admin in admins:
         await manager.broad_cast_personal_json(str(admin), response)
     # QUERY ADMINS
@@ -68,8 +69,8 @@ async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optio
     return data
 
 @router.delete("/", status_code=status.HTTP_200_OK)
-async def del_n_connection(deleted=Depends(delete_new_connection), session:AsyncSession=Depends(get_session)):
-    admins = await get_users_by_roles(session=session, roles="admin")
+async def del_n_connection(deleted=Depends(delete_new_connection), get_user_services:GetUserServices = Depends(GetUserServices)):
+    admins = await get_user_services.get_users_by_roles(roles="admin")
     for admin in admins:
         await manager.broad_cast_personal_json(str(admin), deleted)
     return {

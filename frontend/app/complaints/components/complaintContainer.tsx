@@ -7,11 +7,15 @@ import Messaging from '../dashboard/components/messagingModal2'
 import { GetComplaintsMessage } from '@/app/actions/complaint'
 import { useAuth } from '@/app/utils/authProvider'
 import { useNotification } from '@/app/common/NotificationProvider'
-
+import DeletConfirmation from './deleteComplaintsConfirmation'
 
 type PromiseType = {
     status?: number;
-    data: Complaints[];
+    data: DataComplaintsType;
+}
+
+type DataComplaintsType = {
+    data: Complaints[]
 }
 
 type ComplaintStatusType = {
@@ -109,16 +113,16 @@ const ComplaintsContainer = (
                 break;
             case 200:
                 queueMicrotask(() =>
-                    setComplaints(complaintsInitialData.data)
+                    setComplaints(complaintsInitialData.data.data)
                 );
                 break;
             default:
                 break;
         }
     }, [complaintsInitialData])
-    
+    console.log(complaints)
     // WEBSOCKET
-    const { message, sendMessage } = useWebsocket();
+    const { message, sendMessage } = useWebsocket();    
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
@@ -130,11 +134,11 @@ const ComplaintsContainer = (
                     })
                 )
                 break;
-            case "complaint_status":
+            case "new_status":
                 queueMicrotask(() =>
                     setComplaints((prev) => {
                         return prev.map((complaint: Complaints) =>
-                            complaint.id === message.data.id ? { ...complaint, ...message.data } : complaint
+                            complaint.id === message.complaint_status.complaint_id ? { ...complaint, ...message.complaint_status } : complaint
                         )
                     }))
                 break;
@@ -196,10 +200,10 @@ const ComplaintsContainer = (
 
 
     // HANDLING DELTED COMPLAINTS
-    const handleDelete = (id: number) => {
-        const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
-        setComplaints(updatedComplaints);
-    };
+    // const handleDelete = (id: number) => {
+    //     const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
+    //     setComplaints(updatedComplaints);
+    // };
 
     // MESSAGING MODAL CLOSE HANDLER
     const MessageClose = () => {
@@ -289,8 +293,7 @@ const ComplaintsContainer = (
                     status={complaint.status}
                     date_time_submitted={complaint.date_time_submitted}
                     complaintsStatusName={complaintsStatusNameInitialData.data}
-                    serverurl={serverurl}
-                    deleteComplaint={handleDelete}>
+                    serverurl={serverurl}>
                     <Messaging
                         complaint_id={complaint.id}
                         messageLoading={messageLoading}
@@ -301,6 +304,9 @@ const ComplaintsContainer = (
                         onOpen={() => MessageOpen(complaint.id)}
                         onClosed={MessageClose}
                         receiver_id={complaint.user_id === user?.id ? undefined : complaint.user_id} />
+                    <DeletConfirmation
+                        complaintId={complaint.id}
+                    />
                 </ComplaintsCard>
             ))}
         </section>

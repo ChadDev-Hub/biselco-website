@@ -30,9 +30,9 @@ const Stats = ({ data }: Props) => {
   const { message } = useWebsocket();
   useEffect(() => {
     switch (message?.detail) {
-      case "complaints_stats":
+      case "new_status":
         queueMicrotask(() => 
-          setStatsData(message.data));
+          setStatsData(message.complaints_stats));
         break;
       default:
         break;
