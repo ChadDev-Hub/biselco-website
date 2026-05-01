@@ -7,10 +7,11 @@ from ..model.complaints import Complaints
 from ..model.status_update import ComplaintsStatusUpdates
 from ..model.complaints_history import ComplaintsStatusHistory
 from ..model.status_name import ComplaintsStatusName
+from sqlalchemy.orm import selectinload
 from typing import Optional
 from ..schema.requests_model import Datahistory
 from .get2 import GetServices
-from typing import Literal
+from typing import Literal, List
 
 
 class PutServices:
@@ -18,7 +19,7 @@ class PutServices:
         self.session = session
         self.get_services = get_services
         
-    async def add_new_status(self, complaints_id:int, stats:Literal['Received', 'Pending', 'Working', 'Complete'] | str):
+    async def add_new_status(self, complaints_id:int, stats:int, current_status_id:Optional[int] = None):
         """
         Add New Status to Complaints
         Args:
@@ -27,23 +28,29 @@ class PutServices:
         """
         
         complaints = await self.get_services.get_selected_complaints(complaints_id=complaints_id)
-        status_name = await self.get_services.get_seleted_status_name(statu_name=stats)
-        
+        selected_status = await self.get_services.get_seleted_status_name(status_id=stats,current_status_id=current_status_id)
         
         added = False
+        values = [
+            {
+                "complaint_id": complaints.id,
+                "status_id": s.id
+            }
+            for s in selected_status
+        ]
         try:
-            new_status = ComplaintsStatusUpdates(complaints=complaints, status=status_name)
-            self.session.add(new_status)
+            new_status = (insert(ComplaintsStatusUpdates).values(values))
+            await self.session.execute(new_status)
             await self.session.commit()
             added = True
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-        return added, status_name, complaints
+        return added, selected_status, complaints
     
-    async def add_complaints_history(self, data:Datahistory):
+    async def add_complaints_history(self, data:List[dict]):
         added = False
         try:
-            new_status_history = insert(ComplaintsStatusHistory).values(data.model_dump(mode="python"))
+            new_status_history = insert(ComplaintsStatusHistory).values(data)
             await self.session.execute(new_status_history)
             await self.session.commit()
             added = True

@@ -28,6 +28,7 @@ type WSMessage = {
   detail: "new_status";
   complaint_status: ComplaintStatusData;
   complaints_stats: ComplaintStatsType[];
+
 } | {
   detail: "deleted_news";
   data: NewsData;
@@ -225,7 +226,7 @@ type ComplaintData = {
   }
   status: [];
   status_history: [];
-  latest_status?: string;
+  latest_status?: LatestsStatusType;
   resolution_time: string;
   unread_messages: number;
 }
@@ -234,10 +235,14 @@ type ComplaintStatusData = {
   complaint_id: number;
   status: [];
   status_history: [];
-  latest_status?: string;
-  resolution_time: string;
+  latest_status?: LatestsStatusType;
+  resolution_time?: string;
 }
 
+type LatestsStatusType = {
+  id: number;
+  name: string
+}
 
 
 type WSContextType = {

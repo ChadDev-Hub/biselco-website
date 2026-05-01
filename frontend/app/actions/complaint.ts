@@ -34,12 +34,14 @@ export async function DeleteComplaint(id: number) {
 
 
 // UPDATE COMPLAINT STATUS
-export async function UpdateComplaintStatus(complaint_id: number, status_name: string) {
+export async function UpdateComplaintStatus(complaint_id: number, status_name: string, status_id:number, current_status_id?: number) {
     const data = await serverFetchAutoRefresh(
         `${baseUrl}/v1/complaints/status/${complaint_id}`,
         "PUT",
         JSON.stringify({
-            status_name: status_name
+            status_name: status_name,
+            status_id: status_id,
+            current_status_id: current_status_id
         }),
         {
             "content-type": "application/json"
@@ -49,13 +51,14 @@ export async function UpdateComplaintStatus(complaint_id: number, status_name: s
 }
 
 // DELETE COMPLAINT STATUS
-export async function DeleteComplaintStatus(complaint_id: number, status_name: string, status_id: number) {
+export async function DeleteComplaintStatus(complaint_id: number, status_name: string, status_id: number, current_status_id?: number) {
     const data = await serverFetchAutoRefresh(
         `${baseUrl}/v1/complaints/status/${complaint_id}`,
         "DELETE",
         JSON.stringify({
             status_name: status_name,
-            status_id: status_id
+            status_id: status_id,
+            current_status_id: current_status_id
         }),
         {
             "content-type": "application/json"

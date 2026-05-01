@@ -51,7 +51,10 @@ type Complaint = {
   location: Location;
   status_history: StatusHistory[];
   status: status[];
-  latest_status?: string;
+  latest_status?: {
+    id: number;
+    name: string;
+  };
   user_status?: string;
   resolution_time: string;
   images?: ComplaintsImages[];
@@ -230,6 +233,7 @@ const ComplaintsContainer = ({ data }: Props) => {
         }
         break;
       case "new_status":
+        console.log(message);
         queueMicrotask(() =>
           setallComplaints((prev) => {
             return prev.map((complaint: Complaint) =>
@@ -302,7 +306,6 @@ const ComplaintsContainer = ({ data }: Props) => {
         break;
     }
   }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
-  console.log(message);
   useEffect(() => {
     if (!isMessaginModalOpen || !complaintsMessage.length) return;
 
@@ -371,6 +374,7 @@ const ComplaintsContainer = ({ data }: Props) => {
             </td>
           <td className="text-center">
             <ComplaintStatusButton
+              currentStatus={complaint.latest_status?.id}
               status={
                 allComplaints.find(
                   (complaint) => complaint.id === activeComplaintsId,
@@ -381,7 +385,7 @@ const ComplaintsContainer = ({ data }: Props) => {
             />
           </td>
           <td className="animate-pulse text-center text-blue-800 drop-shadow-md drop-shadow-amber-900 font-bold">
-            {complaint.latest_status}
+            {complaint.latest_status?.name}
           </td>
           <td className="flex justify-center">
             <StatusHistoryModal data={complaint.status_history} />

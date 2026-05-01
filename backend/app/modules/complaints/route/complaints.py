@@ -35,6 +35,7 @@ from ....dependencies.bucket3 import upload_image
 from ..services.put import PutServices
 from ..schema.requests_model import Datahistory
 from ...user.service.get_user import GetUserServices
+from ..services.delete import DeleteServices
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -335,30 +336,31 @@ async def delete_complaint(
 @router.put("/status/{complaint_id}", status_code=status.HTTP_201_CREATED)
 async def update_complaint_status(
         complaint_id: int,
-        data: ComplaintsStatus = Body(),
+        data: ComplaintsStatus = Body(...),
         put_services: PutServices = Depends(PutServices),
         get_services: GetServices = Depends(GetServices),
         user: UserModel = Depends(get_current_user),
         get_user:GetUserServices = Depends(GetUserServices),
         get_dashboard_services: GetDashboardServices = Depends(GetDashboardServices)
         ):
-
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
     try:
-        is_status_added, selected_status, selected_complaint = await put_services.add_new_status(complaints_id=complaint_id, stats=data.status_name)
+        is_status_added, selected_status, selected_complaint = (await put_services.add_new_status(complaints_id=complaint_id,
+                                                                                stats=data.status_id,
+                                                                                current_status_id=data.current_status_id))
         if not is_status_added:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Status Not Added")
-        
         # ADD STATUS HISTORY
-        data_history = Datahistory(
+        data_history = [Datahistory(
             complaint_id=selected_complaint.id,
-            status_id=selected_status.id,
+            status_id=s.id,
             user_id=str(user.id),
-            comments=f"Updated to {data.status_name}"
-        )
+            comments=f"Updated to {s.status_name}"
+        ).model_dump(mode="python")
+        for s in selected_status]
         is_history_added = await put_services.add_complaints_history(data=data_history)
         if not is_history_added:
             raise HTTPException(
@@ -376,14 +378,11 @@ async def update_complaint_status(
             "complaint_status": new_status,
             "complaints_stats": new_stats
         }
-        
-        
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
         for admin in admins:
             await manager.broad_cast_personal_json(user_id=admin, data=new_complaint_status)
-
     except Exception as e:
-        return e
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return {
         "detail": f"{data.status_name} Successfully Updated"
     }
@@ -393,81 +392,38 @@ async def update_complaint_status(
 @router.delete("/status/{complaint_id}", status_code=status.HTTP_200_OK)
 async def delete_complaint_status(
     complaint_id: int,
-    session: AsyncSession = Depends(get_session),
+    delete_services:DeleteServices = Depends(DeleteServices),
+    get_user:GetUserServices = Depends(GetUserServices),
+    get_dashboard_services:GetDashboardServices = Depends(GetDashboardServices),
     data: ComplaintsStatus = Body(...),
     user: UserModel = Depends(get_current_user),
 ):
-    
     if "admin" not in [role.name for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
     try:
-        select_complaint = (await session.execute(select(Complaints).where(Complaints.id == complaint_id))).scalar_one_or_none()
-        if not select_complaint:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
-        select_status = (await session.execute(select(ComplaintsStatusName).where( ComplaintsStatusName.id >= data.status_id))).scalars().all()
-        selected_status_ids = [s.id for s in select_status]
-        
-        if not select_status:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
-        
-        # DELETE STATEMENT
-        try:
-            delete_stmt = delete(ComplaintsStatusUpdates).where(
-                and_(
-                    ComplaintsStatusUpdates.complaints == select_complaint,
-                    ComplaintsStatusUpdates.status_id.in_(selected_status_ids)))
-            await session.execute(delete_stmt)
-            await session.commit()
-        except Exception as e:
-            print(e)
-        finally:
-            await session.refresh(select_complaint)
-        
-        # ADD STATUS HISTORY
-        for si in selected_status_ids:
-            data_history = {
-                "complaint_id": select_complaint.id,
-                "status_id": si,
-                "user_id": user.id,
-                "comments": f"Removed from {data.status_name}",
-                "timestamped": datetime.now()
-            }
-            await add_complaints_history(session=session, data=data_history)
-            
-        # BROADCAST
-        admin = (await session.execute(select(Roles).options(selectinload(Roles.users)).where(Roles.name == "admin"))).scalars().all()
-        admin_ids = [str(user.id)
-                     for admin_user in admin for user in admin_user.users]
-        
-    
+        new_complaints_status, selected_complaints = await delete_services.delete_complaint_status(
+            user_id=str(user.id),
+            complaint_id=complaint_id,
+            status_id=data.status_id,
+            current_status_id=data.current_status_id
+        )
+        new_stats = await get_dashboard_services.get_complaints_stats()
+        roles = await get_user.get_users_by_roles(roles="admin")
         
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if str(select_complaint.user_id) not in admin_ids:
-            admin_ids.append(str(select_complaint.user_id))
-
+        if str(selected_complaints.user_id) not in roles:
+            roles.append(str(selected_complaints.user_id))
         # TASK
         new_status = {
-            "detail": "complaint_status",
-            "data": await new_complaints_status(session=session, complaint_id=complaint_id, user_id=str(user.id))
+            "detail": "new_status",
+            "complaint_status": new_complaints_status,
+            "complaints_stats": new_stats
         }
-        new_stats = {
-            "detail": "complaints_stats",
-            "data": await get_complaints_stats(session=session)
-        }
-     
-        
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
-        for admin in admin_ids:
-            await manager.broad_cast_personal_json(
-                user_id=admin, data=new_stats)
+        for admin in roles:
             await manager.broad_cast_personal_json(
                 user_id=admin, data=new_status)
-            
-        
-        
     except Exception as e:
         return e
     return {

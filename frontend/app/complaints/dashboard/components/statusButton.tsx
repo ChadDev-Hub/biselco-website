@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import EnableButton from "./complaintStatusToggle";
 
 type Props = {
+  currentStatus?: number;
   status: status[];
   complaints_id: number;
   onOpen: (complaint_id: number) => void;
@@ -21,7 +22,7 @@ type StatsType = {
   name: string;
 };
 
-const ComplaintStatusButton = ({ status, complaints_id, onOpen }: Props) => {
+const ComplaintStatusButton = ({currentStatus, status, complaints_id, onOpen }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const complaintStatusName = [
     {
@@ -143,6 +144,7 @@ const ComplaintStatusButton = ({ status, complaints_id, onOpen }: Props) => {
                     />
                   )}
                   <EnableButton
+                    current_status_id={currentStatus}
                     status_id={item.id}
                     complaint_id={complaints_id}
                     enabled={

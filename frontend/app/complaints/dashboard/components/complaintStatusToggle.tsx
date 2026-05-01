@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/app/actions/complaint'
 import { useAlert } from '@/app/common/alert'
 type Props = {
+    current_status_id?: number
     status_id?: number
     name?: string;
     complaint_id?: number;
@@ -12,7 +13,7 @@ type Props = {
 
 
 
-const EnableButton = ({ status_id, complaint_id, name, enabled }: Props) => {
+const EnableButton = ({ current_status_id,status_id, complaint_id, name, enabled }: Props) => {
     const [checked, setChecked] = useState(enabled);
     const [loading, setLoading] = useState(false);
     const { showAlert } = useAlert();
@@ -33,7 +34,7 @@ const EnableButton = ({ status_id, complaint_id, name, enabled }: Props) => {
             switch (check) {
                 case true:
                     
-                    const update = await UpdateComplaintStatus(complaint_id, name)
+                    const update = await UpdateComplaintStatus(complaint_id, name, status_id, current_status_id)
                     if (update?.status === 401) {
                         setChecked(false)
                         showAlert('error', update.data.detail)
@@ -43,7 +44,7 @@ const EnableButton = ({ status_id, complaint_id, name, enabled }: Props) => {
                     break;
                 case false:
                     
-                    const del = await DeleteComplaintStatus(complaint_id, name, status_id)
+                    const del = await DeleteComplaintStatus(complaint_id, name, status_id, current_status_id)
                     if (del?.status === 401) {
                         setChecked(true)
                         showAlert('error', del.data.detail)

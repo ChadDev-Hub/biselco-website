@@ -59,7 +59,7 @@ class Complaints(BaseModel):
     status_updates: Mapped[List["ComplaintsStatusUpdates"]] = relationship(
         back_populates="complaints",
         order_by="ComplaintsStatusUpdates.timestamped")
-    status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="complaint", order_by="ComplaintsStatusHistory.timestamped.desc()")
+    status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="complaint", order_by="desc(ComplaintsStatusHistory.timestamped), asc(ComplaintsStatusHistory.id)")
     complaint_messages: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="complaints", order_by="ComplaintsMessage.timestamped")
 
 

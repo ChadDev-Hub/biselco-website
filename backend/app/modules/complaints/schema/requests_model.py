@@ -50,5 +50,6 @@ class ComplaintsStatus(BaseModel):
        status_id: int
     """
     status_name: str
-    status_id: Optional[int] = None
+    status_id: int
+    current_status_id:Optional[int] = None
     

@@ -9,7 +9,7 @@ from .. import *
 from ...user import Users
 from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
 from ..model.complaints_history import ComplaintsStatusHistory
-from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus
+from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus
 from ....modules.websocket.schema.response_model import User, Message
 from ....core.security import get_current_user
 from shapely.geometry import Point
@@ -59,7 +59,10 @@ class GetServices:
         latest_status_name = (
             select(
                 latest_status.c.complaint_id.label("complaint_id"),
-                ComplaintsStatusName.status_name)
+                ComplaintsStatusName.id.label("id"),
+                ComplaintsStatusName.status_name,
+                
+                )
             .select_from(latest_status)
             .join(ComplaintsStatusName, ComplaintsStatusName.id == latest_status.c.status_id)
             .cte("latest_status_name")
@@ -84,11 +87,29 @@ class GetServices:
         return selected_complaints
     
     # GET SELECTED STATUS NAME
-    async def get_seleted_status_name(self, statu_name:str):
-        selected_status_name = (await self.session.execute(select(ComplaintsStatusName).where(ComplaintsStatusName.status_name == statu_name))).scalar_one_or_none()
-        if not selected_status_name:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
-        return selected_status_name
+    async def get_seleted_status_name(self, status_id:int, current_status_id:Optional[int] = None, to_delete:bool= False):
+        try:
+            if to_delete:
+                return id
+            else:
+                stmt = (select(ComplaintsStatusName)
+                    .where(and_(ComplaintsStatusName.id <= status_id, 
+                                ComplaintsStatusName.id > current_status_id))
+                    .order_by((ComplaintsStatusName.id.asc())))
+                results = (await self.session.execute(stmt)).scalars().all()
+                
+                # return selected_status
+                selected_status = [
+                    SelectecComplaintStatus(
+                    id=status.id, 
+                    status_name=status.status_name) for status in results]
+                if not selected_status:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            return selected_status
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    # GET SELECTED STATUS NAME TO DELETE
+  
     
     async def get_all_complaints(self, page: Optional[int] = None, query: Optional[str] = None, get_all:bool = True):
         if not page:
@@ -98,6 +119,7 @@ class GetServices:
         stmt = (
             select(Complaints, 
                    latest_status_name.c.status_name.label("latest_status"),
+                   latest_status_name.c.id.label("latest_status_id"),
                    unread_message.c.count.label("unread_messages"))
             .select_from(Complaints)
             .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
@@ -136,7 +158,7 @@ class GetServices:
         total_complaint = (await self.session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalar_one()
         total_page = total_complaint // self.PAGESIZE if total_complaint % self.PAGESIZE == 0 else total_complaint // self.PAGESIZE + 1
         results = []
-        for complaints, latests_updates, unread_messages in data:
+        for complaints, latests_updates, latest_status_id, unread_messages in data:
             status_lists = [
                 ComplaintStatus(
                     id=s.id,
@@ -175,7 +197,9 @@ class GetServices:
                     ),
                 date_time_submitted=complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                 status=status_lists,
-                latest_status=latests_updates,
+                latest_status=Lateststatus(
+                    id=latest_status_id,
+                    name=latests_updates),
                 status_history=status_history,
                 resolution_time=format_timedelta(complaints.resolution_time) if complaints.resolution_time else None,
                 unread_messages=unread_messages
@@ -185,8 +209,9 @@ class GetServices:
             "total_page": total_page
         }
     async def get_new_complaints_status(self, complaints_id:int):
+        self.session.expire_all()
         latests_status = self.get_latest_status()
-        stmt = (select(Complaints,latests_status.c.status_name.label("latest_status"))
+        stmt = (select(Complaints,latests_status.c.status_name.label("latest_status"), latests_status.c.id.label("latest_status_id"))
                 .select_from(Complaints)
                 .outerjoin(latests_status, latests_status.c.complaint_id == Complaints.id)
                 .options(selectinload(Complaints.status_updates)
@@ -196,7 +221,7 @@ class GetServices:
                          )
                 .where(and_(Complaints.is_deleted == False, Complaints.id == complaints_id))
                 )
-        new_complaints, latests_status = (await self.session.execute(stmt)).one()
+        new_complaints, latests_status, latests_status_id = (await self.session.execute(stmt)).one()
         if not new_complaints:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="New Status Complaint Not Found")
         status_lists = [
@@ -221,8 +246,11 @@ class GetServices:
         return NewComplaintStatus(
             complaint_id=new_complaints.id,
             status=status_lists,
-            latest_status=latests_status,
-            status_history=status_history
+            latest_status=Lateststatus(
+                id=latests_status_id,
+                name=latests_status),
+            status_history=status_history,
+            resolution_time=format_timedelta(new_complaints.resolution_time) if new_complaints.resolution_time else None,
         ).model_dump(mode="json")
      
 
