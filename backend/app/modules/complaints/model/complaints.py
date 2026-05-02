@@ -7,6 +7,7 @@ from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import func
 from datetime import datetime, time, date, timezone, timedelta
 from sqlalchemy.dialects.postgresql import UUID
+
 if TYPE_CHECKING:
     from ...user.model.users import Users
     from .status_update import ComplaintsStatusUpdates
@@ -39,7 +40,7 @@ class Complaints(BaseModel):
     """
     __tablename__ = "consumer_complaints"
     id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=UUID())
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users_account.id", ondelete="CASCADE", onupdate="CASCADE"), type_=UUID(as_uuid=True))
     subject: Mapped[str] = mapped_column(type_=Text, nullable=True)
     description: Mapped[str] = mapped_column(type_=Text, nullable=True)
     reference_pole: Mapped[str] = mapped_column(type_=Text)

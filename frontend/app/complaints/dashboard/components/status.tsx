@@ -11,13 +11,13 @@ type PromiseType = {
 };
 type Props = {
   data: Promise<PromiseType>;
-};
+};  
 type ComplaintStatsType = {
-  id: number;
-  title: string;
+  label: string;
   value: number;
   description: string;
 };
+
 const Stats = ({ data }: Props) => {
   const stats = use(data);
   const [statsData, setStatsData] = useState<ComplaintStatsType[]>([]);
@@ -33,6 +33,10 @@ const Stats = ({ data }: Props) => {
       case "new_status":
         queueMicrotask(() => 
           setStatsData(message.complaints_stats));
+        break;
+      case "new_complaint":
+        queueMicrotask(() => 
+          setStatsData(message.stats));
         break;
       default:
         break;
@@ -135,12 +139,12 @@ const Stats = ({ data }: Props) => {
 
   return (
     <div className="stats shadow">
-      {statsData.map((m) => (
+      {statsData.map((m, index) => (
         <StatsCard
-        key={m.id}
-          label={m.title}
+        key={index}
+          label={m.label}
           value={m.value}
-          svg={SpecificSvg(m.title)}
+          svg={SpecificSvg(m.label)}
           description={m.description}
         />
       ))}

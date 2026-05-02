@@ -9,13 +9,12 @@ type Props = {
 
 type WSMessage = {
   detail: "news";
-  data: NewsData;
+  data: NewsData; 
 } | {
-  detail: "complaints";
-  data: {
-    data: ComplaintData;
-    total_page: number;
-  };
+  detail: "new_complaint";
+  data: ComplaintData;
+  total_page: number;
+  stats: Stats[];
 } | {
   detail: "complaints_admin";
   data: {
@@ -27,7 +26,7 @@ type WSMessage = {
 {
   detail: "new_status";
   complaint_status: ComplaintStatusData;
-  complaints_stats: ComplaintStatsType[];
+  complaints_stats: Stats[];
 
 } | {
   detail: "deleted_news";
@@ -132,7 +131,7 @@ type NewConnection = {
 // COMPLAINT STATSD TYPE
 type ComplaintStatsType = {
   id: number;
-  title: string;
+  label: string;
   value: number;
   description: string;
 };

@@ -9,7 +9,7 @@ from .. import *
 from ...user import Users
 from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
 from ..model.complaints_history import ComplaintsStatusHistory
-from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus
+from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus, ComplaintsImages
 from ....modules.websocket.schema.response_model import User, Message
 from ....core.security import get_current_user
 from shapely.geometry import Point
@@ -20,7 +20,7 @@ from typing import Optional
 from ...user.schema.response_model import UserModel
 from ....common.total_page import get_total_page
 import pytz
-
+from pprint import pprint
 
 
 def format_timedelta(td):
@@ -89,28 +89,41 @@ class GetServices:
     # GET SELECTED STATUS NAME
     async def get_seleted_status_name(self, status_id:int, current_status_id:Optional[int] = None, to_delete:bool= False):
         try:
+            condition = []
             if to_delete:
-                return id
-            else:
+                condition.append(ComplaintsStatusName.id >= status_id)
+                if current_status_id:
+                    condition.append(ComplaintsStatusName.id <= current_status_id)
                 stmt = (select(ComplaintsStatusName)
-                    .where(and_(ComplaintsStatusName.id <= status_id, 
-                                ComplaintsStatusName.id > current_status_id))
+                        .where(and_(*condition)))
+            else:
+                condition.append(ComplaintsStatusName.id <= status_id)
+                if current_status_id:
+                    condition.append(ComplaintsStatusName.id > current_status_id)
+                stmt = (select(ComplaintsStatusName)
+                    .where(and_(*condition))
                     .order_by((ComplaintsStatusName.id.asc())))
-                results = (await self.session.execute(stmt)).scalars().all()
-                
-                # return selected_status
-                selected_status = [
-                    SelectecComplaintStatus(
-                    id=status.id, 
-                    status_name=status.status_name) for status in results]
-                if not selected_status:
-                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+            results = (await self.session.execute(stmt)).scalars().all()
+            # return selected_status
+            selected_status = [
+                SelectecComplaintStatus(
+                id=status.id, 
+                status_name=status.status_name) for status in results]
+            if not selected_status:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
             return selected_status
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    # GET SELECTED STATUS NAME TO DELETE
-  
+        
+    # GET COMPLAINTS TOTAL PAGE
+    async def get_complaints_total_page(self):
+        total_complaint = (await self.session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalar_one()
+        total_page = total_complaint // self.PAGESIZE if total_complaint % self.PAGESIZE == 0 else total_complaint // self.PAGESIZE + 1
+        return total_page
     
+    
+    # GET SELECTED STATUS NAME TO DELETE
     async def get_all_complaints(self, page: Optional[int] = None, query: Optional[str] = None, get_all:bool = True):
         if not page:
             page = 1
@@ -123,7 +136,6 @@ class GetServices:
                    unread_message.c.count.label("unread_messages"))
             .select_from(Complaints)
             .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
-            .join(Users, Users.id == Complaints.user_id)
             .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
@@ -155,8 +167,7 @@ class GetServices:
             stmt = stmt.offset((page - 1) * self.PAGESIZE).limit(self.PAGESIZE)
 
         data = (await self.session.execute(stmt)).all()
-        total_complaint = (await self.session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalar_one()
-        total_page = total_complaint // self.PAGESIZE if total_complaint % self.PAGESIZE == 0 else total_complaint // self.PAGESIZE + 1
+        total_page = await self.get_complaints_total_page()
         results = []
         for complaints, latests_updates, latest_status_id, unread_messages in data:
             status_lists = [
@@ -202,12 +213,99 @@ class GetServices:
                     name=latests_updates),
                 status_history=status_history,
                 resolution_time=format_timedelta(complaints.resolution_time) if complaints.resolution_time else None,
-                unread_messages=unread_messages
+                unread_messages=unread_messages,
+                images=[ComplaintsImages(id=img.id, url=img.image_url) for img in complaints.complaints_image]
             ))
         return {
             "data": results,
             "total_page": total_page
         }
+    
+    async def get_new_complaints(self, complaint_id:int):
+        self.session.expire_all()
+        try:
+            latest_status_name = self.get_latest_status()
+            unread_message = self.get_unread_message()
+            total_page = await self.get_complaints_total_page()
+            stmt = (
+            select(Complaints, 
+                   latest_status_name.c.status_name.label("latest_status"),
+                   latest_status_name.c.id.label("latest_status_id"),
+                   unread_message.c.count.label("unread_messages"))
+            .select_from(Complaints)
+            .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
+            .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
+            .options(selectinload(Complaints.status_updates)
+                     .selectinload(ComplaintsStatusUpdates.status),
+                     selectinload(Complaints.user),
+                     selectinload(Complaints.status_history)
+                     .selectinload(ComplaintsStatusHistory.user),
+                     selectinload(Complaints.complaints_image)
+                     )
+            .where(and_(Complaints.is_deleted == False, Complaints.id == complaint_id)).order_by(desc(Complaints.id))
+            )
+            new_complaints, latests_status, latests_status_id, unread_messages = (await self.session.execute(stmt)).one()
+            loc = Point(to_shape(new_complaints.location).coords)   
+            data = ComplaintsModel(
+                id=new_complaints.id,
+                user_id=str(new_complaints.user_id),
+                first_name=new_complaints.user.first_name,
+                last_name=new_complaints.user.last_name,
+                user_photo=new_complaints.user.photo,
+                subject=new_complaints.subject,
+                description=new_complaints.description,
+                reference_pole=new_complaints.reference_pole,
+                village=new_complaints.village,
+                municipality=new_complaints.municipality,
+                location=Location(
+                    latitude=loc.y,
+                    longitude=loc.x,
+                    srid=new_complaints.location.srid
+                    ),
+                date_time_submitted=new_complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                status=[
+                    ComplaintStatus(
+                        id=s.id,
+                        complaint_id=s.complaint_id,
+                        status_id=s.status_id,
+                        name=s.status.status_name,
+                        description=s.status.description,
+                        date=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+                        time=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+                        ) for s in new_complaints.status_updates
+                    ],
+                latest_status=Lateststatus(
+                    id=latests_status_id,
+                    name=latests_status
+                    ),
+                status_history=[
+                    StatusHistory(
+                        id=s.id,
+                        first_name=s.user.first_name,
+                        last_name=s.user.last_name,
+                        comments=s.comments,
+                        timestamped=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                        user_photo=s.user.photo,
+                        ) for s in new_complaints.status_history
+                    ],
+                resolution_time=format_timedelta(new_complaints.resolution_time) if new_complaints.resolution_time else None,
+                unread_messages=unread_messages,
+                images=[ComplaintsImages(id=img.id, url=img.image_url) for img in new_complaints.complaints_image]
+            )
+            pprint(data.model_dump(mode="json"))
+            return {
+                "detail": "new_complaint",
+                "data": data.model_dump(mode="json"),
+                "total_page": total_page,
+            }
+                
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        
+
+    
+    
     async def get_new_complaints_status(self, complaints_id:int):
         self.session.expire_all()
         latests_status = self.get_latest_status()
@@ -292,7 +390,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 1,
-                    'title', 'Total Complaints',
+                    'label', 'Total Complaints',
                     'value', func.count(Complaints.id),
                     'description', 'Includes Deleted'
                 ).label("data"))
@@ -317,7 +415,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 2,
-                    'title', 'Completion',
+                    'label', 'Completion',
                     'value', complaints_subquery.c.completed,
                     'description',
 
@@ -343,7 +441,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 3,
-                    'title', 'Daily Complaints',
+                    'label', 'Daily Complaints',
                     'value', func.count(Complaints.id),
                     'description', 'Today'
                 ).label("data"))

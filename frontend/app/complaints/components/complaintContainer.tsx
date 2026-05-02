@@ -43,11 +43,17 @@ type Complaints = {
     municipality: string;
     location: location,
     status: [];
-    latest_status?: string;
+    latest_status?: LatestsStatusType;
     user_status?: string;
     
     resolution_time: string;
     unread_messages: number;
+}
+
+
+type LatestsStatusType = {
+  id: number;
+  name: string
 }
 
 type location = {
@@ -126,11 +132,11 @@ const ComplaintsContainer = (
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
-            case "complaints":
+            case "new_complaint":
                 queueMicrotask(() =>
                     setComplaints((prev) => {
-                        const existingComplaints = prev.filter((complaint: Complaints) => complaint.id !== message.data.data.id)
-                        return [message.data.data, ...existingComplaints]
+                        const existingComplaints = prev.filter((complaint: Complaints) => complaint.id !== message.data.id)
+                        return [message.data, ...existingComplaints]
                     })
                 )
                 break;

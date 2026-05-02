@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, use} from "react";
+import { useState, useEffect, use} from "react";
 import MapButton from "./mapbutton";
 import ComplaintStatusButton from "./statusButton";
 import { useWebsocket } from "@/app/utils/websocketprovider";
@@ -7,7 +7,6 @@ import Image from "next/image";
 import { redirect, useSearchParams } from "next/navigation";
 import { useAlert } from "@/app/common/alert";
 import MessageDetailView from "./messageDetailView";
-import { useRouter } from "next/navigation";
 import StatusHistoryModal from "./statusHistory";
 import { GetComplaintsMessage } from "@/app/actions/complaint";
 import Messaging from "./messagingModal2";
@@ -110,12 +109,28 @@ type ComplaintsImages = {
 }
 
 
+// type LastMesssageType = 
+//   | "complaint_message"
+//   | "news"
+//   | "new_complaint"
+//   | "complaints_admin"
+//   | "new_status"
+//   | "deleted_news"
+//   | "deleted_complaints"
+//   | "presence"
+//   | "post_change_meter"
+//   | "deleted_change_meter"
+//   | "new_connection_deleted"
+//   | "seen_message"
+//   | "complaints_stats"
+//   | "sent_message"
+//   | "new_connection_created"
+
 const ComplaintsContainer = ({ data }: Props) => {
   const complaintsIinitialData = use(data);
   const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
   const searchParms = useSearchParams();
   const page = searchParms.get("page");
-  const router = useRouter();
   const {playMessageNotification} = useNotification();
   const [messageLoading, setMessageLoading] = useState(false);
   const [activeComplaintsId, setactiveComplaintsId] = useState<number | null>(
@@ -218,16 +233,16 @@ const ComplaintsContainer = ({ data }: Props) => {
   useEffect(() => {
     if (!message) return;
     switch (message.detail) {
-      case "complaints_admin":
+      case "new_complaint":
         if (Number(page) !== 1 && page !== null) {
           showAlert("success", "New Concerns Submitted");
         } else {
           queueMicrotask(() => {
             setallComplaints((prev) => {
               const existingComplaints = prev.filter(
-                (complaint) => complaint.id !== message.data.data.id,
+                (complaint) => complaint.id !== message.data.id,
               );
-              return [message.data.data, ...existingComplaints].slice(0, 10);
+              return [message.data, ...existingComplaints].slice(0, 10);
             });
           });
         }
@@ -246,7 +261,11 @@ const ComplaintsContainer = ({ data }: Props) => {
         break;
       case "deleted_complaints":
         showAlert("success", "Complaint Deleted");
-        router.refresh();
+        queueMicrotask(() =>
+          setallComplaints((prev) =>
+            prev.filter((complaint) => complaint.id !== message.data.id),
+          ),
+        );
         break;
       case "presence":
         queueMicrotask(() =>
@@ -305,7 +324,7 @@ const ComplaintsContainer = ({ data }: Props) => {
       default:
         break;
     }
-  }, [message, router, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
+  }, [message, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
   useEffect(() => {
     if (!isMessaginModalOpen || !complaintsMessage.length) return;
 

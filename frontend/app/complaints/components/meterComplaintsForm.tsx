@@ -155,10 +155,11 @@ const MeterComplaints = ({ title, choices, isother }: Props) => {
     newDATA.append("accountNumber", data.accountNumber);
     newDATA.append("issue", data.issue ? data.issue : "Illegal Connection");
     newDATA.append("details", data.details);
+    newDATA.append("is_meter_complaint", true.toString());
 
     if (lon !== undefined && lat !== undefined) {
       newDATA.append("lon", lon.toString());
-      newDATA.append("lat", lat.toString());
+      newDATA.append("lat", lat.toString());  
     }
 
     if (data.attachment?.[0]) {

@@ -2,10 +2,9 @@
 
 import BiselcoMap from "../../common/Map";
 import Image from "next/image";
-import { PostGenericComplaints } from "@/app/actions/complaint";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { useState, useEffect } from "react";
-
+import { PostComplaints } from "@/app/actions/complaint";
 
 // Define the type for form data
 interface ComplaintFormData {
@@ -70,11 +69,12 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
     data.append("details", formData.details);
     data.append("lon", String(lon));
     data.append("lat", String(lat));
+    data.append("is_meter_complaint", false.toString()); 
     const file = formData.attachment;
     if (file && file.length > 0) {
       data.append("attachment", file[0]);
     }
-    const res = await PostGenericComplaints(data);
+    const res = await PostComplaints(data);
 
     switch (res?.status) {
       case 201:

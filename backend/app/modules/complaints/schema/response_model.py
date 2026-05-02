@@ -79,27 +79,10 @@ class NewComplaintsModel(BaseModel):
     
 class Stat(BaseModel):
     id: int
-    title: str
+    label: str
     value: int
     description: str
     
 class SelectecComplaintStatus(BaseModel):
     id: int
     status_name: str
-# class ComplaintHistoryModel(BaseModel):
-#     id: int
-#     user_id: str
-#     first_name: str
-#     last_name: str
-#     user_photo:str
-#     subject: str
-#     description: str
-#     reference_pole: Optional[str]
-#     village: str
-#     municipality: str
-#     location: Location
-#     date_time_submitted: str
-#     status: List[ComplaintStatus]
-#     latest_status: Optional[str] = None
-#     status_history: Optional[List[StatusHistory]] = None
-#     resolution_time:Optional[str] = None

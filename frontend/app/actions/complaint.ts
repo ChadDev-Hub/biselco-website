@@ -6,9 +6,8 @@ export async function PostComplaints(form: FormData) {
     const data = await serverFetchAutoRefresh( 
         `${baseUrl}/v1/complaints/`,
         "POST",
-        form,
+        form
     )
-    
     return data
 }
 

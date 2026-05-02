@@ -16,13 +16,15 @@ class Geometry(BaseModel):
     
 class CreateComplaints(BaseModel):
     user_id: str
-    account_no: str
-    issue: str
+    account_no: Optional[str] = None
+    subject: str
     details: str
+    location: WKTElement
     village: str
-    municipality: str 
-    geom: str
+    municipality: str
     imageurl: Optional[str] =None
+    
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 
 class Datahistory(BaseModel):
