@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import os
 from uuid import uuid4
 from fastapi import UploadFile
+from PIL import Image
+from io import BytesIO
 load_dotenv()
 AWS_ACCESS_KEY_ID = os.getenv("AWS_CLIENT")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_CLIENT_SECRET")
@@ -17,14 +19,26 @@ s3_client= boto3.client( "s3",
 )
 
 
+async def preprocess_image(image:UploadFile):
+    image.file.seek(0)
+    img = Image.open(image.file)
+    img = img.resize((600, 600))
+    img = img.convert("RGB")
+    
+    buffer = BytesIO()
+    img.save(buffer, format="WEBP", quality=100, optimize=True)
+    buffer.seek(0)
+    return buffer
+
 # UPLOAD IMAGES
 async def upload_image(file: UploadFile, folder:str):
-    print(file)
     if not file or not file.filename:
         return
+    
+    buffer = await preprocess_image(file)
     file.file.seek(0)
-    file_format = file.filename.split('.')[-1]
-    complaint_key = f"{folder}/{uuid4()}.{file_format}"
-    s3_client.upload_fileobj(file.file, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
+    
+    complaint_key = f"{folder}/{uuid4()}.webp"
+    s3_client.upload_fileobj(buffer, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
     return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{complaint_key}"
 

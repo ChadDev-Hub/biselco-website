@@ -14,7 +14,7 @@ export default function NavBar({ title }: Props) {
     const {user} = useAuth()
     return (
         <div className={`navbar navbar-cente shadow drop-shadow-md  top-0 left-0 right-0 z-50 fixed md:fixed lg:fixed p-4 bg-base-200/45 backdrop-blur-sm ${visibleRoutes.includes(currentRouter) ? "visible": "hidden"}`}>
-            <label htmlFor="my-drawer-4" aria-label="open sidebar" className={`swap swap-rotate btn btn-square btn-ghost md:inline-flex hidden ${visibleRoutes.includes(currentRouter) ? "visible" : "hidden"} `}>
+            <label htmlFor="my-drawer-4" aria-label="open sidebar" className={`swap swap-rotate btn btn-square btn-ghost md:inline-flex ${visibleRoutes.includes(currentRouter) ? "visible" : "hidden"} `}>
                 {/* Sidebar toggle icon */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
