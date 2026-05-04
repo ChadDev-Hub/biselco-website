@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { getLandingPageData } from "../../lib/serverFetch";
 import Hero from "./components/hero";
 import McoGoogleLogin from "../common/auth-component/mcoGoogleLogin";
@@ -8,13 +8,14 @@ import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
 import Events from "./components/events";
 const Landing = async () => {
-  const landingPageData = await getLandingPageData()
+  const landingPageData = await getLandingPageData();
   return (
-    <div className="bg-base-100 text-base-content min-h-screen font-sans">
+    <div className=" w-full bg-base-100 text-base-content min-h-screen font-sans">
       <section>
         <Hero
           subtitle={landingPageData.hero.subtitle}
-          description={landingPageData.hero.description}>
+          description={landingPageData.hero.description}
+        >
           <McoGoogleLogin />
         </Hero>
       </section>
@@ -29,24 +30,19 @@ const Landing = async () => {
       </section>
 
       {/* SERVICES AND FEATURES */}
-      <section className="w-full px-5 py-10 sm:py-10 md:py-15 lg:py-25 bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
+      <section className="w-full py-4  bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
         <ServiceFeature />
       </section>
 
-
       {/* EVENTS */}
-      <section className="w-full flex flex-col items-center">
+      <section className="w-full bg-linear-to-b from-gray-300 to-blue-200 border py-4 flex flex-col justify-center items-center">
         <Events />
       </section>
-    <section>
-      <Footer />
-    </section>
-      
+      <section>
+        <Footer />
+      </section>
     </div>
+  );
+};
 
-
-
-  )
-}
-
-export default Landing
+export default Landing;

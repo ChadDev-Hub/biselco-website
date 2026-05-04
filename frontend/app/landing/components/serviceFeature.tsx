@@ -12,14 +12,19 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 1 } },
 };
 const ServiceFeature = () => {
-  const services = ["Lightning Fast Response", "Live Monitoring"];
+  const services = [{
+    title: "Lightning Fast Response",
+    description: "Beyond just electricity, we provide the tools for a connected life."
+  }, {
+    title: "Live Monitoring",
+    description: "Track service status, outages, and updates in real time through our monitoring system."  }];
   return (
     <motion.div className="container flex flex-col gap-4 mx-auto px-4">
       <motion.div
         initial="hidden"
         whileInView="visible"
         variants={fadeInUp}
-        className="glass text-center rounded-box p-8"
+        className="glass text-center rounded-box "
       >
         <h2 className="text-4xl text-primary  font-extrabold mb-4 italic">
           Service Excellence
@@ -43,7 +48,7 @@ const ServiceFeature = () => {
             variants={fadeInUp}
             className="card bg-base-100/20 backdrop-blur-sm shadow-xl hover:bg-base-300 transition-all cursor-pointer group border-b-4 border-transparent hover:border-primary"
           >
-            <div className="card-body">
+            <div className="card-body w-full">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -60,10 +65,9 @@ const ServiceFeature = () => {
                   />
                 </svg>
               </div>
-              <h3 className="card-title">{service}</h3>
+              <h3 className="card-title">{service.title}</h3>
               <p className="opacity-70">
-                Dedicated support teams and digital tools designed for your
-                convenience and safety.
+                {service.description}
               </p>
             </div>
           </motion.div>

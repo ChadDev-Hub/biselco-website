@@ -101,7 +101,7 @@ export default function Hero({ subtitle, description, children }: Props) {
             initial="hidden"
             whileInView="visible"
             variants={textTyping}
-            className="text-4xl text-center sm:text-center md:text-center lg:text-start sm:text-3xl md:text-4xl lg:text-5xl whitespace-normal wrap-break-word font-black mb-6s leading-normal">
+            className="text-4xl text-center sm:text-center md:text-center lg:text-start sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word font-black mb-6s leading-normal">
               {
                 title.split("").map((letter, index) => (
                   <motion.span  key={index}  variants={letterVariant} >
@@ -110,7 +110,7 @@ export default function Hero({ subtitle, description, children }: Props) {
                 ))
               }
             </motion.h1>
-            <motion.h2 initial="hidden" whileInView="visible" variants={textTyping} className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-4xl lg:text-5xl whitespace-normal wrap-break-word">
+            <motion.h2 initial="hidden" whileInView="visible" variants={textTyping} className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word">
               {"Brighter Tomorrow".split("").map((letter, index) => (
                 <motion.span key={index} variants={letterVariant}>
                   {letter}

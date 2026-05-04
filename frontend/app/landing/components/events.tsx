@@ -18,9 +18,9 @@ const Events = () => {
         image_src: "/agma_image.jpg"
     }]
   return (
-    <div className='h-["200px"] w-full'>
-        <h1>Events</h1>
+    <div className='w-full'>
         <Carousel>
+            
         {
             events.map((event, index) => (
                 <EventCard key={index} image_src={event.image_src} title={event.title} description={event.description} />
