@@ -6,7 +6,7 @@ import LandingStats from "./components/stats";
 import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
-
+import Events from "./components/events";
 const Landing = async () => {
   const landingPageData = await getLandingPageData()
   return (
@@ -33,6 +33,11 @@ const Landing = async () => {
         <ServiceFeature />
       </section>
 
+
+      {/* EVENTS */}
+      <section className="w-full flex flex-col items-center">
+        <Events />
+      </section>
     <section>
       <Footer />
     </section>

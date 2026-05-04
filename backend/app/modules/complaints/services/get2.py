@@ -136,6 +136,7 @@ class GetServices:
                    unread_message.c.count.label("unread_messages"))
             .select_from(Complaints)
             .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
+            .join(Users, Users.id == Complaints.user_id)
             .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
@@ -169,6 +170,7 @@ class GetServices:
         data = (await self.session.execute(stmt)).all()
         total_page = await self.get_complaints_total_page()
         results = []
+        
         for complaints, latests_updates, latest_status_id, unread_messages in data:
             status_lists = [
                 ComplaintStatus(
@@ -234,6 +236,7 @@ class GetServices:
                    unread_message.c.count.label("unread_messages"))
             .select_from(Complaints)
             .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
+            .join(Users, Users.id == Complaints.user_id)
             .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
             .options(selectinload(Complaints.status_updates)
                      .selectinload(ComplaintsStatusUpdates.status),
@@ -292,7 +295,6 @@ class GetServices:
                 unread_messages=unread_messages,
                 images=[ComplaintsImages(id=img.id, url=img.image_url) for img in new_complaints.complaints_image]
             )
-            pprint(data.model_dump(mode="json"))
             return {
                 "detail": "new_complaint",
                 "data": data.model_dump(mode="json"),

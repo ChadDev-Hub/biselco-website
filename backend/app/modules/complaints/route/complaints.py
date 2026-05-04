@@ -8,24 +8,21 @@ from ..schema.requests_model import ComplaintsStatus
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from geoalchemy2.functions import ST_Point, ST_SetSRID, ST_Intersects
 from shapely.geometry import Point
-from ..services.complaints_dashboard import get_complaints_history, get_top_10_complaints, get_complaint_overtime
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
 from ...websocket.websocket_manager import manager
 from .. import *
 from ...user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
-from ..schema.response_model import ComplaintsModel, ComplaintStatusName, ComplaintsModelLists, NewComplaintsModel
+from ..schema.response_model import  ComplaintStatusName, ComplaintsModelLists, NewComplaintsModel
 from ...user.schema.response_model import UserModel
 from typing import Optional
 from ...gis.franchise_area.model.boundary import Boundary
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ...gis.franchise_area.services.get_location import verifyLocation
 from ...gis.franchise_area.schema.response_model import VerifiedLocation
-from ..services.complaints_status_history import add_complaints_history
 from ..services.complaints_messages import get_message
 from ...websocket.schema.response_model import Message
-from ..services.complaints_stats import get_complaints_stats
 from ..schema.response_model import Stat
 from ..model.complaint_image import ComplaintsImage
 from asyncio import gather

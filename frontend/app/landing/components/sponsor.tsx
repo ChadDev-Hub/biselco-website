@@ -1,5 +1,5 @@
 "use client";
-import { motion} from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 const ParentContainer = {
@@ -11,7 +11,7 @@ const ParentContainer = {
         opacity: 1,
         y: 0,
     },
-    
+
 }
 
 const container = {
@@ -31,20 +31,20 @@ const itemVariants = {
 
 
 export default function Sponsor() {
-    const items = ["/coron.jpg", "/busuanga.jpeg", "/culion.jpg", "/linapacan.png",   "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
+    const items = ["/coron.jpg", "/busuanga.jpeg", "/culion.jpg", "/linapacan.png", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
     return (
         <motion.div
-        variants={ParentContainer}
-        initial="hidden"
-        whileInView="visible"
-        
-         className="overflow-hidden w-full">
+            variants={ParentContainer}
+            initial="hidden"
+            whileInView="visible"
+            className="overflow-hidden w-full">
             <motion.div
                 initial="hidden"
                 whileInView="visible"
                 className="flex gap-4"
-                animate={{ 
-                    x: ["0%", "-100%"] }}
+                animate={{
+                    x: ["0%", "-100%"]
+                }}
                 transition={{
                     repeat: Infinity,
                     ease: "linear",

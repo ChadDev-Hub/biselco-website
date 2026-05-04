@@ -60,6 +60,7 @@ export default function Hero({ subtitle, description, children }: Props) {
     <div
       ref={scollRef}
       className="
+          relative
           flex flex-col
           pt-25
           pb-16
@@ -69,7 +70,6 @@ export default function Hero({ subtitle, description, children }: Props) {
           "
     >
       <motion.div
-        style={{ y }}
         initial="hidden"
         whileInView="visible"
         variants={fadeinSide}
@@ -85,13 +85,13 @@ export default function Hero({ subtitle, description, children }: Props) {
         </motion.h1>
       </motion.div>
 
-      <div className="grid gap-4  mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-3 ">
+      <div className="grid gap-4  mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 ">
         <motion.div
           style={{ y }}
           initial="hidden"
           whileInView="visible"
           variants={fadeLeftSide}
-          className="flex flex-col w-full items-center gap-4 lg:items-start  order-2 lg:order-1  col-span-2"
+          className="flex flex-col w-full items-center gap-4 lg:items-start  order-2 lg:order-1"
         >
           <div className="badge text-center sm:text-center md:text-end lg:text-start  badge-primary badge-outline">
             Empowering Our Community
@@ -129,10 +129,10 @@ export default function Hero({ subtitle, description, children }: Props) {
             {children}
           </div>
         </motion.div>
-        <motion.div className="order-1 flex  flex-col gap-4 w-full justify-center  lg:order-2">
+        <motion.div className="order-1 flex flex-col justify-center items-center  gap-4 px-2 md:px-15 lg:px-20  lg:order-2">
           <motion.div
           style={{ y }}
-          className="w-full rounded-full lg:hover-3d "
+          className="rounded-full  lg:hover-3d "
           initial="hidden"
           whileInView="visible"
           variants={fadeRightSide}

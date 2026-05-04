@@ -7,7 +7,6 @@ from ..model.complaint_image import ComplaintsImage
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ..schema.requests_model import CreateComplaints
-from ..services.get import new_complaint
 from ....common.total_page import get_total_page
 from ..services.get2 import GetServices
 from typing import Optional
