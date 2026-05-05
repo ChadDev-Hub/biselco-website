@@ -2,6 +2,8 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
+import { useRouter } from 'next/navigation';
+
 type Props = {
   image_src: string;
   title: string;
@@ -52,7 +54,7 @@ return {
   animate: {
     y: [-10, 0],
     transition: {
-      delay: 0.2 * i,
+      delay: 0.5 * i,
       duration: 0.4,
       repeat: Infinity,
       repeatType: "mirror" as const,
@@ -63,6 +65,10 @@ return {
 
 const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, footer }: Props) => {
   const year = new Date().getFullYear();
+  const router = useRouter();
+  const handleNavigation = () => {
+    router.push('/agma-registration',{scroll: false})
+  }
   return (
     <motion.div
     initial="hidden"
@@ -73,8 +79,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
       
       <motion.h2 
       variants={textTyping}
-      initial="hidden"
-      whileInView="visible"
       className="absolute top-2 left-3 z-20 pr-12 
                  text-2xl sm:text-3xl lg:text-4xl 
                  font-extrabold wrap-break-word leading-tight
@@ -90,12 +94,14 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
       </motion.h2>
 
       {/* 2. Image: Standardized aspect ratio for consistency */}
-      <figure className="w-full aspect-square sm:aspect-video md:aspect-square">
+      <figure className="w-full relative aspect-square sm:aspect-video md:aspect-square">
         <Image
+        loading="eager"
           src={image_src}
           alt={title}
           fill
-          className="object-fill h-fit w-full"
+          className="object-fill h-fit w-full "
+          sizes="(max-width: 768px) 100vw,  (max-width: 1200px) 50vw, 33vw"
         />
       </figure>
 
@@ -115,8 +121,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
         </div>
         <div className="relative z-10 flex flex-col items-center ">
           <motion.h1
-          initial="hidden"
-          whileInView="animate"
           variants={textTyping}
            className={`text-xl text-shadow-2xs sm:text-2xl lg:text-3xl flex gap-1 font-black ${font.className}`}>
             {abrev.map((item, index)=>(
@@ -161,8 +165,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
             {/* TITLE */}
             <motion.h1
             variants={textTyping}
-            initial="hidden"
-            whileInView="visible"
              className="text-xl font-extrabold text-violet-500 text-shadow-md text-shadow-orange-300">
             {`"${qoute_title}`.split("").map((char, index) => (
               <motion.span key={index} variants={letterVariant}>
@@ -172,8 +174,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
             </motion.h1>
             {/* DESCRIPTION */}
             <motion.h2
-            initial="hidden"
-            whileInView="visible"
             variants={textTyping}
              className="text-md italic font-bold">{
             `${qoute_description}"`.split("").map((char, index) => (
@@ -187,8 +187,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
           {/* FOOTER */}
           <div className="z-100 text-center text-xs mt-2 italic w-full ">
             <motion.h1
-            initial="hidden"
-            whileInView="visible"
             variants={textTyping}
             >
               
@@ -207,8 +205,7 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
         {/* 5. Actions: Using absolute/relative to stay on top of SVG */}
         <div className="card-actions justify-end items-end h-full p-4 relative z-40">
           
-          <button type="button" className="btn btn-primary drop-shadow-lg active:scale-105 btn-sm sm:btn-md shadow-lg">
-          
+          <button type="button" onClick={handleNavigation} className="btn btn-primary drop-shadow-lg active:scale-105 btn-sm sm:btn-md shadow-lg">
             Register Now
           </button>
         </div>

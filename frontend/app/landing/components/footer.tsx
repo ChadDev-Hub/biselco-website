@@ -47,12 +47,6 @@ const Footer = () => {
                 <h6 className="footer-title opacity-50">Member Services</h6>
                 <a className="link link-hover">Energy Saving Tips</a>
             </nav>
-            <nav>
-                <h6 className="footer-title opacity-50">Transparency</h6>
-                <a className="link link-hover">Board Resolutions</a>
-                <a className="link link-hover">Financial Reports</a>
-                <a className="link link-hover">Careers</a>
-            </nav>
         </footer>
     )
 }

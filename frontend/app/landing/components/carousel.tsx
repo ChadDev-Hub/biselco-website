@@ -8,9 +8,9 @@ type Props = {
 const Carousel = ({ children }: Props) => {
   const [current, setCurrent] = useState(0);
   return (
-    <div className="wrap-break-word flex justify-center items-center carousel">
-      <div className="carousel-item relativ flex  flex-col gap-2 h-full">
-        <AnimatePresence mode="wait">
+    <div className="wrap-break-word relative flex justify-center items-center carousel">
+      <div className="carousel-item flex  flex-col gap-2 h-full">
+        <AnimatePresence mode="sync">
           <motion.div
             key={current} // Unique key triggers the animation on change
             initial={{ opacity: 0, x: 50 }}
