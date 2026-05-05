@@ -51,7 +51,7 @@ const LandingStats = () => {
     return () => controls.stop();
   }, [renewableEnergy]);
     return (
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4 md:px-20 lg:px-28 xl:px-64">
             <motion.div
                 initial={{ opacity: 0, scale: 0.85 }}
                 whileInView={{ opacity: 1, scale: 1 }}

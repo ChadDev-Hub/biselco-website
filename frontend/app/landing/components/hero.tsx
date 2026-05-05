@@ -65,7 +65,7 @@ export default function Hero({ subtitle, description, children }: Props) {
           pt-25
           pb-16
           gap-4
-          px-6 sm:px-0 md:px-60 lg:px-60
+          px-2 sm:px-2 md:px-20 lg:px-28 xl:px-80
           bg-linear-to-b from-orange-700 to-gray-300
           "
     >
@@ -85,18 +85,18 @@ export default function Hero({ subtitle, description, children }: Props) {
         </motion.h1>
       </motion.div>
 
-      <div className="grid gap-4  mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 ">
+      <div className="grid gap-1  mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1  lg:grid-cols-2 ">
         <motion.div
           style={{ y }}
           initial="hidden"
           whileInView="visible"
           variants={fadeLeftSide}
-          className="flex flex-col w-full items-center gap-4 lg:items-start  order-2 lg:order-1"
+          className="flex flex-col shrink-0 w-full items-center gap-2 lg:items-start  order-2 lg:order-1"
         >
           <div className="badge text-center sm:text-center md:text-end lg:text-start  badge-primary badge-outline">
             Empowering Our Community
           </div>
-          <div className="flex w-full flex-col gap-2  ">
+          <div className="flex w-full flex-col gap-2">
             <motion.h1 
             initial="hidden"
             whileInView="visible"
@@ -129,7 +129,7 @@ export default function Hero({ subtitle, description, children }: Props) {
             {children}
           </div>
         </motion.div>
-        <motion.div className="order-1 flex flex-col justify-center items-center  gap-4 px-2 md:px-15 lg:px-20  lg:order-2">
+        <motion.div className="order-1  flex flex-col justify-center items-center  gap-4 px-2 md:px-15 lg:px-20  lg:order-2">
           <motion.div
           style={{ y }}
           className="rounded-full  lg:hover-3d "
@@ -143,8 +143,8 @@ export default function Hero({ subtitle, description, children }: Props) {
               loading="eager"
               src="/biselco-icon.png"
               alt="biselco-icon"
-              width={400}
-              height={400}
+              width={200}
+              height={200}
             />
           </figure>
           <div></div>

@@ -19,7 +19,7 @@ const ServiceFeature = () => {
     title: "Live Monitoring",
     description: "Track service status, outages, and updates in real time through our monitoring system."  }];
   return (
-    <motion.div className="container flex flex-col gap-4 mx-auto px-4">
+    <motion.div className="container flex flex-col mx-auto gap-2 px-2 sm:px-2 md:px-20 lg:px-28 xl:px-64">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -38,7 +38,7 @@ const ServiceFeature = () => {
         variants={staggerContainer}
         initial="hidden"
         whileInView="visible"
-        className={`grid grid-cols-1 md:grid-cols-${services.length} gap-8`}
+        className={`grid grid-cols-1 md:grid-cols-${services.length} gap-2`}
       >
         {services.map((service, index) => (
           <motion.div

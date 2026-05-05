@@ -12,6 +12,7 @@ const Landing = async () => {
   return (
     <div className=" w-full bg-base-100 text-base-content min-h-screen font-sans">
       <section>
+
         <Hero
           subtitle={landingPageData.hero.subtitle}
           description={landingPageData.hero.description}
@@ -20,12 +21,12 @@ const Landing = async () => {
         </Hero>
       </section>
 
-      <section className="w-full bg-linear-to-b from-gray-300 to-blue-200">
+      <section className="bg-linear-to-b from-gray-300 to-blue-200">
         <LandingStats />
       </section>
 
       {/* VISION AND MISSION SECTION */}
-      <section className="py-5 w-full bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
+      <section className="py-5 w-full  bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
         <VisionMission />
       </section>
 
@@ -35,7 +36,24 @@ const Landing = async () => {
       </section>
 
       {/* EVENTS */}
-      <section className="w-full bg-linear-to-b from-gray-300 to-blue-200 border py-4 flex flex-col justify-center items-center">
+      <section className="w-full relative h-full bg-linear-to-b from-gray-300 to-blue-200  py-4 flex flex-col justify-center items-center">
+        <div className="absolute w-full h-full">
+          <svg width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+            <defs>
+
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+
+            <path id="arc" d="" stroke="#00d4ff" stroke-width="3" fill="none" filter="url(#glow)" />
+          </svg>
+        </div>
         <Events />
       </section>
       <section>

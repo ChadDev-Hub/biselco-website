@@ -7,15 +7,9 @@ type Props = {
 
 const Carousel = ({ children }: Props) => {
   const [current, setCurrent] = useState(0);
-  const prev = () => {
-    setCurrent((c) => (c - 1 + children.length) % children.length);
-  };
-  const next = () => {
-    setCurrent((c) => (c + 1) % children.length);
-  };
   return (
-    <div className="wrap-break-word flex justify-center items-center carousel h-full">
-      <div className="carousel-item relativ flex  flex-col">
+    <div className="wrap-break-word flex justify-center items-center carousel">
+      <div className="carousel-item relativ flex  flex-col gap-2 h-full">
         <AnimatePresence mode="wait">
           <motion.div
             key={current} // Unique key triggers the animation on change
@@ -27,14 +21,14 @@ const Carousel = ({ children }: Props) => {
             {children[current]}
           </motion.div>
           <motion.div className="flex gap-1 justify-center">
-            {children.map((child, index) => (
+            {children.length > 1 && children.map((child, index) => (
               <button
                 type="button"
                 title="dfs"
-                className="btn btn-xs btn-circle"
+                className="btn btn-xs btn-info"
                 key={index}
                 onClick={() => setCurrent(index)}
-              ></button>
+              >{index+1}</button>
             ))}
           </motion.div>
         </AnimatePresence>
