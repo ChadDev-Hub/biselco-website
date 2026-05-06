@@ -19,7 +19,7 @@ const ServiceFeature = () => {
     title: "Live Monitoring",
     description: "Track service status, outages, and updates in real time through our monitoring system."  }];
   return (
-    <motion.div className="container flex flex-col mx-auto gap-2 px-2 sm:px-2 md:px-20 lg:px-28 xl:px-48">
+    <motion.div className="w-full flex flex-col mx-auto gap-2 px-2 sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip">
       <motion.div
         initial="hidden"
         whileInView="visible"

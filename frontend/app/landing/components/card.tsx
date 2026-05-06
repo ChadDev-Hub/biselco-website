@@ -74,7 +74,7 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
     initial="hidden"
     whileInView="visible"
     variants={fadeInUp}
-     className="card card-md drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-screen md:w-md lg:w-lg xl:w-xl group">
+     className="card card-md drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-100 md:w-md lg:w-lg xl:w-xl group">
       {/* 1. Optimized Title: Responsive font sizing and better z-index */}
       
       <motion.h2 
@@ -124,7 +124,12 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
           variants={textTyping}
            className={`text-xl text-shadow-2xs sm:text-2xl lg:text-3xl flex gap-1 font-black ${font.className}`}>
             {abrev.map((item, index)=>(
-              <motion.span className={`${item.color}`} variants={bouncingLetter(index)} key={index}>
+              <motion.span
+              whileInView="animate"
+              whileHover={{scale: 1.1}}
+              className={`${item.color}`} 
+              variants={bouncingLetter(index)}
+              key={index}>
                   {item.char}
               </motion.span>
             ))}

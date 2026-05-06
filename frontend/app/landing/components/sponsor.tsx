@@ -60,6 +60,7 @@ export default function Sponsor() {
                         className="w-10 shrink-0 h-full py-2 flex items-center justify-center text-white"
                     >
                         <Image
+                            loading="eager"                            
                             src={item}
                             alt="sponsor"
                             width={100}

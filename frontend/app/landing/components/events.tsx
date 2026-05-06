@@ -35,7 +35,7 @@ const Events = () => {
         ]
     }]
   return (
-    <div className='w-full  sm:px-2 md:px-20 lg:px-28 xl:px-64'>
+    <div className='w-full  sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip'>
         <Carousel>
         {
             events.map((event, index) => (

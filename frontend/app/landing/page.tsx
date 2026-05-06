@@ -10,37 +10,40 @@ import Events from "./components/events";
 const Landing = async () => {
   const landingPageData = await getLandingPageData();
   return (
-    <div className=" w-full bg-base-100 text-base-content min-h-screen font-sans">
-      <section >
-        <Hero
-          subtitle={landingPageData.hero.subtitle}
-          description={landingPageData.hero.description}
-        >
-          <McoGoogleLogin />
-        </Hero>
-      </section>
+    <div className="bg-base-100  text-base-content min-h-screen font-sans">
+      <main className="w-full">
+        <section className="w-full">
+          <Hero
+            subtitle={landingPageData.hero.subtitle}
+            description={landingPageData.hero.description}
+          >
+            <McoGoogleLogin />
+          </Hero>
+        </section>
 
-      <section className="bg-linear-to-b from-gray-300 to-blue-200">
-        <LandingStats />
-      </section>
+        <section className="w-full  bg-linear-to-b from-gray-300 to-blue-200">
+          <LandingStats />
+        </section>
 
-      {/* VISION AND MISSION SECTION */}
-      <section className="py-5 w-full  bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
-        <VisionMission />
-      </section>
+        {/* VISION AND MISSION SECTION */}
+        <section className="py-4 w-full  bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
+          <VisionMission />
+        </section>
 
-      {/* SERVICES AND FEATURES */}
-      <section className="w-full py-4  bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
-        <ServiceFeature />
-      </section>
+        {/* SERVICES AND FEATURES */}
+        <section className="w-full  py-4  bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
+          <ServiceFeature />
+        </section>
+        {/* EVent */}
+        <section className="w-full relative h-full bg-linear-to-b from-gray-300 to-blue-200  py-4 flex flex-col justify-center items-center">
+          <Events />
+        </section>
+        <section className="w-full">
+          <Footer />
+        </section>
 
-      EVENTS
-      <section className="w-full relative h-full bg-linear-to-b from-gray-300 to-blue-200  py-4 flex flex-col justify-center items-center">
-        <Events />
-      </section>
-      <section>
-        <Footer />
-      </section>
+      </main>
+
     </div>
   );
 };

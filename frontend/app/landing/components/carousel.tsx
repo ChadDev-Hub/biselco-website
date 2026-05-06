@@ -8,7 +8,7 @@ type Props = {
 const Carousel = ({ children }: Props) => {
   const [current, setCurrent] = useState(0);
   return (
-    <div className="wrap-break-word relative flex justify-center items-center carousel">
+    <div className="wrap-break-word relative flex w-full justify-center items-center carousel">
       <div className="carousel-item flex  flex-col gap-2 h-full">
         <AnimatePresence mode="sync">
           <motion.div

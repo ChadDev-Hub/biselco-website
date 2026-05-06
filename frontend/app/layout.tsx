@@ -25,13 +25,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://biselco.calamianes.cloud.com"),
+  metadataBase: new URL("https://biselco.calamianes.cloud"),
 
   // Basic SEO
-  title: {
-    default: "BISELCO",
-    template: "%s | BISELCO",
-  },
+  title: "BISELCO",
   description:
     "App for BISELCO - Manage services, complaints, and updates بسهولة.",
 
@@ -55,18 +52,18 @@ export const metadata: Metadata = {
 
   // Canonical URL
   alternates: {
-    canonical: "https://biselco.calamianes.cloud",
+    canonical: "/",
   },
 
   // Open Graph (Facebook, Messenger, LinkedIn, etc.)
   openGraph: {
     title: "BISELCO",
     description: "App for BISELCO - Manage services and complaints",
-    url: "https://biselco.calamianes.cloud",
+    url: "/",
     siteName: "BISELCO",
     images: [
       {
-        url: "https://biselco.calamianes.cloud/biselco-icon.png",
+        url: "/biselco-icon.png",
         width: 1200,
         height: 630,
         alt: "BISELCO App Preview",
