@@ -260,7 +260,7 @@ const ChangeMeterForm = () => {
                         {/* IMAGE */}
                         <div className="flex flex-col self-center items-center justify-center ">
                             <label className="label font-bold text-md"> Upload Image</label>
-                            <input capture className="file-input" type="file" accept="image/*" {...register('attachment', { required: "Please Upload Image of the Electric Meter" })} />
+                            <input  className="file-input" type="file" accept="image/*" {...register('attachment', { required: "Please Upload Image of the Electric Meter" })} />
                             {errors.attachment && <span className="text-red-500">{errors.attachment.message}</span>}
                             {attachment?.[0] &&
                                 <Image src={attachment ? URL.createObjectURL(attachment[0]) : ""}

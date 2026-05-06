@@ -181,7 +181,7 @@ const NewConnectionForm = () => {
                         <label >
                             Image
                         </label>
-                        <input {...register("attachment", { required: "Image is required" })} multiple={false} accept="image/*" type="file" capture className="file-input w-full" />
+                        <input {...register("attachment", { required: "Image is required" })} multiple={false} accept="image/*" type="file" className="file-input w-full" />
                         {attachment?.[0] &&
                             <Image
                                 src={attachment ? URL.createObjectURL(attachment[0]) : ""}

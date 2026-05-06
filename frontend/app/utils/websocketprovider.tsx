@@ -254,6 +254,7 @@ const WebsocketContext = createContext<WSContextType | undefined>(undefined)
 const WebsocketProvider = ({ children }: Props) => {
   const [message, setMessage] = useState<WSMessage | null>(null)
   const { user } = useAuth()
+  
   const wsRef = useRef<WebSocket | null>(null)
   const WSURL = process.env.NEXT_PUBLIC_WEBSOCKET_URL as string
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null)

@@ -1,9 +1,9 @@
 "use client"
-import React, {createContext, useState, useContext} from 'react'
+import React, {createContext, useState, useContext, useEffect} from 'react'
 
 type Props = {
     children: React.ReactNode;
-    initialUser: User | null
+    initialUser?: User
 }
 
 
@@ -29,7 +29,14 @@ type contextType = {
 
 const authContext = createContext<contextType | null>(null)
 const AuthProvider = ({children, initialUser}: Props) => {
-    const [user, setUser] = useState<User | null>(initialUser)
+    const [user, setUser] = useState<User | null>(null)
+
+    useEffect(() => {
+        if (initialUser) {
+            setUser(initialUser)
+        }
+    }, [initialUser])
+    
   return (
     <authContext.Provider value={{user, setUser}}>
         {children}

@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { getLandingPageData } from "../lib/serverFetch";
 import DocNavigation from "./common/doc";
 import Drawer from "./common/drawer";
 import ThemeController from "./common/themeController";
 import { WebsocketProvider } from "./utils/websocketprovider";
 import { AuthProvider } from "./utils/authProvider";
-import { getCurrentUser } from "../lib/serverFetch";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import AlertComponent from "./common/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
+import { getCurrentUser } from '@/lib/serverFetch';
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,11 +57,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BISELCO",
     description: "App for BISELCO - Manage services and complaints",
-    url: "/",
+    url: "https://biselco.calamianes.cloud",
     siteName: "BISELCO",
     images: [
       {
-        url: "/biselco-icon.png",
+        url: "https://biselco.calamianes.cloud/biselco-icon.png",
         width: 1200,
         height: 630,
         alt: "BISELCO App Preview",
@@ -123,22 +121,19 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const data = await getLandingPageData();
-  const user = await getCurrentUser();
-  const googleClient = process.env.GOOGLE_CLIENT_ID;
+  const currentUSER = await getCurrentUser();
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <AuthProvider initialUser={user.status === 200 ? user.detail : null}>
-          <GoogleOAuthProvider clientId={googleClient ?? ""}>
+        <AuthProvider initialUser={currentUSER?.detail ?? null}>
             <WebsocketProvider>
               <AlertComponent>
                 <LoadingIndicator>
                   <ThemeController />
                   <NotificationProvider>
-                    <Drawer baseurl={baseurl} title={data.hero.title}>
+                    <Drawer baseurl={baseurl}>
                       {children}
                       <DocNavigation />
                     </Drawer>
@@ -146,7 +141,6 @@ export default async function RootLayout({
                 </LoadingIndicator>
               </AlertComponent>
             </WebsocketProvider>
-          </GoogleOAuthProvider>
         </AuthProvider>
       </body>
     </html>

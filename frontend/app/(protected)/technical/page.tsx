@@ -1,5 +1,4 @@
 
-import React from 'react'
 import {GetTechnicalForms} from "@/lib/serverFetch"
 import TechniclaFormLists from './components/optionsLists'
 import { Suspense } from 'react'

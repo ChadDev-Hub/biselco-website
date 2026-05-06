@@ -3,12 +3,9 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth } from "../utils/authProvider"
 import LogoutButton from "./auth-component/logout"
-interface Props {
-    title?: string,
 
-}
 
-export default function NavBar({ title }: Props) {
+export default function NavBar() {
     const currentRouter = usePathname()
     const visibleRoutes = ["/landing","/", "/complaints", "/complaints/dashboard", "/technical", "/technical/change-meter","/technical/new-connection"];
     const {user} = useAuth()
@@ -38,7 +35,7 @@ export default function NavBar({ title }: Props) {
                 height={30}
             />
             <div className="flex-1">
-                <a className="btn btn-ghost text-xl text-blue-700">{title}</a>
+                <a className="btn btn-ghost text-xl text-blue-700">BISELCO</a>
             </div>
             <div className={`flex flex-none z-40 ${currentRouter === "/landing" ? "hidden" : ""}`}>
                 <button type="button" aria-label="Search" className="btn btn-ghost btn-circle">

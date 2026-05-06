@@ -23,7 +23,7 @@ const Drawer = ({ children, title }: Props) => {
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content">
                 {/* Navbar */}
-                <NavBar title={title} />
+                <NavBar/>
                 {/* Page content here */}
                 <div className="lg:p-2">
                     {children}

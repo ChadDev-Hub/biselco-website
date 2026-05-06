@@ -1,4 +1,5 @@
 "use server";
+import { Metadata } from "next";
 import { getLandingPageData } from "../../lib/serverFetch";
 import Hero from "./components/hero";
 import McoGoogleLogin from "../common/auth-component/mcoGoogleLogin";
@@ -7,6 +8,11 @@ import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
 import Events from "./components/events";
+
+
+
+
+
 const Landing = async () => {
   const landingPageData = await getLandingPageData();
   return (

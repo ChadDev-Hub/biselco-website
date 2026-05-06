@@ -13,6 +13,7 @@ router = APIRouter(prefix="/socket", tags=['Socket'])
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depends(get_session)):
+    print(websocket)
     user = await get_current_user_ws(websocket)
     if not user:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
