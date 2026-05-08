@@ -15,3 +15,7 @@ class Consumer(BaseModel):
     geolocation: Optional[location] | None = None
 
     model_config = ConfigDict(from_attributes=True)
+    
+class ConsumerVerification(BaseModel):
+    account_no:str
+    model_config = ConfigDict(from_attributes=True)

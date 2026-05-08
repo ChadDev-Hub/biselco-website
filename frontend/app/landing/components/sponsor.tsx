@@ -31,7 +31,7 @@ const itemVariants = {
 
 
 export default function Sponsor() {
-    const items = ["/coron.jpg", "/busuanga.jpeg", "/culion.jpg", "/linapacan.png", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
+    const items = ["/coron.jpg", "/busuanga.jpg", "/culion.jpg", "/linapacan.png", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
     return (
         <motion.div
             variants={ParentContainer}
@@ -68,9 +68,6 @@ export default function Sponsor() {
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="h-full w-full drop-shadow-md shadow-md rounded-box bg-base-100 object-cover"
                         />
-
-
-
                     </motion.div>
                 ))}
             </motion.div>

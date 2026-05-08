@@ -1,8 +1,12 @@
 "use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Luckiest_Guy } from "next/font/google";
 import { useRouter } from 'next/navigation';
+import { textTyping } from "@/app/utils/framerFunctions";
+import AgmaCircleIcon from "@/app/agma-registration/components/agmacircle";
+import { letterVariant } from "@/app/utils/framerFunctions";
+import { fadeInUp } from "@/app/utils/framerFunctions";
+
 
 type Props = {
   image_src: string;
@@ -18,53 +22,19 @@ type Abrev = {
   color: string;
 }
 
-const font = Luckiest_Guy({ weight: "400", subsets: ["latin"] });
-
-
-
-const fadeInUp = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 1 } },
-};
-
-const textTyping = {
-  hidden: { },
-  visible: {
-    transition: {
-      delayChildren: 0.4,
-      staggerChildren: 0.05,
-    },
-    
-  },
-}
-
-const letterVariant = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-};
 
 
 
 
-const bouncingLetter = (i: number)=>{ 
-return {
-  hidden: { 
-    y: 0 
-  },
-  animate: {
-    y: [-10, 0],
-    transition: {
-      delay: 0.5 * i,
-      duration: 0.4,
-      repeat: Infinity,
-      repeatType: "mirror" as const,
-      ease: "easeInOut" as const
-    }
-  }
-}};
+
+
+
+
+
+
+
 
 const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, footer }: Props) => {
-  const year = new Date().getFullYear();
   const router = useRouter();
   const handleNavigation = () => {
     router.push('/agma-registration',{scroll: false})
@@ -100,45 +70,28 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
           src={image_src}
           alt={title}
           fill
-          className="object-fill h-fit w-full "
+          className="object-fill object-center h-fit w-full "
           sizes="(max-width: 768px) 100vw,  (max-width: 1200px) 50vw, 33vw"
         />
       </figure>
 
       {/* 3. The Badge (AGMA): Changed to use percentages or dynamic sizes */}
 
-      <div className="
-              absolute
-              drop-shadow-2xl
-              z-30
-              right-[10%] top-[50%] /* Positioned to image/body split */
-              w-30 h-30
-              rounded-full 
-              flex flex-col justify-center items-center
-            ">
-        <div className="absolute inset-0 rounded-full p-1 animate-spin bg-linear-to-tr from-amber-300 via-blue-600 to-amber-300">
-          <div className="w-full h-full rounded-full bg-linear-to-r from-violet-400 to-blue-500"></div>
-        </div>
-        <div className="relative z-10 flex flex-col items-center ">
-          <motion.h1
-          variants={textTyping}
-           className={`text-xl text-shadow-2xs sm:text-2xl lg:text-3xl flex gap-1 font-black ${font.className}`}>
-            {abrev.map((item, index)=>(
-              <motion.span
-              whileInView="animate"
-              whileHover={{scale: 1.1}}
-              className={`${item.color}`} 
-              variants={bouncingLetter(index)}
-              key={index}>
-                  {item.char}
-              </motion.span>
-            ))}
-          </motion.h1>
-          <span className={`text-black font-bold text-2xl lg:text-3xl [text-stroke:1px_white] [-webkit-text-stroke:1px_white] ${font.className} `}>{year}</span>
-
-        </div>
-
-      </div>
+      
+        <AgmaCircleIcon 
+        abrev={abrev} 
+        positionClass="
+                      drop-shadow-black
+                      absolute
+                      drop-shadow-xl
+                      z-30
+                      right-[10%] top-[50%] /* Positioned to image/body split */
+                      w-30 h-30
+                      rounded-full 
+                      flex flex-col justify-center items-center
+                    "
+         />
+      
       {/* Card Body */}
       <div className="card-body flex flex-col bottom-0 p-0 w-full absolute  overflow-hidden bg-transparent">
         <svg
@@ -161,8 +114,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
           <path className="fill-base-200/50" d="M0 56.6734C445.7 -6.9999 498.477 210 852.774 56.6734V131C852.774 131 0.230428 71.0163 4.66999e-05 130.976C3.90831e-05 105.306 0 56.6734 0 56.6734Z" >
 
           </path>
-          
-
         </svg>
         <div className="group z-50 w-1/2 ml-2.5 mt-50  relative">
         <div className="absolute -bottom-12">
@@ -194,7 +145,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
             <motion.h1
             variants={textTyping}
             >
-              
               {footer.split("").map((char, index)=>(
                 <motion.span key={index} variants={letterVariant}>{char}</motion.span>
               ))}</motion.h1>

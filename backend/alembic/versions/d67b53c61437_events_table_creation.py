@@ -29,7 +29,9 @@ def upgrade() -> None:
         sa.Column("end_date", sa.Date(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        schema="public"
+        sa.PrimaryKeyConstraint("id"),
+        schema="public",
+        
     )
     op.create_index("events_idx", "events", ["id"], unique=True, schema="public", if_not_exists=True)
     
@@ -39,18 +41,20 @@ def upgrade() -> None:
         sa.Column("event_id", sa.Integer(), nullable=False),
         sa.Column("upload_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("url", sa.Text(), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
-            ["event_id"], ["events.id"], 
+            ["event_id"], ["public.events.id"], 
             ondelete="CASCADE", 
-            onupdate="CASCADE", 
-            use_alter=True
-        )
+            onupdate="CASCADE",
+        ),
+        schema="public",
     )
+    
     op.create_index("event_images_idx", "event_images", ["id"], unique=True, schema="public", if_not_exists=True)
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("DROP TABLE IF EXISTS events_images;")
-    op.execute("DROP TABLE IF EXISTS events;")
+    op.drop_table("event_images", schema="public", if_exists=True)
+    op.drop_table("events", schema="public", if_exists=True)
     op.execute("DROP INDEX IF EXISTS events_idx;")
     op.execute("DROP INDEX IF EXISTS event_images_idx;")

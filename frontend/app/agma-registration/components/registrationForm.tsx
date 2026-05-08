@@ -1,42 +1,104 @@
 "use client"
-import { useRef } from "react"
+import { useCallback, useRef } from "react"
 import SignatureCanvas from "./signatureCanvas"
+import SignaturePad from "signature_pad"
+import { useForm, useWatch, SubmitHandler } from 'react-hook-form';
+import { RegisterAgma } from "@/app/actions/agma";
+import Image from "next/image"
 
-
+type FormType = {
+  account_no: string;
+  name: string;
+  mobile_number: string;
+  image: File;
+  signature: File;
+}
 const RegistrationForm = () => {
+  const { register, handleSubmit, formState: { errors }, control, setError, clearErrors } = useForm<FormType>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const signaturePadRef = useRef<SignaturePad | null>(null);
   const labelClass = "label font-bold text-black text-shadow-white text-shadow-md"
   const inputClass = "input w-full"
 
 
+  const ImageWatched = useWatch({
+    control: control,
+    name: "image",
+  })
 
-  // FUNCTIONS
-  const saveSignature = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (!canvasRef.current) return;
-    const dataURL = canvasRef.current.toDataURL('image/png');
-    console.log("Signature Data:", dataURL);
-    // You can now send this Base64 string to your FastAPI backend
+  const clearSignatureErrror = () => {
+    clearErrors("signature");
+  }
+
+  const ImageFile = ImageWatched?.[0];
+
+  const getSignatureFile = (
+    signaturePad: SignaturePad | null
+  ) => {
+
+    if (!signaturePad) return null;
+
+    if (signaturePad.isEmpty()) {
+      return null;
+    }
+
+    const dataUrl = signaturePad.toDataURL("image/png");
+
+    return new File(
+      [dataUrl],
+      "signature.png",
+      {
+        type: "image/png",
+      }
+    );
   };
+  // FUNCTIONS
+
+  const onSubmit: SubmitHandler<FormType> = useCallback( async(data) => {
+    const pad = signaturePadRef.current;
+
+    const signature = getSignatureFile(pad);
+
+    if (!signature) {
+      setError("signature", {
+        type: "required",
+        message: "Please Sign Here",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("account_no", data.account_no);
+    formData.append("name", data.name);
+    formData.append("mobile_no", data.mobile_number);
+    formData.append("image", data.image[0]);
+    formData.append("signature", signature);
+
+    const res = await RegisterAgma(formData);
+    console.log(res?.status);
+    console.log([...formData.entries()])},[setError])
+  
+
+
+
 
   return (
-    <div className="w-full flex justify-center">
-      <form action="" className="form w-full md:w-1/2 lg:w-1/2 xl:w-1/2 rounded-box p-2 bg-base-200/45 drop-shadow-md shadow">
+    <div className="w-full flex justify-center px-0 sm:px-32">
+      <form onSubmit={(e) => {handleSubmit(onSubmit)(e);}} className="form flex flex-col gap-2 h-full w-full  rounded-box p-2 bg-base-200/45 drop-shadow-md shadow">
         {/* TITLE */}
         <h1 className="text-3xl text-violet-600 font-extrabold text-shadow-2xs text-shadow-white">Register Now</h1>
 
-
         {/* ACCOUNT NO */}
-
         <section>
           <label className={labelClass}>Account Number</label>
-        
           <input
-          title="Account Number"
-          type="text"
-          className= {inputClass}
-          placeholder="Your 10 Digit Account Number" />
-
+            {...register("account_no", { required: "Please Enter Your Account Number" })}
+            title="Account Number"
+            type="text"
+            className={inputClass}
+            placeholder="Your 10 Digit Account Number" />
+          {errors.account_no && <p className="text-error text-xs italic"> {errors.account_no.message}</p>}
         </section>
 
         {/* NAME */}
@@ -46,8 +108,10 @@ const RegistrationForm = () => {
             Name
           </label>
           <input title="Name"
-          placeholder="Input Your Name"
-           className={inputClass} />
+            {...register("name", { required: "Please Enter Your Name" })}
+            placeholder="Input Your Name"
+            className={inputClass} />
+          {errors.name && <p className="text-error text-xs italic"> {errors.name.message}</p>}
         </section>
 
         {/* MOBILE NUMBER */}
@@ -55,7 +119,10 @@ const RegistrationForm = () => {
           <label className={labelClass}>
             Mobile Number
           </label>
-          <input title="Mobile" type="text" placeholder="Input Your Mobile Number" className={inputClass} />
+          <input
+            {...register("mobile_number", { required: "Please Enter Your Mobile Number" })}
+            title="Mobile" type="text" placeholder="Input Your Mobile Number" className={inputClass} />
+          {errors.mobile_number && <p className="text-error text-xs italic"> {errors.mobile_number.message}</p>}
         </section>
 
         {/* IMAGE UPLOAD */}
@@ -63,7 +130,30 @@ const RegistrationForm = () => {
           <label className={labelClass}>
             Image
           </label>
-          <input capture="user" title="Image"  type="file" accept="image/*" className={`file-input w-full`} />
+          <input
+            {...register("image", { required: "Please Upload Your Latest Photo" })}
+            capture="user"
+            title="Image"
+            type="file"
+            accept="image/*"
+            className={`file-input w-full`} />
+          {errors.image && <p className="text-error text-xs italic"> {errors.image.message}</p>}
+          {/* IMAGE PREVIEW */}
+
+          {
+            ImageFile && (
+              <div className="flex p-2 justify-center items-center">
+                <Image
+                  width={100}
+                  height={100}
+                  src={URL.createObjectURL(ImageFile)}
+                  alt="image"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover w-1/2 drop-shadow-md shadow-md"
+                />
+              </div>
+            )
+          }
         </section>
 
 
@@ -72,12 +162,16 @@ const RegistrationForm = () => {
           <label className={labelClass}>
             Signature
           </label>
-          <SignatureCanvas canvasRef={canvasRef} />
+          <SignatureCanvas
+            clearError={clearSignatureErrror}
+            signaturePadRef={signaturePadRef}
+            canvasRef={canvasRef} />
+          {errors.signature && <p className="text-error text-xs italic"> {errors.signature.message}</p>}
         </section>
 
         {/* SUBMIT */}
         <section>
-          <button onClick={saveSignature} className="btn btn-primary w-full">Submit</button>
+          <button type="submit" className="btn btn-primary w-full">Submit</button>
         </section>
       </form>
     </div>

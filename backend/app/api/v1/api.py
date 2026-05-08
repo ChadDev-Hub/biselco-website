@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from ...modules.complaints.route import complaints
 
 from ...modules.technical.change_meter.route import change_meter
-
+from ...modules.agma.route import agma
 from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
 from .routes import landing, login, logout, meter, news, signup, user, technical_form, consumers
@@ -24,3 +24,4 @@ router.include_router(technical_form.router)
 router.include_router(change_meter.router)
 router.include_router(consumers.router)
 router.include_router(new_connection_route.router)
+router.include_router(agma.router)

@@ -9,8 +9,10 @@ from ...franchise_area.model.villages import Village
 from ...franchise_area.model.municipality import Municipality
 from typing import List, TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from .service_drop import ServiceDrop
+    from ....agma.model.agma_registration import AgmaRegistration
 
 class ConsumerMeter(BaseModel):
     __tablename__ = "consumer_meter"
@@ -35,7 +37,7 @@ class ConsumerMeter(BaseModel):
     village: Mapped["Village"] = relationship("Village", back_populates="consumer_meters")
     municipal: Mapped["Municipality"] = relationship("Municipality", back_populates="consumer_meters")
     service_drop: Mapped["ServiceDrop"] = relationship("ServiceDrop", back_populates="to_consumer")
-    
+    agma: Mapped[List["AgmaRegistration"]] = relationship("AgmaRegistration", back_populates="consumer", cascade="all, delete-orphan")
     
     
     

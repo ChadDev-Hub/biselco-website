@@ -1,5 +1,4 @@
 "use server";
-import { Metadata } from "next";
 import { getLandingPageData } from "../../lib/serverFetch";
 import Hero from "./components/hero";
 import McoGoogleLogin from "../common/auth-component/mcoGoogleLogin";
