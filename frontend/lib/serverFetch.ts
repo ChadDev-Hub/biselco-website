@@ -268,7 +268,6 @@ export const GetNewConnection = async (page?:number) => {
     if(page){
         params.set("page",page.toString())
     }
-    console.log(params.toString())
     const res = await fetch(`${baseUrl}/v1/new_connection/?${params?.toString()}`, {
         method: "GET"
     })
@@ -308,6 +307,27 @@ export const GetNewConnectionStats = async () => {
 //  GET TECHNICAL FORMS
 export const GetTechnicalForms = async () => {
     const res = await fetch(`${baseUrl}/v1/technical_form/all`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}
+
+
+// AGMA REGISTERED
+export const GetAgmaRegistered = async (id: string) => {
+    const params = new URLSearchParams();
+    params.set("id",id.toString())
+    const res = await fetch(`${baseUrl}/v1/agma/registered?${params?.toString()}`, {
         method: "GET"
     })
     const data = await res.json()

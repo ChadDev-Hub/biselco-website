@@ -1,10 +1,13 @@
 "use client"
-import { useCallback, useRef } from "react"
+import {  useCallback, useRef } from "react"
 import SignatureCanvas from "./signatureCanvas"
 import SignaturePad from "signature_pad"
 import { useForm, useWatch, SubmitHandler } from 'react-hook-form';
 import { RegisterAgma } from "@/app/actions/agma";
+import { useRouter } from "next/navigation";
+import { useAlert } from "@/app/common/alert";
 import Image from "next/image"
+
 
 type FormType = {
   account_no: string;
@@ -14,13 +17,13 @@ type FormType = {
   signature: File;
 }
 const RegistrationForm = () => {
-  const { register, handleSubmit, formState: { errors }, control, setError, clearErrors } = useForm<FormType>();
+  const { register, handleSubmit, formState: { errors }, control, setError, clearErrors, reset } = useForm<FormType>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
   const labelClass = "label font-bold text-black text-shadow-white text-shadow-md"
   const inputClass = "input w-full"
-
-
+  const router = useRouter();
+  const { showAlert } = useAlert();
   const ImageWatched = useWatch({
     control: control,
     name: "image",
@@ -32,7 +35,10 @@ const RegistrationForm = () => {
 
   const ImageFile = ImageWatched?.[0];
 
-  const getSignatureFile = (
+  // FUNCTIONS
+
+  // ---------------------------------------------------------------------------
+  const getSignatureFile = async (
     signaturePad: SignaturePad | null
   ) => {
 
@@ -43,21 +49,33 @@ const RegistrationForm = () => {
     }
 
     const dataUrl = signaturePad.toDataURL("image/png");
-
+    const blob = await (await fetch(dataUrl)).blob();
     return new File(
-      [dataUrl],
+      [blob],
       "signature.png",
       {
         type: "image/png",
       }
     );
   };
-  // FUNCTIONS
+  // ---------------------------------------------------------------------------
 
-  const onSubmit: SubmitHandler<FormType> = useCallback( async(data) => {
+  const handleError = useCallback((message: string) => {
+    setError("account_no", {
+      type: "validate",
+      message
+    })
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    showAlert("error", message);
+  }, [showAlert, setError])
+
+
+
+  // HANDLE SUBMIT
+  const onSubmit: SubmitHandler<FormType> = useCallback(async (data) => {
     const pad = signaturePadRef.current;
 
-    const signature = getSignatureFile(pad);
+    const signature = await getSignatureFile(pad);
 
     if (!signature) {
       setError("signature", {
@@ -76,16 +94,32 @@ const RegistrationForm = () => {
     formData.append("signature", signature);
 
     const res = await RegisterAgma(formData);
-    console.log(res?.status);
-    console.log([...formData.entries()])},[setError])
-  
+    switch (res.status) {
+      case 401:
+        handleError(res.error)
+        break;
+      case 404:
+        handleError(res.error)
+        break;
+      case 201:
+        reset();
+        signaturePadRef.current?.clear();
+        const newParams = new URLSearchParams();
+        newParams.set("id", res.data.id);
+        router.push(`/agma-registration/registered?${newParams.toString()}`);
+        break;
+      default:
+        break;
+    }
+  }, [setError, reset, router, handleError])
+
 
 
 
 
   return (
     <div className="w-full flex justify-center px-0 sm:px-32">
-      <form onSubmit={(e) => {handleSubmit(onSubmit)(e);}} className="form flex flex-col gap-2 h-full w-full  rounded-box p-2 bg-base-200/45 drop-shadow-md shadow">
+      <form onSubmit={(e) => { handleSubmit(onSubmit)(e); }} className="form flex flex-col gap-2 h-full w-full  rounded-box p-2 bg-base-200/45 drop-shadow-md shadow">
         {/* TITLE */}
         <h1 className="text-3xl text-violet-600 font-extrabold text-shadow-2xs text-shadow-white">Register Now</h1>
 

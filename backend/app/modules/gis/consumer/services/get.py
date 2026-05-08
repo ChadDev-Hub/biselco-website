@@ -5,17 +5,17 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.response_model import ConsumerVerification
 
+
 class ConsumerMeterGetService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def verfify_account_no(self, account_no: str) -> ConsumerVerification:
-        try:
-            stmt = select(ConsumerMeter).where(ConsumerMeter.account_no == account_no)
-            data = (await self.session.execute(stmt)).scalar_one_or_none()
-            if not data:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account No not Found")
-            return ConsumerVerification(account_no=data.account_no)
-        except Exception as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-            
+
+        stmt = select(ConsumerMeter).where(
+            ConsumerMeter.account_no == account_no)
+        data = (await self.session.execute(stmt)).scalar_one_or_none()
+        if not data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Account not Found")
+        return ConsumerVerification(account_no=data.account_no)

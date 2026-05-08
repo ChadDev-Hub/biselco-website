@@ -1,4 +1,4 @@
-import React, { Suspense, use } from 'react'
+import { Suspense, use } from 'react'
 import Stats from './components/status'
 import { GetAllComplaints, GetComplaintStats, GetTopComplaints } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintsDashboardContainer'

@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Query
 from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest
 from ....dependencies.bucket3 import upload_image
+from ..services.get import GetAgmaRegistrationService
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -11,16 +12,19 @@ async def register_agma(
     data:AgmaRegistrationRequest = Form(...), 
     post_agma_registration_service: PostAgmaRegistrationService = Depends(PostAgmaRegistrationService),
     ):
-    await data.image.seek(0)
-    await data.signature.seek(0)
-    print(data)
-    image_url = await upload_image(file=data.image, folder="agma")
-    signature_url = await upload_image(file=data.signature, folder="agma")
-    registration_data = AgmaValidationRequest(
+    registration_data = AgmaRegistrationRequest(
         account_no=data.account_no,
         name=data.name,
         mobile_no=data.mobile_no,
-        image_url="sample.com",
-        signature_url="sample.com",
+        image=data.image,
+        signature=data.signature
     )
     return await post_agma_registration_service.register_agma(data=registration_data)
+
+@router.get("/registered", status_code=status.HTTP_200_OK )
+async def get_registered(
+    id:str = Query(...),
+    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+):  
+    data = await get_agma_registration_service.get_registered(id=id)
+    return data

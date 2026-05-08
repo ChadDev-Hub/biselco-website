@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sqlalchemy import Integer,  Date, func, Boolean, Text, DateTime, ForeignKey
+from sqlalchemy import Integer,  Date, func, Boolean, Text, DateTime, ForeignKey, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, date
 from sqlalchemy.orm import relationship
@@ -7,14 +7,14 @@ from ....db.base import BaseModel
 from datetime import datetime
 from typing import TYPE_CHECKING
 from ...gis.consumer.model.consumer import ConsumerMeter
-
+import uuid
 
 
 
 class AgmaRegistration(BaseModel):
     __tablename__ = "agma_registration"
     __table_args__ = {"schema": "public"}
-    id:Mapped[int] = mapped_column(type_=Integer, primary_key=True)
+    id:Mapped[uuid.UUID] = mapped_column(type_=UUID, primary_key=True, default=uuid.uuid4)
     account_no:Mapped[str] = mapped_column(
         ForeignKey("gis.consumer_meter.account_no", ondelete="CASCADE", onupdate="CASCADE"),
                                            type_=Text,

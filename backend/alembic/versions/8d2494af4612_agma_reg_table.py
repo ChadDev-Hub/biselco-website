@@ -22,7 +22,7 @@ def upgrade() -> None:
     """Upgrade schema."""
     op.create_table(
         "agma_registration",
-        sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("id", sa.UUID(), nullable=False, primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("account_no", sa.Text(), nullable=False),
         sa.Column("name", sa.Text(), nullable=False),
         sa.Column("phone", sa.Text(), nullable=False),

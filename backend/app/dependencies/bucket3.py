@@ -5,6 +5,10 @@ from uuid import uuid4
 from fastapi import UploadFile
 from PIL import Image
 from io import BytesIO
+from pillow_heif import register_heif_opener
+
+
+register_heif_opener()
 load_dotenv()
 AWS_ACCESS_KEY_ID = os.getenv("AWS_CLIENT")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_CLIENT_SECRET")
@@ -22,11 +26,12 @@ s3_client= boto3.client( "s3",
 async def preprocess_image(image:UploadFile):
     image.file.seek(0)
     img = Image.open(image.file)
-    img = img.resize((600, 600))
-    img = img.convert("RGB")
+    max_size = (600, 600)
+    img.thumbnail(max_size, Image.Resampling.LANCZOS)
+    # img = img.convert("RGB")
     
     buffer = BytesIO()
-    img.save(buffer, format="WEBP", quality=100, optimize=True)
+    img.save(buffer, format="WEBP", quality=100, optimize=True, lossless=True)
     buffer.seek(0)
     return buffer
 

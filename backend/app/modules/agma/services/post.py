@@ -5,8 +5,8 @@ from ....dependencies.db_session import get_session
 from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.services.get import ConsumerMeterGetService
 from ..services.get import GetAgmaRegistrationService
-from ..schema.request_model import AgmaValidationRequest
-
+from ..schema.request_model import AgmaValidationRequest, AgmaRegistrationRequest
+from ....dependencies.bucket3 import upload_image
 class PostAgmaRegistrationService:
     def __init__(self,
                  consumer_meter_service: ConsumerMeterGetService = Depends(
@@ -18,20 +18,27 @@ class PostAgmaRegistrationService:
         self.consumer_meter_service = consumer_meter_service
         self.get_agma_registration_service = get_agma_registration_service
 
-    async def register_agma(self, data:AgmaValidationRequest):
+    async def register_agma(self, data:AgmaRegistrationRequest):
+        print(data)
         verified_account_no = await self.consumer_meter_service.verfify_account_no(account_no=data.account_no)
         if verified_account_no: 
             is_registered  = await self.get_agma_registration_service.verify_registration(verified_account_no.account_no)
             if is_registered:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Already Registered")
             else:
-                stmt = insert(AgmaRegistration).values(
+                image_url = await upload_image(data.image, folder="agma/profiles")
+                signature_url = await upload_image(data.signature, folder="agma/signatures")
+                stmt = (insert(AgmaRegistration).values(
                     account_no=data.account_no,
                     name = data.name,
                     phone = data.mobile_no,
-                    image = data.image_url,
-                    signature = data.signature_url
-                    )
-                await self.session.execute(stmt)
+                    image = image_url,
+                    signature = signature_url
+                    ).returning(AgmaRegistration))
+                result = await self.session.execute(stmt)
                 await self.session.commit()
-                return {"message": "Registered Successfully"}
+                new_row = result.scalar_one()
+                return {
+                    "message": "Registered Successfully",
+                    "id": new_row.id
+                    }
