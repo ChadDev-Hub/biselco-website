@@ -376,10 +376,22 @@
             <td>{complaint.last_name}</td>
             <td>{complaint.date_time_submitted}</td>
             <td className="w-full">{complaint.subject}</td>
+            {/* REFERENCE POLE */}
+            <td>{complaint.reference_pole}</td>
+            {/* LATEST COMPLAINT */}
+            <td className="animate-pulse text-center text-blue-800 drop-shadow-md drop-shadow-amber-900 font-bold">
+              {complaint.latest_status?.name}
+            </td>
+
+            {/* RESOLUTION TIME */}
+            <td>
+              {complaint.resolution_time ? complaint.resolution_time : "Unresolved"}
+            </td>
+
+            {/* COMPLAINT DESCRIPTION */}
             <td className="flex justify-center  w-full">
               <MessageDetailView complaintDescription={complaint.description} />
             </td>
-            <td>{complaint.reference_pole}</td>
             <td align="center">
               <MapButton
                 title="Consumer Complaints Map"
@@ -403,9 +415,7 @@
                 onOpen={handleSelectedComplaintsId}
               />
             </td>
-            <td className="animate-pulse text-center text-blue-800 drop-shadow-md drop-shadow-amber-900 font-bold">
-              {complaint.latest_status?.name}
-            </td>
+            
             <td className="flex justify-center">
               <StatusHistoryModal data={complaint.status_history} />
             </td>
@@ -425,9 +435,7 @@
                 } receiver_id={complaint.user_id}
               />
             </td>
-            <td>
-              {complaint.resolution_time ? complaint.resolution_time : "Unresolved"}
-            </td>
+            
           </tr>
         ))}
       </tbody>

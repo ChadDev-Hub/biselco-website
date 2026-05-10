@@ -30,15 +30,16 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
     'LAST NAME',
     'SUBMITTED AT',
     'SUBJECT',
+    'REF POLE',
+    'LATEST UPDATE',
+    'RESOLUTION TIME',
     'DETAILS',
-    'REFERENCE POLE',
     'MAP',
     'IMAGE',
     'STATUS',
-    'LATEST UPDATE',
     'STATUS HISTORY',
     'MESSAGES',
-    'RESOLUTION TIME'
+    
   ]
   return (
     <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">

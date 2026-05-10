@@ -19,7 +19,6 @@ class PostAgmaRegistrationService:
         self.get_agma_registration_service = get_agma_registration_service
 
     async def register_agma(self, data:AgmaRegistrationRequest):
-        print(data)
         verified_account_no = await self.consumer_meter_service.verfify_account_no(account_no=data.account_no)
         if verified_account_no: 
             is_registered  = await self.get_agma_registration_service.verify_registration(verified_account_no.account_no)

@@ -64,13 +64,13 @@ const LandingStats = () => {
                     <div className="stat-desc font-bold">Community-Owned</div>
                 </div>
                 <div className="stat p-8 place-items-center">
-                    <div className="stat-title font-medium">Grid Reliability</div>
-                    <div className="stat-value text-secondary">{reliability}%</div>
-                    <div className="stat-desc text-secondary">24/7 Monitoring</div>
+                    <div className="stat-title font-medium">Categorization</div>
+                    <div className="stat-value text-secondary">AAA</div>
+                    <div className="stat-desc text-secondary">Top Reliability Rating</div>
                 </div>
                 <div className="stat p-8 place-items-center">
-                    <div className="stat-title font-medium">Renewable Energy</div>
-                    <div className="stat-value text-accent">{energy}%</div>
+                    <div className="stat-title font-medium">Classification</div>
+                    <div className="stat-value text-accent">Large</div>
                     <div className="stat-desc">Growing Annually</div>
                 </div>
             </motion.div>
