@@ -23,10 +23,10 @@ const ImageViewer = ({image}: Props) => {
               alt="change meter image"
             />
      </button>
-     <dialog ref={dialogRef} className="modal modal-bottoms">
-        <div className="modal-box h-full w-full max-h-[70vh]">
-            <div className="relative w-full border">
-                <button onClick={handleClose} className="absolute right-0 top-2"></button>
+     <dialog ref={dialogRef} className="modal modal-bottom px-2 sm:px-4 xl:px-[20%]">
+        <div className="modal-box relative h-full w-full max-h-[80vh] ">
+            <div className="absolute right-2 top-2 z-50 ">
+                <button onClick={handleClose} className="btn btn-xs btn-error drop-shadow-2xl drop-shadow-black ">X</button>
             </div>
             <Image
               fill
