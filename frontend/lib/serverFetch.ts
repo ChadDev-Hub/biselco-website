@@ -181,8 +181,6 @@ export const queryConsumer = async(query?:string)=>{
     }
 }
 
-
-
 //  GET CHANGE METER DATA
 export const GetChangeMeter = async (page?:number,query?: string) => {
     const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?page=${page}` : `${baseUrl}/v1/change_meter/`;

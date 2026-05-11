@@ -11,6 +11,10 @@ const Delete = ({ handleDelete, show }: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null)
     const handleOpen = () => modalRef.current?.showModal()
     const handleClose = () => modalRef.current?.close()
+    const Delete = () => {
+        handleDelete();
+        handleClose();
+      }
     return (
         <>
         <button
@@ -77,7 +81,7 @@ const Delete = ({ handleDelete, show }: Props) => {
                 <p className="py-4 text-warning">Are you sure you want to delete this change meter?</p>
                 <div className="modal-action">
                     <button type="button" onClick={handleClose} className="btn">Cancel</button>
-                    <button type="button" onClick={handleDelete} className="btn btn-error">Delete</button>
+                    <button type="button" onClick={Delete} className="btn btn-error">Delete</button>
                 </div>
             </form>
         </dialog>

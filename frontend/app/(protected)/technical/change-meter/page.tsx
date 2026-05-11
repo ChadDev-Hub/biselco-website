@@ -12,7 +12,7 @@ import TableFooter from './components/tableFooter'
 import PageNationLoading from './components/pageNationSkeleton'
 import StatsSkeleton from '@/app/common/statsSkeleton'
 import { Archivo_Black } from 'next/font/google'
-
+import ChangeMeteCards from './components/changeMeterCards'
 
 const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
 
@@ -41,42 +41,30 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
     "IMAGES",
     "MAP"];
   return (
-    <>
-      <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4'>
-        <div>
-          <section className='mt-3 flex justify-center'>
+    <div className='flex flex-col gap-2'>
+      <div className=''>
+          <section className='mt-3   flex justify-center'>
             <ChangeMeterForm />
           </section>
         </div>
-
-        <div>
+        <div className='p-2'>
           <section className='flex  flex-col gap-4'>
             <fieldset className='fieldset rounded-box'>
-              
-                <legend className={`fieldset-legend  text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Stats
+              <legend className={`fieldset-legend  text-lg text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Stats
               </legend>
               <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
                 <Stats data={data} />
               </Suspense>
             </fieldset>
-            <div className=' h-full'>
-              <DashBoardTable >
-                <TableHead columns={columns} selectable={true} />
-                <Suspense fallback={<TableDataSkeleton row={9} col={columns.length} />}>
-                  <TableData data={data} />
-                </Suspense>
-                <Suspense fallback={<PageNationLoading />}>
-                  <TableFooter pageUrl={pageUrl} data={data} />
-                </Suspense>
-              </DashBoardTable>
-            </div>
+
           </section>
 
         </div>
-
-
+     
+      <div className='h-full w-full'>
+              <ChangeMeteCards data={data} />
       </div>
-    </>
+    </div>
   )
 }
 

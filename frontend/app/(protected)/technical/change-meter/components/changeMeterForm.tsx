@@ -1,6 +1,6 @@
 "use client"
 import BiselcoMap from "@/app/common/Map"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form"
 import { useDebounce } from "use-debounce";
 import { queryConsumer } from "@/lib/serverFetch";
@@ -10,6 +10,8 @@ import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
 import { Archivo_Black } from "next/font/google";
 import ElectricMeter from "../../components/electricMeterSvg";
+import {useCallback} from 'react';
+import { useAlert } from "@/app/common/alert";
 type FormField = {
     dateAccomplished: string;
     accountNumber: string;
@@ -51,7 +53,13 @@ const ChangeMeterForm = () => {
     const [selectedConsumer, setSelectedConsumer] = useState<string>("");
     const { showLoading } = useLoading();
     const useParams = useSearchParams();
-    
+    const {showAlert} = useAlert();
+    const modalRef = useRef<HTMLDialogElement | null>(null);
+    const handleOpen = () => modalRef.current?.showModal();
+    const handleClose = useCallback(() => {
+    modalRef.current?.close();
+
+}, []);
     // WATCH COORDINATES
     const lon = useWatch({
         control: control,
@@ -123,9 +131,8 @@ const ChangeMeterForm = () => {
         setValue("lon", account.geolocation.coordinates[0]);
         setConsumer([]);
     }
-    console.log(isSubmitting);
     // HANDLE SUBMIT
-    const onSubmit: SubmitHandler<FormField> = async(data) => {
+    const onSubmit: SubmitHandler<FormField> = useCallback(async (data) => {
         const NewData = new FormData();
         NewData.append("dateAccomplished", data.dateAccomplished);
         NewData.append("accountNumber", data.accountNumber);
@@ -139,7 +146,7 @@ const ChangeMeterForm = () => {
         NewData.append("InitialMeterReading", data.InitialMeterReading.toString());
         NewData.append("lat", data.lat?.toString() ?? "");
         NewData.append("lon", data.lon?.toString() ?? "");
-        if(data.remarks?.trim()){NewData.append("remarks", data.remarks)}
+        if (data.remarks?.trim()) { NewData.append("remarks", data.remarks) }
         NewData.append("accomplishedBy", data.accomplishedBy);
         if (data.attachment?.[0]) {
             NewData.append("attachment", data.attachment[0]);
@@ -147,11 +154,13 @@ const ChangeMeterForm = () => {
         showLoading(true, "Submitting Change Meter...")
         const page = useParams.get("page") as unknown as number;
 
-        const res  =  await SubmitChangeMeter(NewData,page ? page : 1 )
+        const res = await SubmitChangeMeter(NewData, page ? page : 1)
         switch (res?.status) {
             case 201:
+                console.log(res);
                 reset();
                 showLoading(false);
+                showAlert("success", "Successfully submitted change meter");
                 break;
             case 403:
                 showLoading(false);
@@ -164,138 +173,155 @@ const ChangeMeterForm = () => {
             default:
                 break;
         };
-    }
+    },[reset, setError, showLoading, useParams, showAlert]);
 
+    
     return (
-        <fieldset className='fieldset drop-shadow-md glass rounded-box w-full overflow-y-auto max-w-200 border"'>
-            <legend className={`fieldset-legend text-3xl text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Change Meter Form</legend>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex overflow-x-auto h-full flex-col gap-2 p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="">
-                        {/* Date Accomplished */}
-                        <div>
-                            <label className='label font-bold text-md'>
-                                Date Accomplished
-                            </label>
-                            <input
-                                {...register('dateAccomplished', { required: true })}
-                                title="Date Accomplished"
-                                className="input w-full"
-                                type="date" />
-                            {errors.dateAccomplished && <span className="text-red-500">Date Accomplished is required</span>}
-                        </div>
-                        {/* Account Number  */}
-                        <div className="relative">
-                            <label className='label font-bold text-md'>
-                                Account Number
-                            </label>
-                            <input
-                                {...register('accountNumber', { required: true })}
-                                name="accountNumber"
-                                title="Account Number"
-                                placeholder="Search Account here..."
-                                className="input dropdown  w-full"
-                                type="text" />
-                            {errors.accountNumber && <span className="text-red-500">Account Number is required</span>}
-                            {consumer.length > 0 ?
-                                <ul className="dropdown-conten rounded-box drop-shadow-md  grid grid-cols-1 menu absolute max-h-60 overflow-y-auto w-full bg-base-100  z-10">
-                                    {consumer.map((item: Consumer) => (
-                                        <li key={item.account_no} onClick={() => selectConsumer(item)}>
-                                            <a >
-                                                {item.account_no} - {item.account_name}
-                                            </a>
-                                        </li>
+        <>
+            <button onClick={handleOpen} className="btn btn-success">
+                add
+            </button>
+            <dialog ref={modalRef} className="modal  xl:px-20  modal-bottom">
+                <div className='px-2 w-full  modal-box border drop-shadow-md z-10   glass rounded-box  border"'>
 
-                                    ))}
-                                </ul> : null}
-                        </div>
-                        {/* Consumer Name */}
-                        <div>
-                            <label className="label font-bold text-md">Consumer Name</label>
-                            <input {...register('consumerName', { required: "Account Name is required" })} title="Consumer Name" placeholder="Conumer Name" className="input w-full" type="text" />
-                            {errors.consumerName && <span className="text-red-500">{errors.consumerName.message}</span>}
-                        </div>
+                    <div className={`sticky top-0 text-lg text-blue-800 pb-2 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>
+                        Change Meter Form
+                        <button onClick={handleClose} className="btn absolute z-100 top-1 right-2 btn-xs btn-circle">X</button>
+                    </div>
+                    <div className="overflow-y-auto max-h-[80vh]">
+                        <form onSubmit={handleSubmit(onSubmit)} className="flex overflow-x-auto  overflow-y-auto h-full flex-col gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="w-full">
+                                    {/* Date Accomplished */}
+                                    <div>
+                                        <label className='label font-bold text-xs'>
+                                            Date Accomplished
+                                        </label>
+                                        <input
+                                            {...register('dateAccomplished', { required: true })}
+                                            title="Date Accomplished"
+                                            className="input w-full"
+                                            type="date" />
+                                        {errors.dateAccomplished && <span className=" text-red-500 italic text-xs">Date Accomplished is required</span>}
+                                    </div>
+                                    {/* Account Number  */}
+                                    <div className="relative">
+                                        <label className='label font-bold text-xs'>
+                                            Account Number
+                                        </label>
+                                        <input
+                                            {...register('accountNumber', { required: true })}
+                                            name="accountNumber"
+                                            title="Account Number"
+                                            placeholder="Search Account here..."
+                                            className="input dropdown  w-full"
+                                            type="text" />
+                                        {errors.accountNumber && <span className="  text-red-500 italic text-xs">Account Number is required</span>}
+                                        {consumer.length > 0 ?
+                                            <ul className="dropdown-conten rounded-box drop-shadow-md  grid grid-cols-1 menu absolute max-h-60 overflow-y-auto w-full bg-base-100  z-10">
+                                                {consumer.map((item: Consumer) => (
+                                                    <li key={item.account_no} onClick={() => selectConsumer(item)}>
+                                                        <a >
+                                                            {item.account_no} - {item.account_name}
+                                                        </a>
+                                                    </li>
 
-                        {/* Pull out Meter */}
-                        <div className="flex flex-col gap-1">
-                            <label className='label font-bold text-md'>Pullout Meter</label>
-                            <input {...register('pullOutMeterNumber', { required: "Please Input Pullout Meters" })} title="Pullout Meter Number" placeholder="Meter Number" className="input w-full" type="text" />
-                            {errors.pullOutMeterNumber && <span className="text-red-500">{errors.pullOutMeterNumber.message}</span>}
-                            <input {...register('pullOutMeterBrand', { required: "Please Input Pullout Meters" })} title="Pullout Meter Brand" placeholder="Brand" className="input w-full" type="text" />
-                            {errors.pullOutMeterBrand && <span className="text-red-500">{errors.pullOutMeterBrand.message}</span>}
-                            <input {...register('pullOutMeterReading', { required: "Please Input Pullout Meters" })} title="Pullout Meter Reading" placeholder="Reading" className="input  w-full" type="number" />
-                            {errors.pullOutMeterReading && <span className="text-red-500">{errors.pullOutMeterReading.message}</span>}
-                        </div>
-                        {/* New Meter */}
-                        <div className="flex flex-col gap-1">
-                            <label className="label font-bold text-md">New Meter</label>
-                            <input {...register("NewMeterNumber", { required: "Please Input New Meters" })} title="New Meter Number" placeholder="Meter Number" className="input w-full" type="text" />
-                            {errors.NewMeterNumber && <span className="text-red-500">{errors.NewMeterNumber.message}</span>}
-                            <input {...register("NewMeterBrand", { required: "Please Input New Meters" })} title="New Meter Brand" placeholder="Brand" className="input w-full" type="text" />
-                            {errors.NewMeterNumber && <span className="text-red-500">{errors.NewMeterNumber.message}</span>}
-                            <input {...register("NewMeterSealed", { required: "Please Input New Meters" })} title="New Meter Sealed" placeholder="Meter Sealed" className="input  w-full" type="text" />
-                            {errors.NewMeterSealed && <span className="text-red-500">{errors.NewMeterSealed.message}</span>}
-                            <input {...register("InitialMeterReading", { required: "Please Input New Meters" })} title="New Meter Reading" placeholder="Initial Reading" className="input  w-full" type="number" />
-                            {errors.InitialMeterReading && <span className="text-red-500">{errors.InitialMeterReading.message}</span>}
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-2 items-center">
-                        {/* Location */}
-                        <div className="border-gray-200 w-full inset-shadow-md shadow drop-shadow-md">
-                            <input type="hidden" {...register('lon', { required: "Please Select Location" })} />
-                            <input type="hidden" {...register("lat", { required: "Please Select Location" })} />
+                                                ))}
+                                            </ul> : null}
+                                    </div>
+                                    {/* Consumer Name */}
+                                    <div>
+                                        <label className="label font-bold text-xs">Consumer Name</label>
+                                        <input {...register('consumerName', { required: "Account Name is required" })} title="Consumer Name" placeholder="Conumer Name" className="input w-full" type="text" />
+                                        {errors.consumerName && <span className=" text-red-500 italic text-xs">{errors.consumerName.message}</span>}
+                                    </div>
 
-                            <label className="label font-bold text-md">Location</label>
-                            <BiselcoMap
-                                markerPopup={`${consumerName ? `${consumerName} Electric Meter` : ""}`}
-                                markerSvg={<ElectricMeter />}
-                                consumermeters={lon && lat ? [lon, lat] : undefined}
-                                onSelectLocation={(lat, lon) => {
-                                    setValue("lat", lat);
-                                    setValue("lon", lon);
-                                }} />
-                            {errors.lat && <span className="text-red-500">{errors.lat?.message}</span>}
-                        </div>
+                                    {/* Pull out Meter */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className='label font-bold text-xs  '>Pullout Meter</label>
+                                        <input {...register('pullOutMeterNumber', { required: "Please Input Pullout Meters" })} title="Pullout Meter Number" placeholder="Meter Number" className="input w-full " type="text" />
+                                        {errors.pullOutMeterNumber && <span className="text-red-500 italic text-xs">{errors.pullOutMeterNumber.message}</span>}
+                                        <input {...register('pullOutMeterBrand', { required: "Please Input Pullout Meters" })} title="Pullout Meter Brand" placeholder="Brand" className="input w-full" type="text" />
+                                        {errors.pullOutMeterBrand && <span className="text-red-500 italic text-xs">{errors.pullOutMeterBrand.message}</span>}
+                                        <input {...register('pullOutMeterReading', { required: "Please Input Pullout Meters" })} title="Pullout Meter Reading" placeholder="Reading" className="input  w-full" type="number" />
+                                        {errors.pullOutMeterReading && <span className="text-red-500 italic text-xs">{errors.pullOutMeterReading.message}</span>}
+                                    </div>
+                                    {/* New Meter */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="label font-bold text-xs">New Meter</label>
+                                        <input {...register("NewMeterNumber", { required: "Please Input New Meters" })} title="New Meter Number" placeholder="Meter Number" className="input w-full" type="text" />
+                                        {errors.NewMeterNumber && <span className="text-red-500  italic text-xs">{errors.NewMeterNumber.message}</span>}
+                                        <input {...register("NewMeterBrand", { required: "Please Input New Meters" })} title="New Meter Brand" placeholder="Brand" className="input w-full" type="text" />
+                                        {errors.NewMeterNumber && <span className="text-red-500 italic text-xs">{errors.NewMeterNumber.message}</span>}
+                                        <input {...register("NewMeterSealed", { required: "Please Input New Meters" })} title="New Meter Sealed" placeholder="Meter Sealed" className="input  w-full" type="text" />
+                                        {errors.NewMeterSealed && <span className="text-red-500  italic text-xs">{errors.NewMeterSealed.message}</span>}
+                                        <input {...register("InitialMeterReading", { required: "Please Input New Meters" })} title="New Meter Reading" placeholder="Initial Reading" className="input  w-full" type="number" />
+                                        {errors.InitialMeterReading && <span className="text-red-500 italic text-xs">{errors.InitialMeterReading.message}</span>}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2 items-center">
+                                    {/* Location */}
+                                    <div className="border-gray-200 w-full inset-shadow-md shadow drop-shadow-md">
+                                        <input type="hidden" {...register('lon', { required: "Please Select Location" })} />
+                                        <input type="hidden" {...register("lat", { required: "Please Select Location" })} />
 
-                        {/* IMAGE */}
-                        <div className="flex flex-col self-center items-center justify-center ">
-                            <label className="label font-bold text-md"> Upload Image</label>
-                            <input  className="file-input" type="file" accept="image/*" {...register('attachment', { required: "Please Upload Image of the Electric Meter" })} />
-                            {errors.attachment && <span className="text-red-500">{errors.attachment.message}</span>}
-                            {attachment?.[0] &&
-                                <Image src={attachment ? URL.createObjectURL(attachment[0]) : ""}
-                                    alt="Image"
-                                    width={200}
-                                    height={200}
-                                    sizes="(min-width: 1024px) 200px, 100vw"
-                                    className="max-h-40 w-auto h-auto mt-4 drop-shadow-2xl drop-shadow-gray-700" />
-                            }
-                        </div>
+                                        <label className="label font-bold text-xs">Location</label>
+                                        <BiselcoMap
+                                            markerPopup={`${consumerName ? `${consumerName} Electric Meter` : ""}`}
+                                            markerSvg={<ElectricMeter />}
+                                            consumermeters={lon && lat ? [lon, lat] : undefined}
+                                            onSelectLocation={(lat, lon) => {
+                                                setValue("lat", lat);
+                                                setValue("lon", lon);
+                                            }} />
+                                        {errors.lat && <span className="text-red-500  italic text-xs">{errors.lat?.message}</span>}
+                                    </div>
+
+                                    {/* IMAGE */}
+                                    <div className="flex flex-col self-center items-center justify-center ">
+                                        <label className="label font-bold text-xs"> Upload Image</label>
+                                        <input className="file-input" type="file" accept="image/*" {...register('attachment', { required: "Please Upload Image of the Electric Meter" })} />
+                                        {errors.attachment && <span className="text-red-500 talic text-xs">{errors.attachment.message}</span>}
+                                        {attachment?.[0] &&
+                                            <Image src={attachment ? URL.createObjectURL(attachment[0]) : ""}
+                                                alt="Image"
+                                                width={200}
+                                                height={200}
+                                                sizes="(min-width: 1024px) 200px, 100vw"
+                                                className="max-h-40 w-auto h-auto mt-4 drop-shadow-2xl drop-shadow-gray-700" />
+                                        }
+                                    </div>
+                                </div>
+                                {/* Remarks */}
+                                <div>
+                                    <label className="label font-bold text-xs">Remarks</label>
+                                    <input title="Remarks" {...register('remarks')} placeholder="Remarks" className="input w-full" type="text" />
+                                </div>
+                                {/* Accomplished By */}
+                                <div>
+                                    <label className="label font-bold text-xs"> Accomplished By</label>
+                                    <input {...register('accomplishedBy', { required: "Input Who Installed the Meter" })} type="text" title="Accomplished by" placeholder="Accomplished By" className="input w-full" />
+                                    {errors.accomplishedBy && <span className="text-red-500  italic text-xs">{errors.accomplishedBy.message}</span>}
+                                </div>
+                            </div>
+                            <div className="col-span-1 sm:col-span-1 md:col-span-2">
+                                {/* SUBMIT */}
+                                <button type="submit" disabled={isSubmitting} className={`btn w-full btn-accent`}>
+                                    {isSubmitting ?
+                                        <p className="skeleton skeleton-text">Submitting..</p>
+                                        :
+                                        <p>Submit Change Meter</p>
+                                    }
+                                </button>
+                            </div>
+                        </form>
+
                     </div>
-                    {/* Remarks */}
-                    <div>
-                        <label className="label font-bold text-md">Remarks</label>
-                        <input title="Remarks" {...register('remarks')} placeholder="Remarks" className="input w-full" type="text" />
-                    </div>
-                    {/* Accomplished By */}
-                    <div>
-                        <label className="label font-bold text-md"> Accomplished By</label>
-                        <input {...register('accomplishedBy', { required: "Input Who Installed the Meter" })} type="text" title="Accomplished by" placeholder="Accomplished By" className="input w-full" />
-                        {errors.accomplishedBy && <span className="text-red-500">{errors.accomplishedBy.message}</span>}
-                    </div>
+
                 </div>
-                 <div className="col-span-1 sm:col-span-1 md:col-span-2">
-                    {/* SUBMIT */}
-                    <button type="submit" disabled={isSubmitting} className={`btn w-full btn-accent`}>
-                        {isSubmitting ?
-                            <p className="skeleton skeleton-text">Submitting..</p>
-                            :
-                            <p>Submit Change Meter</p>
-                        }
-                    </button>
-                </div>
-            </form>
-        </fieldset>
+            </dialog>
+        </>
+
     )
 }
 

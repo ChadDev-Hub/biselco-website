@@ -35,8 +35,8 @@ const Events = () => {
         ]
     }]
   return (
-    <div className='w-full  sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip'>
-        <Carousel>
+    <div className='w-full flex flex-col justify-center items-center px-2 sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip'>
+       
         {
             events.map((event, index) => (
 
@@ -49,7 +49,6 @@ const Events = () => {
                 abrev={event.abrevation}/>
             ))
         }
-    </Carousel>
     </div>
   )
 }

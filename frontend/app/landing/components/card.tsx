@@ -44,16 +44,14 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
     initial="hidden"
     whileInView="visible"
     variants={fadeInUp}
-     className="card card-md drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-100 md:w-md lg:w-lg xl:w-xl group">
+     className="card image-full drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-full md:w-md lg:w-lg xl:w-xl group">
       {/* 1. Optimized Title: Responsive font sizing and better z-index */}
       
       <motion.h2 
       variants={textTyping}
       className="absolute top-2 left-3 z-20 pr-12 
                  text-2xl sm:text-3xl lg:text-4xl 
-                 font-extrabold wrap-break-word leading-tight
-                 [text-stroke:1px_white] [-webkit-text-stroke:1px_white] 
-                 md:[text-stroke:2px_white] md:[-webkit-text-stroke:2px_white]">
+                 font-extrabold wrap-break-word leading-tight text-black text-shadow-md text-shadow-white">
         {title.split("").map((char, index) => (
           <motion.span
            key={index}
@@ -64,7 +62,7 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
       </motion.h2>
 
       {/* 2. Image: Standardized aspect ratio for consistency */}
-      <figure className="w-full relative aspect-square sm:aspect-video md:aspect-square">
+      <figure className="w-full  relative aspect-square sm:aspect-auto md:aspect-auto">
         <Image
         loading="eager"
           src={image_src}
