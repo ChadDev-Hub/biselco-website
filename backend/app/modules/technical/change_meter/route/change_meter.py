@@ -96,7 +96,6 @@ async def create_change_meter(
 
         data = NewChangeMeterResponse.model_validate(
             change_meter_data).model_dump(mode="json")
-        print(data)
         for admin in admin_user:
             await manager.broad_cast_personal_json(user_id=str(admin), data=data)
     except Exception as e:

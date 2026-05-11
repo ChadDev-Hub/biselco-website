@@ -5,9 +5,10 @@ import { useRef } from "react";
 type Props = {
     handleDelete: () => void
     show: boolean;
+    is_active: boolean;
 }
 
-const Delete = ({ handleDelete, show }: Props) => {
+const Delete = ({ handleDelete, show , is_active}: Props) => {
     const modalRef = useRef<HTMLDialogElement>(null)
     const handleOpen = () => modalRef.current?.showModal()
     const handleClose = () => modalRef.current?.close()
@@ -21,7 +22,9 @@ const Delete = ({ handleDelete, show }: Props) => {
             onClick={handleOpen}
             title='Delete Selected'
             type='button'
-            className={`btn sticky left-4 shadow btn-circle btn-sm btn-ghost ${show ? "" : "hidden"}`}>
+            data-tip="Delete Change Meter"
+            disabled={is_active ? false: true}
+            className={`btn ${is_active? "btn-primary": "btn-disabled"} tooltip tooltip-right sticky left-4 shadow btn-circle btn-sm  ${show ? "" : "hidden"}}`}>
             <svg
                 width={20}
                 height={20}

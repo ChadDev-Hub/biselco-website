@@ -14,7 +14,7 @@ from shapely.geometry import Point
 from pprint import pprint
 import io
 
-PAGE_SIZE = 9  
+PAGE_SIZE = 12
 
 
 async def get_change_meter_stats(session: AsyncSession):

@@ -140,7 +140,7 @@ const Stats = ({ data }: Props) => {
         break;
     }
   }
-  console.log("stats", statistics)
+ 
   return (
 
     <div className="stats shadow w-full">

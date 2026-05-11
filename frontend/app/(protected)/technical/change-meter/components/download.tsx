@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler} from "react-hook-form";
 
 
+
 type Props = {
     show: boolean;
     download: (data:FormField) => void;
+    isactive: boolean;
 }
 type FormField = {
     prepared_by: string
@@ -17,7 +19,7 @@ type FormField = {
     approved_position: string
 }
 
-const DownloadReport = ({ show, download }: Props) => {
+const DownloadReport = ({ show, download, isactive }: Props) => {
     const { register, reset, handleSubmit, formState: { errors, isValid, isSubmitSuccessful}} = useForm<FormField>();
     const [showForm, setShowForm] = useState(false);
     const [showDowndloadButon, setShowDowndloadButton] = useState(false);
@@ -64,7 +66,7 @@ const DownloadReport = ({ show, download }: Props) => {
 
     return (
         <>
-            <button onClick={handleOpen} title='Download Report' type='button' className={`btn shadow sticky left-14 btn-ghost btn-circle btn-sm ${show ? "" : "hidden"}`}>
+            <button disabled={isactive? false : true} onClick={handleOpen} title='Download Report' type='button' className={`btn ${isactive? "btn-primary" : "btn-disabled"} shadow sticky left-14 btn-circle btn-sm ${show ? "" : "hidden"}`}>
                 <svg
                     width={20}
                     height={20}
