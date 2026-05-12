@@ -13,7 +13,7 @@ from sqlalchemy import true
 from ..schema.response_model import NewConnectionData
 from typing import Type
 from .....common.total_page import get_total_page
-PAGESIZE=9
+PAGESIZE=12 
 
 
 async def get_new_connection(session: AsyncSession, page:Optional[int] = None):

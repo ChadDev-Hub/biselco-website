@@ -45,7 +45,7 @@ def create_technical_report(
     # -----------------------------
     ws.merge_cells(start_row=1, start_column=1,
                    end_row=1, end_column=len(columns))
-    ws["A1"] = "CHANGE METER REPORT"
+    ws["A1"] = title
     ws["A1"].font = title_font
     ws["A1"].alignment = center_align
 

@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status, Body, Depends
+from fastapi import HTTPException, status, Body, Depends, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -15,17 +15,19 @@ from ...services.technical_report import create_technical_report
 from ..schema.response_model import NewConnectionReportResponse, NewConnectionCreatedResponse
 from ..services.get import get_new_connection_stats
 from .....common.total_page import get_total_page
+from .....dependencies.bucket3 import upload_image
 
-PAGESIZE = 9
-async def create_new_connection(session: AsyncSession, new_connection: dict, image: Optional[str] = None):
+PAGESIZE = 12
+async def create_new_connection(session: AsyncSession, new_connection: dict, image: UploadFile):
     stmt = NewConnection(**new_connection)
     try:
         session.add(stmt)
         await session.flush()
         if image:
+            image_url = await upload_image(file=image, folder="new_connection")
             session.add(NewConnectionImage(
                 new_connection_id=stmt.id,
-                image=image))
+                image=image_url))
         await session.commit()
         results = (await session.execute(
             select(NewConnection)

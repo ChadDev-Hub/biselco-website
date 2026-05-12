@@ -54,6 +54,8 @@ async def extract_address_from_image(
         return VerifiedLocation(
             village=location.villages.name,
             municipality=location.municipal.name,
+            lat=image_lat,
+            lon=image_lon,
             geom=WKTElement('POINT({} {})'.format(image_lon, image_lat), srid=4326)
         )
     except KeyError:

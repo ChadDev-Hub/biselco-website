@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import { queryConsumer } from "@/lib/serverFetch";
-import Image from "next/image";
+
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
 import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +12,8 @@ import { Archivo_Black } from "next/font/google";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useCallback } from "react";
 import { useAlert } from "@/app/common/alert";
+import ImageViewer from "./imageViewr";
+
 type FormField = {
   dateAccomplished: string;
   accountNumber: string;
@@ -239,6 +241,7 @@ const ChangeMeterForm = () => {
           >
             Change Meter Form
             <button
+              type="button"
               onClick={handleClose}
               className="btn absolute z-100 top-1 right-2 btn-xs btn-circle"
             >
@@ -448,6 +451,37 @@ const ChangeMeterForm = () => {
                       })}
                     />
 
+
+
+                    {/* IMAGE */}
+                    <div className="flex flex-col self-center items-center justify-center ">
+                      <label className="label font-bold text-xs">
+                        {" "}
+                        Upload Image
+                      </label>
+                      <input
+                        className="file-input"
+                        type="file"
+                        accept="image/*"
+                        {...register("attachment", {
+                          required: "Please Upload Image of the Electric Meter",
+                        })}
+                      />
+                      {errors.attachment && (
+                        <span className="text-red-500 talic text-xs">
+                          {errors.attachment.message}
+                        </span>
+                      )}
+                      {attachment?.[0] && (
+                        <div className="mt-2">
+                          <ImageViewer
+                            image={attachment?.[0] ? URL.createObjectURL(attachment?.[0]) : ""}
+                          />
+                        </div>
+
+                      )}
+                    </div>
+
                     <label className="label font-bold text-xs">Location</label>
                     <BiselcoMap
                       markerPopup={`${consumerName ? `${consumerName} Electric Meter` : ""}`}
@@ -462,39 +496,6 @@ const ChangeMeterForm = () => {
                       <span className="text-red-500  italic text-xs">
                         {errors.lat?.message}
                       </span>
-                    )}
-                  </div>
-
-                  {/* IMAGE */}
-                  <div className="flex flex-col self-center items-center justify-center ">
-                    <label className="label font-bold text-xs">
-                      {" "}
-                      Upload Image
-                    </label>
-                    <input
-                      className="file-input"
-                      type="file"
-                      accept="image/*"
-                      {...register("attachment", {
-                        required: "Please Upload Image of the Electric Meter",
-                      })}
-                    />
-                    {errors.attachment && (
-                      <span className="text-red-500 talic text-xs">
-                        {errors.attachment.message}
-                      </span>
-                    )}
-                    {attachment?.[0] && (
-                      <Image
-                        src={
-                          attachment ? URL.createObjectURL(attachment[0]) : ""
-                        }
-                        alt="Image"
-                        width={200}
-                        height={200}
-                        sizes="(min-width: 1024px) 200px, 100vw"
-                        className="max-h-40 w-auto h-auto mt-4 drop-shadow-2xl drop-shadow-gray-700"
-                      />
                     )}
                   </div>
                 </div>

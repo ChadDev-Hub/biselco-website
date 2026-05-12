@@ -1,4 +1,5 @@
 "use server";
+
 import { serverFetchAutoRefresh } from "./actionWraper";
 
 const baseUrl = process.env.BASESERVERURL;
@@ -42,3 +43,15 @@ export const DownloadNewConnectionReport = async (items:object) => {
     )
     return data;
 }
+
+export const CheckImageLocation = async (attachment: File) => {
+  const formData = new FormData();
+  formData.append("attachment", attachment);
+  const data = await serverFetchAutoRefresh(
+    `${baseUrl}/v1/new_connection/check_image_location`,
+    "POST",
+    formData
+  );
+  await new Promise((resolve)=> setTimeout(resolve, 2000));
+  return data;
+};

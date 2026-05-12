@@ -8,7 +8,7 @@ from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from .get import get_change_meter_stats
 from .....common.total_page import get_total_page
-
+PAGESIZE = 12
 async def post_change_meter(session:AsyncSession, data:dict, image:Optional[str] = None):
     new_change_meter = ChangeMeter(**data)
     try:
@@ -48,7 +48,7 @@ async def post_change_meter(session:AsyncSession, data:dict, image:Optional[str]
             }
         }
         change_meter_stats = await get_change_meter_stats(session=session)
-        total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=10)
+        total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=PAGESIZE)
         
         return {
             "detail": "post_change_meter",

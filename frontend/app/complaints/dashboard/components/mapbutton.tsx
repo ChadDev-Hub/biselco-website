@@ -115,15 +115,16 @@ const MapButton = ({ location, municipality, village, title }: Props) => {
         </svg>
       </button>
       <dialog ref={modalRef} className="modal modal-bottom">
-        <div className="modal-box">
-          <div className="flex items-start justify-center w-full absolute top-0 left-0">
+        <div className="modal-box relative">
+         
             <button
               type="button"
               onClick={handleCloseModal}
-              className="btn btn-rounded drop-shadow-2xl bg-base-content w-xs sm:w-sm md:w-md h-2.5"
+              className="btn btn-circle btn-error btn-sm absolute right-2 top-2 drop-shadow-2xl "
             >
+              X
             </button>
-          </div>
+        
           <h3 className="font-bold text-lg flex gap-2 items-center">
             <span>
               <svg

@@ -12,6 +12,8 @@ from .....dependencies.bucket3 import upload_image
 from ..services.delete import delete_new_connection
 from typing import Optional
 from datetime import datetime
+from shapely import Point
+from geoalchemy2.functions import ST_X, ST_Y
 from ....websocket.websocket_manager import manager
 from ..schema.response_model import NewConnectionInitialData
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
@@ -30,15 +32,10 @@ async def new_connection(session: AsyncSession = Depends(get_session),
                          attachment:UploadFile = File(...),
                          accomplished_by: str = Form(...),
                          location: VerifiedLocation = Depends(verifyLocation),
-                         image_location: VerifiedLocation = Depends(extract_address_from_image),
                          remarks: Optional[str] = Form(None),
                          get_user_services: GetUserServices = Depends(GetUserServices)
                          ):
-    loc  = None
-    if image_location:
-        loc = image_location
-    else:
-        loc = location
+    loc  = location
     data = {
         "form_id": 4,
         "date_accomplished": datetime.strptime(date, "%Y-%m-%d").date(),
@@ -53,15 +50,23 @@ async def new_connection(session: AsyncSession = Depends(get_session),
         "geom": loc.geom,
         "remarks": remarks
     }
-    image_url = None
-    if attachment:
-        image_url = await upload_image(file=attachment, folder="new_connection")
-    response = await create_new_connection(session=session, new_connection=data, image=image_url)
+    response = await create_new_connection(session=session, new_connection=data, image=attachment)
     admins = await get_user_services.get_users_by_roles(roles="admin")
     for admin in admins:
         await manager.broad_cast_personal_json(str(admin), response)
     # QUERY ADMINS
     return {"detail": "New Connection Created Successfully"}
+
+@router.post("/check_image_location/", status_code=status.HTTP_200_OK)
+async def check_image(image_location: VerifiedLocation = Depends(extract_address_from_image)):
+    if not image_location:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image Doesn't Have Location Please pin the Exact Location")
+    return {
+        "location": image_location.village,
+        "lat": image_location.lat,
+        "lon": image_location.lon,
+        "srid" : image_location.geom.srid
+    }
 
 @router.get("/",status_code=status.HTTP_200_OK, response_model=NewConnectionInitialData)
 async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optional[int] = Query(None)):

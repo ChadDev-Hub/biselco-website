@@ -148,7 +148,7 @@ const ChangeMeteContainer = ({ data }: Props) => {
   };
   return (
     <>
-      <div className="px-2 w-full">
+      <div className=" w-full">
         {/* NAV BAR */}
         <div className="navbar w-full  px-2 flex justify-between glass mb-2 rounded-box">
           {/* TOOLS */}
@@ -170,23 +170,26 @@ const ChangeMeteContainer = ({ data }: Props) => {
             <div>
               <ChangeMeterForm />
             </div>
-            <div className="">
-                <span className="font-semibold">Items:</span>  <span>{selectedRow.size === 0 ? "" : selectedRow.size }</span>
-            </div>
+            
           </div>
           {/*Search*/}
-          <div>
+          <div className="shrink">
+            
             <input
               placeholder="Find"
               type="text"
               className="input bg-base-300 drop-shadow-md drop-shadow-gray-500 rounded-full"
             />
           </div>
+          
         </div>
+        {selectedRow.size > 0 && <div className="badge mb-2 badge-outline badge-secondary text-xs font-bold">
+              <span>Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size }</span>
+          </div>}
       </div>
 
       {/* Chage Meter Card */}
-      <div className="grid grid-cols-1 px-2  sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
+      <div className="grid grid-cols-1   sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
         {changeMeterData.map((item: ChangeMeter, index) => (
           <ChangeMeteCards
             key={index}

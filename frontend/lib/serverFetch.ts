@@ -143,7 +143,7 @@ export async function ComplaintStatusName() {
         `${baseUrl}/v1/complaints/status/name`,
         {
             method: "GET",
-            next: {revalidate: 300}
+            cache: "no-cache"
         }
     )
     const data = await res.json()
@@ -185,7 +185,8 @@ export const queryConsumer = async(query?:string)=>{
 export const GetChangeMeter = async (page?:number,query?: string) => {
     const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?page=${page}` : `${baseUrl}/v1/change_meter/`;
     const res = await fetch(url, {
-        method: "GET"
+        method: "GET",
+        cache: "no-cache"
     })
     const data = await res.json()
     if (!res.ok){
@@ -194,6 +195,7 @@ export const GetChangeMeter = async (page?:number,query?: string) => {
             data: data.detail
         }
     }
+   
     return {
         status: res.status,
         data: data
@@ -267,7 +269,8 @@ export const GetNewConnection = async (page?:number) => {
         params.set("page",page.toString())
     }
     const res = await fetch(`${baseUrl}/v1/new_connection/?${params?.toString()}`, {
-        method: "GET"
+        method: "GET",
+        cache: "no-cache"
     })
     const data = await res.json()
     if (!res.ok){
