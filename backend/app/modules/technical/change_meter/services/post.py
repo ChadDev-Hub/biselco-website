@@ -1,5 +1,5 @@
 from ..model.change_meter import ChangeMeter, ChangeMeterImage
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,18 +7,19 @@ from typing import Optional
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from .get import get_change_meter_stats
+from .....dependencies.bucket3 import upload_image
 from .....common.total_page import get_total_page
 PAGESIZE = 12
-async def post_change_meter(session:AsyncSession, data:dict, image:Optional[str] = None):
+async def post_change_meter(session:AsyncSession, data:dict, image:UploadFile):
     new_change_meter = ChangeMeter(**data)
     try:
         session.add(new_change_meter)
         await session.flush()
-
+        image_url = await upload_image(file=image, folder="change_meter")
         if image:
             session.add(ChangeMeterImage(
                 change_meter_id=new_change_meter.id,
-                image=image))
+                image=image_url))
         await session.commit()
         await session.refresh(new_change_meter)
         results = (await session.execute(

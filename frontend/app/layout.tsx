@@ -86,7 +86,7 @@ export const metadata: Metadata = {
   },
 
   // PWA / Mobile
-  // manifest: "/site.webmanifest",
+  manifest: "/manifest.webmanifest",
 
   // Robots (SEO indexing rules)
   robots: {
@@ -124,6 +124,9 @@ export default async function RootLayout({
   const currentUSER = await getCurrentUser();
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
+      <head>
+        <meta name="apple-mobile-web-app-title" content="BISELCO" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >

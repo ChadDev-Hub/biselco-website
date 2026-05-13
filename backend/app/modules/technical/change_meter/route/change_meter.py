@@ -39,7 +39,7 @@ async def create_change_meter(
     accomplishedBy: Annotated[str, Form()],
     user: UserModel = Depends(get_current_user),
     remarks: Annotated[Optional[str], Form()] = None,
-    attachment: Annotated[Optional[UploadFile], File()] = None,
+    attachment: UploadFile = File(),
     verified_location: VerifiedLocation = Depends(verifyLocation),
     image_location: VerifiedLocation = Depends(extract_address_from_image),
     session: AsyncSession = Depends(get_session),
@@ -47,9 +47,7 @@ async def create_change_meter(
 ):
     # UPLOAD IMAGE TO S3 BUCKET
 
-    image_url = None
-    if attachment:
-        image_url = await upload_image(file=attachment, folder="change_meter")
+    
 
     # CHECK IF THE USER IS ADMIN IF NOT RAISE AN ERROR
     if "admin" not in [role.name.lower() for role in user.roles]:
@@ -89,7 +87,7 @@ async def create_change_meter(
             "accomplished_by": accomplishedBy,
             "geom": location.geom}
 
-        change_meter_data = await post_change_meter(session=session, data=new_change_meter, image=image_url)
+        change_meter_data = await post_change_meter(session=session, data=new_change_meter, image=attachment)
 
         # GET ADMIN USER
         admin_user = await get_user_services.get_users_by_roles(roles="admin")

@@ -48,7 +48,7 @@ export const CheckImageLocation = async (attachment: File) => {
   const formData = new FormData();
   formData.append("attachment", attachment);
   const data = await serverFetchAutoRefresh(
-    `${baseUrl}/v1/new_connection/check_image_location`,
+    `${baseUrl}/v1/new_connection/check_image_location/`,
     "POST",
     formData
   );

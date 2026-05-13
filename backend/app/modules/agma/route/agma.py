@@ -27,4 +27,4 @@ async def get_registered(
     get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
 ):  
     data = await get_agma_registration_service.get_registered(id=id)
-    return data
+    return data 
