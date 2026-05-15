@@ -4,15 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import { queryConsumer } from "@/lib/serverFetch";
-
+import { CirclePlus } from "lucide-react"
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
 import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
-import { Archivo_Black } from "next/font/google";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useCallback } from "react";
 import { useAlert } from "@/app/common/alert";
 import ImageViewer from "./imageViewr";
+import { Camera } from "lucide-react"
 
 type FormField = {
   dateAccomplished: string;
@@ -30,6 +30,7 @@ type FormField = {
   remarks: string | undefined;
   accomplishedBy: string;
   attachment?: File;
+  realtimeImage?: File;
 };
 
 type Consumer = {
@@ -47,7 +48,6 @@ type Location = {
   coordinates: [number, number];
 };
 
-const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
 
 const ChangeMeterForm = () => {
   const {
@@ -69,6 +69,8 @@ const ChangeMeterForm = () => {
   const handleClose = useCallback(() => {
     modalRef.current?.close();
   }, []);
+  const [imagePreview, setImagePreview] = useState<File | undefined>(undefined);
+
   // WATCH COORDINATES
   const lon = useWatch({
     control: control,
@@ -97,6 +99,38 @@ const ChangeMeterForm = () => {
     control: control,
     name: "attachment",
   });
+
+  // WATCH REALTIME IMAGE
+  const realtime_image = useWatch({
+    control: control,
+    name: "realtimeImage",
+  })
+
+  
+
+  useEffect(()=>{
+    if(attachment){
+      setValue("realtimeImage", undefined)
+      queueMicrotask(()=> setImagePreview(attachment))
+      return;
+    }
+  },[attachment,setValue])
+
+  useEffect(()=>{
+    if (!realtime_image) return
+    if(realtime_image){
+      setValue("attachment", undefined)
+      queueMicrotask(()=> setImagePreview(realtime_image))
+
+      navigator.geolocation.getCurrentPosition((position)=>{
+        setValue("lat", position.coords.latitude)
+        setValue("lon", position.coords.longitude)
+      })
+      return;
+    }
+  },[realtime_image,setValue])
+
+  
 
   useEffect(() => {
     if (consumerSearch === "") {
@@ -167,7 +201,7 @@ const ChangeMeterForm = () => {
       }
       NewData.append("accomplishedBy", data.accomplishedBy);
       if (data.attachment?.[0]) {
-        NewData.append("attachment", data.attachment[0]);
+        NewData.append("attachment",imagePreview?.[0]);
       }
       showLoading(true, "Submitting Change Meter...");
       const page = useParams.get("page") as unknown as number;
@@ -192,7 +226,7 @@ const ChangeMeterForm = () => {
           break;
       }
     },
-    [reset, setError, showLoading, useParams, showAlert],
+    [reset, setError, showLoading, useParams, showAlert, imagePreview],
   );
 
   return (
@@ -202,48 +236,19 @@ const ChangeMeterForm = () => {
         data-tip="Add Change Meter"
         title="Change Meter Form"
         onClick={handleOpen}
-        className="btn btn-primary btn-circle btn-sm tooltip tooltip-right tooltip-xs"
+        className="btn btn-active btn-circle btn-sm tooltip tooltip-right tooltip-xs"
       >
-        <svg
-          width={25}
-          height={25}
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            {" "}
-            <path
-              d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
-              stroke="#1C274C"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            ></path>{" "}
-            <path
-              d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7"
-              stroke="#1C274C"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            ></path>{" "}
-          </g>
-        </svg>
+        <CirclePlus />
       </button>
-      <dialog ref={modalRef} className="modal  xl:px-20  modal-bottom">
-        <div className='px-2 w-full  modal-box border drop-shadow-md z-10   glass rounded-box  border"'>
+      <dialog ref={modalRef} className="modal modal-bottom">
+        <div className='px-2 w-full mx-auto  modal-box max-w-3xl border drop-shadow-md z-10 bg-base-100 rounded-box  border"'>
           <div
-            className={`sticky top-0 text-lg text-blue-800 pb-2 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}
+            className={`sticky top-0 z-100`}
           >
-            Change Meter Form
             <button
               type="button"
               onClick={handleClose}
-              className="btn absolute z-100 top-1 right-2 btn-xs btn-circle"
+              className="btn absolute z-100 -top-4 right-0 btn-sm btn-circle"
             >
               X
             </button>
@@ -251,7 +256,7 @@ const ChangeMeterForm = () => {
           <div className="overflow-y-auto max-h-[70vh]">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="flex overflow-x-auto  overflow-y-auto h-full flex-col gap-2"
+              className="flex overflow-x-clip  overflow-y-auto h-full flex-col gap-2"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="w-full">
@@ -263,7 +268,7 @@ const ChangeMeterForm = () => {
                     <input
                       {...register("dateAccomplished", { required: true })}
                       title="Date Accomplished"
-                      className="input w-full"
+                      className="input input-sm w-full"
                       type="date"
                     />
                     {errors.dateAccomplished && (
@@ -282,7 +287,7 @@ const ChangeMeterForm = () => {
                       name="accountNumber"
                       title="Account Number"
                       placeholder="Search Account here..."
-                      className="input dropdown  w-full"
+                      className="input input-sm dropdown  w-full"
                       type="text"
                     />
                     {errors.accountNumber && (
@@ -316,7 +321,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="Consumer Name"
                       placeholder="Conumer Name"
-                      className="input w-full"
+                      className="input input-sm w-full"
                       type="text"
                     />
                     {errors.consumerName && (
@@ -337,7 +342,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="Pullout Meter Number"
                       placeholder="Meter Number"
-                      className="input w-full "
+                      className="input input-sm w-full "
                       type="text"
                     />
                     {errors.pullOutMeterNumber && (
@@ -351,7 +356,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="Pullout Meter Brand"
                       placeholder="Brand"
-                      className="input w-full"
+                      className="input input-sm w-full"
                       type="text"
                     />
                     {errors.pullOutMeterBrand && (
@@ -365,7 +370,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="Pullout Meter Reading"
                       placeholder="Reading"
-                      className="input  w-full"
+                      className="input input-sm  w-full"
                       type="number"
                     />
                     {errors.pullOutMeterReading && (
@@ -383,7 +388,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="New Meter Number"
                       placeholder="Meter Number"
-                      className="input w-full"
+                      className="input input-sm w-full"
                       type="text"
                     />
                     {errors.NewMeterNumber && (
@@ -397,7 +402,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="New Meter Brand"
                       placeholder="Brand"
-                      className="input w-full"
+                      className="input input-sm w-full"
                       type="text"
                     />
                     {errors.NewMeterNumber && (
@@ -411,7 +416,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="New Meter Sealed"
                       placeholder="Meter Sealed"
-                      className="input  w-full"
+                      className="input input-sm w-full"
                       type="text"
                     />
                     {errors.NewMeterSealed && (
@@ -425,7 +430,7 @@ const ChangeMeterForm = () => {
                       })}
                       title="New Meter Reading"
                       placeholder="Initial Reading"
-                      className="input  w-full"
+                      className="input input-sm shadow  w-full"
                       type="number"
                     />
                     {errors.InitialMeterReading && (
@@ -437,7 +442,7 @@ const ChangeMeterForm = () => {
                 </div>
                 <div className="flex flex-col gap-2 items-center">
                   {/* Location */}
-                  <div className="border-gray-200 w-full inset-shadow-md shadow drop-shadow-md">
+                  <div className="border-gray-200 w-full">
                     <input
                       type="hidden"
                       {...register("lon", {
@@ -456,26 +461,43 @@ const ChangeMeterForm = () => {
                     {/* IMAGE */}
                     <div className="flex flex-col self-center items-center justify-center ">
                       <label className="label font-bold text-xs">
-                        {" "}
                         Upload Image
                       </label>
-                      <input
-                        className="file-input"
-                        type="file"
-                        accept="image/*"
-                        {...register("attachment", {
-                          required: "Please Upload Image of the Electric Meter",
-                        })}
-                      />
+                      <div className="flex items-center justify-between gap-2">
+                        <input
+                          className="file-input file-input-sm file-input-success"
+                          type="file"
+                          accept="image/*"
+                          {...register("attachment", {
+                            required: "Please Upload Image of the Electric Meter",
+                          })}
+                        />
+                        <span className="text-xs"> OR</span>
+                        <label title="Capture  Realtime Image" data-tip="Take Picture" className="btn btn-active btn-circle cursor-pointer tooltip-left tooltip">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            {...register("realtimeImage", {
+                            })}
+                          />
+                          <Camera  className=" text-emerald-500 t" />
+                        </label>
+
+                      </div>
+
+
+
                       {errors.attachment && (
                         <span className="text-red-500 talic text-xs">
                           {errors.attachment.message}
                         </span>
                       )}
-                      {attachment?.[0] && (
+                      {imagePreview?.[0] && (
                         <div className="mt-2">
                           <ImageViewer
-                            image={attachment?.[0] ? URL.createObjectURL(attachment?.[0]) : ""}
+                            image={imagePreview ? URL.createObjectURL(imagePreview?.[0]) : ""}
                           />
                         </div>
 
@@ -506,7 +528,7 @@ const ChangeMeterForm = () => {
                     title="Remarks"
                     {...register("remarks")}
                     placeholder="Remarks"
-                    className="input w-full"
+                    className="input input-sm w-full"
                     type="text"
                   />
                 </div>
@@ -523,7 +545,7 @@ const ChangeMeterForm = () => {
                     type="text"
                     title="Accomplished by"
                     placeholder="Accomplished By"
-                    className="input w-full"
+                    className="input input-sm w-full"
                   />
                   {errors.accomplishedBy && (
                     <span className="text-red-500  italic text-xs">
@@ -532,12 +554,12 @@ const ChangeMeterForm = () => {
                   )}
                 </div>
               </div>
-              <div className="col-span-1 sm:col-span-1 md:col-span-2">
+              <div className="modal-action">
                 {/* SUBMIT */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`btn w-full btn-accent`}
+                  className={`btn btn-sm  w-full btn-accent`}
                 >
                   {isSubmitting ? (
                     <p className="skeleton skeleton-text">Submitting..</p>

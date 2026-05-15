@@ -2,7 +2,6 @@
 
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const baseUrl = process.env.BASESERVERURL;
 // SIGNUP ACTION
@@ -66,5 +65,9 @@ export const GoogleLoginRoute = async(secretKey?:string)=>{
       error: results.detail,
     };
   }
-  redirect(results.url);
+  
+  return {
+    status: res.status,
+    url: results.url
+  }
 }

@@ -66,6 +66,7 @@ const Pagination = ({ data, pageUrl }: Props) => {
     if (page === currentPage) return;
     const params = new URLSearchParams();
     if (query.get("q")) params.set("q", query.get("q") as string);
+    params.set("page", String(page));
     setLoading(true);
     setCurrentPage(page);
     router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });

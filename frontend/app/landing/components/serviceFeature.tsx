@@ -19,21 +19,7 @@ const ServiceFeature = () => {
     title: "Live Monitoring",
     description: "Track service status, outages, and updates in real time through our monitoring system."  }];
   return (
-    <motion.div className="w-full flex flex-col mx-auto gap-2 px-2 sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        variants={fadeInUp}
-        className="glass text-center rounded-box "
-      >
-        <h2 className="text-4xl text-primary  font-extrabold mb-4 italic">
-          Service Excellence
-        </h2>
-        <p className="max-w-xl text-black font-bold mx-auto opacity-70 text-lg">
-          Beyond just electricity, we provide the tools for a connected life.
-        </p>
-      </motion.div>
-
+    <motion.div className="w-full flex flex-col mx-auto gap-2 max-w-3xl px-2 overflow-x-clip">
       <motion.div
         variants={staggerContainer}
         initial="hidden"

@@ -13,6 +13,7 @@ from sqlalchemy import true
 from ..schema.response_model import NewConnectionData
 from typing import Type
 from .....common.total_page import get_total_page
+from datetime import date
 PAGESIZE=12 
 
 
@@ -78,31 +79,26 @@ async def get_new_connection_stats(session: AsyncSession):
 
     monthly_count = (
         select(
-            func.date_trunc("month", NewConnection.date_accomplished).label("month"),
             func.coalesce(func.count(), 0).label("monthly_count")
         )
-        .group_by("month")
-    ).subquery()
-
-    average_count = (
-        select(func.coalesce(func.floor(func.abs(func.round(func.avg(monthly_count.c.monthly_count)))), 0).label("average_count"))
-    ).cte("average_count")
+        .where(func.extract("month", NewConnection.date_accomplished) == func.extract("month", func.current_date()))
+    ).cte("monthly_count")
 
     data = (await session.execute(
-        select(total_count.c.total, daily_total.c.daily_total, average_count.c.average_count)
+        select(total_count.c.total, daily_total.c.daily_total, monthly_count.c.monthly_count)
         .select_from(total_count)
         .join(daily_total, true())
-        .join(average_count, true()))).mappings().one()
+        .join(monthly_count, true()))).mappings().one()
     return [{
         "label": "Total",
         "value": data["total"],
-        "description": "New Connection"
+        "description": "NC"
     }, {
         "label": "Daily Total",
         "value": data["daily_total"],
         "description": "Today"
     }, {
-        "label": "Monthly Avg.",
-        "value": data["average_count"],
-        "description": "Monthly Avg."
+        "label": "Monthly",
+        "value": data["monthly_count"],
+        "description": date.today().strftime("%B")
     }]

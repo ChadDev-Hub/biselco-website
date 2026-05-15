@@ -39,7 +39,7 @@ const NewConnectionCard = ({
 }: Props) => {
   return (
     <CardComponent
-      className={`w-full flex flex-col justify-center items-center  ${selectedRow.has(id) ? "border border-blue-600" : "border border-blue-400"} hover:cursor-pointer bg-radial from-gray-100  to-gray-500  shadow-md shadow-gray-700 rounded-box  `}
+      className={`w-full flex flex-col justify-center items-center  ${selectedRow.has(id) ? "border border-blue-600" : "border border-gray-300 border-t-emerald-500 border-t-2"} hover:cursor-pointer bg-base-100 shadow-md  rounded-box  `}
     >
       <div className="p-2 w-full relative flex flex-col gap-2">
         <input
@@ -61,7 +61,7 @@ const NewConnectionCard = ({
         </div>
 
         <div className="card-body py-4 px-0 flex flex-col">
-          <div className="drop-shadow-md shadow-gray-600  w-full p-4 rounded-box  glass">
+          <div className="drop-shadow-md bg-base-200 w-full p-4 rounded-box  glass">
             <div className="badge bg-xs text-xs bg-linear-to-tr from-blue-100 to-blue-400  badge-sm absolute  top-2 right-2">
               NC
             </div>

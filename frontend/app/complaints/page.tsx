@@ -6,11 +6,13 @@ import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './dashboard/components/loading'
 import ComplaintHeader from './components/header'
+import ConcernCard from './components/modernConcernCard';
+
 const ComplaintsPage = () => {
   const data = UserComplaints()
   const statusName = ComplaintStatusName()
   return (
-    <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
+    <div className="flex min-h-screen items-start w-full justify-center">
       <main className="
       container
       max-w-190
@@ -19,11 +21,6 @@ const ComplaintsPage = () => {
       gap-4 
       flex-col 
       lg:items-center 
-      mt-20
-      xs:mt-20
-      sm:mt-20 
-      md:mt-20
-      lg:mt-20 
       pb-21">
         {/* Header */}
         <section>
@@ -45,6 +42,7 @@ const ComplaintsPage = () => {
             <ComplaintsDashboardRouteButton />
           </div>
         </FabIcon>
+        <ConcernCard/>
       </main>
     </div>
   )

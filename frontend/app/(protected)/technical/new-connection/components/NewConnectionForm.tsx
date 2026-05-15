@@ -2,12 +2,14 @@
 
 import { useForm, SubmitHandler, useWatch } from "react-hook-form"
 import BiselcoMap from "@/app/common/Map"
-import Image from "next/image"
 import { newConnectionMeter } from "@/app/actions/newConnectionMeter"
 import ElectricMeter from "../../components/electricMeterSvg"
-import { Archivo_Black } from "next/font/google"
-import { CheckImageLocation } from "@/app/actions/newConnectionMeter"
 import { useEffect, useRef, useState } from "react"
+import { GetImageLocation } from '../../../../actions/imageGeolocation';
+import { CirclePlus } from 'lucide-react';
+import ImageViewer from '../../change-meter/components/imageViewr';
+
+
 type FormField = {
     date: string;
     consumer_name: string;
@@ -23,17 +25,18 @@ type FormField = {
     accomplished_by: string
 }
 
-const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
+
 
 const NewConnectionForm = () => {
     const { register, clearErrors, setError, control, formState: { errors, isSubmitting }, handleSubmit, setValue, reset, getValues } = useForm<FormField>()
     const modalRef = useRef<HTMLDialogElement | null>(null);
     const attachment = useWatch({ control, name: "attachment" });
     const [imageLocationVerifying, setImageLocationVerifying] = useState(false);
-
     const handleClose = () => modalRef?.current?.close();
     const handleOpen = () => modalRef?.current?.showModal();
-
+    const labelStyle = "label font-bold text-xs"
+    const inputStle = "input input-sm w-full"
+    const errorStyle = "text-xs text-error italic"
     const consumerName = useWatch({
         control: control,
         name: "consumer_name",
@@ -52,23 +55,19 @@ const NewConnectionForm = () => {
         if (attachment?.length === 0 || attachment === undefined) return;
         const runCheck = async () => {
             setImageLocationVerifying(true);
-            const result = await CheckImageLocation(attachment[0]);
-            switch (result?.status) {
-                case 200:
-                    setValue("lat", result.data.lat);
-                    setValue("lon", result.data.lon);
-                    clearErrors("lat");
-                    setImageLocationVerifying(false);
-                    break;
-                case 404:
-                    setError("lat", { message: result.data })
-                    setValue("lon", undefined)
-                    setValue("lat", undefined)
-                    setImageLocationVerifying(false);
-                    break
-                default:
-                    break;
+            const {latitude, longitude}= await GetImageLocation(attachment[0]);
+            if (!latitude || !longitude){
+                setError("lat", {message:"Unable to verify location of image attached please pin the exact location"});
+                setImageLocationVerifying(false);
+                setValue("lat", undefined);
+                setValue("lon", undefined);
+                return;
             }
+            setValue("lat", latitude);
+            setValue("lon", longitude);
+            clearErrors("lat");
+            setImageLocationVerifying(false);
+            
         };
         runCheck();
     }, [attachment, setValue, setError, setImageLocationVerifying, clearErrors]);
@@ -100,49 +99,21 @@ const NewConnectionForm = () => {
                 data-tip="Add Change Meter"
                 title="Change Meter Form"
                 onClick={handleOpen}
-                className="btn btn-primary btn-circle btn-sm tooltip tooltip-right tooltip-xs"
+                className="btn btn-active btn-circle btn-sm tooltip tooltip-right tooltip-xs"
             >
-                <svg
-                    width={25}
-                    height={25}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                        id="SVGRepo_tracerCarrier"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                        {" "}
-                        <path
-                            d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
-                            stroke="#1C274C"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                        ></path>{" "}
-                        <path
-                            d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7"
-                            stroke="#1C274C"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                        ></path>{" "}
-                    </g>
-                </svg>
+                <CirclePlus/>
             </button>
-            <dialog ref={modalRef} className="modal  xl:px-20  modal-bottom">
-                <div className='px-2 w-full  modal-box border drop-shadow-md z-10   glass rounded-box  border"'>
+            <dialog ref={modalRef} className="modal  modal-bottom">
+                <div className='px-2 w-full mx-auto modal-box border max-w-3xl drop-shadow-md z-10 bg-base-100 rounded-box  border"'>
 
                 <div
-                    className={`sticky top-0 text-lg text-blue-800 pb-2 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}
+                    className={`sticky -top-4 `}
                 >
-                    New Connection Form
+                   
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="btn absolute z-100 top-1 right-2 btn-xs btn-circle"
+                        className="btn absolute z-100 -top-4 right-0 btn-sm btn-circle"
                     >
                         X
                     </button>
@@ -152,50 +123,55 @@ const NewConnectionForm = () => {
                     <div >
                         {/* DATE */}
                         <div className="flex flex-col">
-                            <label className="label">
+                            <label className={labelStyle}>
                                 Date Accomplished
                             </label>
-                            <input {...register("date", { required: "Date is required" })} type="date" className="input w-full" />
-                            {errors.date && <span className="text-red-500">{errors.date.message}</span>}
+                            <input {...register("date", { required: "Date is required" })} type="date" className={inputStle} />
+                            {errors.date && <span className={errorStyle}>{errors.date.message}</span>}
                         </div>
                         {/* CONSUMER NAME */}
-                        <div className="flex flex-col">
-                            <label >
+                        <div className="flex  flex-col">
+                            <label className={labelStyle}>
                                 Consumer Name
                             </label>
-                            <input {...register("consumer_name", { required: "Please enter consumer name" })} type="text" className="input w-full" />
-                            {errors.consumer_name && <span className="text-red-500">{errors.consumer_name.message}</span>}
+                            <input {...register("consumer_name", { required: "Please enter consumer name" })} type="text" 
+                            placeholder="Consumer Name" 
+                            className={inputStle} />
+                            {errors.consumer_name && <span className={errorStyle}>{errors.consumer_name.message}</span>}
                         </div>
 
                         {/* METER SERIAL NUMBER */}
                         <div className="flex flex-col">
-                            <label >
+                            <label className={labelStyle}>
                                 Meter Serial Number
                             </label>
-                            <input {...register("meter_serial_number", { required: "Please enter correct Seriral Number" })} type="text" className="input w-full" />
-                            {errors.meter_serial_number && <span className="text-red-500">{errors.meter_serial_number.message}</span>}
+                            <input {...register("meter_serial_number", { required: "Please enter correct Seriral Number" })} type="text" className={inputStle}
+                            placeholder="Meter Serial Number" />
+                            {errors.meter_serial_number && <span className={errorStyle}>{errors.meter_serial_number.message}</span>}
                         </div>
 
                         {/* METER BRAND*/}
                         <div className="flex flex-col">
-                            <label >
+                            <label className={labelStyle} >
                                 Meter Brand
                             </label>
-                            <input {...register("meter_brand", { required: "Please enter meter brand" })} type="text" className="input w-full" />
-                            {errors.meter_brand && <span className="text-red-500">{errors.meter_brand.message}</span>}
+                            <input {...register("meter_brand", { required: "Please enter meter brand" })} type="text" className={inputStle}
+                            placeholder="Meter Brand" />
+                            
+                            {errors.meter_brand && <span className={errorStyle}>{errors.meter_brand.message}</span>}
                         </div>
 
                         {/* METER SEALED */}
                         <div className="flex flex-col">
-                            <label >
-                                Meter Sealed
+                            <label className={labelStyle}>
+                                Meter Seal
                             </label>
-                            <input {...register("meter_sealed")} type="text" className="input w-full" />
+                            <input {...register("meter_sealed")} type="text" className={inputStle} placeholder="Meter Seal" />
                         </div>
 
                         {/* INITIAL READING */}
                         <div className="flex flex-col">
-                            <label>
+                            <label className={labelStyle}>
                                 Initial Reading
                             </label>
                             <input type="number" accept="number" {...register("initial_reading", {
@@ -206,38 +182,38 @@ const NewConnectionForm = () => {
                                     const num = Number(v)
                                     return isNaN(num) ? undefined : num
                                 }
-                            })} className="input w-full" />
-                            {errors.initial_reading && <span className="text-red-600">{errors.initial_reading.message}</span>}
+                            })} className={inputStle} placeholder="Initial Reading" />
+                            {errors.initial_reading && <span className={errorStyle}>{errors.initial_reading.message}</span>}
                         </div>
 
                         {/* MULTIPLIER */}
                         <div className="flex flex-col">
-                            <label>
+                            <label className={labelStyle}>
                                 Multiplier
                             </label>
                             <input type="number" accept="number" defaultValue={1} {...register("multiplier", {
                                 valueAsNumber: true,
                                 required: "Multiplier is required",
                                 setValueAs: (value) => Number(value)
-                            })} className="input w-full" />
-                            {errors.multiplier && <span className="text-red-600">{errors.multiplier.message}</span>}
+                            })} className={inputStle} />
+                            {errors.multiplier && <span className={errorStyle}>{errors.multiplier.message}</span>}
                         </div>
 
                         {/* REMARKS */}
                         <div className="flex flex-col h-fit">
-                            <label >
+                            <label className={labelStyle} >
                                 Remarks
                             </label>
-                            <textarea {...register("remarks")} className="textarea w-full" />
+                            <textarea {...register("remarks")} className="textarea textarea-sm w-full" />
                         </div>
 
                         {/* ACCOMPLISHED BY */}
                         <div>
-                            <label>
+                            <label className={labelStyle}>
                                 Accomplished By
                             </label>
-                            <input {...register("accomplished_by", { required: "Accomplished By is required" })} type="text" className="input w-full" />
-                            {errors.accomplished_by && <span className="text-red-600">{errors.accomplished_by.message}</span>}
+                            <input {...register("accomplished_by", { required: "Accomplished By is required" })} type="text" className={inputStle} placeholder="Accomplished By" />
+                            {errors.accomplished_by && <span className={errorStyle}>{errors.accomplished_by.message}</span>}
                         </div>
 
                     </div>
@@ -246,25 +222,19 @@ const NewConnectionForm = () => {
                         {/* LOCATION */}
 
                         {/* IMAGE */}
-                        <div className="flex flex-col">
-                            <label >
+                        <div className="flex flex-col items-center gap-2">
+                            <label className={labelStyle} >
                                 Image
                             </label>
-                            <input {...register("attachment", { required: "Image is required" })} multiple={false} accept="image/*" type="file" className="file-input w-full " />
+                            <input {...register("attachment", { required: "Image is required" })} multiple={false} accept="*/*" type="file" className="file-input file-input-sm file-input-success w-full " />
                             {attachment?.[0] &&
-                                <Image
-                                    src={attachment ? URL.createObjectURL(attachment[0]) : ""}
-                                    alt="Attachment"
-                                    width={200}
-                                    height={200}
-                                    sizes="(min-width: 1024px) 200px, 100vw"
-                                    className="max-h-40 w-auto h-auto mt-4 drop-shadow-2xl drop-shadow-gray-700" />}
-                            {errors.attachment && <span className="text-red-600">{errors.attachment.message}</span>}
+                            <ImageViewer image={URL.createObjectURL(attachment[0])}/>}
+                            {errors.attachment && <span className={errorStyle}>{errors.attachment.message}</span>}
 
                         </div>
 
                         <div className="flex relative  flex-col">
-                            <label >
+                            <label className={labelStyle}>
                                 Location
                             </label>
                             <input type="hidden" {...register('lon', { required: "Please Select a location" })} />
@@ -277,13 +247,10 @@ const NewConnectionForm = () => {
                                     setValue("lat", lat);
                                     setValue("lon", lon);
                                     clearErrors("lat");
-
                                 }} />
                             {imageLocationVerifying && <p className="skeleton w-full absolute top-[50%] left-[20%] text-lg italic font-semibold skeleton-text">Verifying Image Location..</p>}
-                            {errors.lat && <span className="text-red-600">{errors.lat.message}</span>}
+                            {errors.lat && <span className={errorStyle}>{errors.lat.message}</span>}
                         </div>
-
-
                     </div>
 
 

@@ -42,7 +42,7 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
     
   ]
   return (
-    <div className="flex min-h-screen  items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
+    <div className="flex min-h-screen  items-start w-full justify-center font-sans  ">
       <main className="
       container
       max-w-300
@@ -59,7 +59,8 @@ const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number;
       lg:mt-20 
       pb-21">
         <ComplaintDashBoardHeader />
-        <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
+        <Suspense fallback={
+          <StatsSkeleton numberofStats={3} />}>
           <Stats data={statsData} />
         </Suspense>
 

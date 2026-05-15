@@ -12,6 +12,7 @@ from .....common.total_page import get_total_page
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from pprint import pprint
+from datetime import date
 import io
 
 PAGE_SIZE = 12
@@ -24,33 +25,27 @@ async def get_change_meter_stats(session: AsyncSession):
     daily_total = (select(
         func.count().label("daily_total"))
         .select_from(ChangeMeter)
-        .where(ChangeMeter.date_accomplished == func.current_date()
-               )
+        .where(ChangeMeter.date_accomplished ==  func.current_date())
     ).cte("daily_total")
     monthly_count = (select(
-        func.date_trunc("month", ChangeMeter.date_accomplished).label("month"),
-        func.coalesce(func.count(), 0).label("monthly_count"))
-        .group_by("month")
-    ).subquery()
-    average_count = (select(
-        func.coalesce(func.floor(func.abs(func.round(
-            func.avg(monthly_count.c.monthly_count)))), 0).label("average_count")
-    )).cte("average_count")
-
+        func.coalesce(func.count(), 0).label("m_count"))
+        .where(func.extract("month", ChangeMeter.date_accomplished) == func.extract("month", func.current_date()))
+    ).cte("monthly_count")
+    
     data = (await session.execute(
         select(total_count.c.total,
                daily_total.c.daily_total,
-               average_count.c.average_count)
+               monthly_count.c.m_count)
         .select_from(total_count)
         .join(daily_total, true())
-        .join(average_count, true()))).mappings().one()
+        .join(monthly_count, true()))).mappings().one()
     new_data = []
     for key, value in data.items():
         if key == "total":
             total = {
                 "label": "Total",
                 "value": value,
-                "description": "Change Meter"
+                "description": "CM"
             }
             new_data.append(total)
         elif key == "daily_total":
@@ -60,11 +55,11 @@ async def get_change_meter_stats(session: AsyncSession):
                 "description": "Today"
             }
             new_data.append(daily)
-        elif key == "average_count":
+        elif key == "m_count":
             average = {
-                "label": "Avg.",
+                "label": "Monthly",
                 "value": value,
-                "description": "Monthly Avg."
+                "description": date.today().strftime("%B")
             }
             new_data.append(average)
     return new_data

@@ -1,7 +1,6 @@
 "use client"
 
-import React from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link';
 type Props = {
     strokeColor?: string;
     svgfill?: string
@@ -10,12 +9,10 @@ type Props = {
 
 
 const TechnicalDepRouteButton = ({strokeColor, svgfill, orientation}:Props) => {
-    const router = useRouter()
-    const handleClick = () => {
-        router.replace("/technical")
-    }
     return (
-        <button onClick={handleClick} aria-label='Technical-department-Route' type='button' data-tip="Navigate to Technical Department" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`}>
+        <Link 
+        href={"/technical"} 
+        aria-label='Technical-department-Route' type='button' data-tip="Navigate to Technical Department" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`}>
             <svg
                 fill={svgfill}
                 version="1.1"
@@ -53,7 +50,7 @@ const TechnicalDepRouteButton = ({strokeColor, svgfill, orientation}:Props) => {
             <span className="is-drawer-close:hidden">
                 Technical Department
             </span>
-        </button>
+        </Link>
     )
 }
 

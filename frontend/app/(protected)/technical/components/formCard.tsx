@@ -11,7 +11,7 @@ type Props = {
 
 const FormCard = ({cardTitle, cardDescription, children}: Props) => {
     return (
-        <div className="card bg-base-100 image-full h-65 w-full sm:w-full md:w-95 lg:w-100 shadow-md drop-shadow-md hover:scale-101">
+        <div className="card bg-base-100 image-full h-full w-full max-w-96 shadow-md drop-shadow-md hover:scale-101">
             <figure >
                 <Image
                     width={600}

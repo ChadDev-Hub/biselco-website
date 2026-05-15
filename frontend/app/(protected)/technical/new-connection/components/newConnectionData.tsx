@@ -53,7 +53,7 @@ const NewConnectionDataContainer = ({ data }: Props) => {
     const page = searchParams.get("page")
     const router = useRouter()
     const { showAlert } = useAlert()
-   
+
 
     useEffect(() => {
         switch (newConnection?.status) {
@@ -65,14 +65,14 @@ const NewConnectionDataContainer = ({ data }: Props) => {
             default:
                 break;
         }
-    },[newConnection])
+    }, [newConnection])
 
 
     useEffect(() => {
-    if (selectedRow.size > 0) {
-      queueMicrotask(() => setisActive(true));
-    } else queueMicrotask(() => setisActive(false));
-  }, [selectedRow]);
+        if (selectedRow.size > 0) {
+            queueMicrotask(() => setisActive(true));
+        } else queueMicrotask(() => setisActive(false));
+    }, [selectedRow]);
 
     // WEBSOCKET
     const { message } = useWebsocket()
@@ -147,73 +147,78 @@ const NewConnectionDataContainer = ({ data }: Props) => {
     }
     return (
         <>
-        <div className=" w-full">
-        {/* NAV BAR */}
-        <div className="navbar w-full  px-2 flex justify-between glass mb-2 rounded-box">
-          {/* TOOLS */}
-          <div className="flex items-center gap-2">
-            <div>
-              <Delete
-                is_active={isActive}
-                show={true}
-                handleDelete={handleDelete}
-              />
-            </div>
-            <div>
-              <DownloadReport
-                isactive={isActive}
-                show={true}
-                download={handleDownload}
-              />
-            </div>
-            
-            <div>
-                <NewConnectionForm/>
-            </div>
-         
-          </div>
-          {/*Search*/}
-          <div className="shrink">
-            
-            <input
-              placeholder="Find"
-              type="text"
-              className="input bg-base-300 drop-shadow-md drop-shadow-gray-500 rounded-full"
-            />
-          </div>
-          
-        </div>
-        {selectedRow.size > 0 && <div className="badge mb-2 badge-outline badge-secondary text-xs font-bold">
-              <span>Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size }</span>
-          </div>}
-      </div>
-        {/* NEW CONNECTION CARD */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 place-items-center">
-            {newConnectionData.map((item: NewConnectionData, index)=>(
-                <NewConnectionCard
-                key={index}
-                consumer_name={item.consumer_name}
-                newmeter_brand={item.meter_brand}
-                newmeter_serial={item.meter_serial_no}
-                location={item.location}
-                lat={item.geom.coordinates[1]}
-                lon={item.geom.coordinates[0]}
-                srid={item.geom.srid}
-                date_accomplished={item.date_accomplished}
-                selectedRow={selectedRow}
-                id={item.id}
-                handleSelection={handleSelection}
-                accomplished_by={item.accomplished_by}
-                initial_reading={item.initial_reading}
-                image={item.images[0]}
-                />
-            ))}
+            <div className=" w-full flex justify-center">
+                {/* NAV BAR */}
+                <div className="navbar max-w-2xl items-center  bg-base-100 border-gray-100 shadow-md w-full  px-2 flex justify-between glass mb-2 rounded-box">
+                    {/* TOOLS */}
+                    <div className="flex items-center gap-2">
+                        <div>
+                            <Delete
+                                is_active={isActive}
+                                show={true}
+                                handleDelete={handleDelete}
+                            />
+                        </div>
+                        <div>
+                            <DownloadReport
+                                isactive={isActive}
+                                show={true}
+                                download={handleDownload}
+                            />
+                        </div>
 
-        </div>
-        
+                        <div>
+                            <NewConnectionForm />
+                        </div>
+                        {selectedRow.size > 0 && <div className="badge badge-outline badge-secondary text-xs font-bold">
+                            <span >Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size}</span>
+                        </div>}
+
+                    </div>
+                    {/*Search*/}
+                    <div>
+
+                        <input
+                            placeholder="Find"
+                            type="text"
+                            className="input bg-base-200 drop-shadow-md  rounded-box w-full max-w-xs input-md"
+                        />
+                    </div>
+
+                </div>
+
+            </div>
+            {/* NEW CONNECTION CARD */}
+            <div className="flex justify-center">
+                <div className="grid w-full max-w-6xl grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 place-items-center">
+                    {newConnectionData.map((item: NewConnectionData, index) => (
+                        <NewConnectionCard
+                            key={index}
+                            consumer_name={item.consumer_name}
+                            newmeter_brand={item.meter_brand}
+                            newmeter_serial={item.meter_serial_no}
+                            location={item.location}
+                            lat={item.geom.coordinates[1]}
+                            lon={item.geom.coordinates[0]}
+                            srid={item.geom.srid}
+                            date_accomplished={item.date_accomplished}
+                            selectedRow={selectedRow}
+                            id={item.id}
+                            handleSelection={handleSelection}
+                            accomplished_by={item.accomplished_by}
+                            initial_reading={item.initial_reading}
+                            image={item.images[0]}
+                        />
+                    ))}
+
+                </div>
+
+            </div>
+
+
         </>
-        
+
     )
 }
 
-export default  NewConnectionDataContainer;
+export default NewConnectionDataContainer;

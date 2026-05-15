@@ -45,15 +45,15 @@ type Complaints = {
     status: [];
     latest_status?: LatestsStatusType;
     user_status?: string;
-    
+
     resolution_time: string;
     unread_messages: number;
 }
 
 
 type LatestsStatusType = {
-  id: number;
-  name: string
+    id: number;
+    name: string
 }
 
 type location = {
@@ -128,7 +128,7 @@ const ComplaintsContainer = (
     }, [complaintsInitialData])
     console.log(complaints)
     // WEBSOCKET
-    const { message, sendMessage } = useWebsocket();    
+    const { message, sendMessage } = useWebsocket();
     useEffect(() => {
         if (!message) return
         switch (message.detail) {
@@ -156,14 +156,15 @@ const ComplaintsContainer = (
                 break;
             case "sent_message":
                 queueMicrotask(() => {
-                    if(isMessagingModalOpen && message.data.new_message.complaints_id === activeComplaintsId){
-                    setComplaintsMessage((prev) => {
-                        const exists = prev.some((msg) => msg.id === message.data.new_message.id);
-                        if (exists) {
-                            return prev.map((msg: ComplaintMessage) => msg.id === message.data.new_message.id ? { ...msg, ...message.data.new_message } : msg)
-                        }
-                        return [...prev, message.data.new_message]
-                    })};
+                    if (isMessagingModalOpen && message.data.new_message.complaints_id === activeComplaintsId) {
+                        setComplaintsMessage((prev) => {
+                            const exists = prev.some((msg) => msg.id === message.data.new_message.id);
+                            if (exists) {
+                                return prev.map((msg: ComplaintMessage) => msg.id === message.data.new_message.id ? { ...msg, ...message.data.new_message } : msg)
+                            }
+                            return [...prev, message.data.new_message]
+                        })
+                    };
                     setComplaints((prev) => {
                         if (message.data.unread.sender_id === user?.id) return prev;
                         return prev.map((item: Complaints) => {
@@ -203,13 +204,6 @@ const ComplaintsContainer = (
         }
     }, [message, user, isMessagingModalOpen, playMessageNotification, activeComplaintsId]);
 
-
-
-    // HANDLING DELTED COMPLAINTS
-    // const handleDelete = (id: number) => {
-    //     const updatedComplaints = complaints.filter((complaint) => complaint.id !== id);
-    //     setComplaints(updatedComplaints);
-    // };
 
     // MESSAGING MODAL CLOSE HANDLER
     const MessageClose = () => {

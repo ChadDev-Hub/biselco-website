@@ -3,13 +3,12 @@ import Stats from './components/stats'
 import { GetChangeMeter } from '@/lib/serverFetch'
 import { Suspense } from 'react'
 import StatsSkeleton from '@/app/common/statsSkeleton'
-import { Archivo_Black } from 'next/font/google'
 import ChangeMeterCardSkeleton from './components/chageMeterCardsSkeleton'
 import ChangeMeteContainer from './components/changeMeterContainer';
 import PageNationLoading from './components/pageNationSkeleton'
 import Pagination from './components/pagination';
+import Headers from '../new-connection/components/header';
 
-const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"], display: "swap" });
 
 type Props = {
   searchParams: Promise<{
@@ -21,20 +20,18 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
   const data = GetChangeMeter(page);
   const pageUrl = '/technical/change-meter/'
   return (
-    <div className='flex flex-col gap-2 '>
-        
-          <section className='px-2'>
-            <fieldset className='fieldset'>
-              <legend className={` text-lg text-blue-800 text-shadow-md text-shadow-amber-600 ${archivoBlack.className}`}>Change Meter
-              </legend>
+    <>
+    <Headers title="Change Meter"/>
+    <main className='flex flex-col gap-2 '>
+          <section className=' w-full justify-center flex'>
+            
               <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
                 <Stats data={data} />
               </Suspense>
-            </fieldset>
           </section>
 
      
-      <section className='px-2'>
+      <section className=''>
          <Suspense fallback={<ChangeMeterCardSkeleton/>}>
              <ChangeMeteContainer data={data} />
         </Suspense>
@@ -47,7 +44,9 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
         </Suspense>
         
       </section>
-    </div>
+    </main>
+    </>
+    
   )
 }
 

@@ -11,7 +11,6 @@ import Events from "./components/events";
 
 
 
-
 const Landing = async () => {
   const landingPageData = await getLandingPageData();
   return (

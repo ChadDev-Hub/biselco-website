@@ -33,7 +33,8 @@ const AuthProvider = ({children, initialUser}: Props) => {
 
     useEffect(() => {
         if (initialUser) {
-            setUser(initialUser)
+            queueMicrotask(() => setUser(initialUser))
+    
         }
     }, [initialUser])
     

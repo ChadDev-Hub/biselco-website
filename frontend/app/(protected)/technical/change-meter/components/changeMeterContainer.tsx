@@ -14,9 +14,9 @@ import ChangeMeterForm from "./changeMeterForm";
 
 type PromiseType =
   | {
-      status: number;
-      data: Data;
-    }
+    status: number;
+    data: Data;
+  }
   | undefined;
 
 type Data = {
@@ -148,9 +148,9 @@ const ChangeMeteContainer = ({ data }: Props) => {
   };
   return (
     <>
-      <div className=" w-full">
+      <div className="w-full justify-center flex gap-2">
         {/* NAV BAR */}
-        <div className="navbar w-full  px-2 flex justify-between glass mb-2 rounded-box">
+        <div className="navbar w-full max-w-2xl bg-base-100 border-gray-100 shadow items-center px-2 flex justify-between glass mb-2 rounded-box">
           {/* TOOLS */}
           <div className="flex items-center gap-2">
             <div>
@@ -170,49 +170,55 @@ const ChangeMeteContainer = ({ data }: Props) => {
             <div>
               <ChangeMeterForm />
             </div>
-            
+
+            {selectedRow.size > 0 &&
+              <div className="badge  badge-outline badge-info  text-xs font-bold">
+                <span>Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size}</span>
+              </div>}
+
           </div>
           {/*Search*/}
           <div className="shrink">
-            
+
             <input
               placeholder="Find"
               type="text"
-              className="input bg-base-300 drop-shadow-md drop-shadow-gray-500 rounded-full"
+              className="input drop-shadow-md bg-base-100 rounded-box w-full max-w-xs"
             />
           </div>
-          
+
         </div>
-        {selectedRow.size > 0 && <div className="badge mb-2 badge-outline badge-secondary text-xs font-bold">
-              <span>Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size }</span>
-          </div>}
+
       </div>
 
       {/* Chage Meter Card */}
-      <div className="grid grid-cols-1   sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
-        {changeMeterData.map((item: ChangeMeter, index) => (
-          <ChangeMeteCards
-            key={index}
-            id={item.id}
-            selectedRow={selectedRow}
-            handleSelection={handleSelection}
-            image={item.images[0]}
-            account_no={item.account_no}
-            consumer_name={item.consumer_name}
-            pullout_meter={item.pull_out_meter}
-            newmeter_brand={item.new_meter_brand}
-            newmeter_serial={item.new_meter_serial_no}
-            location={item.location}
-            lat={item.geom.coordinates[1]}
-            lon={item.geom.coordinates[0]}
-            accomplished_by={item.accomplished_by}
-            date_accomplished={item.date_accomplished}
-            srid={item.geom.srid}
-            initial_reading={item.initial_reading}
-            pullout_reading={item.pull_out_meter_reading}
-          />
-        ))}
+      <div className="flex justify-center">
+        <div className="grid grid-cols-1 w-full max-w-7xl  sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
+          {changeMeterData.map((item: ChangeMeter, index) => (
+            <ChangeMeteCards
+              key={index}
+              id={item.id}
+              selectedRow={selectedRow}
+              handleSelection={handleSelection}
+              image={item.images[0]}
+              account_no={item.account_no}
+              consumer_name={item.consumer_name}
+              pullout_meter={item.pull_out_meter}
+              newmeter_brand={item.new_meter_brand}
+              newmeter_serial={item.new_meter_serial_no}
+              location={item.location}
+              lat={item.geom.coordinates[1]}
+              lon={item.geom.coordinates[0]}
+              accomplished_by={item.accomplished_by}
+              date_accomplished={item.date_accomplished}
+              srid={item.geom.srid}
+              initial_reading={item.initial_reading}
+              pullout_reading={item.pull_out_meter_reading}
+            />
+          ))}
+        </div>
       </div>
+
     </>
   );
 };

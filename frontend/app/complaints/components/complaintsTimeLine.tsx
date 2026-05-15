@@ -1,6 +1,5 @@
 "use client"
 
-import { switchClasses } from "@mui/material";
 import TimeLineSvg from "./timeLineSvg";
 type statusItem = {
     id: number;
@@ -26,23 +25,20 @@ const ComplaintsTimeLine = ({ data, status }: Props) => {
         const filteredStatus = status?.filter((item) => item.name === status_name);
         return filteredStatus
     }
-    const timeLineMiddelSvg = (status_name: string) => {
-        
-    }
     return (
-        <ul className="timeline mt-6 timeline-snap-icon timeline-vertical ">
+        <ul className="timeline mt-6 bg-base-100 timeline-snap-icon timeline-vertical ">
             {data.map((item) => (
                 <li key={item.id}>
                     {item.id % 2 === 0 ? (
-                        <div className={`timeline-end timeline-box   ${statuslist?.includes(item.status_name) ? "bg-base-100 drop-shadow-2xl" : "bg-base-100/10"}`}>
-                            <h2 className={`text-md lg:text-lg text-shadow-2xs flex flex-col font-bold ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                        <div className={`timeline-end timeline-box `}>
+                            <h2 className={`text-xs lg:text-xs text-blue-500 text-shadow-2xs flex flex-col font-bold ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.status_name}
                                 {statuslist?.includes(item.status_name) && <span className="text-green-500 animate-pulse  text-[0.60rem] italic "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>}
                             </h2>
                             <hr className={`${statuslist?.includes(item.status_name) ? "" : "bg-transparent"}`} />
-                            <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            {/* <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.description}
-                            </p>
+                            </p> */}
                         </div>
                     ) : (
                         <div className={`timeline-start timeline-box ${statuslist?.includes(item.status_name) ? "bg-base-100  drop-shadow-2xl" : "bg-base-100/10"}`}>
@@ -51,9 +47,9 @@ const ComplaintsTimeLine = ({ data, status }: Props) => {
                                 {statuslist?.includes(item.status_name) && <span className="text-green-500 text-[0.60rem] italic animate-pulse "> {filterDate(item?.status_name)?.[0]?.date} • {filterDate(item?.status_name)?.[0]?.time}</span>}
                             </h2>
                             <hr className={`${statuslist?.includes(item.status_name) ? "" : "bg-transparent"}`} />
-                            <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
+                            {/* <p className={`tex-sm lg:text-md italic ${statuslist?.includes(item.status_name) ? "" : "text-gray-400/20"}`}>
                                 {item.description}
-                            </p>
+                            </p> */}
                         </div>
                     )}
                     <div className="timeline-middle">

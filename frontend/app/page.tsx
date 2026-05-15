@@ -1,40 +1,18 @@
-import NewsNavBar from "./components/newsNavBar";
-import { Suspense} from "react";
+import HomePageHeader from './components/header';
+import HomePageTools from './components/tools';
 
-import NewFeedLoading from "./components/loading";
-import { getNewsPage } from "@/lib/serverFetch";
-import NewsFeedContainer from "./components/newsFeed";
-export default  function Home() {
-  const news = getNewsPage();
+
+export default function CooperativeHome() {
   return (
-    <div className="flex min-h-screen items-start w-full justify-center bg-zinc-50 font-sans  bg-linear-to-bl from-blue-600 to-yellow-600">
-      <main className="
-      container
-      max-w-190
-      px-3
-      flex 
-      gap-4 
-      flex-col 
-      lg:items-center 
-      mt-20 
-      sm:mt-20 
-      md:mt-20
-      lg:mt-20 
-      pb-21">
-        <header className="flex flex-col items-center">
-          <h1 className="text-[clamp(2rem,6vw,4rem)] text-shadow-2xs  tracking-tight font-extrabold flex gap-4">
-            <span className="text-blue-700">
-              NEWS
-            </span>
-            <span className="text-yellow-300">
-              UPDATE</span>
-          </h1>
-        </header>
-        <NewsNavBar />
-        <Suspense fallback={<NewFeedLoading/>}>
-          <NewsFeedContainer initialData={news} />
-        </Suspense>
+    <div className="min-h-screen bg-base-300 pb-20">
+      {/* Header */}
+      <HomePageHeader />
+      <main className="max-w-2xl mx-auto px-4 -mt-6">
+
+        {/* Tools Grid */}
+        <HomePageTools/>
       </main>
     </div>
   );
 }
+

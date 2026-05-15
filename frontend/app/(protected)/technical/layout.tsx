@@ -6,8 +6,8 @@ type Props = {
 
 const TechnicalPageLayout = async({children}: Props) => {
   return (
-    <div className='flex flex-col items-center bg-zinc-50  justify-start w-full bg-linear-to-bl from-blue-600 to-yellow-600 min-h-screen '>
-        <main className='container mt-20 mb-20 pb-4 h-full mx-2'>
+    <div className='flex flex-col items-center justify-start w-full '>
+        <main className='container pb-14 sm:pb-0 pt-2 px-2 mb-4'>
             {children}
         </main>
     </div>

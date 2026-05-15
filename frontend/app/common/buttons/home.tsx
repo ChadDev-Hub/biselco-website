@@ -1,8 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
-
+import Link from 'next/link'
 
 type Props = {
     svgfill:string;
@@ -11,13 +10,9 @@ type Props = {
 }
 
 const HomeRouteButton = ({strokeColor, svgfill, orientation}: Props) => {
-    const router = useRouter()
-    const handleClick = () => {
-        router.push("/")
-    }
     return (
 
-        <button name='home' onClick={handleClick} type='button' className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`} data-tip="Homepage">
+        <Link href="/" type="button" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`} data-tip="Homepage">
             {/* Home icon */}
             <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="1.5"  stroke="currentColor">
             <path 
@@ -31,9 +26,9 @@ const HomeRouteButton = ({strokeColor, svgfill, orientation}: Props) => {
             fill={svgfill}></path>
             
             </svg>
-            <span className="is-drawer-close:hidden">Homepage</span>
+            <span className="is-drawer-close:hidden dock-label">Homepage</span>
         
-        </button>
+        </Link>
 
     )
 }

@@ -109,23 +109,6 @@
   }
 
 
-  // type LastMesssageType = 
-  //   | "complaint_message"
-  //   | "news"
-  //   | "new_complaint"
-  //   | "complaints_admin"
-  //   | "new_status"
-  //   | "deleted_news"
-  //   | "deleted_complaints"
-  //   | "presence"
-  //   | "post_change_meter"
-  //   | "deleted_change_meter"
-  //   | "new_connection_deleted"
-  //   | "seen_message"
-  //   | "complaints_stats"
-  //   | "sent_message"
-  //   | "new_connection_created"
-
   const ComplaintsContainer = ({ data }: Props) => {
     const complaintsIinitialData = use(data);
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
@@ -158,6 +141,7 @@
           );
           break;
         default:
+          redirect("/complaints");
           break;
       }
     }, [complaintsIinitialData]);

@@ -1,8 +1,8 @@
 "use client"
 import { use, useEffect, useState } from 'react'
 import FormCard from './formCard'
-import { useRouter, usePathname } from 'next/navigation'
-import { useAuth } from '@/app/utils/authProvider'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 type Props = {
     initialData: Promise<PromiseType | undefined>
 }
@@ -21,11 +21,10 @@ type TechnicalForms = {
 
 
 const TechniclaFormLists = ({ initialData }: Props) => {
-    const router = useRouter()
-    const currentPath = usePathname()
     const formsData = use(initialData)
     const [forms, setForms] = useState<TechnicalForms[] | [] | undefined>([]);
-    const {user} = useAuth();
+    const pathname = usePathname()
+    console.log(pathname)
 
     useEffect(() => {
         queueMicrotask(() =>
@@ -33,21 +32,17 @@ const TechniclaFormLists = ({ initialData }: Props) => {
     },[formsData])
     
 
-    // HANDLE NAVIGATIONS
-    const handleNavigation = (formNavigate:string) => {
-        const destinationPath = formNavigate.replace(" ", "-").toLowerCase()
-        const userRoles = user?.roles.map((r)=>r.name);
-        if(!userRoles?.includes("admin")) return;   
-        router.push(`${currentPath}/${destinationPath}`);
-    };
+  
     return (
         <div className='flex flex-col justify-center items-center'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2  gap-4 w-fit justify-center  items-center'>
+            <div className='grid grid-cols-1  sm:grid-cols-1 md:grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-2 place-content-center'>
                     {forms?.map((form: TechnicalForms) =>
                     (
                         <div key={form.id}>
                             <FormCard cardTitle={form.form_name} cardDescription={form.form_description}>
-                                <button onClick={()=>handleNavigation(form.form_name)} type='button' className='btn neutral '>Submit Report</button>
+                                <Link href={`${pathname}/${form.form_name.replace(/\s/g, '-').toLowerCase()}`}
+                                    className="btn btn-soft btn-sm"
+                                >Submit Report</Link>
                             </FormCard>
                         </div>
                     ))}

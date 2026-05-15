@@ -26,14 +26,15 @@ const StatsCard = ({ label, value, svg, description }: Props) => {
         return () => controls.stop();
     },[value, motionVaue]);
     return (
-        <div className="stat glass ">
+        <div className="stat  shadow-md ">
             <div className="stat-figure text-secondary">
                 {svg}
             </div>
-            <div className="stat-title text-yellow-400">{label}</div>
-            <div className="stat-value text-center">{count}</div>
-            <div className="stat-desc">{description}</div>
+            <div className="stat-title text-blue-700 text-xs  font-bold">{label}</div>
+            <div className="stat-value text-center text-sm">{count}</div>
+            <div className="stat-desc italic text-xs">{description}</div>
         </div>
+        
     )
 }
 

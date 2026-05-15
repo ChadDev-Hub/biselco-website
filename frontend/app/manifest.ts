@@ -3,7 +3,7 @@ import type {MetadataRoute} from 'next'
 
 export default function manifest(): MetadataRoute.Manifest{
     return {
-        name: "Busuanga Island Electric Cooperative",
+        name: "BISELCO",
         short_name: "BISELCO",
         description: "A Progressive Web App for Busuanga Island Electric Cooperative",
         start_url: "/",

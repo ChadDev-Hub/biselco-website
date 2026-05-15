@@ -52,7 +52,7 @@ export default function Hero({ subtitle, description, children }: Props) {
           pb-16
           gap-4
           px-2 sm:px-2 md:px-12 lg:px-16 xl:px-60                                      
-          bg-linear-to-b from-orange-700 to-gray-300
+              bg-linear-to-b from-blue-300 to-orange-700 
           overflow-x-clip
           "
     >

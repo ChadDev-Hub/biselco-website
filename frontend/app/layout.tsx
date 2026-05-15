@@ -11,6 +11,8 @@ import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
 import { getCurrentUser } from '@/lib/serverFetch';
+import type { Viewport } from "next"
+
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +23,15 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  minimumScale: 1,
+  viewportFit: "cover",
+  userScalable: false
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://biselco.calamianes.cloud"),
@@ -46,7 +57,7 @@ export const metadata: Metadata = {
 
   authors: [{ name: "Richard Rojo" }],
   creator: "Richard Rojo Jr.",
-  publisher: "BISELCO",
+  publisher: "Busuanga Island Electric Cooperative",
 
   // Canonical URL
   alternates: {
@@ -126,24 +137,25 @@ export default async function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <head>
         <meta name="apple-mobile-web-app-title" content="BISELCO" />
+
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <AuthProvider initialUser={currentUSER?.detail ?? null}>
-            <WebsocketProvider>
-              <AlertComponent>
-                <LoadingIndicator>
-                  <ThemeController />
-                  <NotificationProvider>
-                    <Drawer baseurl={baseurl}>
-                      {children}
-                      <DocNavigation />
-                    </Drawer>
-                  </NotificationProvider>
-                </LoadingIndicator>
-              </AlertComponent>
-            </WebsocketProvider>
+          <WebsocketProvider>
+            <AlertComponent>
+              <LoadingIndicator>
+                <ThemeController />
+                <NotificationProvider>
+                  <Drawer baseurl={baseurl}>
+                    {children}
+                    <DocNavigation />
+                  </Drawer>
+                </NotificationProvider>
+              </LoadingIndicator>
+            </AlertComponent>
+          </WebsocketProvider>
         </AuthProvider>
       </body>
     </html>

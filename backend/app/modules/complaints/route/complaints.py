@@ -1,30 +1,25 @@
 from fastapi import APIRouter, status, Depends, Form, Body, Query, File, UploadFile
 from fastapi.exceptions import HTTPException
-from sqlalchemy import select, asc, desc, delete, and_, update
+from sqlalchemy import select,  desc,  and_, update
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
-from ....core.security import get_current_user, get_current_user_ws
+from ....core.security import get_current_user
 from ..schema.requests_model import ComplaintsStatus
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from geoalchemy2.functions import ST_Point, ST_SetSRID, ST_Intersects
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
 from ...websocket.websocket_manager import manager
 from .. import *
-from ...user import Users, Roles
 from sqlalchemy.dialects.postgresql import UUID
-from ..schema.response_model import  ComplaintStatusName, ComplaintsModelLists, NewComplaintsModel
+from ..schema.response_model import  ComplaintStatusName, ComplaintsModelLists
 from ...user.schema.response_model import UserModel
 from typing import Optional
-from ...gis.franchise_area.model.boundary import Boundary
-from ...gis.consumer.model.consumer import ConsumerMeter
 from ...gis.franchise_area.services.get_location import verifyLocation
 from ...gis.franchise_area.schema.response_model import VerifiedLocation
 from ..services.complaints_messages import get_message
 from ...websocket.schema.response_model import Message
 from ..schema.response_model import Stat
-from ..model.complaint_image import ComplaintsImage
 from asyncio import gather
 from typing import List
 from ..services.get2 import GetServices, GetDashboardServices, GetMessageServices
