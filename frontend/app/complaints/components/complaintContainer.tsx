@@ -1,6 +1,5 @@
 "use client"
 import { use, useEffect, useState } from 'react'
-import ComplaintsCard from './complaintsCard'
 import { useWebsocket } from '@/app/utils/websocketprovider'
 import { redirect } from 'next/navigation'
 import Messaging from '../dashboard/components/messagingModal2'
@@ -8,6 +7,8 @@ import { GetComplaintsMessage } from '@/app/actions/complaint'
 import { useAuth } from '@/app/utils/authProvider'
 import { useNotification } from '@/app/common/NotificationProvider'
 import DeletConfirmation from './deleteComplaintsConfirmation'
+import ConcernCard from './modernConcernCard';
+import ComplaintsTimeLine from './complaintsTimeLine';
 
 type PromiseType = {
     status?: number;
@@ -96,13 +97,13 @@ const ComplaintsContainer = (
     {
         complaintsData,
         complaintsStatusName,
-        serverurl
     }: Props
 ) => {
     // DATA INITIALIZATION, STREAMING AND STATE MANAGEMENT
     const complaintsInitialData = use(complaintsData)
     const complaintsStatusNameInitialData = use(complaintsStatusName)
     const [complaints, setComplaints] = useState<Complaints[] | []>([]);
+    const [statusName, setStatusName] = useState([]);
     const { user } = useAuth()
     const [isMessagingModalOpen, setIsMessagingModalOpen] = useState(false);
     const [complaintsMessage, setComplaintsMessage] = useState<ComplaintMessage[] | []>([]);
@@ -126,7 +127,14 @@ const ComplaintsContainer = (
                 break;
         }
     }, [complaintsInitialData])
-    console.log(complaints)
+    
+
+
+    useEffect(() => {
+        queueMicrotask(() =>
+            setStatusName(complaintsStatusNameInitialData.data)
+        );
+    }, [complaintsStatusNameInitialData])
     // WEBSOCKET
     const { message, sendMessage } = useWebsocket();
     useEffect(() => {
@@ -284,30 +292,42 @@ const ComplaintsContainer = (
     return (
         <section className='flex flex-col gap-4 w-full items-center'>
             {complaints.map((complaint: Complaints) => (
-                <ComplaintsCard
-                    key={complaint.id}
-                    id={complaint.id}
-                    user_id={complaint.user_id}
-                    subject={complaint.subject}
-                    description={complaint.description}
-                    status={complaint.status}
-                    date_time_submitted={complaint.date_time_submitted}
-                    complaintsStatusName={complaintsStatusNameInitialData.data}
-                    serverurl={serverurl}>
-                    <Messaging
-                        complaint_id={complaint.id}
-                        messageLoading={messageLoading}
-                        isOpen={isMessagingModalOpen}
-                        setInitialData={handleInitialDataSending}
-                        numberOfUnseenMessages={complaint.unread_messages}
-                        messages={complaintsMessage}
-                        onOpen={() => MessageOpen(complaint.id)}
-                        onClosed={MessageClose}
-                        receiver_id={complaint.user_id === user?.id ? undefined : complaint.user_id} />
-                    <DeletConfirmation
-                        complaintId={complaint.id}
-                    />
-                </ComplaintsCard>
+                // <
+                <ConcernCard
+                toolsComponent={
+                    <Messaging 
+                    messageLoading={messageLoading}
+                    complaint_id={complaint.id}
+                    messages={complaintsMessage}
+                    setInitialData={(data)=>handleInitialDataSending({complaints_id: data.complaints_id, message: data.message, receiver_id: data.receiver_id})}
+                    isOpen={isMessagingModalOpen}
+                    numberOfUnseenMessages={complaint.unread_messages}
+                    onOpen={()=> {
+                            setactiveComplaintsId(complaint.id)
+                            MessageOpen(complaint.id)}}
+                    onClosed={MessageClose}/>
+                }
+                deleteTool={
+                    <div className="absolute top-1 right-2">
+                        <DeletConfirmation complaintId={complaint.id} />
+                    </div>
+                }
+                timeLine= {
+                    <ComplaintsTimeLine data={statusName} status={complaint.status} />
+                }
+                userComplaint={{
+                    photo: complaint.user_photo,
+                    firstName: complaint.first_name,
+                    lastName: complaint.last_name,
+                    subject: complaint.subject,
+                    refPole: complaint.reference_pole,
+                    submittedAt: complaint.date_time_submitted,
+                    resolutionTime: complaint.resolution_time,
+                    currentStatus: complaint.latest_status?.name?? "",
+                    details: complaint.description,
+                }}
+                key={complaint.id}/>
+                
             ))}
         </section>
     )

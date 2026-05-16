@@ -1,55 +1,74 @@
 import React from 'react';
-import { User,  Clock,  History, Send } from 'lucide-react';
+import { User,  Clock,  History} from 'lucide-react';
+import Image from 'next/image';
 
 
 
-const ConcernCard = () => {
-  const ticketData = {
-  firstName: "John",
-  lastName: "Doe",
-  submittedAt: "May 15, 2026, 10:30 AM",
-  subject: "API Connection Issue",
-  refPole: "NY-88",
-  resolutionTime: "Estimated 4 hours",
-  status: "Under Review",
-  details: "The form won't submit despite valid input fields. Need billing inquiry support."
-};
-  const ticket = ticketData;
+type Props = {
+  userComplaint: User;
+  timeLine: React.ReactNode;
+  deleteTool: React.ReactNode;
+  toolsComponent: React.ReactNode;  
+}
+
+type User = {
+  firstName:string;
+  lastName: string;
+  submittedAt: string;
+  subject: string;
+  refPole: string;
+  resolutionTime: string;
+  currentStatus: string;
+  details: string;
+  photo: string;
+}
+
+const ConcernCard = ({userComplaint, timeLine, toolsComponent, deleteTool}: Props) => {
+  
   return (
-    <div className="max-w-4xl mx-auto bg-base-100 rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
+    <div className="max-w-4xl relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
+      
+        {deleteTool}
+      
+      
       {/* Header Section */}
-      <div className="bg-base-200 p-6 border-b border-slate-100 flex items-center gap-4">
-        <div className="bg-blue-100 p-3 rounded-full">
-          <User className="text-blue-600" size={32} />
+      <div className="bg-base-200 max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
+        <div className="bg-blue-100 ava avatar avatar-xs border p-3 rounded-full">
+          <Image
+          src={userComplaint.photo}
+          fill
+          alt="Profile"
+          sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+          className="rounded-full ring-primary ring-offset-base-100 w-24 ring-2 ring-offset-2"/>
         </div>
         <div>
           <p className="text-xs font-bold text-blue-400 tracking-widest uppercase">Profile Ticket</p>
-          <h2 className="text-2xl font-bold text-slate-800">
-            {ticket.firstName} {ticket.lastName}
+          <h2 className="text-sm font-bold text-slate-800">
+            {userComplaint.firstName} {userComplaint.lastName}
           </h2>
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-2">
         {/* Left Column: Metadata */}
         <div className="space-y-4">
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Submitted At</span>
-            <span className="text-slate-700">{ticket.submittedAt}</span>
+            <span className="text-slate-700 text-xs">{userComplaint.submittedAt}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Subject</span>
-            <span className="text-slate-700 font-medium">{ticket.subject}</span>
+            <span className="text-slate-700 text-xs">{userComplaint.subject}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Ref Pole</span>
-            <span className="text-slate-700">{ticket.refPole}</span>
+            <span className="text-slate-700 text-xs">{userComplaint.refPole}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Resolution Time</span>
             <div className="flex items-center gap-2 text-slate-700">
               <Clock size={16} />
-              <span>{ticket.resolutionTime}</span>
+              <span className="text-xs">{userComplaint.resolutionTime}</span>
             </div>
           </div>
         </div>
@@ -58,7 +77,7 @@ const ConcernCard = () => {
         <div className="space-y-6">
           <div>
             <span className="inline-block bg-blue-600 text-white px-4 py-1 rounded-md font-bold text-sm uppercase">
-              {ticket.status}
+              {userComplaint.currentStatus}
             </span>
           </div>
           
@@ -67,17 +86,7 @@ const ConcernCard = () => {
               <History size={16} className="text-slate-400" />
               <span className="text-xs font-bold text-slate-500 uppercase">Status History</span>
             </div>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-300"></div> Created
-              </li>
-              <li className="flex items-center gap-2 text-blue-600 font-medium">
-                <div className="w-2 h-2 rounded-full bg-blue-600"></div> Under Review
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-300"></div> In Progress
-              </li>
-            </ul>
+            {timeLine}
           </div>
         </div>
       </div>
@@ -91,19 +100,13 @@ const ConcernCard = () => {
         </div>
         
         <div className="bg-slate-50 p-4 rounded-lg text-slate-600 text-sm italic border border-slate-100">
-          {ticket.details}
+          {userComplaint.details}
         </div>
       </div>
 
       {/* Footer Action Buttons */}
       <div className="p-6 bg-slate-50 flex flex-wrap justify-end gap-3">
-        <button className="px-6 py-2 rounded-full bg-white border border-slate-200 text-slate-600 font-semibold hover:bg-slate-100 transition">
-          View Messages
-        </button>
-        <button className="px-6 py-2 rounded-full bg-blue-600 text-white font-semibold flex items-center gap-2 hover:bg-blue-700 transition">
-          <Send size={18} />
-          Submit Updates
-        </button>
+        {toolsComponent}
       </div>
     </div>
   );

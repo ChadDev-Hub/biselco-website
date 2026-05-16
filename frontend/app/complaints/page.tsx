@@ -6,7 +6,7 @@ import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintsLoading from './dashboard/components/loading'
 import ComplaintHeader from './components/header'
-import ConcernCard from './components/modernConcernCard';
+
 
 const ComplaintsPage = () => {
   const data = UserComplaints()
@@ -42,7 +42,7 @@ const ComplaintsPage = () => {
             <ComplaintsDashboardRouteButton />
           </div>
         </FabIcon>
-        <ConcernCard/>
+        
       </main>
     </div>
   )

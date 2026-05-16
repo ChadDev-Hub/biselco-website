@@ -13,6 +13,7 @@ import { NotificationProvider } from "./common/NotificationProvider";
 import { getCurrentUser } from '@/lib/serverFetch';
 import type { Viewport } from "next"
 
+
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -142,7 +143,8 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <AuthProvider initialUser={currentUSER?.detail ?? null}>
+
+        <AuthProvider initialUser={currentUSER?.detail}>
           <WebsocketProvider>
             <AlertComponent>
               <LoadingIndicator>

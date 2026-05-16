@@ -2,9 +2,14 @@
 "use client"
 import {Bell} from 'lucide-react'
 import { useAuth } from '@/app/utils/authProvider';
+import { redirect } from 'next/navigation';
 
 const HomePageHeader = () => {
     const {user} = useAuth();
+    if (!user) {
+        console.log(user)
+        redirect("/landing")
+    }
   return (
     <header className="bg-blue-700 text-white p-6 rounded-b-3xl shadow-lg">
         <div className="flex justify-between items-center max-w-2xl mx-auto">

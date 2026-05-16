@@ -1,10 +1,10 @@
 "use client"
-import React, {createContext, useState, useContext, useEffect} from 'react'
-
+import React, {createContext, useState, useContext} from 'react'
 type Props = {
     children: React.ReactNode;
     initialUser?: User
 }
+
 
 
 type User = {
@@ -23,20 +23,13 @@ type Roles = {
 }
 
 type contextType = {
-    user: User | null;
-    setUser: React.Dispatch<React.SetStateAction<User | null>>
+    user: User | undefined;
+    setUser: React.Dispatch<React.SetStateAction<User | undefined>>
 }
 
 const authContext = createContext<contextType | null>(null)
 const AuthProvider = ({children, initialUser}: Props) => {
-    const [user, setUser] = useState<User | null>(null)
-
-    useEffect(() => {
-        if (initialUser) {
-            queueMicrotask(() => setUser(initialUser))
-    
-        }
-    }, [initialUser])
+    const [user, setUser] = useState<User | undefined>(initialUser)
     
   return (
     <authContext.Provider value={{user, setUser}}>
