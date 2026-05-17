@@ -217,7 +217,10 @@ type ComplaintData = {
   village: string;
   municipality: string;
   user_status?: string;
-
+  images?:{
+    id: number,
+    url: string
+  }[]
   location: {
     latitude: number;
     longitude: number;

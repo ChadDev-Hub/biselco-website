@@ -6,14 +6,12 @@ from typing import Optional
 from fastapi import HTTPException, status
 from ...services.technical_report import create_technical_report
 from ..schema.response_model import ChangeMeterReportResponse
-
 from sqlalchemy.orm import selectinload
 from .....common.total_page import get_total_page
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from pprint import pprint
 from datetime import date
-import io
 
 PAGE_SIZE = 12
 

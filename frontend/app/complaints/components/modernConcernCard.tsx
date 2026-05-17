@@ -1,14 +1,15 @@
 import React from 'react';
 import { User,  Clock,  History} from 'lucide-react';
 import Image from 'next/image';
-
+import ImageViewer from '../../(protected)/technical/change-meter/components/imageViewr';
 
 
 type Props = {
   userComplaint: User;
   timeLine: React.ReactNode;
   deleteTool: React.ReactNode;
-  toolsComponent: React.ReactNode;  
+  toolsComponent: React.ReactNode;
+  mapViewer: React.ReactNode; 
 }
 
 type User = {
@@ -21,18 +22,18 @@ type User = {
   currentStatus: string;
   details: string;
   photo: string;
+  village: string; 
+  municipality: string;
+  image: string;
 }
 
-const ConcernCard = ({userComplaint, timeLine, toolsComponent, deleteTool}: Props) => {
-  
+const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, deleteTool}: Props) => {
+  console.log(userComplaint.image)
   return (
-    <div className="max-w-4xl relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
-      
-        {deleteTool}
-      
-      
+    <div className="max-w-lg w-full border-t-2 border-t-blue-600 card relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
+        {deleteTool}        
       {/* Header Section */}
-      <div className="bg-base-200 max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
+      <div className="bg-base-200  max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
         <div className="bg-blue-100 ava avatar avatar-xs border p-3 rounded-full">
           <Image
           src={userComplaint.photo}
@@ -42,14 +43,13 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, deleteTool}: Prop
           className="rounded-full ring-primary ring-offset-base-100 w-24 ring-2 ring-offset-2"/>
         </div>
         <div>
-          <p className="text-xs font-bold text-blue-400 tracking-widest uppercase">Profile Ticket</p>
           <h2 className="text-sm font-bold text-slate-800">
             {userComplaint.firstName} {userComplaint.lastName}
           </h2>
         </div>
       </div>
-
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-2">
+      {/* Card Body */}
+      <div className="p-6 card-body card-border grid grid-cols-1 md:grid-cols-2 gap-2">
         {/* Left Column: Metadata */}
         <div className="space-y-4">
           <div className="flex flex-col">
@@ -70,6 +70,16 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, deleteTool}: Prop
               <Clock size={16} />
               <span className="text-xs">{userComplaint.resolutionTime}</span>
             </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase">Location</span>
+            <div className="flex items-center gap-2 text-slate-700">
+              {mapViewer}
+              <span className="text-xs">{userComplaint.village} {userComplaint.municipality}</span>
+            </div>
+          </div>
+          <div>
+            <ImageViewer image={userComplaint.image}/>
           </div>
         </div>
 
@@ -93,19 +103,13 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, deleteTool}: Prop
 
       {/* Tabs & Details Section */}
       <div className="px-6 pb-6">
-        <div className="flex gap-4 border-b border-slate-100 mb-4 text-xs font-bold text-slate-400 uppercase">
-          <button className="pb-2 border-b-2 border-blue-600 text-blue-600">Details</button>
-          <button className="pb-2 hover:text-slate-600">Map Image</button>
-          <button className="pb-2 hover:text-slate-600">Messages</button>
-        </div>
-        
-        <div className="bg-slate-50 p-4 rounded-lg text-slate-600 text-sm italic border border-slate-100">
+        <div className="bg-slate-50 text-xs p-4 rounded-lg text-slate-600  italic border border-slate-100">
           {userComplaint.details}
         </div>
       </div>
 
       {/* Footer Action Buttons */}
-      <div className="p-6 bg-slate-50 flex flex-wrap justify-end gap-3">
+      <div className="p-6 w-full card-actions bg-base-200 flex flex-wrap justify-end gap-3">
         {toolsComponent}
       </div>
     </div>

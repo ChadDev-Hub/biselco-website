@@ -1,6 +1,6 @@
 
 "use client"
-import LandingPageLoadingImage from './(public)/landing/components/landingPageLoading';
+import LandingPageLoadingImage from './components/landingPageLoading';
 
 const Loading = () => {
   return (

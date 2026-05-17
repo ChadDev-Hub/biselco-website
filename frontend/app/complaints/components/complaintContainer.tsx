@@ -1,7 +1,7 @@
 "use client"
 import { use, useEffect, useState } from 'react'
 import { useWebsocket } from '@/app/utils/websocketprovider'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import Messaging from '../dashboard/components/messagingModal2'
 import { GetComplaintsMessage } from '@/app/actions/complaint'
 import { useAuth } from '@/app/utils/authProvider'
@@ -9,6 +9,8 @@ import { useNotification } from '@/app/common/NotificationProvider'
 import DeletConfirmation from './deleteComplaintsConfirmation'
 import ConcernCard from './modernConcernCard';
 import ComplaintsTimeLine from './complaintsTimeLine';
+import Mapbutton from '@/app/complaints/dashboard/components/mapbutton';
+
 
 type PromiseType = {
     status?: number;
@@ -46,7 +48,10 @@ type Complaints = {
     status: [];
     latest_status?: LatestsStatusType;
     user_status?: string;
-
+    images?: {
+        id: number;
+        url: string;
+    }[]
     resolution_time: string;
     unread_messages: number;
 }
@@ -110,13 +115,12 @@ const ComplaintsContainer = (
     const [messageLoading, setMessageLoading] = useState(false)
     const [activeComplaintsId, setactiveComplaintsId] = useState<number | null>(null);
     const { playMessageNotification } = useNotification()
+    const router = useRouter()
     useEffect(() => {
         switch (complaintsInitialData.status) {
             case 401:
-                redirect("/landing")
-                break;
             case 403:
-                redirect("/landing")
+                router.replace("/")
                 break;
             case 200:
                 queueMicrotask(() =>
@@ -126,7 +130,7 @@ const ComplaintsContainer = (
             default:
                 break;
         }
-    }, [complaintsInitialData])
+    }, [complaintsInitialData, router])
     
 
 
@@ -289,12 +293,23 @@ const ComplaintsContainer = (
             },
         });
     }, [isMessagingModalOpen, complaintsMessage, user, sendMessage]);
+
+
+    console.log(complaints.map((item:Complaints)=>item.images))
     return (
         <section className='flex flex-col gap-4 w-full items-center'>
             {complaints.map((complaint: Complaints) => (
                 // <
                 <ConcernCard
+                key={complaint.id}
+                mapViewer={
+                    <Mapbutton title="Complaint Map"
+                    location={complaint.location} 
+                    municipality={complaint.municipality} 
+                    village={complaint.village}/>
+                }
                 toolsComponent={
+
                     <Messaging 
                     messageLoading={messageLoading}
                     complaint_id={complaint.id}
@@ -305,7 +320,7 @@ const ComplaintsContainer = (
                     onOpen={()=> {
                             setactiveComplaintsId(complaint.id)
                             MessageOpen(complaint.id)}}
-                    onClosed={MessageClose}/>
+                    onClosed={MessageClose}/>               
                 }
                 deleteTool={
                     <div className="absolute top-1 right-2">
@@ -316,6 +331,7 @@ const ComplaintsContainer = (
                     <ComplaintsTimeLine data={statusName} status={complaint.status} />
                 }
                 userComplaint={{
+                    image: complaint?.images?.[0]?.url ?? "",
                     photo: complaint.user_photo,
                     firstName: complaint.first_name,
                     lastName: complaint.last_name,
@@ -325,8 +341,10 @@ const ComplaintsContainer = (
                     resolutionTime: complaint.resolution_time,
                     currentStatus: complaint.latest_status?.name?? "",
                     details: complaint.description,
+                    village: complaint.village,
+                    municipality: complaint.municipality
                 }}
-                key={complaint.id}/>
+               />
                 
             ))}
         </section>

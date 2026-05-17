@@ -147,6 +147,7 @@ class GetServices:
                      )
         ).order_by(desc(Complaints.id)).where(Complaints.is_deleted == False)
         if not get_all:
+            
             stmt = stmt.where(Complaints.user_id == self.user_id)
         if query:
             page = 1
@@ -218,6 +219,7 @@ class GetServices:
                 unread_messages=unread_messages,
                 images=[ComplaintsImages(id=img.id, url=img.image_url) for img in complaints.complaints_image]
             ))
+        pprint(results)
         return {
             "data": results,
             "total_page": total_page
