@@ -81,6 +81,7 @@ const Messaging = ({
   useEffect(() => {
     if (!isOpen || !messages.length) return;
     const container = bottomRef.current?.parentElement;
+    
     if (container) {
       container.scrollTo({
         top: container.scrollHeight,
@@ -116,7 +117,7 @@ const Messaging = ({
         data-tip="Messages"
         type="button"
         
-        className="btn flex flex-col p-1 w-20 h-12 shadow-md items-center relative tooltip tooltip-top  indicator"
+        className="btn tooltip w-20 relative indicator tooltip-top rounded-box flex flex-col items-center justify-center p-1 shadow-md border-gray-300"
         onClick={handleOpen}
       >
         {numberOfUnseenMessages > 0 && (
@@ -129,10 +130,10 @@ const Messaging = ({
           height={30}
           className="text-yellow-500"
         />
-        <label className="label text-[0.5rem] text-black">Messages</label>
+        <label className="label text-[0.5rem] text-yellow-500">Messages</label>
       </button>
       <dialog tabIndex={-1} ref={modalRef} className="modal modal-bottom">
-        <div className="modal-box bg-base-100 p-0 max-w-2xl max-h-[60vh] mx-auto">
+        <div className="modal-box bg-base-100 p-0 max-w-2xl max-h-[60vh] mx-auto flex flex-col">
           <>
             <div className="sticky px-2 py-2 bg-base-200 z-10 top-0 flex items-center">
               <h1 className="text-lg font-bold">Messages</h1>
@@ -172,7 +173,7 @@ const Messaging = ({
                             width={20}
                             height={20}
                             className="rounded-full"
-                            alt="Tailwind CSS chat bubble component"
+                            alt={`${m.sender.first_name} Chat`}
                             src={m.sender.photo}
                           />
                         </div>
@@ -192,7 +193,7 @@ const Messaging = ({
                     </div>
                   </div>
                 ))}
-                <div ref={bottomRef} />
+                <div ref={bottomRef} className="flex-1 overflow-y-auto px-4" />
               </div>
             ) : (
               <div className="w-full text-center">

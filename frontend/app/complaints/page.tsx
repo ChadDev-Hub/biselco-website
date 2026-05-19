@@ -4,28 +4,30 @@ import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
 import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
 import ComplaintsContainer from './components/complaintContainer'
-import ComplaintsLoading from './dashboard/components/loading'
+
 import ComplaintHeader from './components/header'
+import ModernConcernCardSkeleton from './components/modernConcernCardSkeleton';
 
 
 const ComplaintsPage = () => {
   const data = UserComplaints()
   const statusName = ComplaintStatusName()
   return (
-    <div className="flex min-h-screen items-start w-full justify-center">
-      <main className="
-      container
-      max-w-190
-      p-3
-      flex
-      gap-4 
-      flex-col 
-      lg:items-center 
-      pb-21">
-        {/* Header */}
-        <section>
+    <div className="min-h-screen w-full ">
+      {/* Header */}
+        <section className="bg-blue-700 rounded-b-4xl">
           <ComplaintHeader />
         </section>
+      <main className="
+      w-full
+      py-2
+      flex
+      gap-4 
+      flex-col
+      justify-center 
+      lg:items-center 
+      pb-21">
+        
 
         {/* Feature Pills */}
         <section className='w-full flex justify-center'>
@@ -33,9 +35,14 @@ const ComplaintsPage = () => {
             <CreateComplaints/>
           </div>
         </section>
-        <Suspense fallback={<ComplaintsLoading />}>
+
+        <section className="grid grid-cols-1 gap-2">
+          <Suspense fallback={<ModernConcernCardSkeleton />}>
           <ComplaintsContainer complaintsData={data} complaintsStatusName={statusName} />
         </Suspense>
+
+        </section>
+        
 
         <FabIcon>
           <div data-tip="Navigate Dashboard" className='tooltip tooltip-left'>

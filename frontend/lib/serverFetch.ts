@@ -102,6 +102,7 @@ export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
             data: data.detail
         }
     }
+    
     return {
         status: res.status,
         data: data
@@ -130,6 +131,7 @@ export async function UserComplaints() {
             data: data.detail
         }
     }
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     return {
         status: res.status,
         data: data
@@ -215,6 +217,7 @@ export const GetComplaintStats = async () => {
             data: data.detail
         }
     }
+    
     return {
         status: res.status,
         data: data

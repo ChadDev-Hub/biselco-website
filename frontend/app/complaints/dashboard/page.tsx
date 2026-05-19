@@ -1,109 +1,79 @@
-import { Suspense, use } from 'react'
-import Stats from './components/status'
-import { GetAllComplaints, GetComplaintStats, GetTopComplaints } from '@/lib/serverFetch'
-import ComplaintsContainer from './components/complaintsDashboardContainer'
-import ComplaintDashBoardHeader from './components/header'
-import DashBoardTable from '@/app/common/table'
-import TableHead from '@/app/(protected)/technical/change-meter/components/tableHead'
-import TableFooter from '@/app/(protected)/technical/change-meter/components/tableFooter'
-import TableDataSkeleton from '@/app/(protected)/technical/change-meter/components/tableDataSkeleton'
-import TableSearch from './components/tableSearch'
-import PageNationLoading from '@/app/(protected)/technical/change-meter/components/pageNationSkeleton'
-import TableSearchSkeleton from './components/tableSearchSkeleton'
-import RadarChartSimple from '@/app/common/Radar'
-import ChartSkeleton from '@/app/common/ChartSkeleton'
-import { GetComplaintOvertime } from '../../../lib/serverFetch';
-import SimpleAreaChart from '@/app/common/AreaChart'
-import StatsSkeleton from '@/app/common/statsSkeleton'
+import { Suspense, use } from "react";
+import Stats from "./components/status";
+import {
+  GetAllComplaints,
+  GetComplaintStats,
+  ComplaintStatusName,
+} from "@/lib/serverFetch";
+import ComplaintsContainer from "./components/complaintsDashboardContainer";
+import ComplaintDashBoardHeader from "./components/header";
+import StatsSkeleton from "@/app/common/statsSkeleton";
+import TableSearch from "./components/tableSearch";
+import TableSearchSkeleton from "./components/tableSearchSkeleton";
+import ModernConcernCardSkeleton from '../components/modernConcernCardSkeleton';
 
-const DashBoardPage = ({ searchParams }: { searchParams: Promise<{ page: number; q: string }> }) => {
+
+const DashBoardPage = ({
+  searchParams,
+}: {
+  searchParams: Promise<{ page: number; q: string }>;
+}) => {
   const params = use(searchParams);
   const complaintsData = GetAllComplaints(params.page, params.q);
-  const pageUrl = '/complaints/dashboard';
   const statsData = GetComplaintStats();
-  const topComplaints = GetTopComplaints();
-  const overtimeData = GetComplaintOvertime();
-  const columns = [
-    'ID',
-    'PROFILE',
-    'FIRST NAME',
-    'LAST NAME',
-    'SUBMITTED AT',
-    'SUBJECT',
-    'REF POLE',
-    'LATEST UPDATE',
-    'RESOLUTION TIME',
-    'DETAILS',
-    'MAP',
-    'IMAGE',
-    'STATUS',
-    'STATUS HISTORY',
-    'MESSAGES',
-    
-  ]
+  const statusName = ComplaintStatusName();
   return (
-    <div className="flex min-h-screen  items-start w-full justify-center font-sans  ">
-      <main className="
+    <div className=" min-h-screen w-full  ">
+      {/* HEADER */}
+
+      <section className="w-full bg-blue-700 rounded-b-4xl   ">
+        <ComplaintDashBoardHeader />
+      </section>
+      <main
+        className="
       container
-      max-w-300
-      p-3
       flex
-      gap-4 
+      gap-4
+      py-2
+      px-0
+      mt-2
       flex-col
       justify-start
       lg:items-center 
-      mt-20
-      xs:mt-20
-      sm:mt-20 
-      md:mt-20
-      lg:mt-20 
-      pb-21">
-        <ComplaintDashBoardHeader />
-        <Suspense fallback={
-          <StatsSkeleton numberofStats={3} />}>
-          <Stats data={statsData} />
-        </Suspense>
+      pb-21"
+      >
+        {/* SECTION STATUS */}
+        <section>
+          <Suspense
+            fallback={
+              <div className="flex justify-center w-full h-full">
+                <div className="stats">
+                  <StatsSkeleton numberofStats={3} />
+                </div>
+              </div>
+            }
+          >
+            <Stats data={statsData} />
+          </Suspense>
+        </section>
 
-        <fieldset className='fieldset rounded-box'>
-          <legend className={`fieldset-legend flex w-full`}>
-            <h3 className='text-sm md:text-2xl text-shadow-md  font-bold  text-blue-800'>
-              Real-Time Concerns Table
-            </h3>
-            <Suspense fallback={<TableSearchSkeleton />}>
-              <TableSearch data={complaintsData} />
-            </Suspense>
-          </legend>
-          <DashBoardTable>
-            <TableHead columns={columns} selectable={false} />
-            <Suspense fallback={
-              <TableDataSkeleton row={8} col={columns.length} />
-            }>
-              <ComplaintsContainer data={complaintsData} />
-            </Suspense>
-            <Suspense
-              fallback={<PageNationLoading />}>
-              <TableFooter data={complaintsData} pageUrl={pageUrl} />
-            </Suspense>
-          </DashBoardTable>
-        </fieldset>
+        <section className="w-full max-w-5xl justify-end flex">
+          <Suspense fallback={<TableSearchSkeleton />}>
+            <TableSearch data={complaintsData} />
+          </Suspense>
+        </section>
 
-        <section className='w-full'>
-
-          <div className='flex flex-col sm:flex-col md:flex-row gap-4 w-full'>
-            <Suspense fallback={<ChartSkeleton />}>
-              <RadarChartSimple prom={topComplaints} valueName='Count' title='Common Concerns' />
-            </Suspense>
-
-            <Suspense fallback={<ChartSkeleton />}>
-              <SimpleAreaChart prom={overtimeData} title='Concerns Overtime'/>
-            </Suspense>
-          </div>
-
-
+        <section className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-2">
+          <Suspense fallback={<ModernConcernCardSkeleton />}>
+            <ComplaintsContainer
+              complaintsStatusName={statusName}
+              data={complaintsData}
+            />
+          </Suspense>
         </section>
       </main>
     </div>
-  )
-}
+  );
+};
 
 export default DashBoardPage;

@@ -219,7 +219,7 @@ class GetServices:
                 unread_messages=unread_messages,
                 images=[ComplaintsImages(id=img.id, url=img.image_url) for img in complaints.complaints_image]
             ))
-        pprint(results)
+
         return {
             "data": results,
             "total_page": total_page

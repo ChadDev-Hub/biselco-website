@@ -2,6 +2,18 @@
 import React, { useRef, useState } from 'react'
 import GenericComplaints from './genericComplaintsForm'
 import MeterComplaints from './meterComplaintsForm'
+import {CircleGauge, UtilityPole, Cable, TowelRack, HousePlug, CircleQuestionMark, NotepadText} from "lucide-react"
+
+
+    const ComplaintButtonAppearance:React.FC<{title:string, svg:React.ReactNode}> = ({title, svg}) => {
+        return (
+            <div className="w-full flex flex-col  items-center py-4 h-full">
+                <span className="grow place-content-center">{svg}</span>
+                <span className="text-[0.5rem] font-semibold">{title}</span>
+            </div>
+        )
+    };
+
 
 const CreateComplaints = () => {
     // COMPLAINTS CHOICES
@@ -119,86 +131,95 @@ const CreateComplaints = () => {
         default:
             break;
     }
+
+    
+    // COMPLAINTS BUTTON
+    const CompliantsButton= (complaint:string) => {
+        switch (complaint) {
+            case "Meter Services":
+                return (
+                    <ComplaintButtonAppearance 
+                    title={complaint}
+                    svg={<CircleGauge className="text-emerald-500 rounded-full shadow p-2" width={40} height={40} />}
+                    
+                    />
+                )
+            case "Pole & Support Structure":
+                return (
+                    <ComplaintButtonAppearance
+                    title={complaint}
+                    svg={<UtilityPole width={40} height={40} className="text-amber-500 rounded-full shadow p-2" />}
+                    />
+                )
+            case "Wiring & Cabling":
+                return (
+                    <ComplaintButtonAppearance
+                    title={complaint}
+                    svg={<Cable className="text-blue-500 rounded-full shadow p-2" width={40} height={40} />}
+                    />
+                )
+            case "Transformer Unit":
+                return (
+                    <ComplaintButtonAppearance
+                    title={complaint}
+                    svg={
+                        <TowelRack width={40} height={40} className="text-violet-500 rounded-full shadow p-2"/>}
+                        />
+                )
+            case "Report Illegal Connection":
+                return (
+                    <ComplaintButtonAppearance
+                    title={complaint}
+                    svg={<HousePlug width={40} height={40} className="text-red-500 rounded-full shadow p-2" />}
+                    />
+                )
+            case "Other":
+                return (
+                    <ComplaintButtonAppearance
+                    title={complaint}
+                    svg={<CircleQuestionMark width={40} height={40} className="text-gray-500 rounded-full shadow p-2" />}
+                    />
+                )
+                
+            default:
+                break;
+        }
+    }
+
+
+
     return (
         <>
-            <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-lg shadow-md btn-success'>
-                <span className='font-bold text-shadow-md text-yellow-300 text-shadow-blue-700'>
+            <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-md rounded-full drop-shadow-md shadow-md btn-primary'>
+                <NotepadText className='fill-blue-300 text-white drop-shadow-md ' width={20} height={20} />
+                <span className='font-bold text-shadow-md '>
                     Submit Your Concern
                 </span>
-                <svg
-                    fill="currentColor"
-                    height={25}
-                    width={25}
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-
-                    viewBox="-51.2 -51.2 614.40 614.40"
-                    stroke="currentColor" strokeWidth="0.00512">
-                    <g strokeWidth={0.1}>
-                    </g>
-                    <g id="SVGRepo_tracerCarrier"
-                        strokeLinecap="round" strokeLinejoin="round"
-                        stroke="currentColor" strokeWidth="1.024">
-                    </g>
-                    <g strokeLinecap='round' strokeLinejoin='round'>
-                        <g>
-                            <g>
-                                <path d="M394.17,121.325L275.473,2.629c-5.615-5.615-15.206-1.638-15.206,6.297v118.287c0,5.146,4.173,9.318,9.318,9.318h118.287 C395.808,136.531,399.784,126.932,394.17,121.325z">
-                                </path>
-                            </g>
-                        </g>
-                        <g>
-                            <g>
-                                <path d="M396.798,230.397v-68.266c0-4.71-3.823-8.533-8.533-8.533H251.734c-4.71,0-8.533-3.823-8.533-8.533V8.534 c0-4.71-3.823-8.533-8.533-8.533H46.937c-4.71,0-8.533,3.823-8.533,8.533v469.326c0,4.71,3.823,8.533,8.533,8.533l177.081,0.008 c3.251,0,6.221-1.852,7.654-4.779c1.434-2.918,1.084-6.4-0.905-8.977c-19.464-25.164-29.892-55.252-30.225-87.09 c-0.666-64.34,41.557-122.878,103.388-140.695c27.374-7.885,55.73-7.825,81.978-0.256c4.54,1.271,9.258-1.306,10.564-5.837 C396.994,236.967,396.798,231.523,396.798,230.397z">
-                                </path>
-                            </g>
-                        </g>
-                        <g>
-                            <g>
-                                <path d="M403.812,344.46l-18.654-18.654c-1.502-1.502-3.968-1.502-5.478,0l-12.348,12.347c-1.664,1.664-1.664,4.369,0,6.033 l18.099,18.099c1.664,1.664,4.369,1.664,6.033,0l12.348-12.348c0.99-0.99,1.135-2.133,1.135-2.739 C404.947,346.602,404.802,345.45,403.812,344.46z">
-                                </path>
-                            </g>
-                        </g>
-                        <g>
-                            <g>
-                                <path d="M345.599,256.005c-70.578,0-127.998,57.42-127.998,127.998S275.021,512,345.599,512s127.998-57.42,127.998-127.998 S416.177,256.005,345.599,256.005z M415.887,362.012L340.18,437.71c-1.092,1.092-2.466,1.869-3.968,2.244l-48.281,12.057 c-0.683,0.171-1.382,0.256-2.065,0.256c-2.236,0-4.42-0.879-6.042-2.5c-2.116-2.125-2.97-5.197-2.244-8.107l12.083-48.255 c0.375-1.502,1.152-2.867,2.244-3.959l54.305-54.305l21.393-21.401c8.175-8.166,21.452-8.149,29.61,0l18.662,18.662 c3.951,3.951,6.135,9.216,6.135,14.805C422.022,352.797,419.837,358.053,415.887,362.012z">
-                                </path>
-                            </g>
-                        </g>
-                        <g>
-                            <g>
-                                <path d="M373.357,374.351l-18.09-18.099c-1.664-1.664-4.369-1.664-6.033,0l-42.751,42.751c-0.546,0.546-0.93,1.229-1.126,1.98 l-6.033,24.123c-0.785,3.123,2.048,5.956,5.171,5.171l24.14-6.024c0.751-0.188,1.434-0.572,1.98-1.126l42.743-42.743 C375.021,378.72,375.021,376.015,373.357,374.351z">
-                                </path>
-                            </g>
-                        </g>
-                    </g></svg>
-            </button>
-            <dialog ref={complaintsModalRef} id="complaints-modal" className="modal modal-bottom sm:modal-middle backdrop-blur-md transition-all px-2">
                 
-                <fieldset className='fieldset flex flex-col gap-4 p-4 modal-box w-full max-h-[90vh] overflow-y-hidden'>
-                    
-                    <div className=' text-2xl font-bold w-full'>
-                        <p className='font-bold text-blue-700 text-shadow-yellow-400 text-shadow-md'>
+            </button>
+            <dialog ref={complaintsModalRef} id="complaints-modal" className="modal modal-bottom sm:modal-middle backdrop-blur-md transition-all">
+                
+                <div className='relative flex flex-col px-1 p-0 gap-2  mx-auto  modal-box w-full max-h-[90vh] overflow-y-hidden'>
+                    <div className='sticky top-0 p-2 text-2xl font-bold w-full bg-base-300'>
+                        <p className='font-bold   text-shadow-md'>
                             Make a Concern
                         </p>
-                        <button type='button' className='btn btn-circle shadow-lg absolute top-1 right-2' onClick={handleClose}>x</button>
+                        <button type='button' className='btn btn-circle shadow-md drop-shadow-md bg-error absolute top-1 right-2' onClick={handleClose}>x</button>
                     </div>
-                    {!hideChoices && <div className='grid grid-cols-2 sm:grid-cols-3 justify-between gap-2 '>
+                    {!hideChoices && 
+                    <div className='grid grid-cols-3 w-full pb-3 place-items-center sm:grid-cols-3  justify-between gap-2 '>
                         {
                             complaintsChoices.map((complaint, index) => (
                                 <button onClick={() => 
                                 handleChooseComplaints(complaint)} type='button' key={index} 
-                                className='btn  btn-sm  px-4 py-2 btn-soft drop-shadow-md shadow-md'>
-                                    <p className='font-bold text-shadow-yellow-400'>
-                                        {complaint}
-                                    </p>
-
+                                className='btn shadow-md border border-gray-300 drop-shadow-md w-32 h-32'>
+                                    {CompliantsButton(complaint)}
                                 </button>
                             ))}
 
                     </div>}
                     {hideChoices && complaintComponentForm}
-                </fieldset>
+                </div>
             </dialog>
         </>
     )

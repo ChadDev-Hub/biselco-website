@@ -7,7 +7,7 @@ import ImageViewer from '../../(protected)/technical/change-meter/components/ima
 type Props = {
   userComplaint: User;
   timeLine: React.ReactNode;
-  deleteTool: React.ReactNode;
+  deleteTool?: React.ReactNode;
   toolsComponent: React.ReactNode;
   mapViewer: React.ReactNode; 
 }
@@ -24,13 +24,12 @@ type User = {
   photo: string;
   village: string; 
   municipality: string;
-  image: string;
+  image: string | null;
 }
 
 const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, deleteTool}: Props) => {
-  console.log(userComplaint.image)
   return (
-    <div className="max-w-lg w-full border-t-2 border-t-blue-600 card relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
+    <div className="max-w-lg w-full border-t-2 border-t-blue-600 border-b-yellow-500 border-b-2 card relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-gray-300 overflow-hidden font-sans">
         {deleteTool}        
       {/* Header Section */}
       <div className="bg-base-200  max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
@@ -78,7 +77,8 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
               <span className="text-xs">{userComplaint.village} {userComplaint.municipality}</span>
             </div>
           </div>
-          <div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-500 uppercase">Image</span>
             <ImageViewer image={userComplaint.image}/>
           </div>
         </div>

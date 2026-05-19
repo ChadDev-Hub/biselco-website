@@ -3,27 +3,33 @@
   import MapButton from "./mapbutton";
   import ComplaintStatusButton from "./statusButton";
   import { useWebsocket } from "@/app/utils/websocketprovider";
-  import Image from "next/image";
   import { redirect, useSearchParams } from "next/navigation";
   import { useAlert } from "@/app/common/alert";
-  import MessageDetailView from "./messageDetailView";
   import StatusHistoryModal from "./statusHistory";
   import { GetComplaintsMessage } from "@/app/actions/complaint";
   import Messaging from "./messagingModal2";
   import { useAuth } from "@/app/utils/authProvider";
   import { useNotification } from "@/app/common/NotificationProvider";
-  import ImageViewer from "./imageViewerModal";
+  import ConcernCard from '../../components/modernConcernCard';
+  import ComplaintsTimeLine from '../../components/complaintsTimeLine';
+
   type PromiseType = {
     status?: number;
     data: ComplaintsListData;
+
   };
 
   type ComplaintsListData = {
     data: Complaint[];
   };
 
+  type ComplaintStatusType = {
+    status?: number;
+    data: []
+}
   type Props = {
     data: Promise<PromiseType>;
+    complaintsStatusName: Promise<ComplaintStatusType>;
   };
 
   type StatusHistory = {
@@ -109,8 +115,9 @@
   }
 
 
-  const ComplaintsContainer = ({ data }: Props) => {
+  const ComplaintsContainer = ({ data, complaintsStatusName }: Props) => {
     const complaintsIinitialData = use(data);
+    const complaintStatusNameInitialData = use(complaintsStatusName);
     const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
     const searchParms = useSearchParams();
     const page = searchParms.get("page");
@@ -123,7 +130,8 @@
     const handleSelectedComplaintsId = (complaintsId: number) => {
       setactiveComplaintsId(complaintsId);
     };
-
+    
+    const [statusName, setStatusName] = useState([]);
     const { showAlert } = useAlert();
 
     // SET INITIAL DATA ON MOUNT
@@ -146,6 +154,11 @@
       }
     }, [complaintsIinitialData]);
 
+    useEffect(() => {
+        queueMicrotask(() =>
+            setStatusName(complaintStatusNameInitialData.data)
+        );
+    }, [complaintStatusNameInitialData])
 
   
     // MESSAGING MODAL
@@ -335,96 +348,60 @@
 
     return (
       <>
-      <tbody className="bg-base-100/45 backdrop-blur-2xl text-xs">
-        {allComplaints.map((complaint: Complaint, index: number) => (
-          <tr key={complaint.id}>
-            <th className="z-10">{index}</th>
-            <td>
-              <div className={`avatar avatar-${complaint.user_status}`}>
-                <div className="w-8">
-                  <Image
-                    loading="eager"
-                    src={
-                      complaint.user_photo ??
-                      "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"
-                    }
-                    alt="User Photo"
-                    width={50}
-                    height={50}
-                    className="rounded-full"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>{complaint.first_name}</td>
-            <td>{complaint.last_name}</td>
-            <td>{complaint.date_time_submitted}</td>
-            <td className="w-full">{complaint.subject}</td>
-            {/* REFERENCE POLE */}
-            <td>{complaint.reference_pole}</td>
-            {/* LATEST COMPLAINT */}
-            <td className="animate-pulse text-center text-blue-800 drop-shadow-md drop-shadow-amber-900 font-bold">
-              {complaint.latest_status?.name}
-            </td>
+      {allComplaints.map((item:Complaint)=>
+      <ConcernCard
+        key={item.id}
+        userComplaint={{
+          firstName: item.first_name,
+          lastName :item.last_name,
+          details : item.description,
+          submittedAt: item.date_time_submitted,
+          subject: item.subject,
+          refPole: item.reference_pole,
+          resolutionTime: item.resolution_time,
+          currentStatus: item.latest_status?.name ?? "",
+          photo: item.user_photo,
+          village: item.village,
+          municipality: item.municipality,
+          image: item.images?.[0]?.url ?? null
+        }}
+        timeLine={<ComplaintsTimeLine data={statusName} status={item.status} />}
+        mapViewer={<MapButton title={item.subject} location={item.location} municipality={item.municipality} village={item.village} />}
+        toolsComponent= {
+          <div className="flex gap-2">
+            {/* MESSAGING */}
+            <Messaging
+              messageLoading={messageLoading}
+              onClosed={MessageClose}
+              onOpen={()=>
+              {
+                handleSelectedComplaintsId(item.id);
+                MessageOpen(item.id)
+              }
+              
+              }
+              isOpen={isMessaginModalOpen}
+              numberOfUnseenMessages={item.unread_messages}
+              complaint_id={item.id}
+              setInitialData={(data)=>handleInitialDataSending({complaints_id: item.id, message:data.message, receiver_id: item.user_id})}
+              messages={complaintsMessage}/>
+              {/* STATUS UPDATES */}
+            <ComplaintStatusButton
+              onOpen={handleSelectedComplaintsId}
+              complaints_id={item.id}
+              status={item.status}
+              currentStatus={item.latest_status?.id}/>
 
-            {/* RESOLUTION TIME */}
-            <td>
-              {complaint.resolution_time ? complaint.resolution_time : "Unresolved"}
-            </td>
-
-            {/* COMPLAINT DESCRIPTION */}
-            <td className="flex justify-center  w-full">
-              <MessageDetailView complaintDescription={complaint.description} />
-            </td>
-            <td align="center">
-              <MapButton
-                title="Consumer Complaints Map"
-                municipality={complaint.municipality}
-                village={complaint.village}
-                location={complaint.location}
-              />
-            </td>
-              <td>
-                <ImageViewer data={complaint.images}/>
-              </td>
-            <td className="text-center">
-              <ComplaintStatusButton
-                currentStatus={complaint.latest_status?.id}
-                status={
-                  allComplaints.find(
-                    (complaint) => complaint.id === activeComplaintsId,
-                  )?.status ?? []
-                }
-                complaints_id={complaint.id}
-                onOpen={handleSelectedComplaintsId}
-              />
-            </td>
-            
-            <td className="flex justify-center">
-              <StatusHistoryModal data={complaint.status_history} />
-            </td>
-            <td>
-              <Messaging
-                messageLoading={messageLoading}
-                complaint_id={complaint.id}
-                messages={complaintsMessage.filter((msg) => msg.complaints_id === complaint.id)}
-                onOpen={() => {
-                  MessageOpen(complaint.id);
-                  setactiveComplaintsId(complaint.id);}
-                }
-                onClosed={MessageClose}
-                isOpen={isMessaginModalOpen}
-                numberOfUnseenMessages={complaint.unread_messages}
-                setInitialData={(data) => handleInitialDataSending({ complaints_id: data.complaints_id, message: data.message, receiver_id: data.receiver_id })
-                } receiver_id={complaint.user_id}
-              />
-            </td>
-            
-          </tr>
-        ))}
-      </tbody>
-      
+              {/* STATUS HISTORY */}
+            <StatusHistoryModal
+            data={item.status_history}/>
+          </div>
+          
+        }
+        />
+      )}
       </>
+      
       
     );
   };

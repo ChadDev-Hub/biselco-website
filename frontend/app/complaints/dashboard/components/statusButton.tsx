@@ -1,6 +1,7 @@
 "use client";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import EnableButton from "./complaintStatusToggle";
+import { NotebookPen } from "lucide-react";
 
 type Props = {
   currentStatus?: number;
@@ -22,7 +23,12 @@ type StatsType = {
   name: string;
 };
 
-const ComplaintStatusButton = ({currentStatus, status, complaints_id, onOpen }: Props) => {
+const ComplaintStatusButton = ({
+  currentStatus,
+  status,
+  complaints_id,
+  onOpen,
+}: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const complaintStatusName = [
     {
@@ -44,7 +50,6 @@ const ComplaintStatusButton = ({currentStatus, status, complaints_id, onOpen }: 
     }
   };
   const handleClose = () => {
-    
     if (modalRef.current) {
       modalRef.current.close();
     }
@@ -53,65 +58,25 @@ const ComplaintStatusButton = ({currentStatus, status, complaints_id, onOpen }: 
     <>
       <button
         aria-label="modal-button"
+        title="Update Status"
         data-tip="Update Status"
         type="button"
-        className="btn btn-circle btn-ghost tooltip tooltip-right "
+        className="btn tooltip w-20 tooltip-top rounded-box flex flex-col items-center justify-center p-1 shadow-md border-gray-300 "
         onClick={handleOpen}
       >
-        <svg
-          width={30}
-          height={30}
-          viewBox="0 0 1024 1024"
-          className="icon drop-shadow-amber-900 drop-shadow-md"
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="#000000"
-        >
-          <g id="SVGRepo_bgCarrier" strokeWidth={0}></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M896 618.666667H443.733333c-10.666667 0-21.333333-4.266667-29.866666-12.8l-78.933334-78.933334c-8.533333-8.533333-8.533333-21.333333 0-29.866666l78.933334-78.933334c8.533333-8.533333 19.2-12.8 29.866666-12.8H896c12.8 0 21.333333 8.533333 21.333333 21.333334v170.666666c0 12.8-8.533333 21.333333-21.333333 21.333334z"
-              fill="#3F51B5"
-            ></path>
-            <path d="M192 128h42.666667v768H192z" fill="#CFD8DC"></path>
-            <path
-              d="M213.333333 213.333333m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
-              fill="#90A4AE"
-            ></path>
-            <path
-              d="M213.333333 512m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
-              fill="#90A4AE"
-            ></path>
-            <path
-              d="M213.333333 810.666667m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z"
-              fill="#90A4AE"
-            ></path>
-            <path
-              d="M725.333333 917.333333H443.733333c-10.666667 0-21.333333-4.266667-29.866666-12.8l-78.933334-78.933333c-8.533333-8.533333-8.533333-21.333333 0-29.866667l78.933334-78.933333c8.533333-8.533333 19.2-12.8 29.866666-12.8H725.333333c12.8 0 21.333333 8.533333 21.333334 21.333333v170.666667c0 12.8-8.533333 21.333333-21.333334 21.333333z"
-              fill="#448AFF"
-            ></path>
-            <path
-              d="M746.666667 320H443.733333c-10.666667 0-21.333333-4.266667-29.866666-12.8l-78.933334-78.933333c-8.533333-8.533333-8.533333-21.333333 0-29.866667l78.933334-78.933333c8.533333-8.533333 19.2-12.8 29.866666-12.8H746.666667c12.8 0 21.333333 8.533333 21.333333 21.333333v170.666667c0 12.8-8.533333 21.333333-21.333333 21.333333z"
-              fill="#00BCD4"
-            ></path>
-          </g>
-        </svg>
+        <NotebookPen width={30} height={30} className="text-blue-500" />
+        <span className="text-[0.5rem] text-blue-500">Update Status</span>
       </button>
       <dialog ref={modalRef} className="modal modal-bottom">
-        <div className="modal-box">
-          <div className="flex items-start justify-center w-full absolute top-0 left-0">
+        <div className="modal-box max-w-3xl mx-auto">
+          <div className="flex items-start justify-end w-full absolute top-1 -left-1">
             <button
               type="button"
               onClick={handleClose}
-              className="btn btn-rounded drop-shadow-2xl bg-base-content w-xs sm:w-sm md:w-md h-2.5"
-            ></button>
+              className="btn btn-circle btn-error btn-sm"
+            >X</button>
           </div>
-          <h1 className="text-md text-blue-500 absolute top-3">
+          <h1 className="text-sm font-bold text-blue-500 absolute top-3">
             Complaint Status
           </h1>
           <div className="overflow-x-auto mt-4">

@@ -295,7 +295,7 @@ const ComplaintsContainer = (
     }, [isMessagingModalOpen, complaintsMessage, user, sendMessage]);
 
 
-    console.log(complaints.map((item:Complaints)=>item.images))
+    
     return (
         <section className='flex flex-col gap-4 w-full items-center'>
             {complaints.map((complaint: Complaints) => (

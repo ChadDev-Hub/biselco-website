@@ -11,7 +11,6 @@ const DeletConfirmation = ({ complaintId }: DeletConfirmationProps) => {
     const handleOpen = () => dialogRef.current?.showModal();
     const onClose = () => dialogRef.current?.close();
     const handleDelete = async () => {
-        console.log(complaintId);
         await DeleteComplaint(complaintId);
     }
     return (

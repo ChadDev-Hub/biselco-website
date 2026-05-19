@@ -4,8 +4,9 @@ import Image from "next/image";
 import { useRef, useState, useCallback } from "react";
 import { motion } from 'framer-motion';
 
+
 type Props = {
-  image: string;
+  image: string | null;
 };
 
 const ImageViewer = ({ image }: Props) => {
@@ -42,7 +43,7 @@ const ImageViewer = ({ image }: Props) => {
         onClick={handleOpen}
         className="relative cursor-pointer overflow-hidden rounded-box border-2 border-white w-34.25 h-15"
       >
-        <Image
+        {image? <Image
           src={image}
           alt="change meter image"
           width={137}
@@ -51,13 +52,13 @@ const ImageViewer = ({ image }: Props) => {
           loading="lazy"
           sizes="137px"
           className="object-cover rounded-box"
-        />
+        />: <span>No Image Available</span>}
       </button>
 
       {/* Modal */}
       <dialog
         ref={dialogRef}
-        className="modal modal-bottom px-2 sm:px-4 md:px-[10%] lg:px-[20%] xl:px-[25%]"
+        className="modal modal-bottom  sm:px-4 md:px-[10%] lg:px-[20%] xl:px-[25%]"
       >
         <div className="modal-box relative w-full  p-2 bg-base-100">
 
@@ -99,7 +100,7 @@ const ImageViewer = ({ image }: Props) => {
                   minWidth: "100%",
                 }}
               >
-                <Image
+                {image? <Image
                   src={image}
                   alt="change meter image"
                   fill
@@ -107,7 +108,7 @@ const ImageViewer = ({ image }: Props) => {
                   quality={75}
                   className="object-contain"
                   sizes="100vw"
-                />
+                /> : <span>No Image Available</span>}
               </motion.div>
             </div>
           )}
