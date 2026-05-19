@@ -91,7 +91,7 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
         break;
     }
   };
-
+  console.log(errors)
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
@@ -115,14 +115,14 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
 
               {/* Issue Type */}
               <div className={`relative overflow-visible ${isother ? "hidden" : ""}`} >
-                <label className="block mb-1 font-medium">Issue</label>
+                <label className="block mb-1 text-sm">Issue</label>
                 <select
                   {...register("issue", { required: isother ? false : "Please select an issue" })}
                   title="Select Issue"
-                  className={`w-full px-3 py-2 border rounded ${errors.issue ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2 select border select-sm rounded ${errors.issue ? "border-red-500" : "border-gray-300"
                     } select `}
                 >
-                  <option value="" disabled={true}>Select Issue</option>
+                  <option value="" disabled={true} className="text-sm">Select Issue</option>
                   {choices?.map((choice) => (
                     <option key={choice} value={choice}>
                       {toTitleCase(choice)}
@@ -130,24 +130,24 @@ const GenericComplaints = ({ title, choices, isother }: Props) => {
                   ))}
 
                 </select>
-                {errors.issue && <p className="text-red-500 text-sm">{errors.issue.message}</p>}
+                {errors.issue && <p className="text-red-500 text-xs italic">{errors.issue.message}</p>}
               </div>
 
               {/* Complaint Details */}
               <div>
-                <label className="block mb-1 font-medium">Details</label>
+                <label className="block mb-1 text-sm ">Details</label>
                 <textarea
                   {...register("details", { required: "Please describe your complaint" })}
                   placeholder="Describe your complaint"
-                  className={`w-full px-3 py-2 border rounded ${errors.details ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2  border rounded ${errors.details ? "border-red-500" : "border-gray-300"
                     } textarea`}
                 />
-                {errors.details && <p className="text-red-500 text-sm">{errors.details.message}</p>}
+                {errors.details && <p className="text-red-500 italic text-xs">{errors.details.message}</p>}
               </div>
 
               {/* Map */}
               <div className="w-full">
-                <label className="label w-full text-wrap font-bold text-black">
+                <label className="label w-full text-wrap font-bold text=sm text-black">
                   Please Pin The Location of Your Complaints
                 </label>
                 <BiselcoMap

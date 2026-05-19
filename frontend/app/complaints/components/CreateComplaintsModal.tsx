@@ -206,19 +206,19 @@ const CreateComplaints = () => {
                         </p>
                         <button type='button' className='btn btn-circle shadow-md drop-shadow-md bg-error absolute top-1 right-2' onClick={handleClose}>x</button>
                     </div>
-                    {!hideChoices && 
+                    {!hideChoices ?
                     <div className='grid grid-cols-3 w-full pb-3 place-items-center sm:grid-cols-3  justify-between gap-2 '>
                         {
                             complaintsChoices.map((complaint, index) => (
                                 <button onClick={() => 
                                 handleChooseComplaints(complaint)} type='button' key={index} 
-                                className='btn shadow-md border border-gray-300 drop-shadow-md w-32 h-32'>
+                                className='btn shadow-md border border-gray-300 drop-shadow-md w-28 h-28'>
                                     {CompliantsButton(complaint)}
                                 </button>
                             ))}
 
-                    </div>}
-                    {hideChoices && complaintComponentForm}
+                    </div> : complaintComponentForm}
+                    
                 </div>
             </dialog>
         </>

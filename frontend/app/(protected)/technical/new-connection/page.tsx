@@ -20,7 +20,7 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
 
     const page = (await searchParams).page
     const newconData = GetNewConnection(Number(page));
-    const pageUrl = '/technical/new-connection'
+   
     const stats = GetNewConnectionStats();
     return (
         <>
@@ -46,7 +46,7 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
 
                 <section className="w-full flex items-center justify-center">
                     <Suspense fallback={<PageNationLoading />}>
-                        <Pagination data={newconData} pageUrl={pageUrl} />
+                        <Pagination data={newconData} />
                     </Suspense>
                 </section>
 

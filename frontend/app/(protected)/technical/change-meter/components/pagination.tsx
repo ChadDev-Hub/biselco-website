@@ -1,6 +1,6 @@
 "use client";
 import  { useState, useEffect, use } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 
 type PromiseType = {
@@ -10,15 +10,16 @@ type PromiseType = {
 
 type Props = {
   data: Promise<PromiseType>;
-  pageUrl: string;
 };
 
 type Page = {
   total_page: number;
 };
-const Pagination = ({ data, pageUrl }: Props) => {
+const Pagination = ({ data}: Props) => {
   const pages = use(data);
+  console.log(pages);
   const router = useRouter();
+  const currentPath = usePathname();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [showListPages, setShowListPages] = useState(false);
@@ -46,7 +47,7 @@ const Pagination = ({ data, pageUrl }: Props) => {
       params.set("page", String(currentPage - 1));
       setLoading(true);
       setCurrentPage(currentPage - 1);
-      router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
+      router.replace(`${currentPath}?${params.toString()}`, { scroll: false });
     }
   };
 
@@ -58,7 +59,7 @@ const Pagination = ({ data, pageUrl }: Props) => {
       params.set("page", String(currentPage + 1));
       setLoading(true);
       setCurrentPage(currentPage + 1);
-      router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
+      router.replace(`${currentPath}?${params.toString()}`, { scroll: false });
     }
   };
   // HANDLE MANUAL PAGE SELECTION
@@ -69,7 +70,7 @@ const Pagination = ({ data, pageUrl }: Props) => {
     params.set("page", String(page));
     setLoading(true);
     setCurrentPage(page);
-    router.replace(`${pageUrl}?${params.toString()}`, { scroll: false });
+    router.replace(`${currentPath}?${params.toString()}`, { scroll: false });
   };
 
   // SHOW LISTS OF PAGES WHEN DROPDOWN BUTTON IS CLICKED

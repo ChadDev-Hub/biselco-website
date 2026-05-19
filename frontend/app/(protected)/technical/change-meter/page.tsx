@@ -18,7 +18,6 @@ type Props = {
 const ChangeMeterFormPage = async ({ searchParams }: Props) => {
   const page = (await searchParams).page
   const data = GetChangeMeter(page);
-  const pageUrl = '/technical/change-meter/'
   return (
     <>
     <Headers title="Change Meter"/>
@@ -40,7 +39,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
 
       <section className="w-full flex justify-center">
         <Suspense fallback={<PageNationLoading />}>
-          <Pagination data={data} pageUrl={pageUrl}/>
+          <Pagination data={data}/>
         </Suspense>
         
       </section>

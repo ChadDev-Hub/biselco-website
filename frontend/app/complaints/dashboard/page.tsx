@@ -11,7 +11,8 @@ import StatsSkeleton from "@/app/common/statsSkeleton";
 import TableSearch from "./components/tableSearch";
 import TableSearchSkeleton from "./components/tableSearchSkeleton";
 import ModernConcernCardSkeleton from '../components/modernConcernCardSkeleton';
-
+import Pagination from '../../(protected)/technical/change-meter/components/pagination';
+import PageNationLoading from '../../(protected)/technical/change-meter/components/pageNationSkeleton';
 
 const DashBoardPage = ({
   searchParams,
@@ -70,6 +71,14 @@ const DashBoardPage = ({
               data={complaintsData}
             />
           </Suspense>
+        </section>
+
+        <section>
+          <Suspense fallback={<PageNationLoading />}>
+            <Pagination data={complaintsData}/>
+          </Suspense>
+          
+
         </section>
       </main>
     </div>
