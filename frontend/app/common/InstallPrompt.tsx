@@ -1,13 +1,13 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
-
 interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
+  prompt: () => Promise<void>;
   userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed'
-    platform: string
-  }>
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
 }
 
 const InstallPrompt = () => {
@@ -15,7 +15,33 @@ const InstallPrompt = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-    
+
+  useEffect(() => {
+    // Detect iOS
+    queueMicrotask(() => {
+       setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !(window as Window & { MSStream?: unknown }).MSStream
+    );
+      
+    // Detect standalone mode
+    setIsStandalone(
+      window.matchMedia("(display-mode: standalone)").matches );
+    })
+  
+    // 🔥 THIS is the missing part
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
+  }, []);
+
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
@@ -29,35 +55,35 @@ const InstallPrompt = () => {
 
     setDeferredPrompt(null);
   };
-
-  useEffect(() => {
-    queueMicrotask(() =>
-      setIsIOS(
-        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-          !(window as Window & { MSStream?: unknown}).MSStream,
-      ),
-    );
-
-    queueMicrotask(() =>
-      setIsStandalone(window.matchMedia("(display-mode: standalone)").matches),
-    );
-  }, []);
-
+  console.log(isStandalone)
   if (isStandalone) return null;
+
   return (
+
     <div className="p-4 rounded-xl">
       <h3 className="font-bold mb-2">Install App</h3>
-      <button onClick={handleInstall} type="button" className="btn btn-sm btn-primary">
-        Add to Home Screen
-      </button>
+
+      {/* Only show button when install is available */}
+      {!isIOS && deferredPrompt && (
+        <button
+          onClick={handleInstall}
+          type="button"
+          className="btn btn-sm btn-primary"
+        >
+          Install App
+        </button>
+      )}
 
       {isIOS && (
-        <p className="text-sm mt-3">
-          {`To install this app on your iPhone/iPad,
-          tap Share ⎋ then "Add to Home Screen" ➕`}
+        <p className="text-sm mt-3">{`
+          To install this app on iPhone/iPad, tap Share ⎋ then
+          "Add to Home Screen" ➕`}
         </p>
       )}
     </div>
+    
+   
+    
   );
 };
 
