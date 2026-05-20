@@ -147,7 +147,7 @@ const NewConnectionDataContainer = ({ data }: Props) => {
     }
     return (
         <>
-            <div className=" w-full flex justify-center">
+            <div className="w-full flex justify-center px-2">
                 {/* NAV BAR */}
                 <div className="navbar max-w-2xl items-center  bg-base-100 border-gray-100 shadow-md w-full  px-2 flex justify-between glass mb-2 rounded-box">
                     {/* TOOLS */}

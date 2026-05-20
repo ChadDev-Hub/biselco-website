@@ -23,9 +23,9 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
    
     const stats = GetNewConnectionStats();
     return (
-        <>
+        <div className="min-h-screen w-full">
         <Headers title="New Connection"/>
-            <div className="flex flex-col gap-2">
+            <main className="flex flex-col gap-2">
 
                 <section className="flex justify-center">
 
@@ -51,8 +51,8 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
                 </section>
 
 
-            </div>
-        </>
+            </main>
+        </div>
 
 
 

@@ -182,9 +182,6 @@ const CreateComplaints = () => {
                 break;
         }
     }
-
-
-
     return (
         <>
             <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-md rounded-full drop-shadow-md shadow-md btn-primary'>

@@ -14,6 +14,7 @@ const FormCard = ({cardTitle, cardDescription, children}: Props) => {
         <div className="card bg-base-100 image-full h-full w-full max-w-96 shadow-md drop-shadow-md hover:scale-101">
             <figure >
                 <Image
+                    loading="eager"
                     width={600}
                     height={400}
                     src="/electric-meter.webp"

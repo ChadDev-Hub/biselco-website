@@ -131,7 +131,7 @@ export async function UserComplaints() {
             data: data.detail
         }
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    
     return {
         status: res.status,
         data: data

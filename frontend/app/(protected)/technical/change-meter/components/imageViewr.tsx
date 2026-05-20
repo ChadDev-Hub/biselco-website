@@ -50,8 +50,8 @@ const ImageViewer = ({ image }: Props) => {
           height={60}
           quality={75}
           loading="lazy"
-          sizes="137px"
-          className="object-cover rounded-box"
+          sizes="(max-width: 768px) 100vw, 329px"
+          className="object-contain"
         />: <span>No Image Available</span>}
       </button>
 
@@ -107,7 +107,7 @@ const ImageViewer = ({ image }: Props) => {
                   priority
                   quality={75}
                   className="object-contain"
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 329px"
                 /> : <span>No Image Available</span>}
               </motion.div>
             </div>

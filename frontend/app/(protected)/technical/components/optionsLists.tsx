@@ -24,8 +24,6 @@ const TechniclaFormLists = ({ initialData }: Props) => {
     const formsData = use(initialData)
     const [forms, setForms] = useState<TechnicalForms[] | [] | undefined>([]);
     const pathname = usePathname()
-    console.log(pathname)
-
     useEffect(() => {
         queueMicrotask(() =>
         setForms(formsData?.data));
@@ -34,8 +32,8 @@ const TechniclaFormLists = ({ initialData }: Props) => {
 
   
     return (
-        <div className='flex flex-col justify-center items-center'>
-            <div className='grid grid-cols-1  sm:grid-cols-1 md:grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-2 place-content-center'>
+        <div className='flex flex-col pt-2 w-full justify-center items-center'>
+            <div className='grid grid-cols-1 max-w-3xl place-items-center w-full sm:grid-cols-1 md:grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-2 place-content-center'>
                     {forms?.map((form: TechnicalForms) =>
                     (
                         <div key={form.id}>
