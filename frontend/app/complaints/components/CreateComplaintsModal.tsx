@@ -1,8 +1,8 @@
 "use client"
 import React, { useRef, useState } from 'react'
-import GenericComplaints from './genericComplaintsForm'
-import MeterComplaints from './meterComplaintsForm'
 import {CircleGauge, UtilityPole, Cable, TowelRack, HousePlug, CircleQuestionMark, NotepadText} from "lucide-react"
+import MeterComplaintsV1 from './meterComplaints';
+import GenericComplaintV1 from './genericComplaints';
 
 
     const ComplaintButtonAppearance:React.FC<{title:string, svg:React.ReactNode}> = ({title, svg}) => {
@@ -74,7 +74,7 @@ const CreateComplaints = () => {
     const complaintsModalRef = useRef<HTMLDialogElement>(null);
     const [complaints, setComplaints] = useState("");
     const [hideChoices, sethideChoices] = useState(false);
-
+    const [title, setTile] = useState("Make A Complaint")
     const handleChooseComplaints = (choosedComplaints: string) => {
         sethideChoices(!hideChoices);
         setComplaints(choosedComplaints);
@@ -91,41 +91,38 @@ const CreateComplaints = () => {
         complaintsModalRef.current?.close();
         sethideChoices(false);
         setComplaints("");
+        setTile("Make A Complaint");
     };
 
     let complaintComponentForm: React.ReactNode = null
     switch (complaints) {
         case "Meter Services":
             complaintComponentForm = 
-            <MeterComplaints
+            <MeterComplaintsV1
             title={complaints} 
             choices={meterIssueChoices} 
             isother={false}/>
+      
             break;
         case "Pole & Support Structure":
-            complaintComponentForm = <GenericComplaints 
-                            title={complaints}
+            complaintComponentForm = <GenericComplaintV1 
                             choices={poleIsueChoices} />
             break;
         case "Wiring & Cabling":
-            complaintComponentForm = <GenericComplaints 
-                            title={complaints}
+            complaintComponentForm = <GenericComplaintV1 
                             choices={wiringIssueChoices} />
             break;
         case "Transformer Unit":
-            complaintComponentForm = <GenericComplaints 
-                            title={complaints}
+            complaintComponentForm = <GenericComplaintV1 
                             choices={TransformerIssueChoices} />
             break;
 
         case "Report Illegal Connection":
-            console.log(complaints)
-            complaintComponentForm = <MeterComplaints
+            complaintComponentForm = <MeterComplaintsV1
             title={complaints} isother={true}/>
             break;
         case "Other":
-            complaintComponentForm = <GenericComplaints 
-                            title={complaints}
+            complaintComponentForm = <GenericComplaintV1 
                             isother={true} />
             break;
         default:
@@ -193,7 +190,7 @@ const CreateComplaints = () => {
             <button aria-label='modal' onClick={handleClick} type='button' className='btn flex btn-md rounded-full drop-shadow-md shadow-md btn-primary'>
                 <NotepadText className='fill-blue-300 text-white drop-shadow-md ' width={20} height={20} />
                 <span className='font-bold text-shadow-md '>
-                    Submit Your Concern
+                    Submit Concern
                 </span>
                 
             </button>
@@ -201,8 +198,8 @@ const CreateComplaints = () => {
                 
                 <div className='relative flex flex-col px-1 p-0 gap-2  mx-auto  modal-box w-full max-h-[90vh] overflow-y-hidden'>
                     <div className='sticky top-0 p-2 text-2xl font-bold w-full bg-base-300'>
-                        <p className='font-bold   text-shadow-md'>
-                            Make a Concern
+                        <p className='font-bold text-md  text-shadow-md'>
+                            {title}
                         </p>
                         <button type='button' className='btn btn-circle shadow-md drop-shadow-md bg-error absolute top-1 right-2' onClick={handleClose}>x</button>
                     </div>
@@ -210,8 +207,10 @@ const CreateComplaints = () => {
                     <div className='grid grid-cols-3 w-full pb-3 place-items-center sm:grid-cols-3  justify-between gap-2 '>
                         {
                             complaintsChoices.map((complaint, index) => (
-                                <button onClick={() => 
-                                handleChooseComplaints(complaint)} type='button' key={index} 
+                                <button onClick={() =>{ 
+                                handleChooseComplaints(complaint)
+                                setTile(complaint)
+                            }} type='button' key={index} 
                                 className='btn shadow-md border border-gray-300 drop-shadow-md w-28 h-28'>
                                     {CompliantsButton(complaint)}
                                 </button>

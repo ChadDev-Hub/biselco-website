@@ -73,7 +73,7 @@ const DashBoardPage = ({
           </Suspense>
         </section>
 
-        <section>
+        <section className="flex justify-center w-full ">
           <Suspense fallback={<PageNationLoading />}>
             <Pagination data={complaintsData}/>
           </Suspense>

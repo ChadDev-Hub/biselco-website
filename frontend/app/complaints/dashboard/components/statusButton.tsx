@@ -82,12 +82,12 @@ const ComplaintStatusButton = ({
           <div className="overflow-x-auto mt-4">
             <ul
               tabIndex={-1}
-              className="dropdown-content text-xs menu bg-base-100 rounded-box w-full  shadow-sm"
+              className="dropdown-content text-[0.6rem] menu bg-base-100 rounded-box w-full  shadow-sm"
             >
               {complaintStatusName.map((item: StatsType, index: number) => (
                 <li
                   key={index}
-                  className="space-y-2 flex flex-row space-x-2 justify-between w-full"
+                  className="space-y-2 flex  flex-row space-x-2 justify-between w-full"
                 >
                   <span>{item.name}</span>
                   {status.find((stats: status) => stats.name === item.name) ? (

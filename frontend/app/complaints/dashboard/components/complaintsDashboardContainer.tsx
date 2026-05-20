@@ -345,7 +345,7 @@
         },
       });
     }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
-
+    console.log(allComplaints);
     return (
       <>
       {allComplaints.map((item:Complaint)=>
