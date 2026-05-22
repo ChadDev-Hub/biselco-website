@@ -1,11 +1,13 @@
 "use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useRouter } from 'next/navigation';
+
 import { textTyping } from "@/app/utils/framerFunctions";
 import AgmaCircleIcon from "@/app/agma-registration/components/agmacircle";
 import { letterVariant } from "@/app/utils/framerFunctions";
 import { fadeInUp } from "@/app/utils/framerFunctions";
+import Link from 'next/link';
+import CountDown from '../../../agma-registration/components/countDown';
 
 
 type Props = {
@@ -14,7 +16,8 @@ type Props = {
   qoute_title: string;
   qoute_description: string;
   footer: string;
-  abrev: Abrev[]
+  abrev: Abrev[],
+  end_date: number
 };
 
 type Abrev = {
@@ -23,22 +26,8 @@ type Abrev = {
 }
 
 
+const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, footer, end_date }: Props) => {
 
-
-
-
-
-
-
-
-
-
-
-const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, footer }: Props) => {
-  const router = useRouter();
-  const handleNavigation = () => {
-    router.push('/agma-registration',{scroll: false})
-  }
   return (
     <motion.div
     initial="hidden"
@@ -46,7 +35,8 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
     variants={fadeInUp}
      className="card image-full drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-full md:w-md lg:w-lg xl:w-xl group">
       {/* 1. Optimized Title: Responsive font sizing and better z-index */}
-      
+        
+      <CountDown targetDate={end_date}/>
       <motion.h2 
       variants={textTyping}
       className="absolute top-2 left-3 z-20 pr-12 
@@ -60,7 +50,6 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
           </motion.span>
         ))}
       </motion.h2>
-
       {/* 2. Image: Standardized aspect ratio for consistency */}
       <figure className="w-full  relative aspect-square sm:aspect-auto md:aspect-auto">
         <Image
@@ -158,9 +147,9 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
         {/* 5. Actions: Using absolute/relative to stay on top of SVG */}
         <div className="card-actions justify-end items-end h-full p-4 relative z-40">
           
-          <button type="button" onClick={handleNavigation} className="btn btn-primary drop-shadow-lg active:scale-105 btn-sm sm:btn-md shadow-lg">
+          <Link href="/agma-registration" type="button"  className="btn btn-primary drop-shadow-lg z-50 active:scale-105 btn-sm sm:btn-md shadow-lg">
             Register Now
-          </button>
+          </Link>
         </div>
       </div>
     </motion.div>

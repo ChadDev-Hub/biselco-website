@@ -25,19 +25,25 @@ class PostAgmaRegistrationService:
             if is_registered:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Already Registered")
             else:
-                image_url = await upload_image(data.image, folder="agma/profiles")
-                signature_url = await upload_image(data.signature, folder="agma/signatures")
-                stmt = (insert(AgmaRegistration).values(
-                    account_no=data.account_no,
-                    name = data.name,
-                    phone = data.mobile_no,
-                    image = image_url,
-                    signature = signature_url
-                    ).returning(AgmaRegistration))
-                result = await self.session.execute(stmt)
-                await self.session.commit()
-                new_row = result.scalar_one()
-                return {
-                    "message": "Registered Successfully",
-                    "id": new_row.id
-                    }
+                try:
+                    image_url = await upload_image(data.image, folder="agma/profiles")
+                    signature_url = await upload_image(data.signature, folder="agma/signatures")
+                    if not image_url and  not signature_url:
+                        raise HTTPException(status_code=status.HTTP_424_FAILED_DEPENDENCY, detail="Image Upload Failed")
+                    stmt = insert(AgmaRegistration).values(
+                        account_no=data.account_no,
+                        name = data.name,
+                        phone = data.mobile_no,
+                        image = image_url,
+                        signature = signature_url
+                    ).returning(AgmaRegistration.id)
+                    results = await self.session.execute(stmt)
+                    await self.session.commit()
+                    new_row = results.scalar_one()
+                    return {
+                        "message": "Registered Successfully",
+                        "id": new_row
+                        }
+                except Exception as e:
+                    print(e)
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

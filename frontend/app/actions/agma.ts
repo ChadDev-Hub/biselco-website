@@ -22,3 +22,26 @@ export const RegisterAgma = async (data: FormData) => {
         data: results,
     };
 };
+
+
+export const DownloadAgmaTicket = async (id:string, url:string) => {
+    const res = await fetch(
+        `${baseUrl}/v1/agma/ticket?id=${id}&path=${url}`,{
+            method: "GET",
+        }
+        
+    );
+
+    const blob = await res.blob();
+    console.log(blob)
+    if (!res.ok) {
+        return {
+            status: res.status,
+            error: "Failed to download ticket",
+        };
+    }
+    return {
+        status: res.status,
+        data: blob,
+    };
+}

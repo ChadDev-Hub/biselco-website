@@ -6,7 +6,7 @@ from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.model.consumer import ConsumerMeter
 from fastapi import Depends, HTTPException, status
 from datetime import date
-
+import pytz
 
 
 
@@ -45,5 +45,7 @@ class GetAgmaRegistrationService:
              "village": d.consumer.village.name,
              "municipality": d.consumer.municipal.name,
              "meter_no": d.consumer.meter_no,
-             "meter_brand": d.consumer.meter_brand
+             "meter_brand": d.consumer.meter_brand,
+             "date_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+             "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
          }

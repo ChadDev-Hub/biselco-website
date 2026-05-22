@@ -13,6 +13,11 @@ export default function CooperativeHome() {
       <main className="max-w-2xl mx-auto px-4 -mt-6">
         {/* Tools Grid */}
         <HomePageTools/>
+        {/* Events */}
+        <section className="w-full space-y-3 mt-10">
+          <h1 className="font-bold text-lg">Events</h1>
+        </section>
+        
       </main>
     </div>
   );

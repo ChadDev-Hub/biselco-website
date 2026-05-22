@@ -36,14 +36,15 @@ const letterVariant = {
 };
 
 interface Props {
-  subtitle: string;
-  description: string;
+
   children?: React.ReactNode;
 }
 
 
-export default function Hero({ subtitle, description, children }: Props) {
+export default function Hero({ children }: Props) {
   const title = "Sustainable Energy for a";
+  const subtitle = "Busuanga Island Electric Cooperative,Inc."
+  const description = "Providing reliable electricity distribution across the Calamianes Islands, powering communities and supporting sustainable development."
   return (
     <div
       className="

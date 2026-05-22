@@ -1,23 +1,21 @@
-"use server";
-import { getLandingPageData } from "../../../lib/serverFetch";
+
+import {GetAgmaEvents } from '../../../lib/serverFetch';
 import Hero from "./components/hero";
 import McoGoogleLogin from "../../common/auth-component/mcoGoogleLogin";
 import LandingStats from "./components/stats";
 import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
-import Events from "./components/events";
+import Events from "./components/agmaeventContainer";
+import { Suspense } from 'react';
 
-const Landing = async () => {
-  const landingPageData = await getLandingPageData();
+const Landing = () => {
+  const AgmaEvents = GetAgmaEvents();
   return (
     <div className="bg-base-100  text-base-content min-h-screen font-sans">
       <main className="w-full">
         <section className="w-full">
-          <Hero
-            subtitle={landingPageData.hero.subtitle}
-            description={landingPageData.hero.description}
-          >
+          <Hero>
             <McoGoogleLogin />
           </Hero>
         </section>
@@ -37,7 +35,10 @@ const Landing = async () => {
         </section>
         {/* EVent */}
         <section className="w-full relative h-full bg-linear-to-b from-gray-300 to-blue-200  py-4 flex flex-col justify-center items-center">
-          <Events />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Events event={AgmaEvents} />
+          </Suspense>
+          
         </section>
         <section className="w-full">
           <Footer />

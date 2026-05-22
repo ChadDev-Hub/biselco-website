@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status, Query
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response
 from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest
 from ....dependencies.bucket3 import upload_image
 from ..services.get import GetAgmaRegistrationService
+from ..services.screenshot import generate_ticket
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -28,3 +29,12 @@ async def get_registered(
 ):  
     data = await get_agma_registration_service.get_registered(id=id)
     return data 
+
+@router.get("/ticket", status_code=status.HTTP_200_OK)
+async def downlaod_ticket(
+    id:str = Query(...),
+    path:str = Query(...),    
+): 
+    screenshot = await generate_ticket(id, path)
+    return Response(content=screenshot, media_type="image/png")
+    

@@ -5,7 +5,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   productionBrowserSourceMaps: true,
-  allowedDevOrigins: ["http://localhost:3000", "http://192.168.254.118:3000"],
+  allowedDevOrigins: ["http://localhost:3001"],
 };
 
 module.exports = {
@@ -18,6 +18,7 @@ module.exports = {
   },
   allowedDevOrigins: ["local-origin.dev", "*.local-origin.dev"],
   images: {
+  
     remotePatterns: [
       {
         protocol: "https",

@@ -19,17 +19,16 @@ const InstallPrompt = () => {
   useEffect(() => {
     // Detect iOS
     queueMicrotask(() => {
-       setIsIOS(
-      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-        !(window as Window & { MSStream?: unknown }).MSStream
-    );
-      
-    // Detect standalone mode
-    setIsStandalone(
-      window.matchMedia("(display-mode: standalone)").matches );
-    })
-  
-    // 🔥 THIS is the missing part
+      setIsIOS(
+        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+          !(window as Window & { MSStream?: unknown }).MSStream,
+      );
+
+      // Detect standalone mode
+      setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+    });
+
+    //
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -55,35 +54,34 @@ const InstallPrompt = () => {
 
     setDeferredPrompt(null);
   };
-  console.log(isStandalone)
+  console.log(isStandalone);
   if (isStandalone) return null;
 
   return (
+    <>
+      {deferredPrompt && <div className="p-4 rounded-xl">
+        <h3 className="font-bold mb-2">Install App</h3>
 
-    <div className="p-4 rounded-xl">
-      <h3 className="font-bold mb-2">Install App</h3>
+        {/* Only show button when install is available */}
+        {!isIOS && deferredPrompt && (
+          <button
+            onClick={handleInstall}
+            type="button"
+            className="btn btn-sm btn-primary"
+          >
+            Install App
+          </button>
+        )}
 
-      {/* Only show button when install is available */}
-      {!isIOS && deferredPrompt && (
-        <button
-          onClick={handleInstall}
-          type="button"
-          className="btn btn-sm btn-primary"
-        >
-          Install App
-        </button>
-      )}
-
-      {isIOS && (
-        <p className="text-sm mt-3">{`
+        {isIOS && (
+          <p className="text-sm mt-3">
+            {`
           To install this app on iPhone/iPad, tap Share ⎋ then
           "Add to Home Screen" ➕`}
-        </p>
-      )}
-    </div>
-    
-   
-    
+          </p>
+        )}
+      </div>}
+    </>
   );
 };
 
