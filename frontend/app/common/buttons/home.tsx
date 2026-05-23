@@ -1,32 +1,20 @@
 "use client"
 
-import React from 'react'
+import {Home} from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
-    svgfill:string;
-    strokeColor:string;
-    orientation:string;
+    isActive: boolean;
+    orientation?: string
 }
 
-const HomeRouteButton = ({strokeColor, svgfill, orientation}: Props) => {
+const HomeRouteButton = ({isActive, orientation}: Props) => {
     return (
 
-        <Link href="/" type="button" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right ${orientation} items-center w-full`} data-tip="Homepage">
+        <Link href="/" type="button" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right items-center w-full ${orientation}`} data-tip="Homepage">
             {/* Home icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" strokeLinejoin="round" strokeLinecap="round" strokeWidth="1.5"  stroke="currentColor">
-            <path 
-            d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-            stroke={strokeColor}
-            fill={svgfill}
-            ></path>
-            <path 
-            d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" 
-            stroke={strokeColor}
-            fill={svgfill}></path>
-            
-            </svg>
-            <span className="is-drawer-close:hidden dock-label">Homepage</span>
+            <Home className={`size-5 ${isActive ? "text-blue-500 drop-shadow-lg drop-shadow-blue-300" : ""}`}/>
+            <span className={`is-drawer-close:hidden dock-label ${isActive ? "text-blue-500 " : ""}`}>Homepage</span>
         
         </Link>
 

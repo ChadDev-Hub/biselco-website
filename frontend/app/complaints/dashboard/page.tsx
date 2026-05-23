@@ -32,16 +32,15 @@ const DashBoardPage = ({
       </section>
       <main
         className="
-      container
       flex
       gap-4
       py-2
-      px-0
       mt-2
       flex-col
       justify-start
-      lg:items-center 
-      pb-21"
+      items-center
+      w-full 
+      pb-24"
       >
         {/* SECTION STATUS */}
         <section>

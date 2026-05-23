@@ -26,7 +26,7 @@ const ComplaintsPage = () => {
       flex-col
       justify-center 
       lg:items-center 
-      pb-21">
+      pb-24">
         
 
         {/* Feature Pills */}

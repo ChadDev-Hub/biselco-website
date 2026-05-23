@@ -1,28 +1,25 @@
 
 "use client"
 import { usePathname } from 'next/navigation'
-import React, { } from 'react'
 import { ComplaintsRouteButton } from './buttons/complaints'
 import { HomeRouteButton } from './buttons/home'
 const DocNavigation = () => {
   const currentRoute = usePathname()
-  const visibleRoutes = ["/", "/complaints", "/complaints/dashboard", "/technical", "/technical/change-meter", "/technical/new-connection"];
+  const invisibleRoutes = ["/landing"];
   const isActive = currentRoute === "/" ? "home"
     : currentRoute === "/complaints" ? "complaints" : "logout";
   return (
-    <div className={`dock text-xs dock-xs  bg-base-100  lg:hidden  shadow-lg  ${visibleRoutes.includes(currentRoute) ? "visible" : "hidden"} `}>
+    <div className={`dock text-xs dock-xs  bg-base-100  lg:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}>
       <div className={`${isActive === "home" ? "dock-active" : ""} `}>
         <HomeRouteButton
-          strokeColor={isActive === "home" ? "currentColor" : "currentColor"}
-          svgfill={isActive === "home" ? "#D4F6FF" : "None"}
+          isActive={isActive === "home"}
+     
           orientation='flex flex-col' />
       </div>
 
       <div className={`${isActive === "complaints" ? "dock-active" : ""} `}>
         <ComplaintsRouteButton
-          strokeColor={isActive === "complaints" ? "currentColor" : "currentColor"}
-          svgfill={isActive === "complaints" ? "#D4F6FF" : "None"}
-          orientation='flex flex-col text-xs' />
+          isActive={isActive === "complaints"} />
       </div>
 
       <div>

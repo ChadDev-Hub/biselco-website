@@ -7,7 +7,7 @@ type PromiseType = {
   data : Data
 };
 type Data = {
-    id: number;
+  id: number;
   title: string;
   description: string;
   date_end: number;
@@ -23,6 +23,7 @@ type Props = {
 
 const Events = ({ event }: Props) => {
     const data = use(event)
+    if(data.status ===404) return null
   return (
     <div className="w-full flex flex-col justify-center items-center px-2 sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip">
       <EventCard
