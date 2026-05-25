@@ -341,7 +341,6 @@ export const GetAgmaRegistered = async (id: string) => {
             data: data.detail
         }
     }
-    await new Promise(resolve => setTimeout(resolve, 3000));
     return {
         status: res.status,
         data: data
@@ -368,6 +367,24 @@ export const GetAgmaEvents = async() => {
 
 export const GetAgmaStats= async() => {
     const res = await fetch(`${baseUrl}/v1/agma/stats`, {
+        method: "GET"
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}
+
+
+export const GetAgmaTicketAll = async()=>{
+    const res = await fetch(`${baseUrl}/v1/agma/registered/all`, {
         method: "GET"
     })
     const data = await res.json()

@@ -1,37 +1,29 @@
-"use client";
 
-import Image from "next/image";
-import { use } from "react";
-
-type PromiseType = {
-  status?: number;
-  data: RegisteredType;
-};
-
-type RegisteredType = {
-  account_no: string;
-  name: string;
-  phone: string;
-  image: string;
-  signature: string;
-  account_name: string;
-  village: string;
-  municipality: string;
-  meter_no: string;
-  meter_brand: string;
-  date_registered: string;
-  time_registered: string;
-};
-
+import React from 'react'
+import Image from 'next/image'
 type Props = {
-  registered: Promise<PromiseType>;
-  id: string;
-};
+    data: data
+}
 
-const AgmaTicketCard = ({ registered }: Props) => {
-  const { data } = use(registered);
-  const year = new Date().getFullYear();
+type data = {
+    account_no: string;
+    account_name: string;
+    year: string;
+    image: string;
+    name: string;
+    village: string;
+    municipality: string;
+    phone: string;
+    meter_no: string;
+    meter_brand: string;
+    date_registered: string;
+    time_registered: string;
+    signature: string
 
+
+}
+
+const AgmaTicketCard = ({data}: Props) => {
   return (
     <div
       id="agma-ticket"
@@ -46,7 +38,7 @@ const AgmaTicketCard = ({ registered }: Props) => {
               Official Ticket
             </p>
             <h1 className="text-xl font-black text-slate-800">
-              BISELCO AGMA {year}
+              BISELCO AGMA {data.year}
             </h1>
           </div>
           <div className="text-right">
@@ -123,7 +115,7 @@ const AgmaTicketCard = ({ registered }: Props) => {
         <div className="grid grid-cols-2 gap-2">
          
           {/* Signature & Action */}
-          <div className="mt-6 flex items-end justify-between">
+          <div className="mt-6 flex   items-end justify-between ">
             <div className="w-32 border-b  border-slate-300  pb-1">
               <Image
                 loading="eager"
@@ -143,9 +135,9 @@ const AgmaTicketCard = ({ registered }: Props) => {
       </div>
 
       {/* Bottom Decorative Bar */}
-      <div className="h-2 bg-primary w-full"></div>
+      <div className="h-2 bg-primary w-full absolute bottom-0"></div>
     </div>
-  );
-};
+  )
+}
 
-export default AgmaTicketCard;
+export default AgmaTicketCard

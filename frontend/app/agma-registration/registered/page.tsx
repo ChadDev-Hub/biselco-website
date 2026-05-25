@@ -1,5 +1,5 @@
 import { use, Suspense } from "react";
-import AgmaTicketCard from "./components/agmaTicketCard";
+import AgmaTicketCard from "./components/agmaTicketCardContainer";
 import { GetAgmaRegistered } from "@/lib/serverFetch";
 import Return from "../../common/Return";
 import DownloadTicket from './components/DownloadTicket';

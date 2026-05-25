@@ -1,7 +1,7 @@
 import React, { use } from "react";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
-import { Users, Droplet, CheckCircle2, AlertCircle } from "lucide-react";
+import { Users, CalendarDays, BadgePercent, CalendarArrowUp } from "lucide-react";
 import CustomIcon from "./customeIcon";
 type Stat = {
   id: number;
@@ -22,7 +22,6 @@ type PromiseType = {
 
 const StatsGrid = ({ stats }: Props) => {
   const statsData = use(stats);
-  console.log(statsData);
   const icon = (title: string) => {
     switch (title) {
       case "Total":
@@ -40,7 +39,7 @@ const StatsGrid = ({ stats }: Props) => {
         return (
           <CustomIcon
             icon={{
-              value: Droplet,
+              value: BadgePercent,
               color: "red",
               rounded: true,
               bgColor: true,
@@ -51,7 +50,7 @@ const StatsGrid = ({ stats }: Props) => {
         return (
           <CustomIcon
             icon={{
-              value: CheckCircle2,
+              value: CalendarArrowUp,
               color: "emerald",
               rounded: true,
               bgColor: true,
@@ -62,7 +61,7 @@ const StatsGrid = ({ stats }: Props) => {
         return (
           <CustomIcon
             icon={{
-              value: AlertCircle,
+              value: CalendarDays,
               color: "yellow",
               rounded: true,
               bgColor: true,

@@ -3,6 +3,7 @@ from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest
 from ....dependencies.bucket3 import upload_image
 from ..services.get import GetAgmaRegistrationService
+from ....core.security import get_current_user
 from ..services.screenshot import generate_ticket
 router = APIRouter(prefix="/agma", tags=["agma"])
 
@@ -41,3 +42,8 @@ async def downlaod_ticket(
 @router.get("/stats", status_code=status.HTTP_200_OK)
 async def complaints_stats(get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_agma_registration_service.get_stats()
+
+
+@router.get("/registered/all", status_code=status.HTTP_200_OK)
+async def get_all(get_agma_registration_service:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)    ):
+    return await get_agma_registration_service.get_all_registered()

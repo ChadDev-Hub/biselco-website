@@ -142,3 +142,29 @@ class GetAgmaRegistrationService:
             pprint(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def get_all_registered(self):
+        stmt = (select(AgmaRegistration)
+                .options(selectinload(AgmaRegistration.consumer)
+                         .selectinload(ConsumerMeter.village),
+                         selectinload(AgmaRegistration.consumer)
+                         .selectinload(ConsumerMeter.municipal))
+                .order_by(AgmaRegistration.timestamped.desc()))
+        results = (await self.session.execute(stmt)).scalars().all()
+        data = [{
+            "account_no": res.account_no,
+            "name": res.name,
+            "phone": res.phone,
+            "image": res.image,
+            "signature": res.signature,
+            "account_name": res.consumer.account_name,
+            "village": res.consumer.village.name,
+            "municipality": res.consumer.municipal.name,
+            "meter_no": res.consumer.meter_no,
+            "meter_brand": res.consumer.meter_brand,
+            "date_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+            "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+        }
+            for res in results
+        ]
+        return data

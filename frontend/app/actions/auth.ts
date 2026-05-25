@@ -62,6 +62,7 @@ export const GoogleLoginRoute = async(secretKey?:string)=>{
   const results = await res.json();
   if (!res.ok) {
     return {
+      status: res.status,
       error: results.detail,
     };
   }

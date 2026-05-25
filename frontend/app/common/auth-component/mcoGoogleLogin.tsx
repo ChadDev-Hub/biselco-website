@@ -9,7 +9,6 @@ const McoGoogleLogin = () => {
     const handleClick = async() => {
         setLoading(true);
         const result = await GoogleLoginRoute();
-        console.log(result)
         switch (result.status) {
             case 200:
                 setLoading(false);

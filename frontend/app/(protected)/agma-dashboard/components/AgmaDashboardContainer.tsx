@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import MembersTable from "./MembersTable";
+import MembersTable from "./MembersTicket";
 import RecentActivities from "./RecentActivities";
 import StatisticsCharts from "./StatisticsCharts";
 import QuickActions from "./QuickActions";

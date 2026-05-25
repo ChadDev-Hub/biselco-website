@@ -1,56 +1,57 @@
 "use client"
-import React, { useState } from 'react'
-import AdminGoogleLogin from './adminGoogleLogin'
-import { GoogleLoginRoute } from '@/app/actions/auth'
+import AdminGoogleLogin from "./adminGoogleLogin";
+import { GoogleLoginRoute } from "@/app/actions/auth";
+import { redirect } from "next/navigation";
+import { useForm, SubmitHandler} from "react-hook-form";
 
 
+type FormType = {
+    adminLoginSecretKey: string
+}
 const LoginForm = () => {
-    const [adminLoginSecretKey, setAdminLoginSecretKey] = useState<string>("")
-    const [errors, setErrors] = useState<{ [key: string]: string }>({})
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAdminLoginSecretKey(e.target.value)
+//   const [adminLoginSecretKey, setAdminLoginSecretKey] = useState<string>("");
+  const {
+    register,
+    setError,
+    formState: { isSubmitting, errors },
+    handleSubmit,
+  } = useForm<FormType>();
+  const handleLogin: SubmitHandler<FormType>=async(data) => {
+    const res = await GoogleLoginRoute(data.adminLoginSecretKey);
+    switch (res?.status) {
+      case 200:
+        redirect(res.url);
+        break;
+      case 409:
+        setError("adminLoginSecretKey", { message: res.error });
+        break;
+      default:
+        break;
     }
-    const validate = (): boolean => {
-        const newErrors: { [key: string]: string } = {}
-        if (adminLoginSecretKey === "") newErrors.adminLoginSecretKey = "Admin Login Secret Key is required."
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0;
-    }
-    const handleLogin = async () => {
-        if (!validate()) return
-        const res = await GoogleLoginRoute(adminLoginSecretKey)
-        if (res?.error) {
-            const newErrors: { [key: string]: string } = {}
-            newErrors.adminLoginSecretKey = res.error
-            setErrors(newErrors)
-            return
-        }
-    }
-        return (
-            <div className='w-full flex justify-center'>
-                <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-sm border p-4">
-                    <legend className="fieldset-legend text-lg font-bold text-yellow-500">Login</legend>
-                    <label className="label">Email</label>
-                    <input type="email" className="input w-full rounded-full" placeholder="Email" />
-                    <label className="label">Password</label>
-                    <input type="password" className="input w-full rounded-full" placeholder="Password" />
-                    <button type='button' className="btn btn-neutral mt-4 rounded-full">Login</button>
-                    <h2 className='text-center'>
-                        OR CONTINUE WITH
-                    </h2>
-                    <label className='label'>
-                        Admin Login Secret Key
-                    </label>
-                    <input required type="text" value={adminLoginSecretKey} onChange={handleChange} className='input w-full rounded-full mb-2' placeholder='Input Admin Login Secret Key' />
-                    {errors.adminLoginSecretKey && <span className='text-red-500 text-center'>{errors.adminLoginSecretKey}</span>}
-                    <div className='flex justify-center items-center'>
-                        <div className='flex items-center rounded-full border overflow-hidden'>
-                            <AdminGoogleLogin login={handleLogin} />
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        )
-    }
+  }
+  return (
+    <div className="w-full flex justify-center bg-base-100 p-6 text-center rounded-box shadow-md max-w-md">
+      <form onSubmit={handleSubmit(handleLogin)}>
+        <label className="label font-bold">Admin Login Secret Key</label>
+        <input
+          {...register("adminLoginSecretKey", {required:{value:true, message:"Admin Login Secret Key is required"}})}
+          type="text"
+          className="input w-full rounded-full mb-2"
+          placeholder="Input Admin Login Secret Key"
+        />
+        {errors.adminLoginSecretKey && (
+          <span className="text-red-500 text-center text-xs italic">
+            {errors.adminLoginSecretKey.message}
+          </span>
+        )}
+        <div className="flex justify-center items-center">
+          <div className="flex items-center rounded-full border overflow-hidden">
+            <AdminGoogleLogin isLoading={isSubmitting}/>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
 
-    export default LoginForm
+export default LoginForm;
