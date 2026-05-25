@@ -37,4 +37,7 @@ async def downlaod_ticket(
 ): 
     screenshot = await generate_ticket(id, path)
     return Response(content=screenshot, media_type="image/png")
-    
+
+@router.get("/stats", status_code=status.HTTP_200_OK)
+async def complaints_stats(get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    return await get_agma_registration_service.get_stats()

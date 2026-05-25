@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 import StatsCard from "./statsCard";
 import { CalendarDays, CheckCircle2, LayersPlus } from "lucide-react";
-
+import StatsContainer from "@/app/common/Stats";
 type PromiseType = {
   status: number;
   data: ComplaintStatsType[];
@@ -54,7 +54,7 @@ const Stats = ({ data }: Props) => {
   };
 
   return (
-    <div className="stats max-w-2xl shadow-md w-full bg-base-100 border border-gray-100 rounded-box ">
+    <StatsContainer className="stats stats-vertical sm:stats-vertical md:stats-horizontal max-w-2xl  overflow-x-auto shadow-md w-full bg-base-100 border border-gray-100 rounded-box ">
       {statsData.map((m, index) => (
         <StatsCard
           key={index}
@@ -64,7 +64,7 @@ const Stats = ({ data }: Props) => {
           description={m.description}
         />
       ))}
-    </div>
+    </StatsContainer>
   );
 };
 

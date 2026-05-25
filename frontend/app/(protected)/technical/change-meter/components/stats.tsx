@@ -1,13 +1,14 @@
 "use client";
-import { use, useEffect, useState } from "react"
+import { use, useEffect, useState } from "react";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
-import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"
+import { CopyPlus, CalendarDays, CirclePlus } from "lucide-react";
+import StatsContainer from "@/app/common/Stats";
 type stats = {
   label: string;
   value: number;
   description: string;
-}
+};
 
 type PromiseType = {
   status: number;
@@ -16,8 +17,7 @@ type PromiseType = {
     stats: stats[];
     total_page: number;
   };
-}
-
+};
 
 type Props = {
   data: Promise<PromiseType>;
@@ -37,7 +37,7 @@ const Stats = ({ data }: Props) => {
       default:
         break;
     }
-  }, [stats])
+  }, [stats]);
 
   useEffect(() => {
     switch (message?.detail) {
@@ -51,30 +51,23 @@ const Stats = ({ data }: Props) => {
       default:
         break;
     }
-  })
+  });
   const svg = (label: string) => {
     switch (label) {
       case "Total":
-        return (
-          <CopyPlus className="text-amber-500" />
-        )
-  
+        return <CopyPlus className="text-amber-500" />;
+
       case "Daily":
-        return (
-          <CalendarDays className="text-emerald-500" />
-        )
+        return <CalendarDays className="text-emerald-500" />;
       case "Monthly":
-        return (
-          <CirclePlus className="text-blue-500" />
-        )
+        return <CirclePlus className="text-blue-500" />;
       default:
         break;
     }
-  }
- 
-  return (
+  };
 
-    <div className="stats max-w-2xl shadow-md w-full bg-base-100 border border-gray-100 rounded-box ">
+  return (
+    <StatsContainer className="max-w-2xl shadow-md w-full bg-base-100 border border-gray-100 rounded-box ">
       {statistics.map((stat, index) => (
         <StatsCard
           key={index}
@@ -84,7 +77,7 @@ const Stats = ({ data }: Props) => {
           svg={svg(stat.label)}
         />
       ))}
-    </div>
-  )
-}
+    </StatsContainer>
+  );
+};
 export default Stats;

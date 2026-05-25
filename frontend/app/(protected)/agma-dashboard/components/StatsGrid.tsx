@@ -1,0 +1,95 @@
+import React, { use } from "react";
+import StatsCard from "@/app/complaints/dashboard/components/statsCard";
+import StatsContainer from "@/app/common/Stats";
+import { Users, Droplet, CheckCircle2, AlertCircle } from "lucide-react";
+import CustomIcon from "./customeIcon";
+type Stat = {
+  id: number;
+  title: string;
+  description: string;
+  value: number;
+  is_percentage: boolean;
+};
+
+type Props = {
+  stats: Promise<PromiseType>;
+};
+
+type PromiseType = {
+  status: number;
+  data: Stat[] | string;
+};
+
+const StatsGrid = ({ stats }: Props) => {
+  const statsData = use(stats);
+  console.log(statsData);
+  const icon = (title: string) => {
+    switch (title) {
+      case "Total":
+        return (
+          <CustomIcon
+            icon={{
+              value: Users,
+              color: "blue",
+              rounded: true,
+              bgColor: true,
+            }}
+          />
+        );
+      case "Percentage":
+        return (
+          <CustomIcon
+            icon={{
+              value: Droplet,
+              color: "red",
+              rounded: true,
+              bgColor: true,
+            }}
+          />
+        );
+      case "Average":
+        return (
+          <CustomIcon
+            icon={{
+              value: CheckCircle2,
+              color: "emerald",
+              rounded: true,
+              bgColor: true,
+            }}
+          />
+        );
+      case "Today":
+        return (
+          <CustomIcon
+            icon={{
+              value: AlertCircle,
+              color: "yellow",
+              rounded: true,
+              bgColor: true,
+            }}
+          />
+        )
+    }
+  };
+  return (
+    <StatsContainer className="shadow w-full stats-vertical lg:stats-horizontal bg-base-100 border border-gray-100 rounded-box ">
+      {Array.isArray(statsData.data) &&
+        statsData.data.map((stat, index) => (
+          <StatsCard
+            key={index}
+            description={stat.description}
+            label={stat.title}
+            value={stat.value}
+            svg={icon(stat.title)}
+            isPercentage={stat.is_percentage}
+            style={{
+              descriptionClassName:
+                "text-center sm:center md:text-left lg:text-left xl:text-left",
+            }}
+          />
+        ))}
+    </StatsContainer>
+  );
+};
+
+export default StatsGrid;

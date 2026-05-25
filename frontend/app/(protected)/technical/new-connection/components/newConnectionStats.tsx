@@ -4,6 +4,7 @@ import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import { use, useState, useEffect } from "react";
 import { useWebsocket } from "@/app/utils/websocketprovider";
 import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"
+import StatsContainer from "@/app/common/Stats";
 type PromiseType = {
     status: number;
     data: StatsType[];
@@ -70,7 +71,7 @@ const Stats = ({ data }: Props) => {
         }
     }, [message])
     return (
-        <div className="stats shadow-md  w-full max-w-2xl bg-base-100 border-gray-100">
+        <StatsContainer className="shadow-md  w-full max-w-2xl bg-base-100 border-gray-100">
             {stats.map((stat, index) => (
                 <StatsCard
                     key={index}
@@ -79,7 +80,7 @@ const Stats = ({ data }: Props) => {
                     description={stat.description}
                     svg={svg(stat.label)} />
             ))}
-        </div>
+        </StatsContainer>
     )
 }
 

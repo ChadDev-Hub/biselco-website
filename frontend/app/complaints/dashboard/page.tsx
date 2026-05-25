@@ -43,7 +43,7 @@ const DashBoardPage = ({
       pb-24"
       >
         {/* SECTION STATUS */}
-        <section>
+        <section className="w-full flex justify-center px-2">
           <Suspense
             fallback={
               <div className="flex justify-center w-full h-full">
