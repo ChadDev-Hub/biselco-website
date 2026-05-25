@@ -20,6 +20,7 @@ type RegisteredType = {
   meter_brand: string;
   date_registered: string;
   time_registered: string;
+  year: string; 
 };
 
 type Props = {
@@ -29,10 +30,8 @@ type Props = {
 
 const AgmaTicketCardContainer = ({ registered }: Props) => {
   const { data } = use(registered);
-  const year = new Date().getFullYear();
-
   return (
-    <AgmaTicketCard data={{ ...data, year: year.toString() }} />
+    <AgmaTicketCard data={data} />
   );
 };
 

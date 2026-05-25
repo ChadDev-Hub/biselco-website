@@ -383,9 +383,19 @@ export const GetAgmaStats= async() => {
 }
 
 
-export const GetAgmaTicketAll = async()=>{
-    const res = await fetch(`${baseUrl}/v1/agma/registered/all`, {
-        method: "GET"
+export const GetAgmaTicketAll = async(page:string | string[] | undefined)=>{
+    const cookieStore = await cookies()
+    const params =new URLSearchParams();
+    if(page){
+        params.set("page", typeof page === "string" ? page : "");
+    }
+    
+    const accessToken = cookieStore.get("access_token")?.value
+    const res = await fetch(`${baseUrl}/v1/agma/ticket/all?${params.toString()}`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        }
     })
     const data = await res.json()
     if (!res.ok){

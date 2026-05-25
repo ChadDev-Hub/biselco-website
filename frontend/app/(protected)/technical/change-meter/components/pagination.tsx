@@ -17,7 +17,6 @@ type Page = {
 };
 const Pagination = ({ data}: Props) => {
   const pages = use(data);
-  console.log(pages);
   const router = useRouter();
   const currentPath = usePathname();
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,12 +38,18 @@ const Pagination = ({ data}: Props) => {
     }
   }, [pages]);
 
+  const buildParms = (page:number) => {
+    const params = new URLSearchParams();
+    if (query.get("q")) params.set("q", query.get("q") as string);
+    if (query.get("tab")) params.set("tab", query.get("tab") as string);
+    params.set("page", String(page));
+    return params.toString();
+  }
+
   // HANDLE PREVIOUS PAGE
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      const params = new URLSearchParams();
-      if (query.get("q")) params.set("q", query.get("q") as string);
-      params.set("page", String(currentPage - 1));
+      const params = buildParms(currentPage - 1);
       setLoading(true);
       setCurrentPage(currentPage - 1);
       router.replace(`${currentPath}?${params.toString()}`, { scroll: false });
@@ -54,9 +59,7 @@ const Pagination = ({ data}: Props) => {
   // HANDLE NEXT PAGE
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      const params = new URLSearchParams();
-      if (query.get("q")) params.set("q", query.get("q") as string);
-      params.set("page", String(currentPage + 1));
+      const params = buildParms(currentPage + 1);
       setLoading(true);
       setCurrentPage(currentPage + 1);
       router.replace(`${currentPath}?${params.toString()}`, { scroll: false });
@@ -65,9 +68,7 @@ const Pagination = ({ data}: Props) => {
   // HANDLE MANUAL PAGE SELECTION
   const handleSelectPage = (page: number) => {
     if (page === currentPage) return;
-    const params = new URLSearchParams();
-    if (query.get("q")) params.set("q", query.get("q") as string);
-    params.set("page", String(page));
+    const params = buildParms(page);
     setLoading(true);
     setCurrentPage(page);
     router.replace(`${currentPath}?${params.toString()}`, { scroll: false });

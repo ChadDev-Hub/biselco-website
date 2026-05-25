@@ -6,6 +6,7 @@ from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.model.consumer import ConsumerMeter
 from fastapi import Depends, HTTPException, status
 from datetime import date
+from typing import Optional
 import pytz
 from pprint import pprint
 
@@ -14,6 +15,7 @@ class GetAgmaRegistrationService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         self.year_now = date.today().year
+        self.PAGESIZE = 3
 
     async def verify_registration(self, account_no: str) -> bool:
         try:
@@ -49,6 +51,7 @@ class GetAgmaRegistrationService:
             "meter_brand": d.consumer.meter_brand,
             "date_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
             "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+            "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
         }
 
     async def get_stats(self):
@@ -143,14 +146,21 @@ class GetAgmaRegistrationService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    async def get_all_registered(self):
+    async def get_all_registered(self, page:Optional[int] = 1):
         stmt = (select(AgmaRegistration)
                 .options(selectinload(AgmaRegistration.consumer)
                          .selectinload(ConsumerMeter.village),
                          selectinload(AgmaRegistration.consumer)
                          .selectinload(ConsumerMeter.municipal))
+                .limit(self.PAGESIZE)
+                .offset((page - 1) * self.PAGESIZE)
                 .order_by(AgmaRegistration.timestamped.desc()))
         results = (await self.session.execute(stmt)).scalars().all()
+        
+        # TOTAL PAGE
+        stmt = (select(func.count(AgmaRegistration.id)))
+        total = (await self.session.execute(stmt)).scalar_one_or_none()
+        total_page = total // self.PAGESIZE if total % self.PAGESIZE == 0 else total // self.PAGESIZE + 1
         data = [{
             "account_no": res.account_no,
             "name": res.name,
@@ -164,7 +174,12 @@ class GetAgmaRegistrationService:
             "meter_brand": res.consumer.meter_brand,
             "date_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
             "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+            "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
+            
         }
             for res in results
         ]
-        return data
+        return{
+            "data": data,
+            "total_page": total_page
+        }

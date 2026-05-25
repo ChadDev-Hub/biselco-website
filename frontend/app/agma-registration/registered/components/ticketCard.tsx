@@ -29,7 +29,7 @@ const AgmaTicketCard = ({data}: Props) => {
       id="agma-ticket"
       className="relative w-full max-w-md mx-auto overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-xl"
     >
-      <div className="h-2 bg-yellow-500 w-full"></div>
+      <div className="h-2 absolute top-0 bg-yellow-500 w-full"></div>
       {/* Top Section: Header & Profile */}
       <div className="p-6 bg-primary/5">
         <div className="flex justify-between items-start mb-4">
@@ -77,7 +77,7 @@ const AgmaTicketCard = ({data}: Props) => {
       </div>
 
       {/* Bottom Section: Details */}
-      <div className="p-6 pt-4">
+      <div className="p-6 pt-4 flex flex-col  h-full">
         <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
           <div>
             <p className="text-[10px] uppercase font-semibold text-slate-400">
@@ -92,7 +92,9 @@ const AgmaTicketCard = ({data}: Props) => {
               Meter Number
             </p>
             <p className="font-mono font-medium text-slate-800">
-              {data.meter_no} ({data.meter_brand})
+              <span>{data.meter_no} </span>
+              <br />
+              <span>{data.meter_brand}</span>
             </p>
           </div>
           <div>
@@ -108,14 +110,17 @@ const AgmaTicketCard = ({data}: Props) => {
               Date Registered
             </p>
             <p className="font-mono font-medium text-slate-800">
-              {data.date_registered} | {data.time_registered}
+              <span>{data.date_registered}</span>
+              <br />
+              <span>{data.time_registered}</span>
+           
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="h-30 flex items-end w-full">
          
           {/* Signature & Action */}
-          <div className="mt-6 flex   items-end justify-between ">
+          <div className="pt-6 flex justify-between items-end ">
             <div className="w-32 border-b  border-slate-300  pb-1">
               <Image
                 loading="eager"
