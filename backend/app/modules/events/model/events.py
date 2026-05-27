@@ -1,4 +1,4 @@
-from sqlalchemy import Integer,  Date, func, Boolean, Text, DateTime, ForeignKey
+from sqlalchemy import Integer,  Date, func, Boolean, Text, DateTime, ForeignKey, Time
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, date, time
 from sqlalchemy.orm import relationship
@@ -16,8 +16,8 @@ class Events(BaseModel):
     end_date:Mapped[date] = mapped_column(type_=Date, nullable=False)
     is_active:Mapped[bool] = mapped_column(type_=Boolean, nullable=False, default=True)
     created_at:Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
-    start_time: Mapped[time] = mapped_column(type_=DateTime(timezone=True), nullable=True)
-    end_time: Mapped[time] = mapped_column(type_=DateTime(timezone=True), nullable=True)
+    start_time: Mapped[time] = mapped_column(type_=Time, nullable=True)
+    end_time: Mapped[time] = mapped_column(type_=Time, nullable=True)
     # Relationship
     images:Mapped[List["EventsImages"]] = relationship(back_populates="events",cascade="all, delete-orphan")
     

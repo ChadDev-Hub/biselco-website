@@ -87,7 +87,8 @@ class GetAgmaRegistrationService:
                                   func.cast(total_consumer.c.value, Numeric)) * 100, 2), 0).label("value"),
                     literal(f"% from total consumer").label("description"),
                     literal(True).label("is_percentage")
-                )
+                ).select_from(total_consumer)
+                .select_from(total_registered)
 
             ).cte("percent_registered")
 

@@ -72,3 +72,4 @@ async def get_agma_filter(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
     return await get_agma_registration_service.get_filters()
+

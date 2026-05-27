@@ -356,12 +356,12 @@ export const GetAgmaEvents = async() => {
     if (!res.ok){
         return {
             status: res.status,
-            data: data.detail
+            detail: data.detail
         }
     }
     return {
         status: res.status,
-        data: data
+        data: data 
     }
 }
 
@@ -403,6 +403,7 @@ export const GetAgmaTicketAll = async(
     const accessToken = cookieStore.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/agma/registered/all?${params.toString()}`, {
         method: "GET",
+        cache: "no-store",
         headers: {
             "Authorization": `Bearer ${accessToken}`
         }
@@ -430,6 +431,7 @@ export const GetAgmaFilters = async() => {
             "Authorization": `Bearer ${accessToken}`
         }
     })
+
     const data = await res.json()
     if (!res.ok){
         return {

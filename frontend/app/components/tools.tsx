@@ -33,7 +33,7 @@ const HomePageTools = () => {
             <div className="grid grid-cols-2 gap-4">
                 <ToolCard icon={<BookMarked className="text-amber-500" />} title="Report Concern" href="/complaints" />
                 {isAdmin && <ToolCard icon={<LayoutDashboard className="text-slate-500" />} title="Concern Dashboard" href="/complaints/dashboard" />}
-                <ToolCard icon={<BarChart3 className="text-blue-500" />} title="AGMA Dashboard" href="/agma-dashboard" />
+                <ToolCard icon={<BarChart3 className="text-blue-500" />} title="AGMA Dashboard" href="/agma-dashboard?tab=overview" />
                 <ToolCard icon={<CreditCard className="text-emerald-500" />} title="Billing Help" />
                 <ToolCard icon={<Map className="text-slate-500" />} title="Distribution Map" />
                 {isAdmin && <ToolCard icon={<ToolCase className="text-yellow-500" />} title="Technical Reports" href="/technical"/>}

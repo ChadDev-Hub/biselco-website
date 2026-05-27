@@ -71,7 +71,7 @@ const StatsGrid = ({ stats }: Props) => {
     }
   };
   return (
-    <StatsContainer className="shadow w-full stats-vertical lg:stats-horizontal bg-base-100 border border-gray-100 rounded-box ">
+    <StatsContainer>
       {Array.isArray(statsData.data) &&
         statsData.data.map((stat, index) => (
           <StatsCard

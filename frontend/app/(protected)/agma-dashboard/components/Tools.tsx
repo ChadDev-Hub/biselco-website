@@ -8,8 +8,8 @@ type Props = {
 
 const NavbarTools = ({children}:Props) => {
   return (
-    <div className="navbar w-full  p-2 shadow-md mb-4 bg-base-100 rounded-box">
-      <div className="flex w-full gap-2">
+    <div className="navbar navbar-center w-full  p-2 shadow-md mb-4 bg-base-100 rounded-box">
+      <div className="flex items-center w-full gap-2">
         {/* SEARCH */}
         <input
           title="Search"

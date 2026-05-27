@@ -9,7 +9,7 @@ type Props = {
 
 const StatsContainer = ({children, className}: Props) => {
   return (
-    <div className={`stats ${className}`}>
+    <div className={`stats ${className} shadow w-full stats-vertical lg:stats-horizontal bg-base-100 border border-gray-100 rounded-box `}>
         {children}
     </div>
   )

@@ -1,9 +1,8 @@
 "use client";
-import { useEffect, useState,  } from "react";
 import StatisticsCharts from "./StatisticsCharts";
 import Tabs from "./Tabs";
 
-import{useRouter } from "next/navigation";
+import{ useSearchParams } from "next/navigation";
 
 
 
@@ -15,23 +14,19 @@ type Props = {
 
 
 const AgmaDashboardContainer = ({children }: Props) => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const handleActiveTab = (tab: string) => setActiveTab(tab);
+  const searchParams = useSearchParams()
+  const activeTab = searchParams.get("tab") ?? "overview";
+  
   const tabs = [
     { label: "Overview", value: "overview" },
     { label: "Statistics", value: "stats" },
     { label: "Setup", value: "setup" },
   ];
   // Parameters
-  const router = useRouter();
-  
-  // NEW PARAMETERS WHEN TAB IS CHANGED
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("tab", activeTab);
-    router.replace(`?${params.toString()}`);
-  },[activeTab,router]);
 
+
+  // NEW PARAMETERS WHEN TAB IS CHANGED
+  
   // ------------------------------------------------------------
   return (
     <div className="w-full h-full min-h-screen ">
@@ -39,7 +34,7 @@ const AgmaDashboardContainer = ({children }: Props) => {
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        handleActiveTab={handleActiveTab}
+      
       />
       {children}
       {/* Tab Content */}
