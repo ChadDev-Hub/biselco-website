@@ -1,46 +1,26 @@
 "use client";
-import { useEffect, useState, use } from "react";
-import MembersTable from "./MembersTicket";
+import { useEffect, useState,  } from "react";
 import StatisticsCharts from "./StatisticsCharts";
 import Tabs from "./Tabs";
 
 import{useRouter } from "next/navigation";
 
-type PromiseType = {
-  status: number;
-  data: {
-    data: RegisteredType[];
-  };
-}
+
 
 type Props = {
-  tabData: Promise <PromiseType>;
+  children: React.ReactNode;
 }
 
-type RegisteredType = {
-  account_no: string;
-  name: string;
-  phone: string;
-  image: string;
-  signature: string;
-  account_name: string;
-  village: string;
-  municipality: string;
-  meter_no: string;
-  meter_brand: string;
-  date_registered: string;
-  time_registered: string;
-  year: string
-};
 
 
-const AgmaDashboardContainer = ({ tabData }: Props) => {
-  const tabDatas = use(tabData);
+
+const AgmaDashboardContainer = ({children }: Props) => {
   const [activeTab, setActiveTab] = useState("overview");
   const handleActiveTab = (tab: string) => setActiveTab(tab);
   const tabs = [
     { label: "Overview", value: "overview" },
     { label: "Statistics", value: "stats" },
+    { label: "Setup", value: "setup" },
   ];
   // Parameters
   const router = useRouter();
@@ -52,15 +32,7 @@ const AgmaDashboardContainer = ({ tabData }: Props) => {
     router.replace(`?${params.toString()}`);
   },[activeTab,router]);
 
-
-
   // ------------------------------------------------------------
-  const [agmaTickets, setAgmaTickets] = useState<RegisteredType[]>([]);
-  useEffect(()=>{
-    if(tabDatas.status === 200){
-      queueMicrotask(() => (setAgmaTickets(tabDatas.data.data)));
-    }
-  },[tabDatas])
   return (
     <div className="w-full h-full min-h-screen ">
       {/* Tabs */}
@@ -69,8 +41,9 @@ const AgmaDashboardContainer = ({ tabData }: Props) => {
         activeTab={activeTab}
         handleActiveTab={handleActiveTab}
       />
+      {children}
       {/* Tab Content */}
-      {activeTab === "overview" && <MembersTable data={agmaTickets}   />}
+     
       {activeTab === "stats" && <StatisticsCharts />}
     </div>
   );

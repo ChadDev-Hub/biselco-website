@@ -81,10 +81,6 @@ const StatsGrid = ({ stats }: Props) => {
             value={stat.value}
             svg={icon(stat.title)}
             isPercentage={stat.is_percentage}
-            style={{
-              descriptionClassName:
-                "text-center sm:center md:text-left lg:text-left xl:text-left",
-            }}
           />
         ))}
     </StatsContainer>

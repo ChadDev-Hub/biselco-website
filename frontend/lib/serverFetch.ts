@@ -383,15 +383,48 @@ export const GetAgmaStats= async() => {
 }
 
 
-export const GetAgmaTicketAll = async(page:string | string[] | undefined)=>{
+export const GetAgmaTicketAll = async(
+    page:string | string[] | undefined,
+    year: string | string[] | undefined,
+    barangay: string | string[] | undefined
+)=>{
     const cookieStore = await cookies()
     const params =new URLSearchParams();
+    
     if(page){
         params.set("page", typeof page === "string" ? page : "");
     }
-    
+    if(year !== "All" && year){
+        params.set("year", typeof year === "string" ? year : "");
+    }
+    if(barangay !== "All" && barangay){
+        params.set("barangay", typeof barangay === "string" ? barangay : "");
+    }
     const accessToken = cookieStore.get("access_token")?.value
-    const res = await fetch(`${baseUrl}/v1/agma/ticket/all?${params.toString()}`, {
+    const res = await fetch(`${baseUrl}/v1/agma/registered/all?${params.toString()}`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        }
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}
+
+
+export const GetAgmaFilters = async() => {
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
+    const res = await fetch(`${baseUrl}/v1/agma/registered/all/filters`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${accessToken}`

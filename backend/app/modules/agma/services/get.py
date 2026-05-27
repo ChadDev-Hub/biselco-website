@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.model.consumer import ConsumerMeter
+from ...gis.franchise_area.model.villages import Village
 from fastapi import Depends, HTTPException, status
 from datetime import date
 from typing import Optional
@@ -15,8 +16,9 @@ class GetAgmaRegistrationService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         self.year_now = date.today().year
-        self.PAGESIZE = 3
+        self.PAGESIZE = 20
 
+    # VERIFY REGISTRATION
     async def verify_registration(self, account_no: str) -> bool:
         try:
             stmt = (select(AgmaRegistration)
@@ -53,6 +55,7 @@ class GetAgmaRegistrationService:
             "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
             "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
         }
+    # GET STATS
 
     async def get_stats(self):
         try:
@@ -107,7 +110,8 @@ class GetAgmaRegistrationService:
                     literal("Today").label("title"),
                     func.coalesce(func.count(AgmaRegistration.id),
                                   0).label("value"),
-                    literal(date.today().strftime("%B %d %Y")).label("description"),
+                    literal(date.today().strftime(
+                        "%B %d %Y")).label("description"),
                     literal(False).label("is_percentage")
                 ).where(func.date(AgmaRegistration.timestamped) == func.current_date())).cte("total_today")
 
@@ -146,40 +150,68 @@ class GetAgmaRegistrationService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    async def get_all_registered(self, page:Optional[int] = 1):
-        stmt = (select(AgmaRegistration)
-                .options(selectinload(AgmaRegistration.consumer)
-                         .selectinload(ConsumerMeter.village),
-                         selectinload(AgmaRegistration.consumer)
-                         .selectinload(ConsumerMeter.municipal))
-                .limit(self.PAGESIZE)
-                .offset((page - 1) * self.PAGESIZE)
-                .order_by(AgmaRegistration.timestamped.desc()))
-        results = (await self.session.execute(stmt)).scalars().all()
+    # GET ALL DATA
+    async def get_all_registered(self, page: Optional[int] = 1, year: Optional[int] = None, barangay:Optional[str]=None):
+        try:
+            stmt = (select(AgmaRegistration)
+                    .join(AgmaRegistration.consumer)
+                    .join(ConsumerMeter.village)
+                    .options(selectinload(AgmaRegistration.consumer)
+                             .selectinload(ConsumerMeter.village),
+                             selectinload(AgmaRegistration.consumer)
+                             .selectinload(ConsumerMeter.municipal))
+                    .limit(self.PAGESIZE)
+                    .offset((page - 1) * self.PAGESIZE)
+                    .order_by(AgmaRegistration.timestamped.desc()))
+            if year:
+                stmt = stmt.where(extract("year", cast(
+                    AgmaRegistration.timestamped, Date)) == year)
+            if barangay:
+                stmt = stmt.where(Village.name == barangay)
+            results = (await self.session.execute(stmt)).scalars().all()
         
-        # TOTAL PAGE
-        stmt = (select(func.count(AgmaRegistration.id)))
-        total = (await self.session.execute(stmt)).scalar_one_or_none()
-        total_page = total // self.PAGESIZE if total % self.PAGESIZE == 0 else total // self.PAGESIZE + 1
-        data = [{
-            "account_no": res.account_no,
-            "name": res.name,
-            "phone": res.phone,
-            "image": res.image,
-            "signature": res.signature,
-            "account_name": res.consumer.account_name,
-            "village": res.consumer.village.name,
-            "municipality": res.consumer.municipal.name,
-            "meter_no": res.consumer.meter_no,
-            "meter_brand": res.consumer.meter_brand,
-            "date_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-            "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-            "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
-            
-        }
-            for res in results
-        ]
-        return{
-            "data": data,
-            "total_page": total_page
-        }
+            # TOTAL PAGE
+            stmt = (select(func.count(AgmaRegistration.id)))
+            total = (await self.session.execute(stmt)).scalar_one_or_none()
+            total_page = total // self.PAGESIZE if total % self.PAGESIZE == 0 else total // self.PAGESIZE + 1
+            data = [{
+                "account_no": res.account_no,
+                "name": res.name,
+                "phone": res.phone,
+                "image": res.image,
+                "signature": res.signature,
+                "account_name": res.consumer.account_name,
+                "village": res.consumer.village.name,
+                "municipality": res.consumer.municipal.name,
+                "meter_no": res.consumer.meter_no,
+                "meter_brand": res.consumer.meter_brand,
+                "date_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+                "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+                "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
+
+            }
+                for res in results
+            ]
+            return {
+                "data": data,
+                "total_page": total_page
+            }
+        except Exception as e:
+            pprint(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def get_filters(self):
+        try:
+            year = (await self.session.execute(select(func.distinct(func.extract("year", AgmaRegistration.timestamped))))).scalars().all()
+            barangay_stmt = (await self.session.execute(select(AgmaRegistration).options(
+                selectinload(AgmaRegistration.consumer)
+                .selectinload(ConsumerMeter.village)))).scalars().all()
+            barangay = list(set([res.consumer.village.name for res in barangay_stmt]))
+            return {"year": year, "barangay": barangay}
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(
+                    e)
+            )

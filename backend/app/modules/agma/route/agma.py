@@ -55,8 +55,20 @@ async def complaints_stats(get_agma_registration_service: GetAgmaRegistrationSer
 async def get_all(
     get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
     user: UserModel = Depends(get_current_user),
-    page: Optional[int] = Query(None),):
+    page: Optional[int] = Query(None),
+    year: Optional[int] = Query(None),
+    barangay:Optional[str] = Query(None)):
+    
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_agma_registration_service.get_all_registered()
+    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay)
+
+@router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
+async def get_agma_filter(
+    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+    user: UserModel = Depends(get_current_user)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
+    return await get_agma_registration_service.get_filters()

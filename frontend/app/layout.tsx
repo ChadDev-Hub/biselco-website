@@ -12,6 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
 import { getCurrentUser } from '@/lib/serverFetch';
 import type { Viewport } from "next"
+import PullToRefresh from './common/PulltoRefresh';
 
 
 const baseurl = process.env.BASESERVERURL;
@@ -151,7 +152,9 @@ export default async function RootLayout({
                 <ThemeController />
                 <NotificationProvider>
                   <Drawer baseurl={baseurl}>
+                    <PullToRefresh>
                     {children}
+                    </PullToRefresh>
                     <DocNavigation />
                   </Drawer>
                 </NotificationProvider>

@@ -33,10 +33,10 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
     initial="hidden"
     whileInView="visible"
     variants={fadeInUp}
-     className="card image-full drop-shadow-2xl relative overflow-hidden h-100 shadow-xl w-full md:w-md lg:w-lg xl:w-xl group">
+     className="card image-full  relative overflow-hidden h-100 shadow-md w-full md:w-md lg:w-lg xl:w-xl group">
       {/* 1. Optimized Title: Responsive font sizing and better z-index */}
         
-      <CountDown targetDate={end_date}/>
+      
       <motion.h2 
       variants={textTyping}
       className="absolute top-2 left-3 z-20 pr-12 
@@ -136,10 +136,12 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
                 <motion.span key={index} variants={letterVariant}>{char}</motion.span>
               ))}</motion.h1>
           </div>
-
         </div>
           
 
+        </div>
+        <div className="relative mt-12 px-6">
+              <CountDown targetDate={end_date}/>
         </div>
         {/* QOUTE SECTION */}
         

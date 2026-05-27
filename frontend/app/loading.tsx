@@ -3,7 +3,7 @@ import LandingPageLoadingImage from "./(public)/landing/components/landingPageLo
 
 const Loading = () => {
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center items-center ">
+    <div className="w-full min-h-screen max-h-screen flex flex-col justify-center items-center ">
       <LandingPageLoadingImage />
     </div>
   );
