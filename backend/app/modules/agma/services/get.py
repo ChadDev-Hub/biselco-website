@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
@@ -8,6 +8,8 @@ from ...gis.franchise_area.model.villages import Village
 from fastapi import Depends, HTTPException, status
 from datetime import date
 from typing import Optional
+from ...events.model.events import Events
+from ..schema.response import AgmaSetup
 import pytz
 from pprint import pprint
 
@@ -17,8 +19,10 @@ class GetAgmaRegistrationService:
         self.session = session
         self.year_now = date.today().year
         self.PAGESIZE = 20
-
+        self.date_time_now = func.date_trunc(
+            'minutes', func.current_timestamp())
     # VERIFY REGISTRATION
+
     async def verify_registration(self, account_no: str) -> bool:
         try:
             stmt = (select(AgmaRegistration)
@@ -152,7 +156,7 @@ class GetAgmaRegistrationService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     # GET ALL DATA
-    async def get_all_registered(self, page: Optional[int] = 1, year: Optional[int] = None, barangay:Optional[str]=None):
+    async def get_all_registered(self, page: Optional[int] = 1, year: Optional[int] = None, barangay: Optional[str] = None):
         try:
             stmt = (select(AgmaRegistration)
                     .join(AgmaRegistration.consumer)
@@ -170,7 +174,7 @@ class GetAgmaRegistrationService:
             if barangay:
                 stmt = stmt.where(Village.name == barangay)
             results = (await self.session.execute(stmt)).scalars().all()
-        
+
             # TOTAL PAGE
             stmt = (select(func.count(AgmaRegistration.id)))
             total = (await self.session.execute(stmt)).scalar_one_or_none()
@@ -208,7 +212,8 @@ class GetAgmaRegistrationService:
             barangay_stmt = (await self.session.execute(select(AgmaRegistration).options(
                 selectinload(AgmaRegistration.consumer)
                 .selectinload(ConsumerMeter.village)))).scalars().all()
-            barangay = list(set([res.consumer.village.name for res in barangay_stmt]))
+            barangay = list(
+                set([res.consumer.village.name for res in barangay_stmt]))
             return {"year": year, "barangay": barangay}
         except Exception as e:
             print(e)
@@ -216,3 +221,20 @@ class GetAgmaRegistrationService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(
                     e)
             )
+
+    async def get_agma_setup(self):
+        try:
+            stmt = select(Events,
+                          case(
+
+                              (self.date_time_now.between(Events.start_date + Events.start_time,
+                               Events.end_date + Events.end_time), literal(True)),
+                              else_=literal(False)
+                          ).label("is_active")
+                          ).where(Events.title.ilike("%AGMA%"))
+            result = (await self.session.execute(stmt)).scalars().one()
+            return result
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

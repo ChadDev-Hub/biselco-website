@@ -1,7 +1,7 @@
 "use client";
 import { FunnelPlusIcon } from "lucide-react";
 import { useState, use } from "react";
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname,redirect } from 'next/navigation';
 
 type PromiseType = {
   status: number;
@@ -18,8 +18,12 @@ type FilterType = {
 
 
 const Filter = ({data}: Props) => {
-  const years = use(data).data.year;
-  const barangays = use(data).data.barangay;
+  const initialData = use(data)
+  if (initialData.status === 403) redirect("/")
+  const years = initialData.data.year;
+  const barangays = initialData.data.barangay;
+  
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const handleOpen = () => setDropdownOpen(!dropdownOpen);
   const router = useRouter();

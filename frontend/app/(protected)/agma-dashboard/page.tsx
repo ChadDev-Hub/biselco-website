@@ -7,7 +7,7 @@ import StatsSkeleton from "@/app/common/statsSkeleton";
 import StatsContainer from "@/app/common/Stats";
 import OverViewSection from "./components/OverViewSection";
 import SetupSection from "./components/SetupSection";
-import { GetAgmaEvents } from '../../../lib/serverFetch';
+import { GetAgmaSetup } from '../../../lib/serverFetch';
 
 const AgmaDashboard = async ({
   searchParams,
@@ -15,7 +15,7 @@ const AgmaDashboard = async ({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
   const stats = GetAgmaStats();
-  const AgmaEvent = GetAgmaEvents();
+  const AgmaEvent = GetAgmaSetup();
   const { tab, page, year, barangay } = await searchParams;
   return (
     <div className="w-full  min-h-screen pb-20 place-items-center">

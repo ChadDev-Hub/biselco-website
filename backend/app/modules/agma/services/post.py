@@ -7,6 +7,9 @@ from ...gis.consumer.services.get import ConsumerMeterGetService
 from ..services.get import GetAgmaRegistrationService
 from ..schema.request_model import AgmaValidationRequest, AgmaRegistrationRequest
 from ....dependencies.bucket3 import upload_image
+from ...events.model.events import Events
+from ...events.schema.requests import AgmaEventSetup
+from sqlalchemy.dialects.postgresql import insert
 class PostAgmaRegistrationService:
     def __init__(self,
                  consumer_meter_service: ConsumerMeterGetService = Depends(
@@ -47,3 +50,22 @@ class PostAgmaRegistrationService:
                 except Exception as e:
                     print(e)
                     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+                
+    async def setup_agma_event(self,data:AgmaEventSetup):
+        try:
+            
+            insert_stmt = insert(Events).values(data.model_dump(mode="python"))
+            
+            stmt = insert_stmt.on_conflict_do_update(index_elements=[Events.title],set_={
+                Events.start_date:insert_stmt.excluded.start_date,
+                Events.end_date:insert_stmt.excluded.end_date,
+                Events.start_time:insert_stmt.excluded.start_time,
+                Events.end_time:insert_stmt.excluded.end_time
+            })
+            await self.session.execute(stmt)
+            await self.session.commit()
+            return {"message": "success"}
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    

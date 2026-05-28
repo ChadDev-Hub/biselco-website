@@ -1,9 +1,11 @@
+from __future__ import annotations
 from sqlalchemy import Integer,  Date, func, Boolean, Text, DateTime, ForeignKey, Time
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, date, time
 from sqlalchemy.orm import relationship
 from ....db.base import BaseModel
-from typing import List
+from typing import List, TYPE_CHECKING
+from .events_schedules import EventsSchedules
 
 
 class Events(BaseModel):
@@ -20,7 +22,7 @@ class Events(BaseModel):
     end_time: Mapped[time] = mapped_column(type_=Time, nullable=True)
     # Relationship
     images:Mapped[List["EventsImages"]] = relationship(back_populates="events",cascade="all, delete-orphan")
-    
+    schedules:Mapped[List["EventsSchedules"]] = relationship(back_populates="events",cascade="all, delete-orphan")
 
 class EventsImages(BaseModel):
     __tablename__ = "event_images"

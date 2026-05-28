@@ -3,6 +3,8 @@ import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
 import { Users, CalendarDays, BadgePercent, CalendarArrowUp } from "lucide-react";
 import CustomIcon from "./customeIcon";
+import { redirect } from 'next/navigation';
+
 type Stat = {
   id: number;
   title: string;
@@ -70,6 +72,8 @@ const StatsGrid = ({ stats }: Props) => {
         )
     }
   };
+
+  if(statsData.status === 403) redirect("/")
   return (
     <StatsContainer>
       {Array.isArray(statsData.data) &&

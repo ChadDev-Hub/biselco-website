@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import Optional
 class AbrevationStyle(BaseModel):
     char: str
@@ -24,3 +24,9 @@ class AgmaEvent(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
     
+class EventSchedule(BaseModel):
+    id:Optional[str] = None
+    event_id: Optional[str] = None
+    area: Optional[str] = None
+    event_location: Optional[str] = None
+    event_date: Optional[datetime] = None

@@ -444,3 +444,29 @@ export const GetAgmaFilters = async() => {
         data: data
     }
 }
+
+export const GetAgmaSetup = async() => {
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
+    const res = await fetch(`${baseUrl}/v1/agma/setup`, {
+        method: "GET",
+        cache:"no-store",
+        headers: {
+
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        }
+    })
+
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            error: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

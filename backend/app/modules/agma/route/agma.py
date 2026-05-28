@@ -6,6 +6,8 @@ from ....dependencies.bucket3 import upload_image
 from ..services.get import GetAgmaRegistrationService
 from ....core.security import get_current_user
 from ..services.screenshot import generate_ticket
+from ...events.schema.requests import AgmaEventSetup
+from ..schema.response import AgmaSetup
 from typing import Optional
 router = APIRouter(prefix="/agma", tags=["agma"])
 
@@ -73,3 +75,22 @@ async def get_agma_filter(
                             detail="Admin Only Transaction Allowed")
     return await get_agma_registration_service.get_filters()
 
+@router.post("/setup", status_code=status.HTTP_201_CREATED)
+async def setup(
+    data: AgmaEventSetup = Form(...),
+    post_services=Depends(PostAgmaRegistrationService),
+    user: UserModel = Depends(get_current_user),
+):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
+    res = await post_services.setup_agma_event(data=data)
+    return res
+
+@router.get("/setup", status_code=status.HTTP_200_OK, response_model=AgmaSetup)
+async def get_setup(
+    get_services=Depends(GetAgmaRegistrationService)
+    
+):
+    res = await get_services.get_agma_setup()
+    return res
