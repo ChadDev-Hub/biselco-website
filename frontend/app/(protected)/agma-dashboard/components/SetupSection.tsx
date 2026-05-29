@@ -1,8 +1,11 @@
 "use client";
 
-import React, { use} from "react";
+import { use, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { SetupAgmaEvent } from '../../../actions/events';
+import { SetupAgmaEvent } from "../../../actions/events";
+import { useAlert } from "../../../common/alert";
+import { useWebsocket } from "@/app/utils/websocketprovider";
+
 
 // Define the shape of your event configuration data
 type FormType = {
@@ -26,37 +29,81 @@ type Props = {
 
 const SetupSection = ({ initialData }: Props) => {
   const AgmaEventData = use(initialData);
+  const { message } = useWebsocket();
+  const { showAlert } = useAlert();
+  const [processedEvent, setProcessedEvent] = useState<string[]>(()=>{
+    if (typeof window === "undefined") return []; // SSR safety guard
+    try {
+      const stored = localStorage.getItem("processed_events");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  
+
   const {
     getValues,
+    setValue,
     register,
     handleSubmit,
-    formState: { isSubmitting},
-  } = useForm<FormType>(
-    {
-      defaultValues:{
-        title: AgmaEventData.data?.title ?? "AGMA",
-        description: AgmaEventData.data?.description ?? "Annual General Membership Assembly Meeting",
-        start_date: AgmaEventData.data?.start_date,
-        end_date: AgmaEventData.data?.end_date,
-        start_time: AgmaEventData.data?.start_time,
-        end_time: AgmaEventData.data?.end_time,
-        is_active: AgmaEventData.data?.is_active
-      }
+    formState: { isSubmitting },
+  } = useForm<FormType>({
+    defaultValues: {
+      title: AgmaEventData.data?.title ?? "AGMA",
+      description:
+        AgmaEventData.data?.description ??
+        "Annual General Membership Assembly Meeting",
+      start_date: AgmaEventData.data?.start_date,
+      end_date: AgmaEventData.data?.end_date,
+      start_time: AgmaEventData.data?.start_time,
+      end_time: AgmaEventData.data?.end_time,
+      is_active: AgmaEventData.data?.is_active,
+    },
+  });
+  useEffect(() => {
+    if (message?.detail === "agma_setup") {
+      if (processedEvent.includes(message.event_id)) return;
+      queueMicrotask(() => {
+        setProcessedEvent((prev) => {
+          const update = [...prev, message.event_id]
+          localStorage.setItem("processed_events", JSON.stringify(update))
+          return update
+        });
+      });
+      
+      setValue("title", message.data.title);
+      setValue("description", message.data.description);
+      setValue("start_date", message.data.start_date);
+      setValue("end_date", message.data.end_date);
+      setValue("start_time", message.data.start_time);
+      setValue("end_time", message.data.end_time);
+      setValue("is_active", message.data.is_active);
+      showAlert("success", message.message);
     }
-  );
-  // Initializing state with your provided data
-  
+  }, [message, setValue, showAlert, processedEvent]);
+
+
   const onSubmit: SubmitHandler<FormType> = async (data) => {
     const formData = new FormData();
 
-    for(const [key, value] of Object.entries(data) ){
-      if (value !== "") formData.append(key,String(value));
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== "") formData.append(key, String(value));
     }
-    const res = await SetupAgmaEvent(formData)
-    console.log(res)
+    const res = await SetupAgmaEvent(formData);
+    switch (res?.status) {
+      case 201:
+        showAlert("success", res.data.message);
+        break;
+      case 403:
+        showAlert("error", res.data.message);
+        break;
+      default:
+        break;
+    }
   };
   // Toggle active status helper
-  
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100 my-4">
       {/* Header section */}
@@ -107,7 +154,6 @@ const SetupSection = ({ initialData }: Props) => {
               {...register("start_date")}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
             />
-           
           </div>
 
           {/* End Date */}
@@ -156,7 +202,13 @@ const SetupSection = ({ initialData }: Props) => {
             disabled={isSubmitting}
             className={`px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
           >
-            {isSubmitting? <span className="skeleton skeleton-text">Saving Configuration</span> : <span>Save Configuration</span>}
+            {isSubmitting ? (
+              <span className="skeleton skeleton-text">
+                Saving Configuration
+              </span>
+            ) : (
+              <span>Save Configuration</span>
+            )}
           </button>
         </div>
       </form>

@@ -31,11 +31,6 @@ class GetEventServices:
                 qoute_description="Electric Cooperative Empowering Communities, Changing Lives.",
                 footer="Makiisa, Makilahok, Manalo, Magkaisa sa AGMA!",
                 image_src="/agma_image.jpg",
-                start_date=result.start_date,
-                end_date=result.end_date,
-                start_time=result.start_time,
-                end_time=result.end_time,
-                is_active=result.is_active,
                 abrevation=[
                     AbrevationStyle(
                         char="A",

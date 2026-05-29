@@ -70,7 +70,23 @@ type WSMessage = {
   data: NewConnectionCreatedType;
 } | {
   detail: "new_connection_deleted"
+} | {
+  detail: "agma_setup";
+  event_id: string;
+  message: string;
+  data: AgmaSetup;
 }
+type AgmaSetup = {
+  id: number;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  start_time: string;
+  end_time: string;
+}
+
 type ChangeMeterCreatedType = {
   change_meter_data: ChangeMeter;
   change_meter_stats: Stats[]

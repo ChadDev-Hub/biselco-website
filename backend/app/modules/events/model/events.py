@@ -16,7 +16,6 @@ class Events(BaseModel):
     description:Mapped[str] = mapped_column(type_=Text, nullable=False)
     start_date:Mapped[date] = mapped_column(type_=Date, nullable=False)
     end_date:Mapped[date] = mapped_column(type_=Date, nullable=False)
-    is_active:Mapped[bool] = mapped_column(type_=Boolean, nullable=False, default=True)
     created_at:Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     start_time: Mapped[time] = mapped_column(type_=Time, nullable=True)
     end_time: Mapped[time] = mapped_column(type_=Time, nullable=True)

@@ -224,7 +224,14 @@ class GetAgmaRegistrationService:
 
     async def get_agma_setup(self):
         try:
-            stmt = select(Events,
+            stmt = select(
+                Events.id,
+                Events.title,
+                Events.description,
+                Events.start_date,
+                Events.end_date,
+                Events.start_time,
+                Events.end_time,
                           case(
 
                               (self.date_time_now.between(Events.start_date + Events.start_time,
@@ -232,7 +239,7 @@ class GetAgmaRegistrationService:
                               else_=literal(False)
                           ).label("is_active")
                           ).where(Events.title.ilike("%AGMA%"))
-            result = (await self.session.execute(stmt)).scalars().one()
+            result = (await self.session.execute(stmt)).mappings().one()
             return result
         except Exception as e:
             print(e)
