@@ -470,3 +470,21 @@ export const GetAgmaSetup = async() => {
         data: data
     }
 }
+
+export const GetAgmaSchedules = async() => {
+    const res = await fetch(`${baseUrl}/v1/agma/schedules`,{
+        method: "GET",
+        cache: "no-cache",
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            error: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}

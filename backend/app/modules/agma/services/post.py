@@ -74,7 +74,6 @@ class PostAgmaRegistrationService:
             
             # SEND NOTIFICATION ON NEW AGMA SETUP IN EVERY ADMINS
             latest_agma_setup = await self.get_agma_registration_service.get_agma_setup()
-            print(latest_agma_setup)
             admins = await self.get_user_services.get_users_by_roles(roles="admin")
             for admin in admins:
                 await self.websocket_manager.broad_cast_personal_json(

@@ -22,12 +22,12 @@ def upgrade() -> None:
     op.drop_column("events", "is_active", schema="public", if_exists=True)
     op.create_table(
         "event_schedules",
-        sa.Column("id", sa.UUID(), nullable=False, primary_key=True, server_default=sa.text("gen_random_uuid()")),
+        sa.Column("id", sa.UUID(), nullable=True, primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("event_id", sa.Integer(), nullable=False),
         sa.Column("area", sa.Text(), nullable=True),
         sa.Column("event_location", sa.Text(), nullable=True),
         sa.Column("event_date", sa.TIMESTAMP(timezone=False), nullable=True),
-        
+        sa.Column("created_at", sa.TIMESTAMP(timezone=False), server_default=sa.func.current_timestamp()),
         sa.ForeignKey("event_id", ["public.events.id"], ondelete="CASCADE", onupdate="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         schema="public",

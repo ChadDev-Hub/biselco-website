@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class EventsSchedules(BaseModel):
     __tablename__ = "event_schedules"
     __table_args__ = {"schema": "public"}
-    id:Mapped[uuid.UUID] = mapped_column(type_=UUID(), primary_key=True, default=uuid.uuid4, unique=True)
+    id:Mapped[uuid.UUID] = mapped_column(type_=UUID(), primary_key=True, default=uuid.uuid4)
     event_id:Mapped[int] = mapped_column(ForeignKey("public.events.id"),type_=Integer, nullable=False)
     area: Mapped[str] = mapped_column(type_=Text, nullable=True)
     event_location:Mapped[str] = mapped_column(type_=Text, nullable=True)

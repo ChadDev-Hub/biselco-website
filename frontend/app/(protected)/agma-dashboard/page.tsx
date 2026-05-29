@@ -7,7 +7,9 @@ import StatsSkeleton from "@/app/common/statsSkeleton";
 import StatsContainer from "@/app/common/Stats";
 import OverViewSection from "./components/OverViewSection";
 import SetupSection from "./components/SetupSection";
-import { GetAgmaSetup } from '../../../lib/serverFetch';
+import { GetAgmaSetup, GetAgmaSchedules } from '../../../lib/serverFetch';
+import Schedules from './components/Schedules';
+
 
 const AgmaDashboard = async ({
   searchParams,
@@ -16,6 +18,7 @@ const AgmaDashboard = async ({
 }) => {
   const stats = GetAgmaStats();
   const AgmaEvent = GetAgmaSetup();
+  const schedules = GetAgmaSchedules();
   const { tab, page, year, barangay } = await searchParams;
   return (
     <div className="w-full  min-h-screen pb-20 place-items-center">
@@ -46,7 +49,20 @@ const AgmaDashboard = async ({
                 barangay={barangay}
               />
             )}
-          {tab === "setup" && <SetupSection initialData={AgmaEvent} />}
+          {tab === "setup" && 
+          <section className="w-full h-full">
+            <Suspense fallback={
+              <span>
+                loading
+            </span>}>
+              <SetupSection initialData={AgmaEvent} />
+            </Suspense>
+            <Suspense fallback={<span>loading</span>}>
+              <Schedules promiseData={schedules}/>
+            </Suspense>
+            
+          </section>
+          }
             {/* Dashboard Content */}
           </AgmaDashboardContainer>
         </section>
