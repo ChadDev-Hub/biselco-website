@@ -24,6 +24,7 @@ type Props = {
 
 const Events = ({ event }: Props) => {
     const data = use(event)
+    console.log(data)
     if(data.status === 404 ) return null
   return (
     <div className="w-full flex flex-col justify-center items-center sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip">

@@ -58,19 +58,17 @@ class GetEventServices:
     
     async def getAgmaEventsSchedule(self):
         try:
-            # check if there is an active agma schedule or not
-            agma_event = (await self.session.execute(select(Events.id).where(
-                and_(
-                    Events.title == 'AGMA',
-                    self.date_time_now.between(Events.start_date + Events.start_time, Events.end_date + Events.end_time))))).scalar_one_or_none()
-            if not agma_event:
-                raise HTTPException(
-                    status_code = status.HTTP_404_NOT_FOUND,
-                    detail = "There is no active AGMA Schedule"
-                )
-            stmt = select(EventsSchedules).where(EventsSchedules.event_id == agma_event)
-            result = (await self.session.execute(stmt)).scalars().all()
-            return result
+            agma_events_id = (await self.session.execute(select(Events.id).where(Events.title.ilike("%AGMA%")))).scalars().one()
+            stmt = select(EventsSchedules).where(EventsSchedules.event_id == agma_events_id)
+            results = (await self.session.execute(stmt)).scalars().all()
+            data = [{
+                "id": str(result.id),
+                "event_id": result.event_id,
+                "area": result.area,
+                "event_location": result.event_location,
+                "event_date": result.event_date
+                } for result in results]       
+            return data
         except Exception as e:
             print(e)
             raise HTTPException(

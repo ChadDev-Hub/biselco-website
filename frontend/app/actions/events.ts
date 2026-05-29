@@ -11,3 +11,12 @@ export const SetupAgmaEvent = async(form:FormData) =>{
     )
     return data
 }
+
+
+export const AgmaEventSchedules = async(data) => {
+    const res = await serverFetchAutoRefresh(`${baseUrl}/v1/events/agma/schedules`, 
+        "POST",
+        data
+    )
+    return res
+}

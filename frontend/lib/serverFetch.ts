@@ -350,7 +350,8 @@ export const GetAgmaRegistered = async (id: string) => {
 
 export const GetAgmaEvents = async() => {
     const res = await fetch(`${baseUrl}/v1/events/agma/`, {
-        method: "GET"
+        method: "GET",
+        next: {revalidate: 5}
     })
     const data = await res.json()
     if (!res.ok){
@@ -472,7 +473,7 @@ export const GetAgmaSetup = async() => {
 }
 
 export const GetAgmaSchedules = async() => {
-    const res = await fetch(`${baseUrl}/v1/agma/schedules`,{
+    const res = await fetch(`${baseUrl}/v1/events/agma/schedules`,{
         method: "GET",
         cache: "no-cache",
     })

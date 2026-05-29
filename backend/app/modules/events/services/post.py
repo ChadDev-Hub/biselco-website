@@ -37,7 +37,10 @@ class PostEventServices:
                         })
                     await self.session.execute(upsert_stmt)
                     await self.session.commit()
-            return (await self.get_services.getAgmaEventsSchedule())
+            new_agma_schedules = await self.get_services.getAgmaEventsSchedule()
+            return {
+                "message": "You have successfully updated the Agma Schedule",
+            }
         except Exception as e:
             print(e)
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail=str(e))
