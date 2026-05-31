@@ -1,7 +1,10 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, BeforeValidator
 from typing import List
 from datetime import date, time, datetime
-from typing import Optional
+from typing import Optional, Annotated
+
+nullable_str = Annotated[Optional[str], BeforeValidator(lambda v: v or None)]
+
 class AbrevationStyle(BaseModel):
     char: str
     color: str
@@ -25,3 +28,11 @@ class EventSchedule(BaseModel):
     area: Optional[str] = None
     event_location: Optional[str] = None
     event_date: Optional[datetime] = None
+    
+class AgmaEventSchedules(BaseModel):
+    id:Optional[str] = None
+    area: Optional[str] = None
+    location: nullable_str
+    date: nullable_str
+    time: nullable_str
+    image: nullable_str

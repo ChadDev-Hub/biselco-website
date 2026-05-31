@@ -27,6 +27,9 @@ type Props = {
   initialData: Promise<PromiseType>;
 };
 
+const labelClassName = "label text-sm font-medium mb-2"
+const inputClassName = "input bg-base-100 w-full rounded-box focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+
 const SetupSection = ({ initialData }: Props) => {
   const AgmaEventData = use(initialData);
   const { message } = useWebsocket();
@@ -41,7 +44,6 @@ const SetupSection = ({ initialData }: Props) => {
     }
   });
   
-
   const {
     getValues,
     setValue,
@@ -132,12 +134,12 @@ const SetupSection = ({ initialData }: Props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Event Name - Full Width */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={labelClassName}>
               Event Title
             </label>
             <div
               title="Event Name"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 bg-gray-50"
+              className={inputClassName}
             >
               {getValues("description")}
             </div>
@@ -145,53 +147,53 @@ const SetupSection = ({ initialData }: Props) => {
 
           {/* Start Date */}
           <div>
-            <label className="block  text-sm font-medium text-gray-700 mb-2">
+            <label className={labelClassName}>
               Start Date
             </label>
             <input
               title="Start Date"
               type="date"
               {...register("start_date")}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className={inputClassName}
             />
           </div>
 
           {/* End Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={labelClassName}>
               End Date
             </label>
             <input
               title="End Date"
               type="date"
               {...register("end_date")}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className={inputClassName}
             />
           </div>
 
           {/* Registration Opening Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={labelClassName}>
               Registration Opening Time
             </label>
             <input
               title="Registration Opening Time"
               type="time"
               {...register("start_time")}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className={inputClassName}
             />
           </div>
 
           {/* Assembly Formal Call Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={labelClassName}>
               Registration Closing Time
             </label>
             <input
               title="Assembly Call Time"
               type="time"
               {...register("end_time")}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className={inputClassName}
             />
           </div>
         </div>
@@ -204,7 +206,7 @@ const SetupSection = ({ initialData }: Props) => {
           >
             {isSubmitting ? (
               <span className="skeleton skeleton-text">
-                Saving Configuration
+                Saving Configuration...
               </span>
             ) : (
               <span>Save Configuration</span>

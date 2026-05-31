@@ -1,23 +1,25 @@
 from ..model.events import Events
 from .get import GetEventServices
-from ..schema.requests import AgmaEventSetup
 from ..model.events_schedules import EventsSchedules
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import select
 from fastapi import Depends, HTTPException, status
-from pprint import pprint
-from datetime import date
 from ..schema.requests import ScheduleEvent
 from typing import List
-import re
+from ..schema.response import EventSchedule
+from sqlalchemy.exc import NoResultFound
+from ...websocket.websocket_manager import manager
+from uuid import uuid4
 
 class PostEventServices:
     def __init__(self, get_services:GetEventServices = Depends(GetEventServices)):
         self.session = get_services.session
         self.get_services = get_services
+        self.manager = manager
+        self.event_id = uuid4()
     async def agma_event_schedule(self,schedules:List[ScheduleEvent]):
-        agma_id = (await self.session.execute(select(Events.id).where(Events.title.ilike("%AGMA%")))).scalar_one()
         try:
+            agma_id = (await self.session.execute(select(Events.id).where(Events.title.ilike("%AGMA%")))).scalar_one()
             for sched in schedules:
                 dump_model = sched.model_dump(mode="python")
                 dump_model['event_id'] = agma_id
@@ -31,20 +33,27 @@ class PostEventServices:
                     upsert_stmt = insert_stmt.on_conflict_do_update(
                         index_elements=[EventsSchedules.id],
                         set_={
+                            EventsSchedules.event_id: insert_stmt.excluded.event_id,
                             EventsSchedules.area : insert_stmt.excluded.area,
                             EventsSchedules.event_location: insert_stmt.excluded.event_location,
                             EventsSchedules.event_date: insert_stmt.excluded.event_date,
                         })
                     await self.session.execute(upsert_stmt)
                     await self.session.commit()
-            new_agma_schedules = await self.get_services.getAgmaEventsSchedule()
+            new_agma_schedules = (await self.get_services.getAgmaEventsSchedule())
+            await manager.broadcast({
+                "detail": "agma_scheds",
+                "event_id": self.event_id,
+                "message": "new_agma_event",
+                "data" : [EventSchedule(**scheds).model_dump(mode="json") for scheds in new_agma_schedules],
+            })
             return {
                 "message": "You have successfully updated the Agma Schedule",
             }
+        except NoResultFound:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Setup Agma Event First")  
         except Exception as e:
-            print(e)
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail=str(e))
-        return "success"
     
     
         

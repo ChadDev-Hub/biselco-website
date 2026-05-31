@@ -53,6 +53,7 @@ export const serverFetchAutoRefresh = async (
       return {
         status: res.status,
         data: data,
+        detail: data.detail
       };
     } else {
       const data = await res.blob();

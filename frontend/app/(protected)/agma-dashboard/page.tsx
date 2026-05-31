@@ -7,10 +7,11 @@ import StatsSkeleton from "@/app/common/statsSkeleton";
 import StatsContainer from "@/app/common/Stats";
 import OverViewSection from "./components/OverViewSection";
 import SetupSection from "./components/SetupSection";
-import { GetAgmaSetup, GetAgmaSchedules } from '../../../lib/serverFetch';
-import Schedules from './components/Schedules';
-
-
+import { GetAgmaSetup, GetAgmaSchedules } from "../../../lib/serverFetch";
+import Schedules from "./components/Schedules";
+import SetupSkeleton from './components/SetupSkeleton';
+import StatisticsCharts from './components/StatisticsCharts';
+import { GetAgmaCountRegistered } from '../../../lib/agma';
 const AgmaDashboard = async ({
   searchParams,
 }: {
@@ -19,7 +20,8 @@ const AgmaDashboard = async ({
   const stats = GetAgmaStats();
   const AgmaEvent = GetAgmaSetup();
   const schedules = GetAgmaSchedules();
-  const { tab, page, year, barangay } = await searchParams;
+  const countRegistered = GetAgmaCountRegistered();
+  const { tab, page, year, barangay, search } = await searchParams;
   return (
     <div className="w-full  min-h-screen pb-20 place-items-center">
       {/* Headers */}
@@ -43,27 +45,24 @@ const AgmaDashboard = async ({
         <section className="w-full ">
           <AgmaDashboardContainer key={`tab-${tab}`}>
             {tab === "overview" && (
-              <OverViewSection
-                page={page}
-                year={year}
-                barangay={barangay}
-              />
+              <OverViewSection 
+              page={page} 
+              year={year} 
+              barangay={barangay}
+              search={search} />
             )}
-          {tab === "setup" && 
-          <section className="w-full h-full">
-            <Suspense fallback={
-              <span>
-                loading
-            </span>}>
-              <SetupSection initialData={AgmaEvent} />
-            </Suspense>
-            <Suspense fallback={<span>loading</span>}>
-              <Schedules promiseData={schedules}/>
-            </Suspense>
-            
-          </section>
-          }
+            {tab === "setup" && (
+              <section className="w-full h-full">
+                <Suspense fallback={<SetupSkeleton />}>
+                  <SetupSection initialData={AgmaEvent} />
+                </Suspense>
+                <Suspense fallback={<span>loading</span>}>
+                  <Schedules promiseData={schedules} />
+                </Suspense>
+              </section>
+            )}
             {/* Dashboard Content */}
+            {tab === "stats" && <StatisticsCharts registerCountPromise={countRegistered}/>}
           </AgmaDashboardContainer>
         </section>
       </main>

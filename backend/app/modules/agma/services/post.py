@@ -1,4 +1,4 @@
-from sqlalchemy import insert
+from sqlalchemy import  select, func, and_
 from fastapi import HTTPException, status, Depends, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from ....dependencies.db_session import get_session
@@ -28,9 +28,15 @@ class PostAgmaRegistrationService:
         self.get_user_services = get_user_services
         self.websocket_manager = manager
         self.event_id = str(uuid4())
-
     async def register_agma(self, data:AgmaRegistrationRequest):
+        check_agma_event = (await self.session.execute(select(Events.id).where(
+            Events.title.ilike("%AGMA%"),
+            func.now().between(Events.start_date + Events.start_time, Events.end_date + Events.end_time)
+        ))).scalar_one_or_none()
+        if not check_agma_event:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Agma Registration Closed")
         verified_account_no = await self.consumer_meter_service.verfify_account_no(account_no=data.account_no)
+        
         if verified_account_no: 
             is_registered  = await self.get_agma_registration_service.verify_registration(verified_account_no.account_no)
             if is_registered:

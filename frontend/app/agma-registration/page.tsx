@@ -1,12 +1,12 @@
 import Hero from "./components/hero";
-import SvgBackground from "./components/svgBackground";
+
 import RegistrationForm from "./components/registrationForm";
 import AgmaRegistrationFooter from "./components/footer";
 import AgmaCircleIcon from "./components/agmacircle";
-import Schedules from "./components/schedules";
-import ScheduleCard from "./components/scheduleCard";
-import Return from "../common/Return";
 
+import Return from "../common/Return";
+import {GetAgmaRegistrationSchedules} from "@/lib/serverFetch";
+import ScheduleSection from "./components/ScheduleSection"
 const Page = () => {
   const Agma = [
     {
@@ -26,92 +26,50 @@ const Page = () => {
       color: "text-yellow-600",
     },
   ];
-  const AgmaSchedules = [
-    {
-      area: "Municipality of Busuanga",
-      date: "JUNE 16, 2023",
-      time: "9:00 AM",
-      location: "Salvacion Gymnasium, Busuanga Palawan",
-      image: "/busuanga.jpg",
-    },
-    {
-      area: "Municipality of Coron",
-      date: "JUNE 17, 2023",
-      time: "9:00 AM",
-      location: "Biselco Main Office, Coron Palawan",
-      image: "/coron.jpg",
-    },
-    {
-      area: "Municipality of Culion",
-      date: "JUNE 17, 2023",
-      time: "9:00 AM",
-      location: "Biselco Main Office, Culion Palawan",
-      image: "/culion.jpg",
-    },
-    {
-      area: "Municipality of Linapacan",
-      date: "JUNE 17, 2023",
-      time: "9:00 AM",
-      location: "Biselco Main Office, Linapacan Palawan",
-      image: "/linapacan.png",
-    },
-  ];
-  return (
-    <div className="w-full bg-linear-to-r from-blue-400 to-orange-500">
-      {/* HERO SECTION */}
-      <section className="bg-center shadow drop-shadow-md md:bg-center bg-cover bg-no-repeat max-h-50 lg:min-h-60 relative bg-[url(/agma_image.jpg)]">
-      <div className="absolute inset-0 bg-linear-to-r from-violet-500/45  to-transparent z-0"></div>
-        <div className="w-full bg-base-100">
-            <Return />
-        </div>
-        
-        <Hero />
 
-        
+  const AgmaSchedules = GetAgmaRegistrationSchedules();
+  return (
+    <article className="w-full min-h-screen bg-linear-to-br from-slate-100 via-indigo-950 to-slate-900 text-slate-100 antialiased pb-16">
+      {/* HERO SECTION */}
+      <section className="relative overflow-hidden bg-cover bg-center bg-no-repeat  flex flex-col justify-between bg-[url(/agma_image.jpg)] shadow-2xl">
+        {/* Modern Gradient Overlay */}
+        <div className="absolute inset-0  bg-linear-to-r from-slate-200/45 via-indigo-950/50 to-transparent z-0" />
+
+        {/* Top Navigation Row */}
+        <div className="w-full backdrop-blur-md bg-slate-900/40 border-b border-white/5 z-10 px-4 py-2">
+          <Return />
+        </div>
+
+        {/* Main Hero Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+          <Hero />
+        </div>
       </section>
 
       {/* BODY SECTION */}
-      <section className="relative w-full h-full py-2 ">
+      <section className="relative w-full mx-auto  sm:px-6 lg:px-8 py-12 lg:py-16 ">
         <AgmaCircleIcon
           abrev={Agma}
           positionClass="
-              absolute
-              drop-shadow-xl
-              drop-shadow-black
-              z-30
-              right-[10%] -top-[4%] lg:-top[10%] xl:-top-[10%] /* Positioned to image/body split */
-              w-30 h-30 lg:w-35 lg:h-35 xl:w-40 xl:h-40
-              rounded-full 
-              flex flex-col justify-center items-center
+              absolute z-30 right-6 sm:right-12 -top-16 lg:-top-20
+        w-28 h-28 lg:w-36 lg:h-36
+        rounded-full flex flex-col justify-center items-center
+        bg-slate-900/80 backdrop-blur-xl text-white
+        border border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.3)]
+        transition-transform duration-300 hover:scale-105
             "
         />
-        <SvgBackground />
-        <div className="w-full grid grid-cols-1 px-2 gap-2 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2">
+        <div className="relative text-black z-10 flex flex-col  gap-4  sm:flex-col md:flex-col lg:flex-col xl:flex-row justify-center items-center  w-full max-w-7xl ">
           <RegistrationForm />
-          <Schedules>
-            {AgmaSchedules?.map((schedule, index) => (
-              <div
-                key={index}
-                className="w-full h-full flex flex-col gap-2 justify-center items-center"
-              >
-                <ScheduleCard
-                  image_url={schedule.image}
-                  location={schedule.location}
-                  title={schedule.area}
-                  date={schedule.date}
-                  time={schedule.time}
-                />
-              </div>
-            ))}
-          </Schedules>
+          <ScheduleSection promise={AgmaSchedules} />
         </div>
       </section>
 
       {/* Footer */}
-      <section className="h-full p-3 flex justify-center w-full">
+      <section className="h-full flex justify-center w-full">
         <AgmaRegistrationFooter />
       </section>
-    </div>
+    </article>
   );
 };
 

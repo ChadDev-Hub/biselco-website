@@ -1,10 +1,11 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
 from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ...gis.franchise_area.model.villages import Village
+from ...gis.franchise_area.model.municipality import Municipality
 from fastapi import Depends, HTTPException, status
 from datetime import date
 from typing import Optional
@@ -19,8 +20,7 @@ class GetAgmaRegistrationService:
         self.session = session
         self.year_now = date.today().year
         self.PAGESIZE = 20
-        self.date_time_now = func.date_trunc(
-            'minutes', func.current_timestamp())
+
     # VERIFY REGISTRATION
 
     async def verify_registration(self, account_no: str) -> bool:
@@ -156,23 +156,40 @@ class GetAgmaRegistrationService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     # GET ALL DATA
-    async def get_all_registered(self, page: Optional[int] = 1, year: Optional[int] = None, barangay: Optional[str] = None):
+    async def get_all_registered(self,
+                                 search: Optional[str] = None,
+                                 page: Optional[int] = 1,
+                                 year: Optional[int] = None,
+                                 barangay: Optional[str] = None):
         try:
             stmt = (select(AgmaRegistration)
                     .join(AgmaRegistration.consumer)
                     .join(ConsumerMeter.village)
+                    .join(ConsumerMeter.municipal)
                     .options(selectinload(AgmaRegistration.consumer)
                              .selectinload(ConsumerMeter.village),
                              selectinload(AgmaRegistration.consumer)
                              .selectinload(ConsumerMeter.municipal))
-                    .limit(self.PAGESIZE)
-                    .offset((page - 1) * self.PAGESIZE)
-                    .order_by(AgmaRegistration.timestamped.desc()))
-            if year:
-                stmt = stmt.where(extract("year", cast(
-                    AgmaRegistration.timestamped, Date)) == year)
-            if barangay:
-                stmt = stmt.where(Village.name == barangay)
+                    .limit(self.PAGESIZE))
+            if search:
+                stmt = stmt.where(
+                    or_(AgmaRegistration.name.ilike(f"%{search}%"),
+                        AgmaRegistration.phone.ilike(f"%{search}%"),
+                        Village.name.ilike(f"%{search}%"),
+                        ConsumerMeter.account_no.ilike(f"%{search}%"),
+                        ConsumerMeter.account_name.ilike(f"{search}%"),
+                        ConsumerMeter.meter_no.ilike(f"%{search}%"),
+                        ConsumerMeter.meter_brand.ilike(f"%{search}%"),
+                        Municipality.name.ilike(f"%{search}%"),
+                        ))
+            else:
+                stmt = stmt.offset(
+                    (page - 1) * self.PAGESIZE).order_by(AgmaRegistration.timestamped.desc())
+                if year:
+                    stmt = stmt.where(extract("year", cast(
+                        AgmaRegistration.timestamped, Date)) == year)
+                if barangay:
+                    stmt = stmt.where(Village.name == barangay)
             results = (await self.session.execute(stmt)).scalars().all()
 
             # TOTAL PAGE
@@ -232,16 +249,30 @@ class GetAgmaRegistrationService:
                 Events.end_date,
                 Events.start_time,
                 Events.end_time,
-                          case(
+                case(
 
-                              (self.date_time_now.between(Events.start_date + Events.start_time,
-                               Events.end_date + Events.end_time), literal(True)),
-                              else_=literal(False)
-                          ).label("is_active")
-                          ).where(Events.title.ilike("%AGMA%"))
+                    (func.now().between(Events.start_date + Events.start_time,
+                                        Events.end_date + Events.end_time), literal(True)),
+                    else_=literal(False)
+                ).label("is_active")
+            ).where(Events.title.ilike("%AGMA%"))
             result = (await self.session.execute(stmt)).mappings().one()
             return result
         except Exception as e:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def get_graph_data(self, municipality: Optional[str] = None):
+        stmt = (select(Village.name.label("name"), func.count(Village.name).label("value"))
+                .join(AgmaRegistration.consumer)
+                .join(ConsumerMeter.village)
+                .join(ConsumerMeter.municipal)
+                .group_by(Village.name)
+                .order_by(Village.name.asc()))
+        if municipality:
+            stmt = stmt.where(Municipality.name == municipality)
+        count_per_village = (await self.session.execute(
+            stmt
+        )).mappings().all()
+        return count_per_village

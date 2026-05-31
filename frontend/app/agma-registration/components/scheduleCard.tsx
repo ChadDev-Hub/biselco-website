@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 
 type Props = {
     title: string
-    date: string
-    time: string
-    location: string;
+    date: string | null
+    time: string | null
+    location: string | null;
     image_url: string;
 
 }

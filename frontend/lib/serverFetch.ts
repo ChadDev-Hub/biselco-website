@@ -7,8 +7,8 @@ const baseUrl = process.env.BASESERVERURL
 
 //  GET CURRENT USER
 export async function getCurrentUser() {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get("access_token")?.value
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/auth/user/me`,{
         method: "GET",
         cache: "no-store",
@@ -47,13 +47,13 @@ export async function getLandingPageData() {
 
 // GET NEWS PAGE DATA
 export async function getNewsPage() {
-    const cookieStore = await cookies()
-    const access_token = cookieStore.get("access_token")?.value
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const res = await fetch(
         `${baseUrl}/v1/news/`,{
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${access_token}`
+                "Authorization": `Bearer ${accessToken}`
             }
         }
     )
@@ -74,14 +74,14 @@ export async function getNewsPage() {
 
 // GET ALL COMPLAINTS 
 export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get("access_token")?.value
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const params = new URLSearchParams();
     if(page){
         params.set("page", page.toString())
     }
     if(q){
-        params.set("q", q.toString())
+        params.set("search", q.toString())
     }
      const url = `${baseUrl}/v1/complaints/all${
         params.toString() ? `?${params.toString()}` : ""
@@ -113,8 +113,8 @@ export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
 // GET COMPLAINTS ON SEPECIFIC USER 
 
 export async function UserComplaints() {
-    const cookieStore = await cookies()
-    const accessToken = cookieStore.get("access_token")?.value
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const res = await fetch(
         `${baseUrl}/v1/complaints/`, {
             method: "GET",
@@ -351,7 +351,7 @@ export const GetAgmaRegistered = async (id: string) => {
 export const GetAgmaEvents = async() => {
     const res = await fetch(`${baseUrl}/v1/events/agma/`, {
         method: "GET",
-        next: {revalidate: 5}
+        cache: "no-store"
     })
     const data = await res.json()
     if (!res.ok){
@@ -387,11 +387,12 @@ export const GetAgmaStats= async() => {
 export const GetAgmaTicketAll = async(
     page:string | string[] | undefined,
     year: string | string[] | undefined,
-    barangay: string | string[] | undefined
+    barangay: string | string[] | undefined,
+    search: string | string[] | undefined
 )=>{
-    const cookieStore = await cookies()
     const params =new URLSearchParams();
-    
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     if(page){
         params.set("page", typeof page === "string" ? page : "");
     }
@@ -401,11 +402,14 @@ export const GetAgmaTicketAll = async(
     if(barangay !== "All" && barangay){
         params.set("barangay", typeof barangay === "string" ? barangay : "");
     }
-    const accessToken = cookieStore.get("access_token")?.value
+    if (search){
+        params.set("search", typeof search === "string" ? search : "");
+    }
     const res = await fetch(`${baseUrl}/v1/agma/registered/all?${params.toString()}`, {
         method: "GET",
         cache: "no-store",
         headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
         }
     })
@@ -428,11 +432,12 @@ export const GetAgmaFilters = async() => {
     const accessToken = cookie.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/agma/registered/all/filters`, {
         method: "GET",
+        
         headers: {
+             "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
         }
     })
-
     const data = await res.json()
     if (!res.ok){
         return {
@@ -458,7 +463,6 @@ export const GetAgmaSetup = async() => {
             "Authorization": `Bearer ${accessToken}`
         }
     })
-
     const data = await res.json()
     if (!res.ok){
         return {
@@ -473,9 +477,16 @@ export const GetAgmaSetup = async() => {
 }
 
 export const GetAgmaSchedules = async() => {
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/events/agma/schedules`,{
         method: "GET",
-        cache: "no-cache",
+        cache: "no-store",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        }
+
     })
     const data = await res.json()
     if (!res.ok){
@@ -487,5 +498,22 @@ export const GetAgmaSchedules = async() => {
     return {
         status: res.status,
         data: data
+    }
+}
+
+export const GetAgmaRegistrationSchedules= async () => {
+    const data = await fetch(`${baseUrl}/v1/events/agma/registration`, {
+        method: "GET"
+    })
+    const res = await data.json()
+    if (!data.ok) {
+        return {
+            status: data.status,
+            error: res.detail
+        }
+    }
+    return {
+        status: data.status,
+        data: res
     }
 }

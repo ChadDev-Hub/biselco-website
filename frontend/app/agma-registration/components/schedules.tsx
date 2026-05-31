@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from 'framer-motion';
 type Props = {
-    children: React.ReactNode[]
+    children: React.ReactNode[] 
 }
 
 const Schedules = ({ children }: Props) => {
@@ -19,11 +19,11 @@ const Schedules = ({ children }: Props) => {
     const handleStop = () => setStop(true);
     const handleStart = () => setStop(false);
     return (
-        <div className="z-10 w-full mt-0 sm:mt-0 md:mt-2 lg:mt-5 xl:mt-10 h-full  flex flex-col justify-start items-center">
+        <div className="z-10 w-full mt-0 max-w-lg  sm:mt-0 md:mt-2 lg:mt-5 xl:mt-10 h-full  flex flex-col justify-start items-center">
             <div 
             onPointerDown={handleStop}
             onPointerUp={handleStart}
-            className='carousel hover:cursor-grabbing w-full glass rounded-box  overflow-x-hidden'>
+            className='carousel hover:cursor-grabbing w-full  rounded-box  overflow-x-hidden'>
                 {children.map((child, index) => (
                     <motion.div
                     style={{transform: `translateX(-${current * 100}%)`}}

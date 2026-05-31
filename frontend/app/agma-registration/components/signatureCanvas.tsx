@@ -43,7 +43,7 @@ const SignatureCanvas = ({ canvasRef, signaturePadRef, clearError }: Props) => {
 
 
   return (
-    <div className="w-full h-fit relative bg-base-100 rounded-xl shadow-lg">
+    <div className="w-full h-fit relative bg-base-100 rounded-xl border-gray-300 shadow-lg">
       <canvas
         onPointerUp={clearError}
         ref={canvasRef}

@@ -14,3 +14,7 @@ class AgmaSetup(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     is_active: Optional[bool] = None
+    
+class AgmaCountRegistered(BaseModel):
+    name: Optional[str] = None
+    value: Optional[int] = None

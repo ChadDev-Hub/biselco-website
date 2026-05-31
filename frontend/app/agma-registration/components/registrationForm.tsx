@@ -4,7 +4,7 @@ import SignatureCanvas from "./signatureCanvas";
 import SignaturePad from "signature_pad";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { RegisterAgma } from "@/app/actions/agma";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useAlert } from "@/app/common/alert";
 import Image from "next/image";
 import { Contact, Phone, Zap } from "lucide-react";
@@ -15,6 +15,8 @@ type FormType = {
   image: File;
   signature: File;
 };
+const labelClassName = "label font-bold text-black text-shadow-white text-shadow-md";
+const inputClassName = "input w-full rounded-box focus:ring-2 focus:ring-blue-600 outline-none";
 const RegistrationForm = () => {
   const {
     register,
@@ -27,9 +29,6 @@ const RegistrationForm = () => {
   } = useForm<FormType>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
-  const labelClass =
-    "label font-bold text-black text-shadow-white text-shadow-md";
-  const inputClass = "input w-full";
   const router = useRouter();
   const { showAlert } = useAlert();
   const ImageWatched = useWatch({
@@ -98,6 +97,11 @@ const RegistrationForm = () => {
 
       const res = await RegisterAgma(formData);
       switch (res.status) {
+        case 400:
+          reset();
+          handleError(res.error);
+          redirect("/")
+          break;
         case 401:
           handleError(res.error);
           break;
@@ -120,12 +124,12 @@ const RegistrationForm = () => {
   );
 
   return (
-    <div className="w-full flex justify-center px-0 sm:px-32">
+    <div className="w-full flex justify-center max-w-lg">
       <form
         onSubmit={(e) => {
           handleSubmit(onSubmit)(e);
         }}
-        className="form flex flex-col gap-2 h-full w-full  rounded-box p-2 bg-base-200/45 drop-shadow-md shadow"
+        className="form flex flex-col gap-2 h-full w-full  rounded-box p-2 bg-base-200 shadow-md"
       >
         {/* TITLE */}
         <h1 className="text-3xl text-violet-600 font-extrabold text-shadow-2xs text-shadow-white">
@@ -134,8 +138,8 @@ const RegistrationForm = () => {
 
         {/* ACCOUNT NO */}
         <section>
-          <label className={labelClass}>Account Number</label>
-          <label className={`${inputClass} ${errors.account_no && "input-error"} border `}>
+          <label className={labelClassName}>Account Number</label>
+          <label className={`${ inputClassName} ${errors.account_no && "input-error"}`}>
             <Zap size={15} />
             <input
               {...register("account_no", {
@@ -171,8 +175,8 @@ const RegistrationForm = () => {
         {/* NAME */}
 
         <section>
-          <label className={labelClass}>Name</label>
-          <label className={`${inputClass} ${errors.name && "input-error"}`}>
+          <label className={labelClassName}>Name</label>
+          <label className={`${inputClassName} ${errors.name && "input-error"}`}>
             <Contact size={15} />
             <input
               title="Name"
@@ -189,9 +193,9 @@ const RegistrationForm = () => {
 
         {/* MOBILE NUMBER */}
         <section>
-          <label className={labelClass}>Mobile Number</label>
+          <label className={labelClassName}>Mobile Number</label>
           <label
-            className={`${inputClass} ${errors.mobile_number && "input-error"}`}
+            className={`${inputClassName} ${errors.mobile_number && "input-error"}`}
           >
             <Phone size={15} />
             <input
@@ -227,7 +231,7 @@ const RegistrationForm = () => {
 
         {/* IMAGE UPLOAD */}
         <section>
-          <label className={labelClass}>Image</label>
+          <label className={labelClassName}>Image</label>
           <input
             {...register("image", {
               required: "Please Upload Your Latest Photo",
@@ -259,7 +263,7 @@ const RegistrationForm = () => {
 
         {/* SIGNATURE */}
         <section>
-          <label className={labelClass}>Signature</label>
+          <label className={labelClassName}>Signature</label>
           <SignatureCanvas
             clearError={clearSignatureErrror}
             signaturePadRef={signaturePadRef}

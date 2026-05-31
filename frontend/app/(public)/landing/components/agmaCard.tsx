@@ -33,7 +33,7 @@ const EventCard = ({abrev, image_src, title, qoute_title, qoute_description, foo
     initial="hidden"
     whileInView="visible"
     variants={fadeInUp}
-     className="card image-full  relative overflow-hidden h-100 shadow-md w-full md:w-md lg:w-lg xl:w-xl group">
+     className="card image-full  relative overflow-hidden h-100 shadow-md w-full max-w-2xl">
       {/* 1. Optimized Title: Responsive font sizing and better z-index */}
         
       

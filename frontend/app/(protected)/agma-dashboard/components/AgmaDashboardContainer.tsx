@@ -1,5 +1,5 @@
 "use client";
-import StatisticsCharts from "./StatisticsCharts";
+
 import Tabs from "./Tabs";
 
 import{ useSearchParams } from "next/navigation";
@@ -39,7 +39,7 @@ const AgmaDashboardContainer = ({children }: Props) => {
       {children}
       {/* Tab Content */}
      
-      {activeTab === "stats" && <StatisticsCharts />}
+      
     </div>
   );
 };

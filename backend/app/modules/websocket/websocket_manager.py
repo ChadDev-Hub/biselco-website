@@ -39,7 +39,6 @@ class ConnectionManager:
                     self.active_connections['user_id'].discard(socket)
 
     async def broadcast(self, json: dict):
-
         for user_id, websockets in list(self.active_connections.items()):
             for socket in list(websockets):
                 try:

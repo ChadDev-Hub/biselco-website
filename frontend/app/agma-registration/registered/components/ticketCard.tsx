@@ -27,7 +27,7 @@ const AgmaTicketCard = ({data}: Props) => {
   return (
     <div
       id="agma-ticket"
-      className="relative w-full max-w-md mx-auto overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-xl"
+      className="relative  w-full max-w-lg  mx-auto overflow-hidden bg-white border-slate-200 rounded-2xl shadow-md"
     >
       <div className="h-2 absolute top-0 bg-yellow-500 w-full"></div>
       {/* Top Section: Header & Profile */}

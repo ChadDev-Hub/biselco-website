@@ -46,9 +46,10 @@ type ChangeMeter = {
 };
 type Props = {
   data: Promise<PromiseType>;
+  searchComponent: React.ReactNode;
 };
 
-const ChangeMeteContainer = ({ data }: Props) => {
+const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
   const changeMeter = use(data);
   const [changeMeterData, setChangeMeterData] = useState<ChangeMeter[] | []>(
     [],
@@ -148,9 +149,9 @@ const ChangeMeteContainer = ({ data }: Props) => {
   };
   return (
     <>
-      <div className="w-full justify-center flex px-2">
+      <div className="w-full justify-center flex px-2 ">
         {/* NAV BAR */}
-        <div className="navbar max-w-2xl items-center  bg-base-100 border-gray-100 shadow-md w-full  px-2 flex justify-between glass mb-2 rounded-box">
+        <div className="navbar max-w-2xl items-center   bg-base-100 border-gray-100 shadow-md w-full  px-2  flex justify-between glass mb-2 rounded-box">
           {/* TOOLS */}
           <div className="flex items-center gap-2">
             <div>
@@ -178,13 +179,7 @@ const ChangeMeteContainer = ({ data }: Props) => {
 
           </div>
           {/*Search*/}
-          <div>
-            <input
-              placeholder="Find"
-              type="text"
-              className="input bg-base-200 drop-shadow-md  rounded-box w-full max-w-xs input-md"
-            />
-          </div>
+          {searchComponent}
 
         </div>
 

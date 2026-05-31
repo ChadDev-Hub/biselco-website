@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, date
 from ..model.events import Events
 from sqlalchemy import select, and_, func
-from ..schema.response import AgmaEvent, AbrevationStyle
+from ..schema.response import AgmaEvent, AbrevationStyle, EventSchedule
 from ..model.events_schedules import EventsSchedules
 from datetime import date, datetime
 
@@ -12,13 +12,14 @@ from datetime import date, datetime
 class GetEventServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-        self.date_time_now = func.date_trunc('minutes', func.current_timestamp())
+        
 
     async def getAgmaEvents(self):
         try:
             stmt = select(Events).where(
-                and_(Events.title.ilike("%AGMA%"), 
-                     self.date_time_now.between(Events.start_date + Events.start_time,Events.end_date + Events.end_time)
+                and_(Events.title.ilike("%AGMA%"),
+                     func.now().between(
+                         Events.start_date + Events.start_time, Events.end_date + Events.end_time)
                      ))
             result = (await self.session.execute(stmt)).scalars().one()
             dt = datetime.combine(result.end_date, result.end_time)
@@ -51,15 +52,14 @@ class GetEventServices:
                 ]
             )
         except Exception as e:
-            print(e)
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+                status_code=status.HTTP_404_NOT_FOUND, detail="Agma Registration Closed!!")
 
-    
     async def getAgmaEventsSchedule(self):
         try:
             agma_events_id = (await self.session.execute(select(Events.id).where(Events.title.ilike("%AGMA%")))).scalars().one()
-            stmt = select(EventsSchedules).where(EventsSchedules.event_id == agma_events_id)
+            stmt = select(EventsSchedules).where(
+                EventsSchedules.event_id == agma_events_id)
             results = (await self.session.execute(stmt)).scalars().all()
             data = [{
                 "id": str(result.id),
@@ -67,9 +67,27 @@ class GetEventServices:
                 "area": result.area,
                 "event_location": result.event_location,
                 "event_date": result.event_date
-                } for result in results]       
+            } for result in results]
             return data
         except Exception as e:
             print(e)
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+    async def get_agma_schedules(self):
+        try:
+            await self.getAgmaEvents()
+            agmaEvent = await self.getAgmaEventsSchedule()
+            result = [{
+                "id": scheds.get("id"),
+                "area": scheds.get("area"),
+                "date": scheds.get("event_date").strftime("%a, %b %d, %Y") if scheds.get("event_date") else None,
+                "time": scheds.get("event_date").strftime("%I:%M %p") if scheds.get("event_date") else None,
+                "location": scheds.get("event_location"),
+                "image": f"/{scheds.get("area").split(' ')[-1].lower()}.jpg"
+            } for scheds in agmaEvent]
+
+            return result
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

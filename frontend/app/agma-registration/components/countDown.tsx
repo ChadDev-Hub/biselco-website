@@ -1,13 +1,15 @@
 "use client";
 import Countdown from "react-countdown";
-
+import {useRouter} from "next/navigation";
 type Props = {
   targetDate: number;
 };
 const CountDown = ({ targetDate }: Props) => {
+  const router = useRouter();
   return (
     <Countdown
       date={targetDate}
+      onComplete={() => router.refresh()}
       renderer={({ days, hours, minutes, seconds }) => {
         const formatedDate = [
           {

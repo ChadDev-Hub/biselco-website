@@ -8,19 +8,19 @@ import {
 import ComplaintsContainer from "./components/complaintsDashboardContainer";
 import ComplaintDashBoardHeader from "./components/header";
 import StatsSkeleton from "@/app/common/statsSkeleton";
-import TableSearch from "./components/tableSearch";
+
 import TableSearchSkeleton from "./components/tableSearchSkeleton";
 import ModernConcernCardSkeleton from '../components/modernConcernCardSkeleton';
 import Pagination from '../../(protected)/technical/change-meter/components/pagination';
 import PageNationLoading from '../../(protected)/technical/change-meter/components/pageNationSkeleton';
-
+import SearchComponent from "../../(protected)/agma-dashboard/components/Search"
 const DashBoardPage = ({
   searchParams,
 }: {
-  searchParams: Promise<{ page: number; q: string }>;
+  searchParams: Promise<{ page: number; search: string }>;
 }) => {
   const params = use(searchParams);
-  const complaintsData = GetAllComplaints(params.page, params.q);
+  const complaintsData = GetAllComplaints(params.page, params.search);
   const statsData = GetComplaintStats();
   const statusName = ComplaintStatusName();
   return (
@@ -59,7 +59,8 @@ const DashBoardPage = ({
 
         <section className="w-full max-w-5xl justify-end flex">
           <Suspense fallback={<TableSearchSkeleton />}>
-            <TableSearch data={complaintsData} />
+            {/* <TableSearch data={complaintsData} /> */}
+            <SearchComponent promise={complaintsData} />
           </Suspense>
         </section>
 

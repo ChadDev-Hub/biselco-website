@@ -15,7 +15,6 @@ export default function CooperativeHome() {
         <HomePageTools/>
         {/* Events */}
         <section className="w-full space-y-3 mt-10">
-          <h1 className="font-bold text-lg">Events</h1>
           <Events event={agmaEvent}/>
         </section>
         

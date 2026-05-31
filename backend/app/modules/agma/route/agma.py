@@ -7,8 +7,8 @@ from ..services.get import GetAgmaRegistrationService
 from ....core.security import get_current_user
 from ..services.screenshot import generate_ticket
 from ...events.schema.requests import AgmaEventSetup
-from ..schema.response import AgmaSetup
-from typing import Optional
+from ..schema.response import AgmaSetup, AgmaCountRegistered
+from typing import Optional, List
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -59,12 +59,13 @@ async def get_all(
     user: UserModel = Depends(get_current_user),
     page: Optional[int] = Query(None),
     year: Optional[int] = Query(None),
-    barangay:Optional[str] = Query(None)):
+    barangay:Optional[str] = Query(None),
+    search: Optional[str] = Query(None)):
     
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay)
+    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search)
 
 @router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
 async def get_agma_filter(
@@ -89,8 +90,20 @@ async def setup(
 
 @router.get("/setup", status_code=status.HTTP_200_OK, response_model=AgmaSetup)
 async def get_setup(
-    get_services=Depends(GetAgmaRegistrationService)
-    
+    get_services=Depends(GetAgmaRegistrationService),
+    user: UserModel = Depends(get_current_user)
 ):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     res = await get_services.get_agma_setup()
     return res
+@router.get("/statistic/count_registered", status_code=status.HTTP_200_OK, response_model=List[AgmaCountRegistered])
+async def get_graph(
+    get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+    user: UserModel = Depends(get_current_user)
+):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
+    return await get_services.get_graph_data()

@@ -75,7 +75,21 @@ type WSMessage = {
   event_id: string;
   message: string;
   data: AgmaSetup;
+} | {
+  detail: "agma_cheds";
+  event_id: string;
+  message: string;
+  data: EventSchedules[];
 }
+
+type EventSchedules = {
+  id?: string | null;
+  area?: string;
+  event_location?: string;
+  event_date: string | null;
+};
+
+
 type AgmaSetup = {
   id: number;
   title: string;

@@ -2,6 +2,7 @@
 
 import EventCard from "./agmaCard";
 import {use} from "react"
+import { usePathname } from 'next/navigation';
 type PromiseType = {
   status : number;
   detail?: string | undefined;
@@ -24,10 +25,12 @@ type Props = {
 
 const Events = ({ event }: Props) => {
     const data = use(event)
-    console.log(data)
+    const pathname = usePathname();
     if(data.status === 404 ) return null
   return (
-    <div className="w-full flex flex-col justify-center items-center sm:px-2 md:px-20 lg:px-28 xl:px-64 overflow-x-clip">
+    <>
+    <h1 className={`font-bold self-start w-full text-2xl ${pathname === "/" ? "block": "hidden"}`}>Events</h1>
+    <div className="w-full flex flex-col justify-center items-center  overflow-x-clip">
       <EventCard
         footer={data.data?.footer??""}
         image_src={data.data?.image_src??""}
@@ -38,6 +41,8 @@ const Events = ({ event }: Props) => {
         end_date={data.data?.date_end??0}
       />
     </div>
+    </>
+    
   );
 };
 

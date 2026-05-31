@@ -1,8 +1,11 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { AgmaEventSchedules } from "../../../actions/events";
+import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useAlert } from "../../../common/alert";
+import { event } from "next/dist/build/output/log";
 
 type PromiseType<T> = {
   status: number;
@@ -13,7 +16,7 @@ type EventSchedules = {
   id?: string | null;
   area?: string;
   event_location?: string;
-  event_date?: string;
+  event_date: string | null;
 };
 type Props = {
   promiseData: Promise<PromiseType<EventSchedules[]>>;
@@ -24,40 +27,51 @@ const Municipality: EventSchedules[] = [
     id: null,
     area: "Municipality of Coron",
     event_location: "",
-    event_date: "",
+    event_date: null,
   },
   {
     id: null,
     area: "Municipality of Busuanga",
     event_location: "",
-    event_date: "",
+    event_date: null,
   },
   {
     id: null,
     area: "Municipality of Culion",
     event_location: "",
-    event_date: "",
+    event_date: null,
   },
   {
     id: null,
     area: "Municipality of Linapacan",
     event_location: "",
-    event_date: "",
+    event_date: null,
   },
 ];
 
 type FormType = {
   schedules: EventSchedules[];
 };
+// CLASSNAMES
+const labelClassName = "label text-sm font-medium mb-2"
+const inputClassName = "input bg-base-100 w-full rounded-box focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+
 
 const Schedules = ({ promiseData }: Props) => {
   const initialData = use(promiseData);
-  const {
-    register,
-    handleSubmit,
-
-    control,
-  } = useForm<FormType>({
+  const { message } = useWebsocket();
+  const { showAlert } = useAlert();
+  const [processedEvent, setProcessedEvent] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const store = localStorage.getItem("processed_events");
+      return store ? JSON.parse(store) : [];
+    } catch {
+      return [];
+    }
+  });
+  // FORM
+  const { register, handleSubmit, control, setValue } = useForm<FormType>({
     defaultValues: {
       schedules: Municipality.map((mun) => {
         const existing = initialData?.data?.find(
@@ -72,17 +86,34 @@ const Schedules = ({ promiseData }: Props) => {
     name: "schedules",
   });
 
+  useEffect(() => {
+    if (message?.detail == "agma_cheds") {
+      if (processedEvent.includes(message.event_id)) return;
+      queueMicrotask(() => {
+        setProcessedEvent((prev) => {
+          const update = [...prev, message.event_id];
+          localStorage.setItem("processed_events", JSON.stringify(event));
+          return update;
+        });
+      });
+      setValue("schedules", message.data);
+    }
+  }, [message, processedEvent, setValue]);
+
   const onSubmit: SubmitHandler<FormType> = async (data) => {
-    const scheduleData = data.schedules.map((item) => ({
-      id: item.id ?? null,
-      area: item.area ?? "",
-      event_location: item.event_location ?? "",
-      event_date: item.event_date
-        ? new Date(item.event_date).toISOString()
-        : null,
-    }));
-    const res = await AgmaEventSchedules(scheduleData)
-    console.log(res)
+    const scheduleData = data.schedules;
+    const res = await AgmaEventSchedules(scheduleData);
+   
+    switch (res?.status) {
+      case 404:
+        showAlert("warning", res.data);
+        break;
+      case 201:
+        showAlert("success", res.data.message);
+        break;
+      default:
+        break;
+    }
   };
   return (
     <div className="w-full max-w-4xl mx-auto bg-base-100 border border-base-200 shadow-md rounded-2xl overflow-hidden">
@@ -116,22 +147,21 @@ const Schedules = ({ promiseData }: Props) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Location Input */}
                 <div className="form-control w-full">
-                  <label className="label py-1.5">
+                  <label className={labelClassName}>
                     <span className="label-text font-medium text-xs text-base-content/70">
                       Event Location
                     </span>
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., Municipal Hall"
                     {...register(`schedules.${index}.event_location` as const)}
-                    className="input  w-full bg-base-100 focus:input-primary transition-all text-sm h-11"
+                    className={inputClassName}
                   />
                 </div>
 
                 {/* Date Input */}
                 <div className="form-control w-full">
-                  <label className="label py-1.5">
+                  <label className={labelClassName}>
                     <span className="label-text font-medium text-xs text-base-content/70">
                       Event Date & Time
                     </span>
@@ -139,7 +169,7 @@ const Schedules = ({ promiseData }: Props) => {
                   <input
                     type="datetime-local"
                     {...register(`schedules.${index}.event_date` as const)}
-                    className="input input-bordered w-full bg-base-100 focus:input-primary transition-all text-sm h-11"
+                    className={inputClassName}
                   />
                 </div>
               </div>

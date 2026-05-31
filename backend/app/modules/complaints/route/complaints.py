@@ -43,7 +43,7 @@ async def get_user_complaints(user: UserModel = Depends(get_current_user), get_s
 # GET ALL COMPLAINTS
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
-        q: Optional[str] = Query(None),
+        search: Optional[str] = Query(None),
         page: Optional[int] = Query(None),
         get_services: GetServices = Depends(GetServices),
         user: UserModel = Depends(get_current_user)):
@@ -53,7 +53,7 @@ async def get_all_complaint(
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
-    data = await get_services.get_all_complaints(query=q, page=page)
+    data = await get_services.get_all_complaints(query=search, page=page)
     return data
 
 
