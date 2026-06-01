@@ -8,7 +8,7 @@ import Filter from "./Filter";
 import FilterSkeleton from "./FilterSkeleton";
 import PageNationLoading from "../../technical/change-meter/components/pageNationSkeleton";
 import SearchComponent from "./Search";
-import TableSearchSkeleton from "../../../complaints/dashboard/components/tableSearchSkeleton";
+import TableSearchSkeleton from "../../../common/SearchSkeleton";
 
 type Props = {
   search: string | string[] | undefined;

@@ -184,11 +184,21 @@ export const queryConsumer = async(query?:string)=>{
 }
 
 //  GET CHANGE METER DATA
-export const GetChangeMeter = async (page?:number,query?: string) => {
-    const url = query ? `${baseUrl}/v1/change_meter/?q=${query}` : page ? `${baseUrl}/v1/change_meter/?page=${page}` : `${baseUrl}/v1/change_meter/`;
+export const GetChangeMeter = async (page?:number,search?:string) => {
+    const cookie = await cookies()
+    const access_token = cookie.get("access_token")?.value
+    const params = new URLSearchParams();
+    if (page) params.set("page", page.toString());
+    if (search) params.set("search", search.toString());
+    const url = `${baseUrl}/v1/change_meter/?${params.toString()}`;
+    
     const res = await fetch(url, {
         method: "GET",
-        cache: "no-cache"
+        cache: "no-store",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${access_token}`
+        }
     })
     const data = await res.json()
     if (!res.ok){
@@ -413,6 +423,7 @@ export const GetAgmaTicketAll = async(
             "Authorization": `Bearer ${accessToken}`
         }
     })
+    
     const data = await res.json()
     if (!res.ok){
         return {

@@ -17,11 +17,13 @@ const AgmaDashboard = async ({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
+  const { tab, page, year, barangay, search, municipality } = await searchParams;
   const stats = GetAgmaStats();
   const AgmaEvent = GetAgmaSetup();
   const schedules = GetAgmaSchedules();
-  const countRegistered = GetAgmaCountRegistered();
-  const { tab, page, year, barangay, search } = await searchParams;
+  const countRegistered = GetAgmaCountRegistered(municipality);
+  
+
   return (
     <div className="w-full  min-h-screen pb-20 place-items-center">
       {/* Headers */}

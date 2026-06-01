@@ -31,7 +31,8 @@ const SimpleBarchart = ({ data, xaxisStyle, yaxisStyle, customTooltip}: Props) =
   const customBar = (props: BarShapeProps) => {
     const { x, y, width, height, index } = props;
     const color = colors[index! % colors.length];
-    return <rect x={x} y={y} width={width} height={height} fill={color} />;
+    return <rect  x={x} y={y} radius={5} width={width} height={height} fill={color} />;
+    
   };
 
   return (
@@ -39,7 +40,6 @@ const SimpleBarchart = ({ data, xaxisStyle, yaxisStyle, customTooltip}: Props) =
       style={{
         width: "100%",
         height: "100%",
-        maxWidth: "700px",
         maxHeight: "300px",
         aspectRatio: 1.618,
       }}

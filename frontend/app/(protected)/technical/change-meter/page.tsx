@@ -8,14 +8,16 @@ import PageNationLoading from "./components/pageNationSkeleton";
 import Pagination from "./components/pagination";
 import Headers from "../new-connection/components/header";
 import SearchComponent from "../../agma-dashboard/components/Search";
+import SearchSkeleton from "../../../common/SearchSkeleton";
 type Props = {
   searchParams: Promise<{
     page: number;
+    search: string;
   }>;
 };
 const ChangeMeterFormPage = async ({ searchParams }: Props) => {
-  const page = (await searchParams).page;
-  const data = GetChangeMeter(page);
+  const {page, search } = (await searchParams);
+  const data = GetChangeMeter(page, search);
   return (
     <>
       <Headers title="Change Meter" />
@@ -30,7 +32,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
           <Suspense fallback={<ChangeMeterCardSkeleton />}>
             <ChangeMeteContainer
               searchComponent={
-                <Suspense fallback={<div>loading</div>}>
+                <Suspense fallback={<SearchSkeleton/>}>
                   <SearchComponent promise={data} />
                 </Suspense>
               }

@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
@@ -271,8 +271,51 @@ class GetAgmaRegistrationService:
                 .group_by(Village.name)
                 .order_by(Village.name.asc()))
         if municipality:
-            stmt = stmt.where(Municipality.name == municipality)
+            stmt = stmt.where(Municipality.name.ilike(f"%{municipality}%"))
         count_per_village = (await self.session.execute(
             stmt
         )).mappings().all()
         return count_per_village
+
+    async def get_registered_overtime(self):
+        try:
+            registered = (select(
+                AgmaRegistration.account_no,
+                func.date(AgmaRegistration.timestamped).label("date"),
+                Municipality.name.label("municipality"),
+            )
+                .join(AgmaRegistration.consumer)
+                .join(ConsumerMeter.municipal)).cte("registered")
+            cumulative_cte = (select(
+                registered.c.date,
+                registered.c.municipality,
+                func.count(registered.c.account_no).label("count"),
+                func.sum(func.count(registered.c.account_no)).over(
+                    partition_by=registered.c.municipality,
+                    order_by=registered.c.date
+                ).label("cumulative_sum")
+            ).select_from(registered)
+                .group_by(registered.c.date, registered.c.municipality)
+            ).cte("cumulative_cte")
+
+            stmt = (
+                select(
+                    cumulative_cte.c.date.label("name"),
+       
+                        func.max(cumulative_cte.c.cumulative_sum).filter(
+                            cumulative_cte.c.municipality == "CORON").label("coron"),
+
+                        func.max(cumulative_cte.c.cumulative_sum).filter(
+                            cumulative_cte.c.municipality == "CULION"
+                        ).label("culion"),
+                )
+                .select_from(cumulative_cte)
+                .group_by(cumulative_cte.c.date)
+                .order_by(cumulative_cte.c.date))
+
+            result = (await self.session.execute(stmt)).mappings().all()
+            return result
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

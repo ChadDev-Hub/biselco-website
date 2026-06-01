@@ -62,12 +62,10 @@ async def get_change_meter_stats(session: AsyncSession):
             new_data.append(average)
     return new_data
 
-# GET CHANGE METER DATA BY QUERY OR ALL
+# GET CHANGE METER DATA BY search OR ALL
 
 
-async def get_change_meter(session: AsyncSession, query: Optional[str] = None, page: Optional[int] = None):
-    if not page:
-        page = 1
+async def get_change_meter(session: AsyncSession, search: Optional[str] = None, page: Optional[int] = 1):
     change_meter = (select(
         ChangeMeter
     ).options(selectinload(ChangeMeter.images))
@@ -75,24 +73,24 @@ async def get_change_meter(session: AsyncSession, query: Optional[str] = None, p
     
     # GET TOTAL PAGE
     total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=PAGE_SIZE)
-    if query:
+    if search:
         stmt = change_meter.where(
             or_(
-                cast(ChangeMeter.timestamped, Text).ilike(f"%{query}%"),
-                cast(ChangeMeter.date_accomplished, Text).ilike(f"%{query}%"),
-                ChangeMeter.account_no.ilike(f"%{query}%"),
-                ChangeMeter.consumer_name.ilike(f"%{query}%"),
-                ChangeMeter.location.ilike(f"%{query}%"),
-                ChangeMeter.pull_out_meter.ilike(f"%{query}%"),
+                cast(ChangeMeter.timestamped, Text).ilike(f"%{search}%"),
+                cast(ChangeMeter.date_accomplished, Text).ilike(f"%{search}%"),
+                ChangeMeter.account_no.ilike(f"%{search}%"),
+                ChangeMeter.consumer_name.ilike(f"%{search}%"),
+                ChangeMeter.location.ilike(f"%{search}%"),
+                ChangeMeter.pull_out_meter.ilike(f"%{search}%"),
                 cast(ChangeMeter.pull_out_meter_reading,
-                     Text).ilike(f"%{query}%"),
-                ChangeMeter.new_meter_serial_no.ilike(f"%{query}%"),
-                ChangeMeter.new_meter_brand.ilike(f"%{query}%"),
-                cast(ChangeMeter.meter_sealed, Text).ilike(f"%{query}%"),
-                cast(ChangeMeter.initial_reading, Text).ilike(f"%{query}%"),
-                ChangeMeter.remarks.ilike(f"%{query}%"),
-                ChangeMeter.accomplished_by.ilike(f"%{query}%"),
-            )).offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE)
+                     Text).ilike(f"%{search}%"),
+                ChangeMeter.new_meter_serial_no.ilike(f"%{search}%"),
+                ChangeMeter.new_meter_brand.ilike(f"%{search}%"),
+                cast(ChangeMeter.meter_sealed, Text).ilike(f"%{search}%"),
+                cast(ChangeMeter.initial_reading, Text).ilike(f"%{search}%"),
+                ChangeMeter.remarks.ilike(f"%{search}%"),
+                ChangeMeter.accomplished_by.ilike(f"%{search}%"),
+            ))  
     else:
         stmt = change_meter.offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE)
     result = (await session.execute(stmt)).scalars().all()

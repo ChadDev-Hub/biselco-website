@@ -106,10 +106,10 @@ async def create_change_meter(
 @router.get("/", status_code=status.HTTP_200_OK, response_model=ChangeMeterResponseList)
 async def fetch_change_meter(
         session: AsyncSession = Depends(get_session),
-        q: Optional[str] = Query(None),
+        search: Optional[str] = Query(None),
         page: Optional[int] = Query(None)):
     # GET CHANGE METER
-    return await get_change_meter(session=session, query=q, page=page)
+    return await get_change_meter(session=session, search=search, page=page if page else 1 )
 
 
 @router.delete("/", status_code=status.HTTP_200_OK)

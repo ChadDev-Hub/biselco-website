@@ -101,9 +101,15 @@ async def get_setup(
 @router.get("/statistic/count_registered", status_code=status.HTTP_200_OK, response_model=List[AgmaCountRegistered])
 async def get_graph(
     get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user)
+    user: UserModel = Depends(get_current_user),
+    municipality: Optional[str] = Query(None)
 ):
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_services.get_graph_data()
+    return await get_services.get_graph_data(municipality=municipality)
+
+@router.get("/statistic/regitered_overtime",status_code=status.HTTP_200_OK)
+async def get_registered_overtime(
+    get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    return await get_services.get_registered_overtime()

@@ -4,19 +4,9 @@ import CardComponent from "@/app/common/card";
 import SimpleBarChart from "@/app/common/Barchart";
 import {TooltipContentProps } from "recharts";
 import MunicipalityFiter from './MunicipalityFiter';
+import SimpleLineChart from "@/app/common/LineChart";
 
-type PromiseType=  {
-  status:number;
-  data?:CountRegistered[];
-  error?:string;
-}
-type Props = {
-  registerCountPromise: Promise<PromiseType>
-}
-type CountRegistered = {
-  name?: string; 
-  value?: number
-}
+
 
 
 const RegisteredCountCustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
@@ -51,7 +41,7 @@ const StatisticsCharts = ({registerCountPromise}:Props) => {
       <CardComponent className="p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Activity Trends</h2>
         <div className="h-64 flex items-center justify-center bg-linear-to-br from-green-50 to-emerald-50 rounded-lg">
-          <p className="text-gray-600">Chart placeholder - Connect your data source</p>
+          <SimpleLineChart />
         </div>
       </CardComponent>
     </div>

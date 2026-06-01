@@ -3,11 +3,11 @@
 import { cookies } from "next/headers";
 const baseUrl = process.env.BASESERVERURL;
 
-export const GetAgmaCountRegistered = async (municipality?: string) => {
+export const GetAgmaCountRegistered = async (municipality: string | string[] | undefined) => {
   const cookie = await cookies();
   const accessToken = cookie.get("access_token")?.value;
   const params = new URLSearchParams();
-  if (municipality) params.set("municipality", municipality);
+  if (municipality) params.set("municipality", typeof municipality === "string" ? municipality : "");
   const res = await fetch(`${baseUrl}/v1/agma/statistic/count_registered?${params.toString()}`, {
     method: "GET",
     headers: {
