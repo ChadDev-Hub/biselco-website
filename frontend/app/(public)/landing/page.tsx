@@ -1,5 +1,4 @@
-
-import {GetAgmaEvents } from '../../../lib/serverFetch';
+import { GetAgmaEvents } from "../../../lib/serverFetch";
 import Hero from "./components/hero";
 import McoGoogleLogin from "../../common/auth-component/mcoGoogleLogin";
 import LandingStats from "./components/stats";
@@ -7,47 +6,72 @@ import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
 import Footer from "./components/footer";
 import Events from "./components/agmaeventContainer";
-import { Suspense } from 'react';
+import AnimatedSection from "./components/AnimatedSection";
+import ScrollToTopButton from "./components/ScrollToTopButton";
+import AnimatedBackground from "./components/AnimatedBackground";
+import EventsLoadingFallback from "./components/EventsLoadingFallback";
+import { Suspense } from "react";
+import Image from 'next/image';
 
-const Landing = () => {
+export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
+
   return (
-    <div className="bg-base-100  text-base-content min-h-screen font-sans">
+    <div className="bg-linear-to-b from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
       <main className="w-full">
-        <section className="w-full">
+        {/* HERO SECTION */}
+        <section className="w-full relative">
           <Hero>
             <McoGoogleLogin />
           </Hero>
         </section>
 
-        <section className="w-full  bg-linear-to-b from-gray-300 to-blue-200">
+        {/* STATS SECTION */}
+        <AnimatedSection className="w-full py-8 px-4 md:py-16 bg-linear-to-b from-blue-200 to-blue-50">
           <LandingStats />
-        </section>
+        </AnimatedSection>
 
         {/* VISION AND MISSION SECTION */}
-        <section className="py-4 w-full  bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
-          <VisionMission />
-        </section>
+        <AnimatedSection className="py-12 px-4 md:py-20 w-full bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden">
 
-        {/* SERVICES AND FEATURES */}
-        <section className="w-full  py-4  bg-center bg-cover bg-[url(/services.jpg)] bg-no-repeat">
+          <AnimatedBackground variant="subtle" />
+          <Image
+          loading="eager"
+          src="/lineworker.png"
+          fill
+          alt="lineworker"
+          className=" mask-radial-from-30% mask-radial-at-center mask-radial-to-70%"
+          />
+          <div className="relative z-10">
+            <VisionMission />
+          </div>
+        </AnimatedSection>
+
+        {/* SERVICES AND FEATURES SECTION */}
+        <AnimatedSection className="w-full py-12 px-4 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100">
           <ServiceFeature />
-        </section>
-        {/* EVent */}
-        <section className="w-full relative h-full bg-linear-to-b from-gray-300 to-blue-200  py-4 flex flex-col justify-center items-center">
-          <Suspense fallback={<div>Loading...</div>}>
-            <Events event={AgmaEvents} />
-          </Suspense>
+        </AnimatedSection>
+
+        {/* EVENTS SECTION */}
+        <AnimatedSection className="relative py-12 px-4 bg-linear-to-t from-blue-300 to-blue-100">
           
-        </section>
+          <AnimatedBackground variant="animated" />
+
+          <div className="relative z-10 w-full ">
+            <Suspense fallback={<EventsLoadingFallback />}>
+              <Events event={AgmaEvents} />
+            </Suspense>
+          </div>
+        </AnimatedSection>
+
+        {/* FOOTER SECTION */}
         <section className="w-full">
           <Footer />
         </section>
-
       </main>
 
+      {/* SCROLL TO TOP BUTTON */}
+      <ScrollToTopButton />
     </div>
   );
-};
-
-export default Landing;
+}

@@ -5,8 +5,8 @@ import {use} from "react"
 import { usePathname } from 'next/navigation';
 type PromiseType = {
   status : number;
-  detail?: string | undefined;
-  data? : Data | undefined;
+  error?: string;
+  data? : Data;
 };
 type Data = {
   id: number;

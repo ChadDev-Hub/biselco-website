@@ -51,12 +51,12 @@ const LandingStats = () => {
     return () => controls.stop();
   }, [renewableEnergy]);
     return (
-        <div className="w-full  relative px-2 sm:px-4 md:px-20 lg:px-28 xl:px-48 overflow-x-clip">
+        <div className="w-full  relative px-2 flex justify-center  overflow-x-clip">
             <motion.div
                 initial={{ opacity: 0, scale: 0.85 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6 }}
-                className="stats stats-vertical lg:stats-horizontal shadow-2xl bg-base-100 w-full border border-base-200"
+                className="stats stats-vertical lg:stats-horizontal shadow-md max-w-5xl bg-base-100 w-full border border-base-200"
             >
                 <div className="stat p-8 place-items-center">
                     <div className="stat-title font-medium">Members Served</div>

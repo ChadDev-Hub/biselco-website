@@ -367,7 +367,7 @@ export const GetAgmaEvents = async() => {
     if (!res.ok){
         return {
             status: res.status,
-            detail: data.detail
+            erorr: data.detail
         }
     }
     return {

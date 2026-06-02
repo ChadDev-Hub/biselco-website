@@ -53,7 +53,7 @@ export default function Hero({ children }: Props) {
           pb-16
           gap-4
           px-2 sm:px-2 md:px-12 lg:px-16 xl:px-60                                      
-              bg-linear-to-b from-blue-300 to-orange-700 
+          bg-linear-to-b from-base-100 to-blue-200
           overflow-x-clip
           "
     >
