@@ -7,7 +7,7 @@ from ..services.get import GetAgmaRegistrationService
 from ....core.security import get_current_user
 from ..services.screenshot import generate_ticket
 from ...events.schema.requests import AgmaEventSetup
-from ..schema.response import AgmaSetup, AgmaCountRegistered
+from ..schema.response import AgmaSetup, AgmaCountRegistered, RegisteredOvertime, AgmaStats
 from typing import Optional, List
 router = APIRouter(prefix="/agma", tags=["agma"])
 
@@ -48,8 +48,14 @@ async def downlaod_ticket(
     return Response(content=screenshot, media_type="image/png")
 
 
-@router.get("/stats", status_code=status.HTTP_200_OK)
-async def complaints_stats(get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+@router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[AgmaStats])
+async def complaints_stats(
+    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+    user: UserModel = Depends(get_current_user)
+    ):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     return await get_agma_registration_service.get_stats()
 
 
@@ -109,7 +115,7 @@ async def get_graph(
                             detail="Admin Only Transaction Allowed")
     return await get_services.get_graph_data(municipality=municipality)
 
-@router.get("/statistic/regitered_overtime",status_code=status.HTTP_200_OK)
+@router.get("/statistic/registered_overtime",status_code=status.HTTP_200_OK, response_model=List[RegisteredOvertime])
 async def get_registered_overtime(
     get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_services.get_registered_overtime()

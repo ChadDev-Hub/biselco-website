@@ -80,6 +80,48 @@ type WSMessage = {
   event_id: string;
   message: string;
   data: EventSchedules[];
+} | {
+  detail: "new_registered";
+  new_regs: NewAgmaRegistered;
+  new_stats: AgmaStats[];
+  count_per_village: CountPerVillage[];
+  registered_overtime: RegisteredOvertime[];
+
+}
+type RegisteredOvertime = {
+  name: string;
+  coron?: number;
+  culion?: number;
+  busuanga?: number;
+  linapacan?: number; 
+}
+type CountPerVillage = {
+  name: string;
+  value?: number;
+}
+type AgmaStats = { 
+  title: string;
+  value: number;
+  description: string;
+  is_percentage: boolean
+}
+
+type NewAgmaRegistered = {
+  id:string;
+  account_no: string;
+  name: string;
+  phone: string;
+  image: string;
+  signature: string;
+  account_name: string;
+  village: string;
+  municipality: string;
+  meter_no: string;
+  meter_brand: string;
+  date_registered: string;
+  time_registered: string;
+  year: string;
+
 }
 
 type EventSchedules = {

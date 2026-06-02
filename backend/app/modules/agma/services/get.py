@@ -45,6 +45,7 @@ class GetAgmaRegistrationService:
                 .where(AgmaRegistration.id == id))
         d = (await self.session.execute(stmt)).scalars().one()
         return {
+            "id":str(d.id),
             "account_no": d.account_no,
             "name": d.name,
             "phone": d.phone,
@@ -197,6 +198,7 @@ class GetAgmaRegistrationService:
             total = (await self.session.execute(stmt)).scalar_one_or_none()
             total_page = total // self.PAGESIZE if total % self.PAGESIZE == 0 else total // self.PAGESIZE + 1
             data = [{
+                "id": str(res.id),
                 "account_no": res.account_no,
                 "name": res.name,
                 "phone": res.phone,
@@ -214,6 +216,7 @@ class GetAgmaRegistrationService:
             }
                 for res in results
             ]
+            
             return {
                 "data": data,
                 "total_page": total_page
@@ -308,6 +311,15 @@ class GetAgmaRegistrationService:
                         func.max(cumulative_cte.c.cumulative_sum).filter(
                             cumulative_cte.c.municipality == "CULION"
                         ).label("culion"),
+
+                        func.max(cumulative_cte.c.cumulative_sum).filter(
+                            cumulative_cte.c.municipality == "BUSUANGA"
+                        ).label("busuanga"),
+
+                        func.max(cumulative_cte.c.cumulative_sum).filter(
+                            cumulative_cte.c.municipality == "LINAPACAN"
+                        )
+                        .label("linapacan"),
                 )
                 .select_from(cumulative_cte)
                 .group_by(cumulative_cte.c.date)

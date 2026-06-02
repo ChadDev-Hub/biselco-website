@@ -377,8 +377,14 @@ export const GetAgmaEvents = async() => {
 }
 
 export const GetAgmaStats= async() => {
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/agma/stats`, {
-        method: "GET"
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        }
     })
     const data = await res.json()
     if (!res.ok){

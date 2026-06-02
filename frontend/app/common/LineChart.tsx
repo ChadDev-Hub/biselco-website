@@ -1,42 +1,69 @@
+"use client";
 
-'use client'
-import {LineChart, Line, XAxis, YAxis, Tooltip, Legend} from "recharts"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+  TooltipContentProps,
+} from "recharts";
 
+type Props<T> = {
+  data?: T[];
+  dataKey?: DataKey[];
+  xaxisStyle?: {
+    fontSize?: number;
+    angle?: number;
+    fontWeight?: number | string;
+  }
+  yaxisStyle?: {
+    fontSize?: number;
+    angle?: number;
+    fontWeight?: number | string;
+  }
+  customToolTip?: (props: TooltipContentProps) => React.ReactNode
+};
+type DataKey = {
+  label: string;
+  color: string;
+};
 
+const SimpleLineChart = <T,>({ data, dataKey, xaxisStyle, yaxisStyle, customToolTip }: Props<T>) => {
 
-const SimpleLineChart = () => {
-    const data = [
-    {
-        "name": "2026-05-21",
-        "coron": 5,
-        "culion": 1
-    },
-    {
-        "name": "2026-05-22",
-        "coron": 6,
-        "culion": null
-    }
-    ]
-    const dataKey = ["coron", "culion"]
   return (
-    <LineChart
-      style={
-        {
-            width: "100%",
-            height: "100%"
-        }
-      }
-      data={data}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip/>
-        <Legend />
-        {dataKey.map((item, index)=>(
-            <Line key={index} type="monotone" dataKey={item} stroke={`#${Math.floor(Math.random() * 16777215).toString(16)}`}/>
-        ))}
-      </LineChart>
+        <LineChart
+          style={{
+            width:"100%",
+            height:"100%",
+            maxHeight: "300px",
+            aspectRatio: 1.618,
+          }}
+          data={data}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" tick={{ fontSize: xaxisStyle?.fontSize, fill: 'black', angle: xaxisStyle?.angle }} />
+          <YAxis tick={{ fontSize: yaxisStyle?.fontSize, fill: 'black', angle: yaxisStyle?.angle }} />
+          <Tooltip content={customToolTip} />
+          <Legend
+            style={{
+              width: "100%",
+            }}
+          />
+          {dataKey?.map((item, index) => (
+            <Line
+              key={index}
+              type="monotone"
+              dataKey={item.label}
+              stroke={item.color}
+            />
+          ))}
+        </LineChart>
+    
+  
+  );
+};
 
-  )
-}
-
-export default SimpleLineChart
+export default SimpleLineChart;

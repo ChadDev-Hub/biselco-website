@@ -18,3 +18,16 @@ class AgmaSetup(BaseModel):
 class AgmaCountRegistered(BaseModel):
     name: Optional[str] = None
     value: Optional[int] = None
+
+class RegisteredOvertime(BaseModel):
+    name: Optional[date] = None
+    coron: Optional[int] = None
+    culion: Optional[int] = None
+    busuanga: Optional[int] = None
+    linapacan: Optional[int] = None
+
+class AgmaStats(BaseModel):
+    title: str
+    value:  float | int | str | None = None
+    description: Optional[str] = None
+    is_percentage: Optional[bool] = None

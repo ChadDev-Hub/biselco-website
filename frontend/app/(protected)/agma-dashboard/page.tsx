@@ -9,21 +9,26 @@ import OverViewSection from "./components/OverViewSection";
 import SetupSection from "./components/SetupSection";
 import { GetAgmaSetup, GetAgmaSchedules } from "../../../lib/serverFetch";
 import Schedules from "./components/Schedules";
-import SetupSkeleton from './components/SetupSkeleton';
-import StatisticsCharts from './components/StatisticsCharts';
-import { GetAgmaCountRegistered } from '../../../lib/agma';
+import SetupSkeleton from "./components/SetupSkeleton";
+import StatisticsCharts from "./components/StatisticsCharts";
+import { GetAgmaCountRegistered, GetRegisteredOverTime } from "../../../lib/agma";
+import CountRegistered from "./components/CountRegistered";
+import RegisteredOverTime from "./components/RegisteredOvertime";
+import ChartSkeleton from '../../common/ChartSkeleton';
+
+
 const AgmaDashboard = async ({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
-  const { tab, page, year, barangay, search, municipality } = await searchParams;
+  const { tab, page, year, barangay, search, municipality } =
+    await searchParams;
   const stats = GetAgmaStats();
   const AgmaEvent = GetAgmaSetup();
   const schedules = GetAgmaSchedules();
   const countRegistered = GetAgmaCountRegistered(municipality);
-  
-
+  const registeredOverTime = GetRegisteredOverTime();
   return (
     <div className="w-full  min-h-screen pb-20 place-items-center">
       {/* Headers */}
@@ -47,11 +52,12 @@ const AgmaDashboard = async ({
         <section className="w-full ">
           <AgmaDashboardContainer key={`tab-${tab}`}>
             {tab === "overview" && (
-              <OverViewSection 
-              page={page} 
-              year={year} 
-              barangay={barangay}
-              search={search} />
+              <OverViewSection
+                page={page}
+                year={year}
+                barangay={barangay}
+                search={search}
+              />
             )}
             {tab === "setup" && (
               <section className="w-full h-full">
@@ -64,7 +70,17 @@ const AgmaDashboard = async ({
               </section>
             )}
             {/* Dashboard Content */}
-            {tab === "stats" && <StatisticsCharts registerCountPromise={countRegistered}/>}
+            {tab === "stats" && (
+              <StatisticsCharts>
+                  <Suspense fallback={<ChartSkeleton />}>
+                      <CountRegistered promise={countRegistered} />
+                  </Suspense>
+
+                  <Suspense fallback={<ChartSkeleton />}>
+                      <RegisteredOverTime promise={registeredOverTime} />
+                  </Suspense>
+              </StatisticsCharts>
+            )}
           </AgmaDashboardContainer>
         </section>
       </main>

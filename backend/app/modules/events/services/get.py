@@ -84,7 +84,7 @@ class GetEventServices:
                 "date": scheds.get("event_date").strftime("%a, %b %d, %Y") if scheds.get("event_date") else None,
                 "time": scheds.get("event_date").strftime("%I:%M %p") if scheds.get("event_date") else None,
                 "location": scheds.get("event_location"),
-                "image": f"/{scheds.get("area").split(' ')[-1].lower()}.jpg"
+                "image": f"/{scheds.get('area').split(' ')[-1].lower()}.jpg" if scheds.get("area") else None
             } for scheds in agmaEvent]
 
             return result

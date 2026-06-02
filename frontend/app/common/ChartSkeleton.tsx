@@ -1,13 +1,14 @@
 "use client";
+import {ChartColumnDecreasing} from "lucide-react"
 const ChartSkeleton = () => {
   return (
-    <div className="glass rounded-2xl p-4 w-full h-90 animate-pulse">
+    <div className="bg-base-100 shadow rounded-2xl p-2 w-full h-fit">
       {/* Title */}
-      <div className="h-4 w-32 bg-base-300 rounded mb-4"></div>
+      <div className="h-10 w-1/2 skeleton bg-slate-200 rounded mb-2"></div>
 
       {/* Fake chart circle */}
-      <div className="flex items-center justify-center h-full">
-        <div className="w-35 h-35 rounded-full border-8 border-base-300 border-t-transparent animate-spin"></div>
+      <div className="flex gap-2 items-end w-full justify-center h-full ">
+        <ChartColumnDecreasing className="w-30 h-30 mx-20 my-20 skeleton  p-4 bg-slate-100 text-slate-100 " />
       </div>
     </div>
   );

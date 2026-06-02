@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart, XAxis, YAxis, Tooltip, Bar, BarShapeProps, CartesianGrid, TooltipContentProps } from "recharts";
+import { BarChart, XAxis, YAxis, Tooltip, Bar, BarShapeProps, CartesianGrid, TooltipContentProps,  } from "recharts";
 
 type Data = {
   name?: string;
@@ -51,6 +51,7 @@ const SimpleBarchart = ({ data, xaxisStyle, yaxisStyle, customTooltip}: Props) =
         left: 0,
         bottom: 2,
       }}
+      
     >
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis fontSize={xaxisStyle?.fontSize} fontWeight={xaxisStyle?.fontWeight} angle={xaxisStyle?.angle}  dataKey="name" />

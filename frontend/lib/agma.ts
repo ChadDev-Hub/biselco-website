@@ -27,3 +27,27 @@ export const GetAgmaCountRegistered = async (municipality: string | string[] | u
     data: data,
   };
 };
+
+
+export const GetRegisteredOverTime = async () => {
+  const cookie = await cookies();
+  const accessToken = cookie.get("access_token")?.value;
+  const res = await fetch(`${baseUrl}/v1/agma/statistic/registered_overtime`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    return {
+      status: res.status,
+      error: data.detail,
+    };
+  }
+  return {
+    status: res.status,
+    data: data,
+  };
+}

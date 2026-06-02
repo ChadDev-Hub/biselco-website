@@ -7,9 +7,8 @@ import NavbarTools from "./Tools";
 import Filter from "./Filter";
 import FilterSkeleton from "./FilterSkeleton";
 import PageNationLoading from "../../technical/change-meter/components/pageNationSkeleton";
+import SearchSkeleton from "../../../common/SearchSkeleton";
 import SearchComponent from "./Search";
-import TableSearchSkeleton from "../../../common/SearchSkeleton";
-
 type Props = {
   search: string | string[] | undefined;
   page: string | string[] | undefined;
@@ -29,7 +28,7 @@ const OverViewSection = ({ page, year, barangay, search }: Props) => {
           <Filter data={filters} />
         </Suspense>
         {/* Search */}
-        <Suspense fallback={<TableSearchSkeleton />}>
+        <Suspense fallback={<SearchSkeleton />}>
           <SearchComponent promise={agmaTicketData} />
         </Suspense>
       </NavbarTools>
