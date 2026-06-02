@@ -46,12 +46,13 @@ const MembersTable = ({ data }: Props) => {
   useEffect(() => {
     if (message?.detail === "new_registered"){
       const setTicket = async()=>{
-        const existingData = consumerTickets.filter((ticket)=>ticket.id !== message.new_regs.id);
-        return setConsumerTickets([message.new_regs, ...existingData])};
-
+        setConsumerTickets((prev)=>{
+          const existingData = prev.filter((ticket)=>ticket.id !== message.new_regs.id);
+        return [message.new_regs, ...existingData] 
+        })};
       setTicket();
     }
-  },[message, consumerTickets]);
+  },[message]);
   return (
     <section>
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">

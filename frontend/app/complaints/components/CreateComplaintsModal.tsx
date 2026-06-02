@@ -99,31 +99,38 @@ const CreateComplaints = () => {
         case "Meter Services":
             complaintComponentForm = 
             <MeterComplaintsV1
+            handleClose={handleClose}
             title={complaints} 
             choices={meterIssueChoices} 
             isother={false}/>
       
             break;
         case "Pole & Support Structure":
-            complaintComponentForm = <GenericComplaintV1 
-                            choices={poleIsueChoices} />
+            complaintComponentForm = <GenericComplaintV1
+                            choices={poleIsueChoices}
+                            handleClose={handleClose} />
             break;
         case "Wiring & Cabling":
             complaintComponentForm = <GenericComplaintV1 
-                            choices={wiringIssueChoices} />
+                            choices={wiringIssueChoices}
+                            handleClose={handleClose} />
             break;
         case "Transformer Unit":
             complaintComponentForm = <GenericComplaintV1 
-                            choices={TransformerIssueChoices} />
+                            choices={TransformerIssueChoices}
+                            handleClose={handleClose}
+                             />
             break;
 
         case "Report Illegal Connection":
             complaintComponentForm = <MeterComplaintsV1
+            handleClose={handleClose}
             title={complaints} isother={true}/>
             break;
         case "Other":
             complaintComponentForm = <GenericComplaintV1 
-                            isother={true} />
+                            isother={true}
+                            handleClose={handleClose} />
             break;
         default:
             break;

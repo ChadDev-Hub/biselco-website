@@ -31,3 +31,4 @@ class AgmaStats(BaseModel):
     value:  float | int | str | None = None
     description: Optional[str] = None
     is_percentage: Optional[bool] = None
+

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import { queryConsumer } from "../../../lib/serverFetch";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/app/actions/complaint";
 import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
+import { useAlert } from "@/app/common/alert";
+
 type ConsumerData = {
   account_no: string;
   account_name: string;
@@ -34,20 +36,24 @@ type Props = {
   title: string;
   choices?: string[];
   isother?: boolean;
+  handleClose: () => void;
 };
 
-const MeterComplaintsV1 = ({ choices, isother }: Props) => {
+const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
   // DEFINE STATE VARIABLES------------------------------------------------------
   const [consumer, setConsumer] = useState<ConsumerData[]>([]);
   const [selectedConsumer, setSelectedConsumer] = useState<string>("");
-
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const { showAlert } = useAlert();
+  
   // CREATE FORM HOOK
   const {
     register,
     handleSubmit,
     setValue,
     resetField,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
     setError,
     reset,
     control,
@@ -93,13 +99,16 @@ const MeterComplaintsV1 = ({ choices, isother }: Props) => {
     }
 
     const fetchConsumer = async () => {
+      setIsSearching(true);
       const res = await queryConsumer(debounced);
       if (res.status === 200) {
         setConsumer(res.data);
+        setIsSearching(false);
       }
     };
     fetchConsumer();
   }, [debounced, selectedConsumer, resetField]);
+
   // HANDLE SELECTED CONSUMER
   const selectConsumer = (account: string, geolocation: coordinates) => {
     setSelectedConsumer(account);
@@ -140,14 +149,26 @@ const MeterComplaintsV1 = ({ choices, isother }: Props) => {
     switch (res?.status) {
       case 201:
         reset();
+        setIsSubmitSuccessful(true);
+        break;
+      case 400:
+        reset();
+        setIsSubmitSuccessful(false);
+        handleClose();
+        showAlert(
+          "error",
+          "Sorry your concern didn't submitted please check your Internet Connection",
+        );
         break;
       case 403:
         setError("lat", { message: res.data });
         setError("lon", { message: res.data });
+        setIsSubmitSuccessful(false);
         break;
       case 404:
         setError("lat", { message: res.data });
         setError("lon", { message: res.data });
+        setIsSubmitSuccessful(false);
         break;
     }
   };
@@ -161,7 +182,10 @@ const MeterComplaintsV1 = ({ choices, isother }: Props) => {
           </h1>
         </div>
       ) : (
-        <form className={`overflow-y-auto max-h-[80vh] ${formStyle}`} onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className={`overflow-y-auto max-h-[80vh] ${formStyle}`}
+          onSubmit={handleSubmit(onSubmit)}
+        >
           {/* ACCOUNT NUMBER */}
           <section className="flex flex-col dropdown dropdown-bottom">
             <label className={labelStyle}>Consumer Name</label>
@@ -174,28 +198,35 @@ const MeterComplaintsV1 = ({ choices, isother }: Props) => {
                 required: "Please Enter Account Number",
               })}
             />
-
-            {consumer.length > 0 && (
-              <ul
-                tabIndex={-1}
-                className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52"
-              >
-                {consumer.map((consumer) => (
-                  <li
-                    className="hover:bg-base-300 text-md"
-                    key={consumer.account_no}
-                    onClick={() => {
-                      selectConsumer(
-                        consumer.account_no,
-                        consumer.geolocation.coordinates,
-                      );
-                    }}
-                  >
-                    {consumer.account_name}
-                  </li>
-                ))}
-              </ul>
-            )}
+            
+              {
+                isSearching ? <div className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52">
+                  <span className="skeleton skeleton-text">
+                    Loading...
+                  </span>
+                  </div>
+              :
+              consumer.length > 0 && (
+                <ul
+                  tabIndex={-1}
+                  className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52"
+                >
+                  {consumer.map((consumer) => (
+                    <li
+                      className="hover:bg-base-300 text-md"
+                      key={consumer.account_no}
+                      onClick={() => {
+                        selectConsumer(
+                          consumer.account_no,
+                          consumer.geolocation.coordinates,
+                        );
+                      }}
+                    >
+                      {consumer.account_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             {errors.accountNumber && (
               <p className={errorStyle}>{errors.accountNumber.message}</p>
             )}
@@ -266,15 +297,21 @@ const MeterComplaintsV1 = ({ choices, isother }: Props) => {
               })}
               className={`file-input file-input-sm w-full ${errors.attachment ? inputerrorStyle : ""}`}
             />
-            
+
             {errors.attachment && (
-              <p className={`${errorStyle} self-start`}>{errors.attachment.message}</p>
+              <p className={`${errorStyle} self-start`}>
+                {errors.attachment.message}
+              </p>
             )}
-            {attachment && 
-            <div className="p-2">
-              <ImageViewer image={attachment[0] ? URL.createObjectURL(attachment[0]) : ""} />
-            </div>
-            }
+            {attachment && (
+              <div className="p-2">
+                <ImageViewer
+                  image={
+                    attachment[0] ? URL.createObjectURL(attachment[0]) : ""
+                  }
+                />
+              </div>
+            )}
           </section>
 
           <button

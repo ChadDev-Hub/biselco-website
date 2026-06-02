@@ -171,6 +171,7 @@ export const queryConsumer = async(query?:string)=>{
         next: { revalidate: 300 },
         method:"GET"})
     const data = await res.json()
+    
     if (!res.ok){
         return {
             status: res.status,
@@ -390,7 +391,7 @@ export const GetAgmaStats= async() => {
     if (!res.ok){
         return {
             status: res.status,
-            data: data.detail
+            error: data.detail
         }
     }
     return {

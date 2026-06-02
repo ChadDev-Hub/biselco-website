@@ -18,7 +18,7 @@ const MunicipalityFiter = () => {
       <select
         title="Municipality"
         className="w-full"
-        defaultValue={"all"}
+        defaultValue="all"
         onChange={(e) => handleSelect(e.target.value)}
       >
         <option disabled selected>

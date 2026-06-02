@@ -3,6 +3,7 @@ import HomePageTools from './components/tools';
 import InstallPrompt from './common/InstallPrompt';
 import Events from "./(public)/landing/components/agmaeventContainer";
 import {GetAgmaEvents} from "../lib/serverFetch";
+import {Suspense} from 'react';
 export default function CooperativeHome() {
   const agmaEvent = GetAgmaEvents();
   return (
@@ -15,7 +16,10 @@ export default function CooperativeHome() {
         <HomePageTools/>
         {/* Events */}
         <section className="w-full space-y-3 mt-10">
-          <Events event={agmaEvent}/>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Events event={agmaEvent}/>
+          </Suspense>
+          
         </section>
         
       </main>

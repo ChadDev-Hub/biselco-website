@@ -25,7 +25,7 @@ const Landing = () => {
         </section>
 
         {/* VISION AND MISSION SECTION */}
-        <section className="py-4 w-full  bg-center bg-blend-overlay bg-cover  h-full bg-[url(/biselco_building.jpeg)] bg-no-repeat">
+        <section className="py-4 w-full  bg-center bg-blend-overlay bg-cover  h-full  bg-no-repeat">
           <VisionMission />
         </section>
 

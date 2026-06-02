@@ -1,7 +1,8 @@
 "use client";
 import SimpleBarChart from "@/app/common/Barchart";
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { TooltipContentProps } from "recharts";
+import { useWebsocket } from "@/app/utils/websocketprovider";
 type PromiseType = {
   status: number;
   data?: CountRegistered[];
@@ -38,11 +39,30 @@ const RegisteredCountCustomTooltip = ({
 };
 const CountRegistered = ({ promise }: Props) => {
   const data = use(promise);
+  const {message} = useWebsocket();
+  const [countRegistered, setCountRegistered] = useState<CountRegistered[]>([]);
+  useEffect(()=>{
+    const setIntialData = async () => {
+      setCountRegistered(data.data || []);
+    }
+    setIntialData();
+  },[data]);
+  
+
+  // UPDATE COUNT REGISTERED IF NEW MESSAGE ARRIVES
+  useEffect(()=>{
+    if (message?.detail === "new_registered"){
+      const update = async () => {
+        setCountRegistered(message.count_per_village);
+      };
+      update();
+    }
+  },[message]);
   return (
     <div className="bg-base-100 rounded-box shadow-md p-2">
       <h2 className="text-lg font-bold">Registered Count</h2>
       <SimpleBarChart
-        data={data.data}
+        data={countRegistered}
         xaxisStyle={{ fontSize: 8, angle: -45, fontWeight: "bold" }}
         yaxisStyle={{ fontSize: 8 }}
         customTooltip={RegisteredCountCustomTooltip}

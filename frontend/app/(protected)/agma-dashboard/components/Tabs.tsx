@@ -21,7 +21,7 @@ const Tabs = ({ tabs, activeTab }: Props) => {
             key={tab.value}
             scroll={false}
             shallow={true}
-            className={`tab tab-lg ${activeTab === tab.value ? "tab-active bg-base-200 rounded-box" : ""}`}
+            className={`tab tab-lg ${activeTab === tab.value ? "tab-active  bg-base-300 rounded-box inset-shadow-sm inset-shadow-slate-500" : ""}`}
           >
             {tab.label}
           </Link>
