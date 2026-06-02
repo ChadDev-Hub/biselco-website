@@ -78,10 +78,6 @@ async def create_complaints(
     get_dashboard_services: GetDashboardServices = Depends(GetDashboardServices)
     
 ):
-    uploaded_url = None
-    if attachment:
-        uploaded_url = await upload_image(file=attachment, folder="complaints")
-
     data = CreateComplaints(
         account_no=accountNumber,
         subject=issue,
@@ -89,11 +85,13 @@ async def create_complaints(
         location=location.geom,
         village=location.village,
         municipality=location.municipality,
-        imageurl=uploaded_url,
         user_id=str(user.id)
     )
     
-    results = await post_service.post_new_complaint(data=data, is_meter_complaint=is_meter_complaint)
+    results = await post_service.post_new_complaint(
+        data=data,
+        is_meter_complaint=is_meter_complaint,
+        image=attachment)
     new_stats = await get_dashboard_services.get_complaints_stats()
     results['stats'] = new_stats
     

@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, UploadFile
 from sqlalchemy import select
 from ..model.complaints import Complaints
 from ..model.status_name import ComplaintsStatusName
@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ..schema.requests_model import CreateComplaints
 from ....common.total_page import get_total_page
+from ....dependencies.bucket3 import upload_image
 from ..services.get2 import GetServices
 from typing import Optional
 
@@ -17,7 +18,7 @@ class PostServices:
         self.session = get_services.session
         self.get_services = get_services
         self.PAGESIZE = get_services.PAGESIZE
-
+     
     # GET RECEIVE STATUS NAME
     async def get_status_name(self):
         self.received = await self.get_services.get_seleted_status_name(status_id=1)
@@ -45,7 +46,11 @@ class PostServices:
         return self.description
 
     # CREATE COMPLAINTS
-    async def post_new_complaint(self, data: CreateComplaints, is_meter_complaint: bool = False):
+    async def post_new_complaint(
+        self, 
+        data: CreateComplaints,
+        is_meter_complaint: bool = False,
+        image:Optional[UploadFile] = None):
         try:
             self.received = await self.get_status_name()
             if is_meter_complaint:
@@ -72,10 +77,11 @@ class PostServices:
                     complaint_id=new_complaints.id
                 )
                 self.session.add(status_updates)
-            if data.imageurl:
+            if image:
+                image_url = await upload_image(image, "complaints")
                 images = ComplaintsImage(
                     complaints_id=new_complaints.id,
-                    image_url=data.imageurl
+                    image_url=image_url
                 )
                 self.session.add(images)
             await self.session.commit()

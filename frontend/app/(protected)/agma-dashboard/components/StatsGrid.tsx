@@ -1,12 +1,13 @@
-import React, { use } from "react";
+"use client"
+import  { use, useState, useEffect } from "react";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
 import { Users, CalendarDays, BadgePercent, CalendarArrowUp } from "lucide-react";
 import CustomIcon from "./customeIcon";
 import { redirect } from 'next/navigation';
+import { useWebsocket } from '@/app/utils/websocketprovider';
 
 type Stat = {
-  id: number;
   title: string;
   description: string;
   value: number;
@@ -19,11 +20,34 @@ type Props = {
 
 type PromiseType = {
   status: number;
-  data: Stat[] | string;
+  data?: Stat[]
+  error?: string
 };
 
 const StatsGrid = ({ stats }: Props) => {
   const statsData = use(stats);
+  const { message } = useWebsocket();
+  if(statsData.status === 403) redirect("/")
+  const [statistics, setStatistics] = useState<Stat[]>([]);
+
+
+  useEffect(()=>{
+    const setInitialData = async () => {
+      setStatistics(statsData.data || []);
+    }
+    setInitialData();
+  },[statsData])
+
+
+  useEffect(()=>{
+    const newStats = async () => {
+      if (message?.detail === "new_registered"){
+        setStatistics(message.new_stats);
+      }
+    }
+    newStats();
+  },[message])
+
   const icon = (title: string) => {
     switch (title) {
       case "Total":
@@ -73,11 +97,11 @@ const StatsGrid = ({ stats }: Props) => {
     }
   };
 
-  if(statsData.status === 403) redirect("/")
+  
   return (
     <StatsContainer>
-      {Array.isArray(statsData.data) &&
-        statsData.data.map((stat, index) => (
+      {Array.isArray(statistics) &&
+        statistics.map((stat, index) => (
           <StatsCard
             key={index}
             description={stat.description}

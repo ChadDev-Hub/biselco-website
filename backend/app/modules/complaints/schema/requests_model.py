@@ -22,7 +22,6 @@ class CreateComplaints(BaseModel):
     location: WKTElement
     village: str
     municipality: str
-    imageurl: Optional[str] =None
     
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 

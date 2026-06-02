@@ -12,7 +12,7 @@ from ...events.schema.requests import AgmaEventSetup
 from sqlalchemy.dialects.postgresql import insert
 from ...websocket.websocket_manager import manager
 from ...user.service.get_user import GetUserServices
-from ..schema.response import AgmaSetup, RegisteredOvertime, AgmaStats
+from ..schema.response import AgmaSetup, RegisteredOvertime, AgmaStats, AgmaCountRegistered
 from uuid import uuid4
 
 
@@ -79,7 +79,7 @@ class PostAgmaRegistrationService:
                             "detail": "new_registered",
                             "new_regs": new_registered,
                             "new_stats": [AgmaStats(**stat).model_dump(mode="json") for stat in new_stats],
-                            "count_per_village": count_per_village,
+                            "count_per_village": [AgmaCountRegistered(**item).model_dump(mode="json") for item in count_per_village],
                             "registered_overtime": [RegisteredOvertime(**item).model_dump(mode="json") for item in registered_overtime]
                             }
                     

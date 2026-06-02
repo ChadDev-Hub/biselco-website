@@ -6,6 +6,8 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/app/actions/complaint";
 import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
+import { useAlert } from '../../common/alert';
+import { useState } from "react";
 
 
 // Define the type for form data
@@ -21,16 +23,19 @@ type ComplaintFormData = {
 type Props = {
   choices?: string[];
   isother?: boolean;
+  handleClose: () => void;
 };
 
-const GenericComplaintV1 = ({ choices, isother }: Props) => {
+const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
+  const {showAlert} = useAlert()
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   // DEFINE STATE VARIABLES------------------------------------------------------
   // CREATE FORM HOOK
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting, },
     setError,
     reset,
     control,
@@ -79,11 +84,19 @@ const GenericComplaintV1 = ({ choices, isother }: Props) => {
     if (data.attachment?.[0]) {
       formData.append("attachment", data.attachment[0]);
     }
+
     const res = await PostComplaints(formData);
     switch (res?.status) {
       case 201:
         reset();
+        setIsSubmitSuccessful(true);
         break;
+      case 400:
+        reset();
+        showAlert("error", "Sorry your concerns didn't submitted please Check your Internet Connection");
+        handleClose()
+        setIsSubmitSuccessful(false);
+        break; 
       case 403:
         setError("lat", { message: res.data });
         setError("lon", { message: res.data });
@@ -94,7 +107,6 @@ const GenericComplaintV1 = ({ choices, isother }: Props) => {
         break;
     }
   };
-  console.log(isSubmitSuccessful);
   return (
     <>
       {isSubmitSuccessful ? (
@@ -189,7 +201,7 @@ const GenericComplaintV1 = ({ choices, isother }: Props) => {
             type="submit"
           >
             {isSubmitting ? (
-              <span className="skeletonskeleton-text">Submitting...</span>
+              <span className="skeleton skeleton-text">Submitting...</span>
             ) : (
               <span>Submit</span>
             )}

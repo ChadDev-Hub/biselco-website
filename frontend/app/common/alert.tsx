@@ -63,7 +63,7 @@ const AlertComponent = ({ children }: Props) => {
       {alert.show && (
         <div
           role="alert"
-          className={`alert alert-${alert.alertType} z-100 fixed right-1/2 min-w-60 translate-x-1/2 top-20 text-sm md:text-md lg:text-md`}
+          className={`alert alert-${alert.alertType} z-50 fixed right-1/2 min-w-60 translate-x-1/2 top-20 text-sm md:text-md lg:text-md`}
         >
           {AlertSvg(alert.alertType)}
           <span className={`w-full text-${alert.alertType}`}>{alert.message}</span>

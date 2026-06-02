@@ -29,14 +29,14 @@ const Page = () => {
 
   const AgmaSchedules = GetAgmaRegistrationSchedules();
   return (
-    <article className="w-full min-h-screen bg-linear-to-br from-slate-100 via-indigo-950 to-slate-900 text-slate-100 antialiased pb-16">
+    <article className="w-full min-h-screen bg-linear-to-br  from-slate-100 via-purple-800 to-blue-400 text-slate-100 antialiased pb-16">
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-cover bg-center bg-no-repeat  flex flex-col justify-between bg-[url(/agma_image.jpg)] shadow-2xl">
+      <section className="relative overflow-hidden bg-cover bg-center bg-no-repeat  flex flex-col justify-between  mask-b-from-60% mask-b-to-90%  bg-[url(/agma_image.jpg)] shadow-md">
         {/* Modern Gradient Overlay */}
         <div className="absolute inset-0  bg-linear-to-r from-slate-200/45 via-indigo-950/50 to-transparent z-0" />
 
         {/* Top Navigation Row */}
-        <div className="w-full backdrop-blur-md bg-slate-900/40 border-b border-white/5 z-10 px-4 py-2">
+        <div className="w-full backdrop-blur-md bg-base-100 border-b z-50  px-4 py-2">
           <Return />
         </div>
 

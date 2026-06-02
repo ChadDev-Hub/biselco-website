@@ -11,16 +11,16 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 import AnimatedBackground from "./components/AnimatedBackground";
 import EventsLoadingFallback from "./components/EventsLoadingFallback";
 import { Suspense } from "react";
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
 
   return (
-    <div className="bg-linear-to-b from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
+    <div className="bg-linear-to-b  from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
       <main className="w-full">
         {/* HERO SECTION */}
-        <section className="w-full relative">
+        <section className="w-full relative ">
           <Hero>
             <McoGoogleLogin />
           </Hero>
@@ -32,16 +32,19 @@ export default function Landing() {
         </AnimatedSection>
 
         {/* VISION AND MISSION SECTION */}
-        <AnimatedSection className="py-12 px-4 md:py-20 w-full bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden">
-
+        <AnimatedSection className="py-12 px-4 md:py-20 w-full bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden ">
           <AnimatedBackground variant="subtle" />
-          <Image
-          loading="eager"
-          src="/lineworker.png"
-          fill
-          alt="lineworker"
-          className=" mask-radial-from-30% mask-radial-at-center mask-radial-to-70%"
-          />
+          <div className="absolute  inset-0 z-0">
+            <Image
+              loading="eager"
+              src="/lineworker.png"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              alt="lineworker"
+              className="relative mask-radial-from-30% mask-radial-at-center mask-radial-to-70%"
+            />
+          </div>
+
           <div className="relative z-10">
             <VisionMission />
           </div>
@@ -54,7 +57,6 @@ export default function Landing() {
 
         {/* EVENTS SECTION */}
         <AnimatedSection className="relative py-12 px-4 bg-linear-to-t from-blue-300 to-blue-100">
-          
           <AnimatedBackground variant="animated" />
 
           <div className="relative z-10 w-full ">

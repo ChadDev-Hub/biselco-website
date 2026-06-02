@@ -64,7 +64,7 @@ const AgmaDashboard = async ({
                 <Suspense fallback={<SetupSkeleton />}>
                   <SetupSection initialData={AgmaEvent} />
                 </Suspense>
-                <Suspense fallback={<span>loading</span>}>
+                <Suspense fallback={<SetupSkeleton />}>
                   <Schedules promiseData={schedules} />
                 </Suspense>
               </section>
