@@ -6,6 +6,7 @@ export async function GetPrimaryLines() {
         cache: "no-store"
     })
     const data = await res.json()
+    await new Promise((resolve) => setTimeout(resolve, 3000))
     if (!res.ok) {
         return {
             status: res.status,
