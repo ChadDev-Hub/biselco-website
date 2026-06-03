@@ -284,7 +284,7 @@ class GetAgmaRegistrationService:
         try:
             registered = (select(
                 AgmaRegistration.account_no,
-                func.date(AgmaRegistration.timestamped).label("date"),
+                func.date(func.timezone("Asia/Manila",AgmaRegistration.timestamped)).label("date"),
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)

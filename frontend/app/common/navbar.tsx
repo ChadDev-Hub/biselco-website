@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export default function NavBar() {
   const currentRouter = usePathname();
-  const invisibleRoutes = ["/landing", "/biselco-admin-login"];
+  const invisibleRoutes = ["/landing", "/biselco-admin-login", "/agma-registration", "/agma-registration/registered"];
   const isLanding = invisibleRoutes.includes(currentRouter);
   const { user } = useAuth();
   const [open, setOpen] = useState(false);

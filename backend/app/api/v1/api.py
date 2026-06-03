@@ -8,7 +8,7 @@ from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
 from .routes import landing, login, logout, meter, news, signup, user, technical_form, consumers
 from ...modules.events.route import events_router
-
+from ...modules.gis.distribution_lines.route import distribution_lines
 
 
 
@@ -28,4 +28,5 @@ router.include_router(consumers.router)
 router.include_router(new_connection_route.router)
 router.include_router(agma.router)
 router.include_router(events_router.router)
+router.include_router(distribution_lines.router)
 
