@@ -1,16 +1,6 @@
+import {FeatureCollection,Geometry} from "geojson";
 
-
-export type Transformers = {
-  type: string;
-  features: {
-    type: string;
-    geometry: {
-      type: string;
-      coordinates: number[][];
-    };
-    properties: TransformerProperties;
-  }[];
-};
+export type Transformers = FeatureCollection<Geometry, TransformerProperties>;
 
 
 

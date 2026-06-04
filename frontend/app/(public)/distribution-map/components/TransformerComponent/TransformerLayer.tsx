@@ -1,138 +1,117 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Map from "ol/Map";
-import VectorSource from "ol/source/Vector";
-import Cluster from "ol/source/Cluster";
-import Icon from "ol/style/Icon";
-import VectorLayer from "ol/layer/Vector";
-import GeoJSON from "ol/format/GeoJSON";
-import Feature from "ol/Feature";
-import Style from "ol/style/Style";
-import CircleStyle from "ol/style/Circle";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Text from "ol/style/Text";
-import { Zap } from "lucide-react";
+import { useEffect, use } from "react";
+import { useMap } from "../MapProvider";
+import { PromiseType } from "../../../../../types/promise";
 import { Transformers } from "@/types/transformer";
-import { renderToStaticMarkup } from "react-dom/server";
+
 type Props = {
-  mapRef: Map | null;
-  data: Transformers | undefined;
+  promise: Promise<PromiseType<Transformers>>;
 };
 
-const batteryIconUrl = (fill: string = "gray") => {
-  const markup = renderToStaticMarkup(
-    <Zap className="text-white" size={20}  strokeWidth={2}  />,
-  );
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24"
-  width="24"
-  height="24">
-      ${markup}
-    </svg>
-  `;
-
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-};
-
-const createSingleStyle = (geometry, color:string) =>
-  new Style({
-    geometry,
-    image: new Icon({
-      src: batteryIconUrl(),
-      scale: 1,
-      anchor: [0.5, 0.5],
-      anchorXUnits: "fraction",
-      anchorYUnits: "fraction",
-    }),
-  });
-
-const createClusterStyle = (size: number) =>
-  new Style({
-    image: new CircleStyle({
-      radius: 18,
-      fill: new Fill({
-        color: "rgba(0, 123, 255, 0.85)",
-      }),
-      stroke: new Stroke({
-        color: "#fff",
-        width: 2,
-      }),
-    }),
-    text: new Text({
-      text: String(size),
-      fill: new Fill({ color: "#fff" }),
-      font: "bold 12px sans-serif",
-    }),
-  });
-
-export default function DistributionTransformer({ mapRef, data }: Props) {
-  const sourceRef = useRef<VectorSource | null>(null);
-  const clusterRef = useRef<Cluster | null>(null);
-  const layerRef = useRef<VectorLayer | null>(null);
+const TransformerLayer = ({ promise }: Props) => {
+  const data = use(promise);
+  const mapRef = useMap();
 
   useEffect(() => {
-    if (!mapRef || !data) return;
+    const map = mapRef?.current;
+    if (!map || !data?.data) return;
 
-    const format = new GeoJSON();
+    const loadIcon = async () => {
+      if (map.hasImage("custom-marker")) return;
 
-    const features = format.readFeatures(data, {
-      featureProjection: "EPSG:3857",
-      dataProjection: "EPSG:4326",
-    });
+      const response = await map.loadImage("/icons/transformer.svg");
 
-    // cleanup old layer first (important)
-    if (layerRef.current) {
-      mapRef.removeLayer(layerRef.current);
-    }
+      if (!response?.data) return;
 
-    // reuse or create source
-    if (!sourceRef.current) {
-      sourceRef.current = new VectorSource();
-    }
-    sourceRef.current.clear();
-    sourceRef.current.addFeatures(features);
+      map.addImage("custom-marker", response.data);
+    };
+    loadIcon();
+    const sourceId = "transformers";
+    const layerId = "transformers-layer";
+    const unclusteredId = "transformers-unclustered";
+    const clusterCountId = "transformers-cluster-count";
 
-    // reuse or create cluster
-    if (!clusterRef.current) {
-      clusterRef.current = new Cluster({
-        distance: 100,
-        source: sourceRef.current,
-      });
-    }
+    const onload = () => {
+      if (!map) return;
+      if (!data.data) return;
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+          cluster: true,
+          type: "geojson",
+          data: data.data,
+        });
+      }
+      if (!map.getLayer(layerId)) {
+        map.addLayer({
+          id: layerId,
+          type: "circle",
+          source: sourceId,
+          paint: {
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "#51bbd6",
+              100,
+              "#f1f075",
+              750,
+              "#f28cb1",
+            ],
+            "circle-radius": [
+              "step",
+              ["get", "point_count"],
+              20,
+              100,
+              30,
+              750,
+              40,
+            ],
+          },
+        });
+      }
+      if (!map.getLayer(clusterCountId)) {
+        map.addLayer({
+          id: clusterCountId,
+          type: "symbol",
+          source: sourceId,
+          layout: {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 12,
+          },
+          paint: {
+            "text-color": "#fff",
+          },
+        });
+      }
 
-    const clusterSource = clusterRef.current;
-
-    const layer = new VectorLayer({
-      source: clusterSource,
-      style: (feature) => {
-        const clusteredFeatures = feature.get("features") as Feature[];
-        const size = clusteredFeatures.length;
-
-        if (size === 1) {
-          const original = clusteredFeatures[0];
-          const props = original.getProperties();
-          const geom = original.getGeometry();
-          return createSingleStyle(geom);
-        }
-
-        return createClusterStyle(size);
-      },
-    });
-
-    layerRef.current = layer;
-    mapRef.addLayer(layer);
-
-    return () => {
-      if (layerRef.current) {
-        mapRef.removeLayer(layerRef.current);
-        layerRef.current = null;
+      if (!map.getLayer(unclusteredId)) {
+        map.addLayer({
+          id: unclusteredId,
+          type: "symbol",
+          source: sourceId,
+          filter: ["!", ["has", "point_count"]],
+          layout: {
+            "icon-image": "custom-marker",
+            "icon-allow-overlap": true,
+            "icon-size": 1,
+          },
+        });
       }
     };
-  }, [mapRef, data]);
 
+    map.on("load", onload);
+
+    return () => {
+      if (map && map.getStyle()) {
+        map.removeLayer(layerId);
+        map.removeLayer(unclusteredId);
+        map.removeLayer(clusterCountId);
+        map.removeSource(sourceId);
+      }
+    };
+  }, [data, mapRef]);
   return null;
-}
+};
+
+export default TransformerLayer;
