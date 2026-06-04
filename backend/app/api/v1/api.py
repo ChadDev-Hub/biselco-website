@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from ...modules.complaints.route import complaints
-
+from ...modules.gis.distribution_transformer.route import distribution_transformer
 from ...modules.technical.change_meter.route import change_meter
 from ...modules.agma.route import agma
 from ...modules.websocket.route import websocket
@@ -29,4 +29,4 @@ router.include_router(new_connection_route.router)
 router.include_router(agma.router)
 router.include_router(events_router.router)
 router.include_router(distribution_lines.router)
-
+router.include_router(distribution_transformer.router)

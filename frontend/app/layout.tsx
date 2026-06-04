@@ -12,6 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
 import { getCurrentUser } from '@/lib/serverFetch';
 import type { Viewport } from "next"
+import "maplibre-gl/dist/maplibre-gl.css";
 import PullToRefresh from './common/PulltoRefresh';
 
 
