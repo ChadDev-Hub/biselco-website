@@ -11,14 +11,15 @@ const Page = () => {
     const primaryLines = GetPrimaryLines()
     const transformers = GetTransformers()
   return (
-    <div className="h-screen w-screen">
+    <div className="h-screen w-full">
       <MapProvider>
-        <Suspense fallback={<LoadingMap/>}>
-            <PrimaryLineLayer promise={primaryLines} />
-        </Suspense>
         <Suspense fallback={<LoadingMap/>}>
             <TransformerLayer promise={transformers} />
         </Suspense>
+        <Suspense fallback={<LoadingMap/>}>
+            <PrimaryLineLayer promise={primaryLines} />
+        </Suspense>
+        
     </MapProvider>
 
     </div>

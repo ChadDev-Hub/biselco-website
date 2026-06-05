@@ -28,7 +28,9 @@ const PrimaryLineLayer = ({ promise }: Props) => {
         data: geojson,
       });
     }
-
+    map.on("load", async()=>{
+      
+    })
     if (!map.getLayer(layerId)) {
       map.addLayer({
         id: layerId,

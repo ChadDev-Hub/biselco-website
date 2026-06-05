@@ -18,15 +18,8 @@ async def register_agma(
     data: AgmaRegistrationRequest = Form(...),
     post_agma_registration_service: PostAgmaRegistrationService = Depends(
         PostAgmaRegistrationService),
-):
-    registration_data = AgmaRegistrationRequest(
-        account_no=data.account_no,
-        name=data.name,
-        mobile_no=data.mobile_no,
-        image=data.image,
-        signature=data.signature
-    )
-    return await post_agma_registration_service.register_agma(data=registration_data)
+):  
+    return await post_agma_registration_service.register_agma(data=data)
 
 
 @router.get("/registered", status_code=status.HTTP_200_OK)

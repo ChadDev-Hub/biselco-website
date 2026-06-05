@@ -15,7 +15,7 @@ import { GetAgmaCountRegistered, GetRegisteredOverTime } from "../../../lib/agma
 import CountRegistered from "./components/CountRegistered";
 import RegisteredOverTime from "./components/RegisteredOvertime";
 import ChartSkeleton from '../../common/ChartSkeleton';
-
+import SpinNavigation from "../agma-spin-wheel/components/spin-navigation";
 
 const AgmaDashboard = async ({
   searchParams,
@@ -30,7 +30,7 @@ const AgmaDashboard = async ({
   const countRegistered = GetAgmaCountRegistered(municipality);
   const registeredOverTime = GetRegisteredOverTime();
   return (
-    <div className="w-full  min-h-screen pb-20 place-items-center">
+    <div className="w-full min-h-screen pb-20 place-items-center">
       {/* Headers */}
       <Headers
         title="Agma Dashboard"
@@ -82,7 +82,10 @@ const AgmaDashboard = async ({
               </StatisticsCharts>
             )}
           </AgmaDashboardContainer>
+          
         </section>
+        
+        <SpinNavigation />
       </main>
     </div>
   );

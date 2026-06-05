@@ -7,6 +7,7 @@ class AgmaRegistrationRequest(BaseModel):
     mobile_no: str
     image:UploadFile
     signature:UploadFile
+    sample_bill:UploadFile
 
 
 class AgmaValidationRequest(BaseModel):

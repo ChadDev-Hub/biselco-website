@@ -24,5 +24,7 @@ class AgmaRegistration(BaseModel):
     image:Mapped[str] = mapped_column(type_=Text, nullable=False)
     signature:Mapped[str] = mapped_column(type_=Text, nullable=False)
     timestamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
+    sample_bill: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    is_winner: Mapped[bool] = mapped_column(type_=Boolean, nullable=True, default=False)
     
     consumer: Mapped[ConsumerMeter] = relationship("ConsumerMeter", back_populates="agma")
