@@ -22,7 +22,8 @@ const PrimaryLineLayer = ({ promise }: Props) => {
     const sourceId = "primary-lines";
     const layerId = "primary-lines-layer";
     const geojson = initialData.data;
-    if (!map.getSource(sourceId)) {
+    const setup = async() => {
+      if (!map.getSource(sourceId)) {
       map.addSource(sourceId, {
         type: "geojson",
         data: geojson,
@@ -45,7 +46,13 @@ const PrimaryLineLayer = ({ promise }: Props) => {
           "line-width": 2,
         },
       });
+    }}
+    if(map.isStyleLoaded()){
+      setup();
+    }else{
+      map.once("load", setup)
     }
+    
 
     // SHOW POPUP
     const handleMapClick = (

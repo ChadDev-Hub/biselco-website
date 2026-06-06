@@ -18,6 +18,7 @@ COPY . .
 RUN apt-get update && apt-get install -y tzdata
 ENV TZ=Asia/Manila
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+CMD ["gunicorn", "app.main:app","-k","uvicorn.workers.UvicornWorker","-w","4", "--bind","0.0.0.0:8001"]
 
 EXPOSE 8001
