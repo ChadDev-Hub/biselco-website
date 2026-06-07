@@ -18,7 +18,7 @@ async def register_agma(
     data: AgmaRegistrationRequest = Form(...),
     post_agma_registration_service: PostAgmaRegistrationService = Depends(
         PostAgmaRegistrationService),
-):  
+):
     return await post_agma_registration_service.register_agma(data=data)
 
 
@@ -43,9 +43,10 @@ async def downlaod_ticket(
 
 @router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[AgmaStats])
 async def complaints_stats(
-    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+    get_agma_registration_service: GetAgmaRegistrationService = Depends(
+        GetAgmaRegistrationService),
     user: UserModel = Depends(get_current_user)
-    ):
+):
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
@@ -54,26 +55,30 @@ async def complaints_stats(
 
 @router.get("/registered/all", status_code=status.HTTP_200_OK)
 async def get_all(
-    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user),
-    page: Optional[int] = Query(None),
-    year: Optional[int] = Query(None),
-    barangay:Optional[str] = Query(None),
-    search: Optional[str] = Query(None)):
-    
+        get_agma_registration_service: GetAgmaRegistrationService = Depends(
+            GetAgmaRegistrationService),
+        user: UserModel = Depends(get_current_user),
+        page: Optional[int] = Query(None),
+        year: Optional[int] = Query(None),
+        barangay: Optional[str] = Query(None),
+        search: Optional[str] = Query(None)):
+
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
     return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search)
 
+
 @router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
 async def get_agma_filter(
-    get_agma_registration_service: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user)):
+        get_agma_registration_service: GetAgmaRegistrationService = Depends(
+            GetAgmaRegistrationService),
+        user: UserModel = Depends(get_current_user)):
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
     return await get_agma_registration_service.get_filters()
+
 
 @router.post("/setup", status_code=status.HTTP_201_CREATED)
 async def setup(
@@ -87,6 +92,7 @@ async def setup(
     res = await post_services.setup_agma_event(data=data)
     return res
 
+
 @router.get("/setup", status_code=status.HTTP_200_OK, response_model=AgmaSetup)
 async def get_setup(
     get_services=Depends(GetAgmaRegistrationService),
@@ -97,9 +103,12 @@ async def get_setup(
                             detail="Admin Only Transaction Allowed")
     res = await get_services.get_agma_setup()
     return res
+
+
 @router.get("/statistic/count_registered", status_code=status.HTTP_200_OK, response_model=List[AgmaCountRegistered])
 async def get_graph(
-    get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+    get_services: GetAgmaRegistrationService = Depends(
+        GetAgmaRegistrationService),
     user: UserModel = Depends(get_current_user),
     municipality: Optional[str] = Query(None)
 ):
@@ -108,7 +117,16 @@ async def get_graph(
                             detail="Admin Only Transaction Allowed")
     return await get_services.get_graph_data(municipality=municipality)
 
-@router.get("/statistic/registered_overtime",status_code=status.HTTP_200_OK, response_model=List[RegisteredOvertime])
+
+@router.get("/statistic/registered_overtime", status_code=status.HTTP_200_OK, response_model=List[RegisteredOvertime])
 async def get_registered_overtime(
-    get_services:GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_services.get_registered_overtime()
+
+
+@router.get("/raffle/spin")
+async def spin(
+    get_services: GetAgmaRegistrationService = Depends(
+        GetAgmaRegistrationService),
+):
+    return await get_services.raffle_spin()

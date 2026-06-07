@@ -331,3 +331,21 @@ class GetAgmaRegistrationService:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def raffle_spin(self):
+        ENTRY_LIMIT = 3
+        try:
+            pendin_winner = (select(AgmaRegistration.id).order_by(func.random()).limit(1)).cte("pending_winner")
+            entries = (select(AgmaRegistration.id).limit(ENTRY_LIMIT)).cte("entries")
+            union_stmt = union_all(select(pendin_winner.c.id), select(entries.c.id)).subquery()
+            entry_union = (await self.session.execute(select(union_stmt.c.id).order_by(func.random()))).scalars().all()
+            winner_id = (await self.session.execute(select(pendin_winner.c.id))).scalars().one()
+            return {
+                "entries": entry_union,
+                "winner": winner_id
+            }
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            

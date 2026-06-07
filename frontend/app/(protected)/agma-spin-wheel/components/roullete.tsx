@@ -6,7 +6,7 @@ import { Zap, Trophy, X } from "lucide-react";
 const SIZE = 500;
 const RADIUS = 240;
 
-const entries = ["3030200121", "1010010123","1010040760","2020080634","1010010931","1010091095","1010010123","1010010123","1010010123","1010010123","2020120347","1010240022"];
+const entries = Array.from({length: 100}, (_,index)=> `Consumer ${index}`)
 
 // Modern color palette matrix for a rich gradient sequence
 const COLORS = [
