@@ -1,4 +1,5 @@
 "use server";
+import { serverFetchAutoRefresh } from './actionWraper';
 const baseUrl = process.env.BASESERVERURL;
 
 
@@ -44,4 +45,12 @@ export const DownloadAgmaTicket = async (id:string, url:string) => {
         status: res.status,
         data: blob,
     };
+}
+
+export const AgmaSpinRoulette = async()=>{
+    const res = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/agma/raffle/spin`,
+        "POST"
+    )
+    return res
 }

@@ -7,6 +7,7 @@ import { useWebsocket } from "@/app/utils/websocketprovider";
 import { useAlert } from "../../../common/alert";
 import { event } from "next/dist/build/output/log";
 
+
 type PromiseType<T> = {
   status: number;
   error?: string;
@@ -15,7 +16,7 @@ type PromiseType<T> = {
 type EventSchedules = {
   id?: string | null;
   area?: string;
-  event_location?: string;
+  event_location: string | null;
   event_date: string | null;
 };
 type Props = {
@@ -26,25 +27,25 @@ const Municipality: EventSchedules[] = [
   {
     id: null,
     area: "Municipality of Coron",
-    event_location: "",
+    event_location: null,
     event_date: null,
   },
   {
     id: null,
     area: "Municipality of Busuanga",
-    event_location: "",
+    event_location: null,
     event_date: null,
   },
   {
     id: null,
     area: "Municipality of Culion",
-    event_location: "",
+    event_location: null,
     event_date: null,
   },
   {
     id: null,
     area: "Municipality of Linapacan",
-    event_location: "",
+    event_location: null,
     event_date: null,
   },
 ];
@@ -101,8 +102,12 @@ const Schedules = ({ promiseData }: Props) => {
   }, [message, processedEvent, setValue]);
 
   const onSubmit: SubmitHandler<FormType> = async (data) => {
-    const scheduleData = data.schedules;
-    const res = await AgmaEventSchedules(scheduleData);
+    
+    const payload = data.schedules.map((sched)=>({
+      ...sched,
+      event_date: sched.event_date ? new Date(sched.event_date).toISOString() : null
+    }))
+    const res = await AgmaEventSchedules(payload);
    
     switch (res?.status) {
       case 404:

@@ -127,7 +127,7 @@ type NewAgmaRegistered = {
 type EventSchedules = {
   id?: string | null;
   area?: string;
-  event_location?: string;
+  event_location: string | null;
   event_date: string | null;
 };
 

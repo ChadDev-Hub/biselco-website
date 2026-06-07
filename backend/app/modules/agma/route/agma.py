@@ -9,6 +9,7 @@ from ..services.screenshot import generate_ticket
 from ...events.schema.requests import AgmaEventSetup
 from ..schema.response import AgmaSetup, AgmaCountRegistered, RegisteredOvertime, AgmaStats
 from typing import Optional, List
+from ..schema.response import AgmaSpin
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -123,8 +124,13 @@ async def get_registered_overtime(
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_services.get_registered_overtime()
 
+@router.get("/raffle/initial_entries", status_code=status.HTTP_200_OK, response_model=List[str])
+async def get_initial_raffle_entries(
+        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    return await get_services.get_initial_raffle_entries()
 
-@router.get("/raffle/spin")
+
+@router.post("/raffle/spin", status_code=status.HTTP_200_OK, response_model=AgmaSpin )
 async def spin(
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),

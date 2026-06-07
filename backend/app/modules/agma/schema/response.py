@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date, time
-
+from typing import List
 
 
 
@@ -32,3 +32,7 @@ class AgmaStats(BaseModel):
     description: Optional[str] = None
     is_percentage: Optional[bool] = None
 
+class AgmaSpin(BaseModel):
+    entries: List[str];
+    pending_winner: str;
+    pending_winner_idx: int;

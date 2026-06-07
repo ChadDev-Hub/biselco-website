@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useState} from "react";
+import { useMemo, useRef, useState, use} from "react";
 import { Zap, Trophy, X } from "lucide-react";
+import { AgmaSpinRoulette } from '../../../actions/agma';
+import { useRouletteSound } from './rouletSound';
+
 
 const SIZE = 500;
 const RADIUS = 240;
 
-const entries = Array.from({length: 100}, (_,index)=> `Consumer ${index}`)
 
 // Modern color palette matrix for a rich gradient sequence
 const COLORS = [
@@ -45,14 +47,25 @@ function describeArc(
     "Z",
   ].join(" ");
 }
+type PromiseType = {
+  status: number;
+  error?: string;
+  data?: string[];
+}
 
-export default function WheelPage() {
+type Props = {
+  promise: Promise<PromiseType>;
+}
+
+export default function WheelPage({promise}:Props) {
+  const InitialEntries = use(promise);
+  const [entries, setEntries] = useState<string[]>(InitialEntries.data || []);
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
-  
+  const {play_sound, stop_sound} = useRouletteSound();
   // Track provisional selection vs displayed modal state
   const [pendingWinner, setPendingWinner] = useState("");
-  console.log(pendingWinner);
+  
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   
   const currentRotationRef = useRef(0);
@@ -75,15 +88,17 @@ export default function WheelPage() {
         color: COLORS[index % COLORS.length]
       };
     });
-  }, [sliceAngle]);
+  }, [sliceAngle, entries]);
 
-  const spin = () => {
+  const spin = async() => {
     if (isSpinning) return;
 
     setIsSpinning(true);
+    play_sound();
     setShowWinnerModal(false);
-
-    const winnerIndex = Math.floor(Math.random() * entries.length);
+    const data = await AgmaSpinRoulette();
+    setEntries(data?.data.entries);
+    const winnerIndex = data?.data.pending_winner_idx;
     
     // Calculate precise target angle so selected index lands perfectly at the top pointer (0 deg offsets)
     const targetAngle = 360 - (winnerIndex * sliceAngle + sliceAngle / 2);
@@ -92,11 +107,12 @@ export default function WheelPage() {
     const totalRotation = currentRotationRef.current + (360 * 8) + targetAngle - (currentRotationRef.current % 360);
     currentRotationRef.current = totalRotation;
     
-    setPendingWinner(entries[winnerIndex]);
+    setPendingWinner(data?.data.pending_winner);
     setRotation(totalRotation);
 
     // Sync modal appearance timing exactly with the CSS transition length (5000ms)
     setTimeout(() => {
+      stop_sound();
       setIsSpinning(false);
       setShowWinnerModal(true);
     }, 5000);
@@ -105,9 +121,6 @@ export default function WheelPage() {
   return (
   <>
   {/* Dynamic Ambient Background Glows */}
-      
-      
-
       
 
       {/* Main Wheel Viewport Frame */}
@@ -126,13 +139,13 @@ export default function WheelPage() {
               transform: `rotate(${rotation}deg)`,
               transition: "transform 5s cubic-bezier(0.15, 0.85, 0.35, 1)",
             }}
-            className="will-change-transform"
+            className={`will-change-transform`}
           >
             <svg
               width={SIZE}
               height={SIZE}
               viewBox="-300 -300 600 600"
-              className="w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] md:w-[500px] md:h-[500px] select-none"
+              className="w-75 h-75 sm:w-105 sm:h-105 md:w-125 md:h-125 select-none"
             >
               <defs>
                 <radialGradient id="wheelOverlay" cx="50%" cy="50%" r="50%">
@@ -183,9 +196,10 @@ export default function WheelPage() {
 
         {/* Action Button */}
         <button
+          type="button"
           onClick={spin}
           disabled={isSpinning}
-          className={`mt-10 px-10 py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 font-bold text-base text-white rounded-full shadow-lg shadow-indigo-500/20 tracking-wider uppercase transform active:scale-95 transition-all duration-300 border border-indigo-400/20
+          className={`btn mt-10 px-10 py-4 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 font-bold text-base text-white rounded-full shadow-lg shadow-indigo-500/20 tracking-wider uppercase transform active:scale-95 transition-all duration-300 border border-indigo-400/20
             ${isSpinning ? "opacity-40 cursor-not-allowed saturate-50 scale-95" : "hover:brightness-110 hover:shadow-purple-500/30 hover:-translate-y-0.5"}`}
         >
           {isSpinning ? "Selecting Winner..." : "Spin Roulette"}
@@ -209,7 +223,7 @@ export default function WheelPage() {
             </button>
 
             {/* Glowing Trophy Icon Ring */}
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/20 mb-5 transform rotate-3">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/20 mb-5 transform rotate-3">
               <Trophy className="size-10 stroke-[2.5]" />
             </div>
 
@@ -232,7 +246,7 @@ export default function WheelPage() {
                   setShowWinnerModal(false)
                   console.log("Pending Winner is Sending to Backend")}
                 }
-                className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-950/50"
+                className="w-full py-3.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-950/50"
               >
                 Confirm Reward
               </button>
