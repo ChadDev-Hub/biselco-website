@@ -1,26 +1,31 @@
 "use client";
 
-import { useMemo, useRef, useState, use} from "react";
-import { Zap, Trophy, X } from "lucide-react";
-import { AgmaSpinRoulette } from '../../../actions/agma';
-import { useRouletteSound } from './rouletSound';
-
-
+import { useMemo, useRef, useState, use } from "react";
+import { Zap } from "lucide-react";
+import { AgmaSpinRoulette } from "../../../actions/agma";
+import { useRouletteSound } from "./rouletSound";
+import { useSearchParams } from "next/navigation";
+import WinnerModal from "./winner-modal";
 const SIZE = 500;
 const RADIUS = 240;
 
-
 // Modern color palette matrix for a rich gradient sequence
 const COLORS = [
-  "#6366f1", "#4f46e5", "#3b82f6", "#2563eb", 
-  "#06b6d4", "#0891b2", "#10b981", "#059669"
+  "#6366f1",
+  "#4f46e5",
+  "#3b82f6",
+  "#2563eb",
+  "#06b6d4",
+  "#0891b2",
+  "#10b981",
+  "#059669",
 ];
 
 function polarToCartesian(
   cx: number,
   cy: number,
   radius: number,
-  angle: number
+  angle: number,
 ) {
   const rad = ((angle - 90) * Math.PI) / 180;
   return {
@@ -34,7 +39,7 @@ function describeArc(
   cy: number,
   radius: number,
   startAngle: number,
-  endAngle: number
+  endAngle: number,
 ) {
   const start = polarToCartesian(cx, cy, radius, endAngle);
   const end = polarToCartesian(cx, cy, radius, startAngle);
@@ -51,23 +56,25 @@ type PromiseType = {
   status: number;
   error?: string;
   data?: string[];
-}
+};
 
 type Props = {
   promise: Promise<PromiseType>;
-}
+};
 
-export default function WheelPage({promise}:Props) {
+export default function WheelPage({ promise }: Props) {
   const InitialEntries = use(promise);
+  const searchParams = useSearchParams();
+  const spinTimer = searchParams.get("spin_time");
   const [entries, setEntries] = useState<string[]>(InitialEntries.data || []);
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
-  const {play_sound, stop_sound} = useRouletteSound();
+  const { play_sound, stop_sound } = useRouletteSound();
   // Track provisional selection vs displayed modal state
   const [pendingWinner, setPendingWinner] = useState("");
-  
+
   const [showWinnerModal, setShowWinnerModal] = useState(false);
-  
+
   const currentRotationRef = useRef(0);
   const sliceAngle = 360 / entries.length;
 
@@ -85,51 +92,55 @@ export default function WheelPage({promise}:Props) {
         endAngle,
         middle,
         textPos,
-        color: COLORS[index % COLORS.length]
+        color: COLORS[index % COLORS.length],
       };
     });
   }, [sliceAngle, entries]);
 
-  const spin = async() => {
+  const spin = async () => {
     if (isSpinning) return;
-
+    stop_sound();
     setIsSpinning(true);
-    play_sound();
+    play_sound(Number(spinTimer));
     setShowWinnerModal(false);
     const data = await AgmaSpinRoulette();
     setEntries(data?.data.entries);
     const winnerIndex = data?.data.pending_winner_idx;
-    
+
     // Calculate precise target angle so selected index lands perfectly at the top pointer (0 deg offsets)
     const targetAngle = 360 - (winnerIndex * sliceAngle + sliceAngle / 2);
-    
-    // Smooth multi-spin accumulation 
-    const totalRotation = currentRotationRef.current + (360 * 8) + targetAngle - (currentRotationRef.current % 360);
+
+    // Smooth multi-spin accumulation
+    const totalRotation =
+      currentRotationRef.current +
+      360 * 8 +
+      targetAngle -
+      (currentRotationRef.current % 360);
     currentRotationRef.current = totalRotation;
-    
+
     setPendingWinner(data?.data.pending_winner);
     setRotation(totalRotation);
 
     // Sync modal appearance timing exactly with the CSS transition length (5000ms)
-    setTimeout(() => {
-      stop_sound();
-      setIsSpinning(false);
-      setShowWinnerModal(true);
-    }, 5000);
+    setTimeout(
+      () => {
+        setIsSpinning(false);
+        setShowWinnerModal(true);
+      },
+      Number(spinTimer) * 1000,
+    );
   };
 
   return (
-  <>
-  {/* Dynamic Ambient Background Glows */}
-      
+    <>
+      {/* Dynamic Ambient Background Glows */}
 
       {/* Main Wheel Viewport Frame */}
-      <div className="relative z-10 flex flex-col items-center">
-        
+      <div className="relative z-10  flex flex-col items-center">
         {/* Top Pointer Indicator Element */}
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 drop-shadow-[0_4px_10px_rgba(244,63,94,0.5)] animate-bounce">
           <div className="w-0 h-0 border-l-14 border-l-transparent border-r-14 border-r-transparent border-t-24 border-t-rose-500" />
-          <Zap className="absolute top-26 left-1/2 -translate-x-1/2 fill-amber-400 text-amber-300 size-5" />
+          <Zap className="absolute  top-20 sm:top-24 xl:top-26 left-1/2 -translate-x-1/2 fill-amber-400 text-amber-300 size-3.5" />
         </div>
 
         {/* High-Tech Outer Ring Frame */}
@@ -137,7 +148,7 @@ export default function WheelPage({promise}:Props) {
           <div
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: "transform 5s cubic-bezier(0.15, 0.85, 0.35, 1)",
+              transition: `transform ${spinTimer}s cubic-bezier(0.15, 0.85, 0.35, 1)`,
             }}
             className={`will-change-transform`}
           >
@@ -156,10 +167,19 @@ export default function WheelPage({promise}:Props) {
 
               <g>
                 {slices.map((slice, index) => (
-                  <g key={index} className="transition-opacity duration-300 hover:opacity-95">
+                  <g
+                    key={index}
+                    className="transition-opacity duration-300 hover:opacity-95"
+                  >
                     {/* Segment Arc */}
                     <path
-                      d={describeArc(0, 0, RADIUS, slice.startAngle, slice.endAngle)}
+                      d={describeArc(
+                        0,
+                        0,
+                        RADIUS,
+                        slice.startAngle,
+                        slice.endAngle,
+                      )}
                       fill={slice.color}
                       stroke="#0f172a"
                       strokeWidth="2.5"
@@ -184,10 +204,20 @@ export default function WheelPage({promise}:Props) {
               </g>
 
               {/* Shading layer for depth appearance */}
-              <circle r={RADIUS} fill="url(#wheelOverlay)" pointerEvents="none" />
+              <circle
+                r={RADIUS}
+                fill="url(#wheelOverlay)"
+                pointerEvents="none"
+              />
 
               {/* Polished Core Hub */}
-              <circle r="45" fill="#0f172a" stroke="#334155" strokeWidth="4" className="shadow-xl" />
+              <circle
+                r="45"
+                fill="#0f172a"
+                stroke="#334155"
+                strokeWidth="4"
+                className="shadow-xl"
+              />
               <circle r="38" fill="#1e293b" />
               <circle r="12" fill="#6366f1" className="animate-pulse" />
             </svg>
@@ -208,60 +238,11 @@ export default function WheelPage({promise}:Props) {
 
       {/* WINNER VIEW WINDOW (MODAL DIALOG) */}
       {showWinnerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300 animate-in fade-in">
-          
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative transform transition-all duration-300 scale-100 animate-in zoom-in-95">
-            
-            {/* Close Cross icon corner button */}
-            <button 
-              type="button"
-              title="close modal"
-              onClick={() => setShowWinnerModal(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <X className="size-5" />
-            </button>
-
-            {/* Glowing Trophy Icon Ring */}
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/20 mb-5 transform rotate-3">
-              <Trophy className="size-10 stroke-[2.5]" />
-            </div>
-
-            <span className="text-xs font-bold tracking-widest text-indigo-400 uppercase">
-              Draw Completed
-            </span>
-            
-            <h2 className="text-3xl font-black text-white mt-1 mb-4 tracking-tight">
-              {pendingWinner}
-            </h2>
-
-            <p className="text-slate-400 text-sm leading-relaxed mb-6">
-              Congratulations! This account node has been drawn successfully out of the total pool entries.
-            </p>
-
-            {/* Modal Actions */}
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  setShowWinnerModal(false)
-                  console.log("Pending Winner is Sending to Backend")}
-                }
-                className="w-full py-3.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-950/50"
-              >
-                Confirm Reward
-              </button>
-              <button
-                onClick={() => setShowWinnerModal(false)}
-                className="w-full py-2.5 bg-transparent hover:bg-slate-800 text-slate-400 hover:text-white font-semibold rounded-xl transition-all text-sm"
-              >
-                Dismiss Window
-              </button>
-            </div>
-          </div>
-        </div>
+        <WinnerModal
+          winner_account={pendingWinner}
+          setShowWinnerModal={setShowWinnerModal}
+        />
       )}
-  </>
-      
-   
+    </>
   );
 }

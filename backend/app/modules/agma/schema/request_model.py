@@ -16,3 +16,7 @@ class AgmaValidationRequest(BaseModel):
     mobile_no: str
     image_url: str
     signature_url: str
+    
+    
+class AccountNumberRequest(BaseModel):
+    account_no: str

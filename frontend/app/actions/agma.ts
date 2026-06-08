@@ -34,7 +34,6 @@ export const DownloadAgmaTicket = async (id:string, url:string) => {
     );
 
     const blob = await res.blob();
-    console.log(blob)
     if (!res.ok) {
         return {
             status: res.status,
@@ -51,6 +50,21 @@ export const AgmaSpinRoulette = async()=>{
     const res = await serverFetchAutoRefresh(
         `${baseUrl}/v1/agma/raffle/spin`,
         "POST"
+    )
+    return res
+}
+
+
+
+export const GetWinnerInfo = async (account_number: string) => {
+    const res = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/agma/raffle/winner/info`,
+        "POST",
+        JSON.stringify({
+         account_no: account_number}),
+        {
+            "Content-Type": "application/json",
+        }
     )
     return res
 }

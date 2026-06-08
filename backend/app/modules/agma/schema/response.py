@@ -36,3 +36,13 @@ class AgmaSpin(BaseModel):
     entries: List[str];
     pending_winner: str;
     pending_winner_idx: int;
+    
+    
+class WinnerInfo(BaseModel):
+    id: str
+    account_no: str
+    name: str
+    image: str
+    village: str
+    municipality: str
+    

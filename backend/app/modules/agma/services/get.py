@@ -46,7 +46,7 @@ class GetAgmaRegistrationService:
                 .where(AgmaRegistration.id == id))
         d = (await self.session.execute(stmt)).scalars().one()
         return {
-            "id":str(d.id),
+            "id": str(d.id),
             "account_no": d.account_no,
             "name": d.name,
             "phone": d.phone,
@@ -217,7 +217,7 @@ class GetAgmaRegistrationService:
             }
                 for res in results
             ]
-            
+
             return {
                 "data": data,
                 "total_page": total_page
@@ -285,7 +285,8 @@ class GetAgmaRegistrationService:
         try:
             registered = (select(
                 AgmaRegistration.account_no,
-                func.date(func.timezone("Asia/Manila",AgmaRegistration.timestamped)).label("date"),
+                func.date(func.timezone("Asia/Manila",
+                          AgmaRegistration.timestamped)).label("date"),
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)
@@ -305,22 +306,22 @@ class GetAgmaRegistrationService:
             stmt = (
                 select(
                     cumulative_cte.c.date.label("name"),
-       
-                        func.max(cumulative_cte.c.cumulative_sum).filter(
-                            cumulative_cte.c.municipality == "CORON").label("coron"),
 
-                        func.max(cumulative_cte.c.cumulative_sum).filter(
-                            cumulative_cte.c.municipality == "CULION"
-                        ).label("culion"),
+                    func.max(cumulative_cte.c.cumulative_sum).filter(
+                        cumulative_cte.c.municipality == "CORON").label("coron"),
 
-                        func.max(cumulative_cte.c.cumulative_sum).filter(
-                            cumulative_cte.c.municipality == "BUSUANGA"
-                        ).label("busuanga"),
+                    func.max(cumulative_cte.c.cumulative_sum).filter(
+                        cumulative_cte.c.municipality == "CULION"
+                    ).label("culion"),
 
-                        func.max(cumulative_cte.c.cumulative_sum).filter(
-                            cumulative_cte.c.municipality == "LINAPACAN"
-                        )
-                        .label("linapacan"),
+                    func.max(cumulative_cte.c.cumulative_sum).filter(
+                        cumulative_cte.c.municipality == "BUSUANGA"
+                    ).label("busuanga"),
+
+                    func.max(cumulative_cte.c.cumulative_sum).filter(
+                        cumulative_cte.c.municipality == "LINAPACAN"
+                    )
+                    .label("linapacan"),
                 )
                 .select_from(cumulative_cte)
                 .group_by(cumulative_cte.c.date)
@@ -332,12 +333,13 @@ class GetAgmaRegistrationService:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
     async def get_initial_raffle_entries(self):
         try:
             stmt = (select(AgmaRegistration.account_no)
-                   .where(AgmaRegistration.is_winner == False)
-                   .order_by(func.random())
-                   .limit(self.RAFFLE_ENTRIES_LIMIT))
+                    .where(AgmaRegistration.is_winner == False, func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
+                    .order_by(func.random())
+                    .limit(self.RAFFLE_ENTRIES_LIMIT))
             result = (await self.session.execute(stmt)).scalars().all()
             return result
         except Exception as e:
@@ -348,13 +350,15 @@ class GetAgmaRegistrationService:
     async def raffle_spin(self):
         try:
             entries = (select(AgmaRegistration.account_no)
-                       .where(AgmaRegistration.is_winner == False)
+                       .where(
+                           AgmaRegistration.is_winner == False,
+                           func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
                        .order_by(func.random())
                        .limit(self.RAFFLE_ENTRIES_LIMIT)).cte("entries")
             entry_result = (await self.session.execute(select(entries.c.account_no))).scalars().all()
-           
+
             random_winner = random.randint(0, len(entry_result) - 1)
-        
+
             return {
                 "entries": entry_result,
                 "pending_winner": entry_result[random_winner],
@@ -364,4 +368,31 @@ class GetAgmaRegistrationService:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-            
+
+    async def winner_info(self, account_no: str):
+        try:
+            stmt = (select(
+                AgmaRegistration.id,
+                AgmaRegistration.account_no,
+                AgmaRegistration.name,
+                AgmaRegistration.image,
+                Village.name.label("village"),
+                Municipality.name.label("municipality"),
+            )
+                .join(AgmaRegistration.consumer)
+                .join(ConsumerMeter.municipal)
+                .join(ConsumerMeter.village)
+                .where(AgmaRegistration.account_no == account_no))
+            result = (await self.session.execute(stmt)).mappings().one()
+            return {
+                "id": str(result["id"]),
+                "account_no": result["account_no"],
+                "name": result["name"],
+                "image": result["image"],
+                "village": result["village"],
+                "municipality": result["municipality"],
+            }
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

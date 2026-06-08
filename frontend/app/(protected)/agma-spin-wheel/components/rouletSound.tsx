@@ -1,8 +1,8 @@
 "use client";
-import React, { createContext, useRef, useContext } from "react";
+import React, { createContext, useRef, useContext} from "react";
 
 type contextTYPE = {
-  play_sound: () => void;
+  play_sound: (duration:number) => void;
   stop_sound: () => void;
 };
 const RouletteSoundContext = createContext<contextTYPE | null>(null);
@@ -10,21 +10,29 @@ const RouletteSoundContext = createContext<contextTYPE | null>(null);
 type Props = {
   children: React.ReactNode;
 };
+
 const RouletteSound = ({ children }: Props) => {
   const soundRef = useRef<HTMLAudioElement>(null);
-  const handlePlaySound = () => {
-    soundRef.current?.play();
+  
+  const handlePlaySound = (duration: number) => {
+    if (!soundRef.current) return;
+    soundRef.current.src = `/sounds/${duration.toString()}s_spin.mp3`;
+    soundRef.current.load();
+    soundRef.current.play();
+
+    
   };
   const handleStopSound = () => {
     if (!soundRef.current) return;
     soundRef.current.pause();
     soundRef.current.currentTime = 0;
   };
+  
   return (
     <RouletteSoundContext.Provider
       value={{
-        play_sound: () => {
-          handlePlaySound();
+        play_sound: (duration:number) => {
+          handlePlaySound(duration);
         },
         stop_sound: () => {
           handleStopSound();
@@ -32,7 +40,7 @@ const RouletteSound = ({ children }: Props) => {
       }}
     >
       <audio ref={soundRef}>
-        <source src="/sounds/roulette.mp3" type="audio/mpeg" />
+        <source  type="audio/mpeg" />
       </audio>
       {children}
     </RouletteSoundContext.Provider>

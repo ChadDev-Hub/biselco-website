@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response, Body
 from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest
 from ...user.schema.response_model import UserModel
@@ -9,7 +9,8 @@ from ..services.screenshot import generate_ticket
 from ...events.schema.requests import AgmaEventSetup
 from ..schema.response import AgmaSetup, AgmaCountRegistered, RegisteredOvertime, AgmaStats
 from typing import Optional, List
-from ..schema.response import AgmaSpin
+from ..schema.request_model import AccountNumberRequest
+from ..schema.response import AgmaSpin, WinnerInfo
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -136,3 +137,13 @@ async def spin(
         GetAgmaRegistrationService),
 ):
     return await get_services.raffle_spin()
+
+
+@router.post("/raffle/winner/info", status_code=status.HTTP_200_OK, response_model=WinnerInfo)
+async def get_winner_info(
+    data: AccountNumberRequest = Body(...),
+    get_services: GetAgmaRegistrationService = Depends(
+        GetAgmaRegistrationService),
+):
+    data = await get_services.winner_info(account_no=data.account_no)
+    return data
