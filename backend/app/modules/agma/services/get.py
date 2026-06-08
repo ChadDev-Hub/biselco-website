@@ -364,8 +364,13 @@ class GetAgmaRegistrationService:
                 "pending_winner": entry_result[random_winner],
                 "pending_winner_idx": random_winner
             }
+            
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No Registered Consumer Found"
+            )
         except Exception as e:
-            print(e)
+            print(e.args)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
@@ -374,7 +379,7 @@ class GetAgmaRegistrationService:
             stmt = (select(
                 AgmaRegistration.id,
                 AgmaRegistration.account_no,
-                AgmaRegistration.name,
+                ConsumerMeter.account_name.label("name"),
                 AgmaRegistration.image,
                 Village.name.label("village"),
                 Municipality.name.label("municipality"),
@@ -393,6 +398,5 @@ class GetAgmaRegistrationService:
                 "municipality": result["municipality"],
             }
         except Exception as e:
-            print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

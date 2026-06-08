@@ -68,3 +68,18 @@ export const GetWinnerInfo = async (account_number: string) => {
     )
     return res
 }
+
+
+export const UpdateWinnerStatus = async (id:string)=> {
+    const res = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/agma/raffle/winner/status`,
+        "PATCH",
+        JSON.stringify({
+            id: id
+        }),
+        {
+            "Content-Type": "application/json",
+        }
+    )
+    return res;
+}

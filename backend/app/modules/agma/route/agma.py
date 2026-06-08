@@ -9,8 +9,9 @@ from ..services.screenshot import generate_ticket
 from ...events.schema.requests import AgmaEventSetup
 from ..schema.response import AgmaSetup, AgmaCountRegistered, RegisteredOvertime, AgmaStats
 from typing import Optional, List
-from ..schema.request_model import AccountNumberRequest
+from ..schema.request_model import AccountNumberRequest, Registeredid
 from ..schema.response import AgmaSpin, WinnerInfo
+from ..services.patch import AgmaRegistrationPatchService
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -125,13 +126,14 @@ async def get_registered_overtime(
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_services.get_registered_overtime()
 
+
 @router.get("/raffle/initial_entries", status_code=status.HTTP_200_OK, response_model=List[str])
 async def get_initial_raffle_entries(
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
     return await get_services.get_initial_raffle_entries()
 
 
-@router.post("/raffle/spin", status_code=status.HTTP_200_OK, response_model=AgmaSpin )
+@router.post("/raffle/spin", status_code=status.HTTP_200_OK, response_model=AgmaSpin)
 async def spin(
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
@@ -147,3 +149,12 @@ async def get_winner_info(
 ):
     data = await get_services.winner_info(account_no=data.account_no)
     return data
+
+
+@router.patch("/raffle/winner/status", status_code=status.HTTP_200_OK)
+async def update_winner_status(
+    data: Registeredid = Body(...),
+    patch_services: AgmaRegistrationPatchService = Depends(
+        AgmaRegistrationPatchService)):
+    await patch_services.update_winner_status(id=data.id)
+    return "Winner Saved Successfully"

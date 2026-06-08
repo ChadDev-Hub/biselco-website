@@ -20,3 +20,7 @@ class AgmaValidationRequest(BaseModel):
     
 class AccountNumberRequest(BaseModel):
     account_no: str
+    
+    
+class Registeredid(BaseModel):
+    id: str

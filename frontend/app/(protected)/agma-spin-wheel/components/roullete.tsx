@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useRef, useState, use } from "react";
-import { Zap } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import { AgmaSpinRoulette } from "../../../actions/agma";
 import { useRouletteSound } from "./rouletSound";
 import { useSearchParams } from "next/navigation";
 import WinnerModal from "./winner-modal";
+import { useAlert } from "../../../common/alert";
 const SIZE = 500;
 const RADIUS = 240;
 
@@ -69,7 +70,9 @@ export default function WheelPage({ promise }: Props) {
   const [entries, setEntries] = useState<string[]>(InitialEntries.data || []);
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isPreparing, setPreparing] = useState(false);
   const { play_sound, stop_sound } = useRouletteSound();
+  const { showAlert } = useAlert();
   // Track provisional selection vs displayed modal state
   const [pendingWinner, setPendingWinner] = useState("");
 
@@ -100,10 +103,19 @@ export default function WheelPage({ promise }: Props) {
   const spin = async () => {
     if (isSpinning) return;
     stop_sound();
+    setShowWinnerModal(false);
+    setPreparing(true);
+    const data = await AgmaSpinRoulette();
+    if (data?.status === 404) {
+      showAlert("warning", data.data);
+      stop_sound();
+      setShowWinnerModal(false);
+      setIsSpinning(false);
+      return;
+    }
+    setPreparing(false);
     setIsSpinning(true);
     play_sound(Number(spinTimer));
-    setShowWinnerModal(false);
-    const data = await AgmaSpinRoulette();
     setEntries(data?.data.entries);
     const winnerIndex = data?.data.pending_winner_idx;
 
@@ -130,21 +142,24 @@ export default function WheelPage({ promise }: Props) {
       Number(spinTimer) * 1000,
     );
   };
-
+  const removeitemfromEntries = (account_no: string) => {
+    const updatedEntries = entries.filter((entry) => entry !== account_no);
+    setEntries(updatedEntries);
+  };
   return (
     <>
       {/* Dynamic Ambient Background Glows */}
 
       {/* Main Wheel Viewport Frame */}
-      <div className="relative z-10  flex flex-col items-center">
+      <div className="relative z-10   flex flex-col items-center">
         {/* Top Pointer Indicator Element */}
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 drop-shadow-[0_4px_10px_rgba(244,63,94,0.5)] animate-bounce">
           <div className="w-0 h-0 border-l-14 border-l-transparent border-r-14 border-r-transparent border-t-24 border-t-rose-500" />
-          <Zap className="absolute  top-20 sm:top-24 xl:top-26 left-1/2 -translate-x-1/2 fill-amber-400 text-amber-300 size-3.5" />
+          <Lightbulb className="absolute  top-20 sm:top-24 xl:top-26 left-1/2 -translate-x-1/2 fill-amber-400 text-amber-300 rotate-180 size-3.5 shadow-2xl" />
         </div>
 
         {/* High-Tech Outer Ring Frame */}
-        <div className="p-4 bg-slate-900/80 backdrop-blur-md rounded-full shadow-[0_0_60px_rgba(99,102,241,0.15)] border border-slate-800 ring-4 ring-slate-800/40">
+        <div className="p-3 bg-slate-900/80 backdrop-blur-md rounded-full shadow-[0_0_60px_rgba(99,102,241,0.15)] border border-slate-800 ring-4 ring-slate-800/40">
           <div
             style={{
               transform: `rotate(${rotation}deg)`,
@@ -156,7 +171,7 @@ export default function WheelPage({ promise }: Props) {
               width={SIZE}
               height={SIZE}
               viewBox="-300 -300 600 600"
-              className="w-75 h-75 sm:w-105 sm:h-105 md:w-125 md:h-125 select-none"
+              className="w-75 h-75 sm:w-105 sm:h-105 md:w-125 md:h-125  select-none"
             >
               <defs>
                 <radialGradient id="wheelOverlay" cx="50%" cy="50%" r="50%">
@@ -209,7 +224,7 @@ export default function WheelPage({ promise }: Props) {
                 fill="url(#wheelOverlay)"
                 pointerEvents="none"
               />
-
+            
               {/* Polished Core Hub */}
               <circle
                 r="45"
@@ -219,6 +234,7 @@ export default function WheelPage({ promise }: Props) {
                 className="shadow-xl"
               />
               <circle r="38" fill="#1e293b" />
+              
               <circle r="12" fill="#6366f1" className="animate-pulse" />
             </svg>
           </div>
@@ -228,19 +244,26 @@ export default function WheelPage({ promise }: Props) {
         <button
           type="button"
           onClick={spin}
-          disabled={isSpinning}
+          disabled={isSpinning || isPreparing}
           className={`btn mt-10 px-10 py-4 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 font-bold text-base text-white rounded-full shadow-lg shadow-indigo-500/20 tracking-wider uppercase transform active:scale-95 transition-all duration-300 border border-indigo-400/20
-            ${isSpinning ? "opacity-40 cursor-not-allowed saturate-50 scale-95" : "hover:brightness-110 hover:shadow-purple-500/30 hover:-translate-y-0.5"}`}
+            ${isSpinning || isPreparing ? "opacity-40 cursor-not-allowed saturate-50 scale-95" : "hover:brightness-110 hover:shadow-purple-500/30 hover:-translate-y-0.5"}`}
         >
-          {isSpinning ? "Selecting Winner..." : "Spin Roulette"}
+          {isPreparing ? (
+            <span className="skeleton skeleton-text">Preparing to Spin...</span>
+          ) : isSpinning ? (
+            "Selecting Winner..."
+          ) : (
+            "Spin Roulette"
+          )}
         </button>
       </div>
 
       {/* WINNER VIEW WINDOW (MODAL DIALOG) */}
       {showWinnerModal && (
         <WinnerModal
+          removeWinerEntry={removeitemfromEntries}
           winner_account={pendingWinner}
-          setShowWinnerModal={setShowWinnerModal}
+          showModal={setShowWinnerModal}
         />
       )}
     </>
