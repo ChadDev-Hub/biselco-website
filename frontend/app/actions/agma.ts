@@ -96,6 +96,5 @@ export const DismissedWinner = async (id:string)=> {
             "Content-Type": "application/json",
         }
     )
-    await new Promise((resolve)=> setTimeout(resolve, 3000));
     return res;
 }

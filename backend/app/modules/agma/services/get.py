@@ -13,6 +13,7 @@ from ...events.model.events import Events
 from ..schema.response import AgmaSetup
 import pytz
 import random
+from ..schema.response import RaffleStats, CountItem
 from pprint import pprint
 
 
@@ -285,7 +286,8 @@ class GetAgmaRegistrationService:
         try:
             registered = (select(
                 AgmaRegistration.account_no,
-                func.extract("hour", AgmaRegistration.timestamped).label("date"),
+                func.extract(
+                    "hour", AgmaRegistration.timestamped).label("date"),
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)
@@ -337,7 +339,7 @@ class GetAgmaRegistrationService:
                 }
                 for res in result
             ]
-            return  data
+            return data
         except Exception as e:
             print(e)
             raise HTTPException(
@@ -435,10 +437,11 @@ class GetAgmaRegistrationService:
                 .where(AgmaRegistration.is_winner == True)
                 .group_by(Village.name)
                 .order_by(Village.name.asc()))).mappings().all()
-            return {
-                "w_per_mun": count_per_municipality,
-                "w_per_vill": count_village
-            }
+            return RaffleStats(
+                w_per_mun=[
+                    CountItem(**dict(row)) for row in count_per_municipality],
+                w_per_vill=[CountItem(**dict(row)) for row in count_village])
         except Exception as e:
+            print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

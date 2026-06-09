@@ -521,7 +521,8 @@ export const GetAgmaSchedules = async() => {
 
 export const GetAgmaRegistrationSchedules= async () => {
     const data = await fetch(`${baseUrl}/v1/events/agma/registration`, {
-        method: "GET"
+        method: "GET",
+        cache: "no-store"
     })
     const res = await data.json()
     if (!data.ok) {

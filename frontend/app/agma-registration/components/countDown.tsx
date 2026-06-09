@@ -2,29 +2,29 @@
 import Countdown from "react-countdown";
 
 import { useRouter } from "next/navigation";
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from "react";
 type Props = {
   targetDate: number;
   is_active: boolean;
 };
 const CountDown = ({ targetDate, is_active }: Props) => {
-  const [isCompleted, setIsCompleted] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
   useEffect(() => {
     if (isCompleted) {
       router.refresh();
-      queueMicrotask(()=>setIsCompleted(false));
+      queueMicrotask(() => setIsCompleted(false));
     }
-  },[isCompleted, router])
-  
+  }, [isCompleted, router]);
+
   return (
     <Countdown
+      key={`${targetDate}-${is_active}`}
       date={targetDate}
-      onComplete={
-        () => {
-          setIsCompleted(true)
-        }
-      }
+      autoStart
+      onComplete={() => {
+        setIsCompleted(true);
+      }}
       renderer={({ days, hours, minutes, seconds }) => {
         const formatedDate = [
           {

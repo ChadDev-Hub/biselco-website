@@ -1,11 +1,13 @@
 "use client";
-import React, { use, useRef } from "react";
+import { use, useRef, useEffect, useState } from "react";
 import { AgmaStatsType } from "@/types/agma";
 import { ChartNoAxesCombined, XCircle } from "lucide-react";
 import SimpleBarChart from "@/app/common/Barchart";
 import { TooltipContentProps } from "recharts";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
+import { useWebsocket } from "@/app/utils/websocketprovider";
+
 type PromiseType = {
   status: number;
   data?: AgmaStatsType;
@@ -39,9 +41,19 @@ const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
 const StatsModal = ({ promise }: Props) => {
   const modal = useRef<HTMLDialogElement>(null);
   const initialData = use(promise);
+  const [data, setData] = useState<AgmaStatsType | undefined>(initialData?.data || undefined);
   const handleOpen = () => modal.current?.showModal();
   const handleClose = () => modal.current?.close();
+  const {message} = useWebsocket();
+  useEffect(() => {
+    if (message?.detail === "agma_raffle_stats"){
+      const updateStats = async () => {
+        setData(message.data);
+      }
+      updateStats();
+    }
 
+  },[message]);
   return (
     <>
       <button
@@ -64,7 +76,7 @@ const StatsModal = ({ promise }: Props) => {
           <header className="font-bold text-2xl">Winner Stats</header>
           <div className="w-full flex flex-col gap-3  items-center">
             <StatsContainer className="bg-slate-600 rounded-box h-fit max-w-sm">
-              {initialData.data?.w_per_mun.map((item, index) => (
+              {data?.w_per_mun.map((item, index) => (
                 <StatsCard
                   style={{
                     titleClass: "text-white text-xs",
@@ -81,7 +93,7 @@ const StatsModal = ({ promise }: Props) => {
               customTooltip={CustomTooltip}
               xaxisStyle={{ fontSize: 8 }}
               yaxisStyle={{ fontSize: 8 }}
-              data={initialData?.data?.w_per_vill}
+              data={data?.w_per_vill}
             />
           </div>
         </div>

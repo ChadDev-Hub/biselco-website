@@ -45,4 +45,11 @@ class WinnerInfo(BaseModel):
     image: str
     village: str
     municipality: str
-    
+
+class CountItem(BaseModel):
+    name: str
+    value: int
+
+class RaffleStats(BaseModel):
+    w_per_mun: List[CountItem]
+    w_per_vill: List[CountItem]

@@ -10,6 +10,7 @@ export const GetAgmaCountRegistered = async (municipality: string | string[] | u
   if (municipality) params.set("municipality", typeof municipality === "string" ? municipality : "");
   const res = await fetch(`${baseUrl}/v1/agma/statistic/count_registered?${params.toString()}`, {
     method: "GET",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -34,6 +35,7 @@ export const GetRegisteredOverTime = async () => {
   const accessToken = cookie.get("access_token")?.value;
   const res = await fetch(`${baseUrl}/v1/agma/statistic/registered_overtime`, {
     method: "GET",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -59,6 +61,7 @@ export const GetRaffleInitialEntries = async () => {
   const accessToken = cookie.get("access_token")?.value;
   const res = await fetch(`${baseUrl}/v1/agma/raffle/initial_entries`, {
     method: "GET",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
@@ -83,6 +86,7 @@ export const GetRaffleStatsData = async ()=>{
   const accessToken = cookie.get("access_token")?.value;
   const res = await fetch(`${baseUrl}/v1/agma/raffle/stats`, {
     method: "GET",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,

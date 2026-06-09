@@ -6,7 +6,7 @@ import {RefreshCcwDot} from "lucide-react"
 const RefreshButton = () => {
     const router = useRouter();
     const refreshPage = () => {
-        window.location.reload();
+        router.refresh();
     }
   return (
     <button type="button" title="Refresh" onClick={refreshPage} className="btn btn-circle btn-lg  bg-linear-to-r from-blue-400 via-purple-400 to-pink-400" >

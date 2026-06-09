@@ -38,6 +38,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_column("agma_registration", "sample_bill", schema="public")
-    op.drop_column("agma_registration", "is_winner", schema="public")
-    op.drop_column("agma_registration", "is_dismissed", schema="public")
+    op.drop_column("agma_registration", "sample_bill", schema="public", if_exists=True)
+    op.drop_column("agma_registration", "is_winner", schema="public", if_exists=True)
+    op.drop_column("agma_registration", "is_dismissed", schema="public", if_exists=True)

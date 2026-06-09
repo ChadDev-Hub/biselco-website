@@ -12,6 +12,7 @@ from typing import Optional, List
 from ..schema.request_model import AccountNumberRequest, Registeredid
 from ..schema.response import AgmaSpin, WinnerInfo
 from ..services.patch import AgmaRegistrationPatchService
+from ..schema.response import RaffleStats
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -123,30 +124,46 @@ async def get_graph(
 
 @router.get("/statistic/registered_overtime", status_code=status.HTTP_200_OK, response_model=List[RegisteredOvertime])
 async def get_registered_overtime(
-        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
+        user: UserModel = Depends(get_current_user)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     return await get_services.get_registered_overtime()
 
 
 @router.get("/raffle/initial_entries", status_code=status.HTTP_200_OK, response_model=List[str])
 async def get_initial_raffle_entries(
+        user: UserModel = Depends(get_current_user),
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     return await get_services.get_initial_raffle_entries()
 
 
 @router.post("/raffle/spin", status_code=status.HTTP_200_OK, response_model=AgmaSpin)
 async def spin(
+    user: UserModel = Depends(get_current_user),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     return await get_services.raffle_spin()
 
 
 @router.post("/raffle/winner/info", status_code=status.HTTP_200_OK, response_model=WinnerInfo)
 async def get_winner_info(
+    user: UserModel = Depends(get_current_user),
     data: AccountNumberRequest = Body(...),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     data = await get_services.winner_info(account_no=data.account_no)
     return data
 
@@ -154,24 +171,36 @@ async def get_winner_info(
 @router.patch("/raffle/winner/status", status_code=status.HTTP_200_OK)
 async def update_winner_status(
     data: Registeredid = Body(...),
+    user: UserModel = Depends(get_current_user),
     patch_services: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     await patch_services.update_winner_status(id=data.id)
     return "Winner Saved Successfully"
 
 @router.patch("/raffle/winner/dismissed", status_code=status.HTTP_200_OK)
 async def dismissed_winner(
+    user: UserModel = Depends(get_current_user),
     data: Registeredid = Body(...),
     patch_services: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     await patch_services.dismissed_winner(id=data.id)
     return "Winner Dismissed Successfully"
 
-@router.get("/raffle/stats", status_code=status.HTTP_200_OK)
+@router.get("/raffle/stats", status_code=status.HTTP_200_OK, response_model=RaffleStats)
 async def get_raffle_stats(
+    user: UserModel = Depends(get_current_user),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
     return await get_services.raffle_stats()
 
     

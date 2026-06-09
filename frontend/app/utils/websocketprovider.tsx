@@ -1,6 +1,7 @@
 'use client'
 import React, { createContext, useRef, useContext, useEffect, useState } from 'react'
 import { useAuth } from './authProvider'
+import { AgmaStatsType } from '../../types/agma';
 
 type Props = {
   children: React.ReactNode;
@@ -87,6 +88,9 @@ type WSMessage = {
   count_per_village: CountPerVillage[];
   registered_overtime: RegisteredOvertime[];
 
+} | {
+  detail: "agma_raffle_stats"
+  data: AgmaStatsType;
 }
 type RegisteredOvertime = {
   name: string;
