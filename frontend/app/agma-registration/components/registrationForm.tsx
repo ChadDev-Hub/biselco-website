@@ -150,7 +150,7 @@ const RegistrationForm = () => {
         </header>
         {/* TITLE */}
 
-        <div className="grid p-3 grid-cols gap-2 grid-cols-2">
+        <div className="grid p-3 grid-cols gap-2 grid-cols-3">
           {/* Profile Picture */}
           <div className="flex flex-col gap-2">
             {/* IMAGE UPLOAD */}
@@ -250,7 +250,7 @@ const RegistrationForm = () => {
             </section>
           </div>
 
-          <div>
+          <div className="col-span-2">
             {/* ACCOUNT NO */}
             <section>
               <label className={labelClassName}>Account Number</label>

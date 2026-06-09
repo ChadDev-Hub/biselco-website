@@ -20,7 +20,7 @@ const LoginForm = () => {
     const res = await GoogleLoginRoute(data.adminLoginSecretKey);
     switch (res?.status) {
       case 200:
-        redirect(res.url);
+         redirect(res.data.url);
         break;
       case 409:
         setError("adminLoginSecretKey", { message: res.error });

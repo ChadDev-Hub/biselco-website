@@ -26,5 +26,5 @@ class AgmaRegistration(BaseModel):
     timestamped: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     sample_bill: Mapped[str] = mapped_column(type_=Text, nullable=True)
     is_winner: Mapped[bool] = mapped_column(type_=Boolean, nullable=True, default=False)
-    
+    is_dismissed: Mapped[bool] = mapped_column(type_=Boolean, nullable=True, default=False)
     consumer: Mapped[ConsumerMeter] = relationship("ConsumerMeter", back_populates="agma")

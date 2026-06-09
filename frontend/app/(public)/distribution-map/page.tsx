@@ -2,7 +2,7 @@
 
 import {GetPrimaryLines} from "../../../lib/distributionLine"
 import { Suspense } from 'react';
-import LoadingMap from "./components/LoadingMap";
+import LoadingIndicator from "./components/LoadingIndicator";
 import { GetTransformers } from "../../../lib/transformer";
 import MapProvider from './components/MapProvider';
 import PrimaryLineLayer from './components/PrimaryLineComponent.tsx/PrimaryLineLayer';
@@ -13,10 +13,10 @@ const Page = () => {
   return (
     <div className="h-screen w-full">
       <MapProvider>
-        <Suspense fallback={<LoadingMap/>}>
+        <Suspense fallback={<LoadingIndicator/>}>
             <TransformerLayer promise={transformers} />
         </Suspense>
-        <Suspense fallback={<LoadingMap/>}>
+        <Suspense fallback={<LoadingIndicator/>}>
             <PrimaryLineLayer promise={primaryLines} />
         </Suspense>
         

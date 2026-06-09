@@ -24,4 +24,19 @@ class AgmaRegistrationPatchService():
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-        
+    
+    async def dismissed_winner(self, id:str):
+        try:
+            await self.session.execute(
+                update(AgmaRegistration)
+                .where(AgmaRegistration.id == id)
+                .values(is_dismissed=True)
+            )
+            await self.session.commit()
+        except DBAPIError  as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Consumer Not Found")
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    

@@ -83,3 +83,19 @@ export const UpdateWinnerStatus = async (id:string)=> {
     )
     return res;
 }
+
+
+export const DismissedWinner = async (id:string)=> {
+    const res = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/agma/raffle/winner/dismissed`,
+        "PATCH",
+        JSON.stringify({
+            id: id
+        }),
+        {
+            "Content-Type": "application/json",
+        }
+    )
+    await new Promise((resolve)=> setTimeout(resolve, 3000));
+    return res;
+}

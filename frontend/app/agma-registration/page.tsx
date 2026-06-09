@@ -47,7 +47,7 @@ const Page = () => {
       </section>
 
       {/* BODY SECTION */}
-      <section className="relative w-full mx-auto  sm:px-6 lg:px-8 py-12 lg:py-16 ">
+      <section className="relative w-full flex flex-col items-center  sm:px-6 lg:px-8 py-12 lg:py-16 ">
         <AgmaCircleIcon
           abrev={Agma}
           positionClass="

@@ -13,7 +13,8 @@ class AgmaEvent(BaseModel):
     id: int
     title: str
     description: str
-    date_end: float
+    target_date: float
+    is_active: bool
     qoute_title: str
     qoute_description: str
     footer: str

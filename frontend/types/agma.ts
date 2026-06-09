@@ -1,4 +1,4 @@
-
+import {Stats} from "./stats";
 
 export type WinnerInfoType = {
     id: string; 
@@ -7,4 +7,10 @@ export type WinnerInfoType = {
     image: string; 
     municipality: string; 
     village: string;
+}
+
+
+export type AgmaStatsType = {
+    w_per_mun: Stats[];
+    w_per_vill: Stats[];
 }

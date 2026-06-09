@@ -56,7 +56,7 @@ const HomePageTools = () => {
                 <ToolCard icon={<BookMarked className="text-amber-500" />} title="Report Concern" href="/complaints" />
                 {isAdmin && <ToolCard icon={<LayoutDashboard className="text-slate-500" />} title="Concern Dashboard" href="/complaints/dashboard" />}
                 {isAdmin && <ToolCard icon={<BarChart3 className="text-blue-500" />} title="AGMA Dashboard" href="/agma-dashboard?tab=overview" />}
-                <ToolCard icon={<Map className="text-slate-500" />} title="Distribution Map" href="/distribution-map" />
+                <ToolCard icon={<Map className="text-violet-500" />} title="Distribution Map" href="/distribution-map" />
 
                 <ComingSoon>
                     <ToolCard icon={<CreditCard className="text-emerald-500" />} title="Billing Help" />

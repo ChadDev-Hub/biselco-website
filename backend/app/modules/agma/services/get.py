@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_, text
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ....dependencies.db_session import get_session
@@ -285,8 +285,7 @@ class GetAgmaRegistrationService:
         try:
             registered = (select(
                 AgmaRegistration.account_no,
-                func.date(func.timezone("Asia/Manila",
-                          AgmaRegistration.timestamped)).label("date"),
+                func.extract("hour", AgmaRegistration.timestamped).label("date"),
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)
@@ -328,7 +327,17 @@ class GetAgmaRegistrationService:
                 .order_by(cumulative_cte.c.date))
 
             result = (await self.session.execute(stmt)).mappings().all()
-            return result
+            data = [
+                {
+                    "name": f"{int(res['name']):02d}:00",
+                    "coron": res["coron"],
+                    "culion": res["culion"],
+                    "busuanga": res["busuanga"],
+                    "linapacan": res["linapacan"],
+                }
+                for res in result
+            ]
+            return  data
         except Exception as e:
             print(e)
             raise HTTPException(
@@ -337,7 +346,9 @@ class GetAgmaRegistrationService:
     async def get_initial_raffle_entries(self):
         try:
             stmt = (select(AgmaRegistration.account_no)
-                    .where(AgmaRegistration.is_winner == False, func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
+                    .where(AgmaRegistration.is_winner == False,
+                           AgmaRegistration.is_dismissed == False,
+                           func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
                     .order_by(func.random())
                     .limit(self.RAFFLE_ENTRIES_LIMIT))
             result = (await self.session.execute(stmt)).scalars().all()
@@ -352,6 +363,7 @@ class GetAgmaRegistrationService:
             entries = (select(AgmaRegistration.account_no)
                        .where(
                            AgmaRegistration.is_winner == False,
+                           AgmaRegistration.is_dismissed == False,
                            func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
                        .order_by(func.random())
                        .limit(self.RAFFLE_ENTRIES_LIMIT)).cte("entries")
@@ -364,7 +376,7 @@ class GetAgmaRegistrationService:
                 "pending_winner": entry_result[random_winner],
                 "pending_winner_idx": random_winner
             }
-            
+
         except ValueError as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="No Registered Consumer Found"
@@ -396,6 +408,36 @@ class GetAgmaRegistrationService:
                 "image": result["image"],
                 "village": result["village"],
                 "municipality": result["municipality"],
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    async def raffle_stats(self):
+        try:
+            count_per_municipality = (await self.session.execute(
+                select(
+                    Municipality.name.label("name"),
+                    func.count(AgmaRegistration.id).label("value"),
+                )
+                .join(AgmaRegistration.consumer)
+                .join(ConsumerMeter.municipal)
+                .where(AgmaRegistration.is_winner == True)
+                .group_by(Municipality.name)
+                .order_by(Municipality.name.asc()))).mappings().all()
+            count_village = (await self.session.execute(
+                select(
+                    Village.name.label("name"),
+                    func.count(AgmaRegistration.id).label("value")
+                )
+                .join(AgmaRegistration.consumer)
+                .join(ConsumerMeter.village)
+                .where(AgmaRegistration.is_winner == True)
+                .group_by(Village.name)
+                .order_by(Village.name.asc()))).mappings().all()
+            return {
+                "w_per_mun": count_per_municipality,
+                "w_per_vill": count_village
             }
         except Exception as e:
             raise HTTPException(

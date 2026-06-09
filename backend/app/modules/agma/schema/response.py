@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import List
 
 
@@ -20,7 +20,7 @@ class AgmaCountRegistered(BaseModel):
     value: Optional[int] = None
 
 class RegisteredOvertime(BaseModel):
-    name: Optional[date] = None
+    name: Optional[str] = None
     coron: Optional[int] = None
     culion: Optional[int] = None
     busuanga: Optional[int] = None

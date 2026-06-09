@@ -30,9 +30,14 @@ def upgrade() -> None:
         table_name="agma_registration",
         column=sa.Column("is_winner", sa.Boolean(), nullable=True, server_default=sa.false()),
         schema="public")
-
+    op.add_column(
+        table_name="agma_registration",
+        column=sa.Column("is_dismissed", sa.Boolean(), nullable=True, server_default=sa.false()),
+        schema="public"
+    )
 
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_column("agma_registration", "sample_bill", schema="public")
     op.drop_column("agma_registration", "is_winner", schema="public")
+    op.drop_column("agma_registration", "is_dismissed", schema="public")

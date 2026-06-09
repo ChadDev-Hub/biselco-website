@@ -7,27 +7,29 @@ from sqlalchemy import select, and_, func
 from ..schema.response import AgmaEvent, AbrevationStyle, EventSchedule
 from ..model.events_schedules import EventsSchedules
 from datetime import date, datetime
+import pytz
 
 
 class GetEventServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-        
+        self.tz = pytz.timezone('Asia/Manila')
+        self.now = datetime.now(self.tz)
 
     async def getAgmaEvents(self):
         try:
             stmt = select(Events).where(
-                and_(Events.title.ilike("%AGMA%"),
-                     func.now().between(
-                         Events.start_date + Events.start_time, Events.end_date + Events.end_time)
+                and_(Events.title.ilike("%AGMA%")
                      ))
             result = (await self.session.execute(stmt)).scalars().one()
-            dt = datetime.combine(result.end_date, result.end_time)
+            end_date = self.tz.localize(datetime.combine(result.end_date, result.end_time))
+            start_date = self.tz.localize(datetime.combine(result.start_date, result.start_time))
             return AgmaEvent(
                 id=result.id,
                 title=result.title,
                 description=result.description,
-                date_end=((dt.timestamp())*1000),
+                target_date=( start_date.timestamp()*1000 if start_date > self.now else end_date.timestamp()*1000),
+                is_active= False if start_date > self.now else True if end_date > self.now else False,
                 qoute_title="Beyond Power.",
                 qoute_description="Electric Cooperative Empowering Communities, Changing Lives.",
                 footer="Makiisa, Makilahok, Manalo, Magkaisa sa AGMA!",
@@ -54,6 +56,22 @@ class GetEventServices:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Agma Registration Closed!!")
+            
+    async def VerifyAgmaEventActive(self):
+        try:
+            stmt = select(Events).where(
+                and_(Events.title.ilike("%AGMA%"),
+                     func.now().between(Events.start_date + Events.start_time,
+                                        Events.end_date + Events.end_time)
+                     ))
+            result = (await self.session.execute(stmt)).scalars().one()
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Agma Registration Closed!!")
+            return True
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Agma Registration Closed!!")
 
     async def getAgmaEventsSchedule(self):
         try:
@@ -76,7 +94,7 @@ class GetEventServices:
 
     async def get_agma_schedules(self):
         try:
-            await self.getAgmaEvents()
+            await self.VerifyAgmaEventActive()
             agmaEvent = await self.getAgmaEventsSchedule()
             result = [{
                 "id": scheds.get("id"),

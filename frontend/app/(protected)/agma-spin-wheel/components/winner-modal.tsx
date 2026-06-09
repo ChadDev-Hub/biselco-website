@@ -2,10 +2,9 @@
 import { X, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
-import { GetWinnerInfo } from "../../../actions/agma";
+import { GetWinnerInfo, DismissedWinner, UpdateWinnerStatus } from '../../../actions/agma';
 import { WinnerInfoType } from "../../../../types/agma";
 import InfoCard from "./infoCard";
-import { UpdateWinnerStatus } from "../../../actions/agma";
 import { useAlert } from '../../../common/alert';
 type Props = {
   winner_account: string;
@@ -21,6 +20,7 @@ const WinnerModal = ({
   const {showAlert} = useAlert()
   const [winnerInfo, setWinnerInfo] = useState<WinnerInfoType | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
   useEffect(() => {
     const getInfo = async () => {
       const res = await GetWinnerInfo(winner_account);
@@ -43,6 +43,18 @@ const WinnerModal = ({
     }
     showModal(false);
   };
+
+  const handleDismissedWinner = async () => {
+    if (!winnerInfo) return;
+    setIsDismissing(true);
+    const res = await DismissedWinner(winnerInfo.id);
+    if (res?.status === 200) {
+      setIsDismissing(false);
+      removeWinerEntry(winnerInfo.account_no);
+      showAlert("success", "Winner Dismissed Successfully");
+    }
+    showModal(false);
+  }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300 animate-in fade-in">
       <Confetti />
@@ -85,11 +97,12 @@ const WinnerModal = ({
             {isUpdating ? <span className="skeleton skeleton-text">Saving Winner...</span> : "Confirm Reward"}
           </button>
           <button
+            disabled={isDismissing}
             type="button"
-            onClick={handleClose}
+            onClick={handleDismissedWinner}
             className="w-full py-2.5 bg-transparent hover:bg-slate-800 text-slate-400 hover:text-white font-semibold rounded-xl transition-all text-sm"
           >
-            Dismiss Window
+            {isDismissing ? <span className="skeleton skeleton-text">Dismissing Winner...</span> : "Dismiss Winner"}
           </button>
         </div>
       </div>

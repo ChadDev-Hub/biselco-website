@@ -158,3 +158,20 @@ async def update_winner_status(
         AgmaRegistrationPatchService)):
     await patch_services.update_winner_status(id=data.id)
     return "Winner Saved Successfully"
+
+@router.patch("/raffle/winner/dismissed", status_code=status.HTTP_200_OK)
+async def dismissed_winner(
+    data: Registeredid = Body(...),
+    patch_services: AgmaRegistrationPatchService = Depends(
+        AgmaRegistrationPatchService)):
+    await patch_services.dismissed_winner(id=data.id)
+    return "Winner Dismissed Successfully"
+
+@router.get("/raffle/stats", status_code=status.HTTP_200_OK)
+async def get_raffle_stats(
+    get_services: GetAgmaRegistrationService = Depends(
+        GetAgmaRegistrationService),
+):
+    return await get_services.raffle_stats()
+
+    
