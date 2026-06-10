@@ -9,6 +9,8 @@ import {
 } from "react";
 import Maplibregl from "maplibre-gl";
 
+
+
 type Props = {
   children: ReactNode;
 };
@@ -19,6 +21,8 @@ const MapProvider = ({ children }: Props) => {
   const [isPointerDown, setIsPointerDown] = useState(false);
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Maplibregl.Map | null>(null);
+
+  
 
   useEffect(() => {
     if (mapContainer.current) {
@@ -40,6 +44,9 @@ const MapProvider = ({ children }: Props) => {
         "top-left",
       );
       mapRef.current.addControl(new Maplibregl.NavigationControl(), "bottom-right");
+
+
+      
     }
     
     return () => {

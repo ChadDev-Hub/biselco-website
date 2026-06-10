@@ -36,7 +36,7 @@ const Page = () => {
         <div className="absolute inset-0  bg-linear-to-r from-slate-200/45 via-indigo-950/50 to-transparent z-0" />
 
         {/* Top Navigation Row */}
-        <div className="w-full backdrop-blur-md bg-base-100 border-b z-50  px-4 py-2">
+        <div className="w-full z-50  px-4 py-2">
           <Return />
         </div>
 

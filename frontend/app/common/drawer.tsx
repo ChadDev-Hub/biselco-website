@@ -11,7 +11,7 @@ type Props = {
 const Drawer = ({ children }: Props) => {
   const currentRoute = usePathname();
   const invisibleRoutes = [
-    "/landing", "/biselco-admin-login"
+    "/landing", "/biselco-admin-login", "/agma-registration", "/agma-registration/registered",
   ];
   const isActive =
     currentRoute === "/"

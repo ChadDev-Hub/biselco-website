@@ -43,10 +43,6 @@ const Footer = () => {
 
 
             </nav>
-            <nav>
-                <h6 className="footer-title opacity-50">Member Services</h6>
-                <a className="link link-hover">Energy Saving Tips</a>
-            </nav>
         </footer>
     )
 }

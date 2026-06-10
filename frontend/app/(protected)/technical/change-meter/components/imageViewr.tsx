@@ -41,7 +41,7 @@ const ImageViewer = ({ image }: Props) => {
         type="button"
         title="View Image"
         onClick={handleOpen}
-        className="relative cursor-pointer overflow-hidden rounded-box border-2 border-white w-34.25 h-15"
+        className="relative ring ring-secondary  cursor-pointer overflow-hidden rounded-box border-2 border-blue-600 border-dashed w-34.25 h-15"
       >
         {image? <Image
           src={image}
@@ -51,7 +51,7 @@ const ImageViewer = ({ image }: Props) => {
           quality={75}
           loading="lazy"
           sizes="(max-width: 768px) 100vw, 329px"
-          className="object-contain"
+          className="object-contain hover:scale-110 transition-all duration-200"
         />: <span>No Image Available</span>}
       </button>
 

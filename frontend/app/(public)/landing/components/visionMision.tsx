@@ -18,13 +18,13 @@ const VisionMission = () => {
   return (
     
       
-        <div className="container mx-auto px-2 sm:px-2 md:px-20 lg:px-28 xl:px-48">
+        <div className="w-full px-2">
           <motion.div 
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={staggerContainer}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-2"
+            className="flex flex-col gap-2"
           >
             <motion.div 
             initial="hidden"

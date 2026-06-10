@@ -291,7 +291,8 @@ class GetAgmaRegistrationService:
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)
-                .join(ConsumerMeter.municipal)).cte("registered")
+                .join(ConsumerMeter.municipal)
+                .where(func.date(AgmaRegistration.timestamped) == func.current_date())).cte("registered")
             cumulative_cte = (select(
                 registered.c.date,
                 registered.c.municipality,

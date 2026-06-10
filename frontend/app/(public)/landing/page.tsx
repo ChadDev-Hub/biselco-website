@@ -32,21 +32,23 @@ export default function Landing() {
         </AnimatedSection>
 
         {/* VISION AND MISSION SECTION */}
-        <AnimatedSection className="py-12 px-4 md:py-20 w-full bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden ">
+        <AnimatedSection className="py-12 px-4 md:py-20 w-full place-items-center  bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden ">
           <AnimatedBackground variant="subtle" />
-          <div className="absolute  inset-0 z-0">
-            <Image
-              loading="eager"
-              src="/lineworker.png"
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              alt="lineworker"
-              className="relative mask-radial-from-30% mask-radial-at-center mask-radial-to-70%"
-            />
-          </div>
+          <div className="grid grid-cols-1  md:grid-cols-2 gap-2 w-full max-w-7xl  items-stretch ">
+            <div className="absolute md:relative z-10 w-full max-w-2xl  inset-0 ">
+              <Image
+                loading="eager"
+                src="/lineworker.jpg"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                alt="lineworker"
+                className="relative mask-radial-from-60%   mask-radial-at-center mask-radial-to-70%"
+              />
+            </div>
 
-          <div className="relative z-10">
-            <VisionMission />
+            <div className="relative z-10  w-full self-stretch ">
+              <VisionMission />
+            </div>
           </div>
         </AnimatedSection>
 
