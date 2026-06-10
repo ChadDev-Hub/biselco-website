@@ -7,6 +7,8 @@ import { GetTransformers } from "../../../lib/transformer";
 import MapProvider from './components/MapProvider';
 import PrimaryLineLayer from './components/PrimaryLineComponent.tsx/PrimaryLineLayer';
 import TransformerLayer from './components/TransformerComponent/TransformerLayer';
+import Drawing from './components/Drawing';
+
 const Page = () => {
     const primaryLines = GetPrimaryLines()
     const transformers = GetTransformers()
@@ -19,7 +21,7 @@ const Page = () => {
         <Suspense fallback={<LoadingIndicator/>}>
             <PrimaryLineLayer promise={primaryLines} />
         </Suspense>
-        
+        <Drawing />
     </MapProvider>
 
     </div>

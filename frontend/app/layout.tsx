@@ -14,7 +14,7 @@ import { getCurrentUser } from '@/lib/serverFetch';
 import type { Viewport } from "next"
 import "maplibre-gl/dist/maplibre-gl.css";
 import PullToRefresh from './common/PulltoRefresh';
-
+import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
 
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({

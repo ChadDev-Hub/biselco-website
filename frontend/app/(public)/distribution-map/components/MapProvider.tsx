@@ -11,6 +11,7 @@ import Maplibregl from "maplibre-gl";
 
 
 
+
 type Props = {
   children: ReactNode;
 };
@@ -44,7 +45,6 @@ const MapProvider = ({ children }: Props) => {
         "top-left",
       );
       mapRef.current.addControl(new Maplibregl.NavigationControl(), "bottom-right");
-
 
       
     }

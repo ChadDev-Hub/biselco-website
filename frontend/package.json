@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@geoman-io/maplibre-geoman-free": "^0.7.1",
     "@lottiefiles/dotlottie-react": "^0.17.13",
     "@mui/material": "^7.3.7",
     "@react-oauth/google": "^0.13.4",
@@ -20,6 +21,7 @@
     "framer-motion": "^12.38.0",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.14.0",
+    "mapbox-gl": "^3.24.0",
     "maplibre-gl": "^5.24.0",
     "next": "^16.2.4",
     "ol": "^10.7.0",
