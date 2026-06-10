@@ -1,6 +1,6 @@
 "use client";
 
-import { Geoman, type GmOptionsPartial } from "@geoman-io/maplibre-geoman-free";
+import { Geoman } from "@geoman-io/maplibre-geoman-free";
 import { useMap } from "./MapProvider";
 import { useEffect, useRef } from "react";
 
@@ -8,47 +8,34 @@ const Drawing = () => {
   const mapRef = useMap();
   const geomanRef = useRef<Geoman | null>(null);
   useEffect(() => {
-    const map = mapRef?.current;
-    if (!map) return;
+    const interval = setInterval(() => {
+      const map = mapRef?.current;
+      if (!map || geomanRef.current) return;
 
-    const initGeoman = () => {
-      // Prevent double initialization if effect runs twice (React 18 StrictMode)
-      if (geomanRef.current) return;
+      if (!map.isStyleLoaded()) return;
 
-      const gmOptions: GmOptionsPartial = {
+      geomanRef.current = new Geoman(map, {
         controls: {
           draw: {
             line: {
               active: true,
               settings: {
-                length: true
-              }
+                length: true,
+              },
             },
           },
         },
-      };
+      });
 
-      geomanRef.current = new Geoman(map, gmOptions);
-    };
+      clearInterval(interval);
+    }, 200);
 
-    // If the map style is already loaded, initialize immediately
-    if (map.isStyleLoaded()) {
-      initGeoman();
-    } else {
-      // Fallback: wait for the style to load
-      map.once("style.load", initGeoman);
-    }
-
-    // Cleanup: Destroy Geoman when the component unmounts
     return () => {
-      map.off("style.load", initGeoman);
-      if (geomanRef.current) {
-        geomanRef.current.destroy();
-        geomanRef.current = null;
-      }
+      clearInterval(interval);
+      geomanRef.current?.destroy();
+      geomanRef.current = null;
     };
   }, [mapRef]);
-
   return null;
 };
 

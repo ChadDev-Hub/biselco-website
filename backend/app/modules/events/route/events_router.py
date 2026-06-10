@@ -22,16 +22,16 @@ async def get_events(get_services=Depends(GetEventServices)):
 @router.post("/agma/schedules", status_code=status.HTTP_201_CREATED)
 async def post_sched(
     data: List[ScheduleEvent] = Body(), 
-    post_service: PostEventServices = Depends(PostEventServices)):
+    post_service: PostEventServices = Depends(PostEventServices),
+    user:UserModel = Depends(get_current_user)):
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Transaction Only")
     return await post_service.agma_event_schedule(data)
 
 
 @router.get("/agma/schedules", status_code=200, response_model=List[EventSchedule])
 async def get_agma_schedule(
-    get_services=Depends(GetEventServices),
-    user:UserModel = Depends(get_current_user)):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin Transaction Only")
+    get_services=Depends(GetEventServices)):
     return await get_services.getAgmaEventsSchedule()
 
 @router.get("/agma/registration", status_code=200, response_model=List[AgmaEventSchedules])

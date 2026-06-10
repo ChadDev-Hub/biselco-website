@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql import insert
 from ...websocket.websocket_manager import manager
 from ...user.service.get_user import GetUserServices
 from ..schema.response import AgmaSetup, RegisteredOvertime, AgmaStats, AgmaCountRegistered
+from ...events.services.get import GetEventServices
 from uuid import uuid4
 
 
@@ -25,22 +26,20 @@ class PostAgmaRegistrationService:
                      ConsumerMeterGetService),
                  get_agma_registration_service: GetAgmaRegistrationService = Depends(
                      GetAgmaRegistrationService),
-                 get_user_services: GetUserServices = Depends(GetUserServices)
+                 get_user_services: GetUserServices = Depends(GetUserServices),
+                 get_event_services: GetEventServices = Depends(GetEventServices)
                  ):
         self.session = consumer_meter_service.session
         self.consumer_meter_service = consumer_meter_service
         self.get_agma_registration_service = get_agma_registration_service
         self.get_user_services = get_user_services
         self.websocket_manager = manager
+        self.get_event_services = get_event_services
         self.event_id = str(uuid4())
 
     async def register_agma(self, data: AgmaRegistrationRequest):
         # CHECK IF AGMA EVEN IS AVAILABLE
-        check_agma_event = (await self.session.execute(select(Events.id).where(
-            Events.title.ilike("%AGMA%"),
-            func.now().between(Events.start_date + Events.start_time,
-                               Events.end_date + Events.end_time)
-        ))).scalar_one_or_none()
+        check_agma_event = await self.get_event_services.VerifyAgmaEventActive()
         if not check_agma_event:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Agma Registration Closed")
