@@ -79,14 +79,14 @@ export const metadata: Metadata = {
     siteName: "BISELCO",
     images: [
       {
-        url: "https://biselco79.com/biselco-icon.png",
+        url: "https://biselco79.com/icon1.png",
         width: 1200,
         height: 630,
         alt: "BISELCO App Preview",
       },
     ],
     locale: "en_PH",
-    type: "website",
+    type:"website",
   },
 
   // Twitter Card
