@@ -165,8 +165,9 @@ export async function ComplaintStatusName() {
 
 // VERIFY CONSUMER
 export const queryConsumer = async(query?:string)=>{
-
-    const url = query? `${baseUrl}/v1/consumers/?consumer=${query}`:`${baseUrl}/v1/consumers/`
+    const param = new URLSearchParams();
+    if (query) param.set("consumer", query);
+    const url = `${baseUrl}/v1/consumers/?${param.toString()}`;
     const res = await fetch(url,{
         next: { revalidate: 300 },
         method:"GET"})

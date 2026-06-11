@@ -7,7 +7,7 @@ from ...gis.consumer.model.consumer import ConsumerMeter
 from ...gis.franchise_area.model.villages import Village
 from ...gis.franchise_area.model.municipality import Municipality
 from fastapi import Depends, HTTPException, status
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 from ...events.model.events import Events
 from ..schema.response import AgmaSetup
@@ -23,6 +23,9 @@ class GetAgmaRegistrationService:
         self.year_now = date.today().year
         self.PAGESIZE = 20
         self.RAFFLE_ENTRIES_LIMIT = 100
+        self.tz = pytz.timezone('Asia/Manila')
+        self.date_now = datetime.now(self.tz).date()
+        self.now = datetime.now(self.tz)
     # VERIFY REGISTRATION
 
     async def verify_registration(self, account_no: str) -> bool:
@@ -256,8 +259,8 @@ class GetAgmaRegistrationService:
                 Events.end_time,
                 case(
 
-                    (func.now().between(Events.start_date + Events.start_time,
-                                        Events.end_date + Events.end_time), literal(True)),
+                    (func.timezone('Asia/Manila', func.now()).between(func.timezone('Asia/Manila', Events.start_date + Events.start_time),
+                                        func.timezone('Asia/Manila', Events.end_date + Events.end_time)), literal(True)),
                     else_=literal(False)
                 ).label("is_active")
             ).where(Events.title.ilike("%AGMA%"))
@@ -292,7 +295,7 @@ class GetAgmaRegistrationService:
             )
                 .join(AgmaRegistration.consumer)
                 .join(ConsumerMeter.municipal)
-                .where(func.date(AgmaRegistration.timestamped) == func.current_date())).cte("registered")
+                .where(func.date(AgmaRegistration.timestamped) == self.date_now)).cte("registered")
             cumulative_cte = (select(
                 registered.c.date,
                 registered.c.municipality,

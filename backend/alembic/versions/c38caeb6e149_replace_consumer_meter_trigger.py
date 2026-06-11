@@ -45,7 +45,7 @@ def upgrade() -> None:
                $$ LANGUAGE plpgsql;
     """
     )
-
+  
 
 def downgrade() -> None:
     """Downgrade schema."""

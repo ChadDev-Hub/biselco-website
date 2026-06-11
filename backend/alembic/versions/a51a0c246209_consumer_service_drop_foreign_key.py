@@ -24,11 +24,13 @@ def upgrade() -> None:
     op.create_foreign_key(constraint_name="service_drop_to_customer_id_fkey", source_table="service_drop", referent_table="consumer_meter",source_schema="gis", referent_schema="gis",  local_cols=["to_customer_id"], remote_cols=["account_no"],  onupdate="CASCADE", ondelete="CASCADE")
 
     op.add_column("consumer_meter", sa.Column("is_solar", sa.Boolean(), nullable=True, server_default=sa.false()), schema="gis")
-
+    op.add_column("consumer_meter", sa.Column("is_agma", sa.Boolean(), nullable=True, server_default=sa.false()), schema="gis")
+    
 def downgrade() -> None:
     """Downgrade schema."""
 
     op.drop_constraint(constraint_name="service_drop_to_customer_id_fkey",table_name= "service_drop", type_="foreignkey", schema="gis", if_exists=True)
     
     op.drop_column("consumer_meter", "is_solar", schema="gis", if_exists=True)
+    op.drop_column("consumer_meter", "is_agma", schema="gis", if_exists=True)
     

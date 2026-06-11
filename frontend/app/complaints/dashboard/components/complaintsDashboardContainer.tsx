@@ -245,7 +245,7 @@
           }
           break;
         case "new_status":
-          console.log(message);
+
           queueMicrotask(() =>
             setallComplaints((prev) => {
               return prev.map((complaint: Complaint) =>
@@ -345,7 +345,6 @@
         },
       });
     }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
-    console.log(allComplaints);
     return (
       <>
       {allComplaints.map((item:Complaint)=>

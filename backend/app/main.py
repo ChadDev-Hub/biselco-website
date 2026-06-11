@@ -2,10 +2,12 @@ from fastapi import FastAPI, HTTPException, status
 from .api.v1 import api
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from .core.lifespan import lifespan
 import os
 load_dotenv()
 app = FastAPI(
-    max_request_size=52428800
+    max_request_size=52428800,
+    lifespan=lifespan
 )
 FRONTENDBASEURL = os.getenv("FRONTEND_BASE_URL")
 if not FRONTENDBASEURL:
@@ -18,5 +20,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(api.router)
 

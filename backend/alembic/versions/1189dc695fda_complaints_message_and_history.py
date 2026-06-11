@@ -46,8 +46,8 @@ def upgrade() -> None:
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('comments', sa.Text(), nullable=True),
     sa.Column('timestamped', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['complaint_id'], ['consumer_complaints.id'], ),
-    sa.ForeignKeyConstraint(['status_id'], ['complaints_status_name.id'], ),
+    sa.ForeignKeyConstraint(['complaint_id'], ['consumer_complaints.id']),
+    sa.ForeignKeyConstraint(['status_id'], ['complaints_status_name.id']),
     sa.ForeignKeyConstraint(['user_id'], ['users_account.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

@@ -4,7 +4,8 @@ import asyncio
 from typing import Set, Dict
 from uuid import UUID
 from collections import defaultdict
-
+from ...core.redis import redis_client, CHANNEL
+import json
 
 class ConnectionManager:
     def __init__(self):
@@ -28,7 +29,7 @@ class ConnectionManager:
                 try:
                     await socket.send_text(message)
                 except Exception:
-                    self.active_connections['user_id'].discard(socket)
+                    self.active_connections[user_id].discard(socket)
 
     async def broad_cast_personal_json(self, user_id: str, data: dict):
         if user_id in self.active_connections:
@@ -36,7 +37,7 @@ class ConnectionManager:
                 try:
                     await socket.send_json(data)
                 except Exception:
-                    self.active_connections['user_id'].discard(socket)
+                    self.active_connections[user_id].discard(socket)
 
     async def broadcast(self, json: dict):
         for user_id, websockets in list(self.active_connections.items()):
@@ -50,13 +51,17 @@ class ConnectionManager:
                 await self.broadcastPresence(user_id, "offline")
 
     async def broadcastPresence(self, user_id: str, status: str):
-        await self.broadcast({
+        payload = {
             "detail": "presence",
             "data": {
                 "user_id": str(user_id),
                 "user_status": status
             }
-        })
+        }
+        await redis_client.publish(
+            CHANNEL,
+            json.dumps(payload),
+        )
 
 
 manager = ConnectionManager()

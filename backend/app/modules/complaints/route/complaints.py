@@ -30,6 +30,8 @@ from ...user.service.get_user import GetUserServices
 from ..services.delete import DeleteServices
 from ..services.post import PostServices
 from ..schema.requests_model import CreateComplaints
+from ....core.redis import CHANNEL, redis_client
+import json
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
@@ -104,11 +106,16 @@ async def create_complaints(
     # # BROADCAST TO USERS
     # for users in admins:
     for admin in admins:
-        await manager.broad_cast_personal_json(
-            user_id=admin,
-            data=results
-        )
-        
+        # await manager.broad_cast_personal_json(
+        #     user_id=admin,
+        #     data=results
+        # )
+        payload = {
+            'type': 'personal',
+            'user_id': admin,
+            'data': results
+        }
+        await redis_client.publish(CHANNEL,json.dumps(payload))
 
     return {
         "detail": "Complaints Submitted"
