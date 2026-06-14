@@ -79,13 +79,11 @@ const NewConnectionDataContainer = ({ data }: Props) => {
     useEffect(() => {
         switch (message?.detail) {
             case "new_connection_created":
-                console.log(message.data.new_connection)
                 if (Number(page) === 1 || page === null) {
                     queueMicrotask(() => {
                         setNewConnectionData((prev) => {
                             const existingData = prev.filter((item) => item.id !== message.data.new_connection.id);
                             const newData = [message.data.new_connection, ...existingData].slice(0, 9);
-                            console.log(newData)
                             return newData
                         })
                     })

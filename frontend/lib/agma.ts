@@ -104,3 +104,23 @@ export const GetRaffleStatsData = async ()=>{
     data: data,
   };
 }
+
+
+
+export const GetAgmaRegistrationSchedules= async () => {
+    const data = await fetch(`${baseUrl}/v1/events/agma/registration`, {
+        method: "GET",
+        cache: "no-store"
+    })
+    const res = await data.json()
+    if (!data.ok) {
+        return {
+            status: data.status,
+            error: res.detail
+        }
+    }
+    return {
+        status: data.status,
+        data: res
+    }
+}

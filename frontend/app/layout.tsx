@@ -41,11 +41,13 @@ export const metadata: Metadata = {
 
   // Basic SEO
   title: "BISELCO",
-  description:
-    "App for BISELCO - Manage services, complaints, and ",
+  description:"Electric service updates and complaints system",
 
   keywords: [
     "BISELCO",
+    "Busuanga",
+    "Culion",
+    "Linapacan",
     "Coron",
     "Palawan",
     "electricity",
@@ -58,11 +60,11 @@ export const metadata: Metadata = {
     "Philippines",
     "Consumer",
     "General Membership Assembly Meeting",
-    "AGM",
-    "Ruth Fortes"
+    "AGMA",
+    "Busuanga Island Electric Cooperative"
   ],
 
-  authors: [{ name: "Richard Rojo" }],
+  authors: [{ name: "Richard Rojo Jr." }],
   creator: "Richard Rojo Jr.",
   publisher: "Busuanga Island Electric Cooperative",
 
@@ -72,21 +74,19 @@ export const metadata: Metadata = {
   },
 
   // Open Graph (Facebook, Messenger, LinkedIn, etc.)
-  openGraph: {
+   openGraph: {
     title: "BISELCO",
-    description: "App for BISELCO - Manage services and complaints",
+    description: "Electric service updates and complaints system",
     url: "https://biselco79.com",
     siteName: "BISELCO",
     images: [
       {
-        url: "https://biselco79.com/icon1.png",
+        url: "https://biselco79.com/preview.png",
         width: 1200,
         height: 630,
-        alt: "BISELCO App Preview",
       },
     ],
-    locale: "en_PH",
-    type:"website",
+    type: "website",
   },
 
   // Twitter Card
@@ -94,14 +94,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "BISELCO",
     description: "Manage services and complaints",
-    images: ["https://biselco79.com/biselco-icon.png"],
+    images: ["https://biselco79.com/preview.png"],
   },
 
   // Icons (favicon, apple touch, etc.)
-  icons: {
-    icon: [{ url: "/biselco-icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-icon.png" }],
-  },
+
 
   // PWA / Mobile
   manifest: "/manifest.webmanifest",
@@ -122,9 +119,9 @@ export const metadata: Metadata = {
   },
 
   // Verification (Google Search Console, etc.)
-  // verification: {
-  //   google: "your-google-verification-code",
-  // },
+  verification: {
+    google: "2z-_wr556xHUKfue5FKHEcGNi-q7yY2AG-QPnfonPz4",
+  },
 
   // App links (optional, for mobile deep linking)
   appLinks: {

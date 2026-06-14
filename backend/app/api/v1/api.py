@@ -1,12 +1,16 @@
 from fastapi import APIRouter
 
+from ...modules.landing.route import landing
+
+from ...modules.gis.consumer.route import consumers
+
 from ...modules.complaints.route import complaints
 from ...modules.gis.distribution_transformer.route import distribution_transformer
 from ...modules.technical.change_meter.route import change_meter
 from ...modules.agma.route import agma
 from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
-from .routes import landing, login, logout, meter, news, signup, user, technical_form, consumers
+from .routes import login, logout, meter, news, signup, user, technical_form
 from ...modules.events.route import events_router
 from ...modules.gis.distribution_lines.route import distribution_lines
 

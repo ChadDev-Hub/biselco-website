@@ -259,8 +259,9 @@ class GetAgmaRegistrationService:
                 Events.end_time,
                 case(
 
-                    (func.timezone('Asia/Manila', func.now()).between(func.timezone('Asia/Manila', Events.start_date + Events.start_time),
-                                        func.timezone('Asia/Manila', Events.end_date + Events.end_time)), literal(True)),
+                    (func.timezone('Asia/Manila', func.now()).between(
+                        Events.start_date + Events.start_time,
+                        Events.end_date + Events.end_time), literal(True)),
                     else_=literal(False)
                 ).label("is_active")
             ).where(Events.title.ilike("%AGMA%"))

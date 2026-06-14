@@ -19,7 +19,7 @@ type Props = {
 const OverViewSection = ({ page, year, barangay, search }: Props) => {
   const filters = GetAgmaFilters();
   const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search);
-
+  
   return (
     <section>
       <NavbarTools>

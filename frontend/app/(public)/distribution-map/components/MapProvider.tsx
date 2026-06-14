@@ -14,21 +14,26 @@ import Maplibregl from "maplibre-gl";
 
 type Props = {
   children: ReactNode;
+  className?: string;
 };
-type MapContextType = React.RefObject<Maplibregl.Map | null> | null;
-const mapContext = createContext<MapContextType>(null);
+type MapContextType = {
+  mapRef: React.RefObject<Maplibregl.Map | null> | null,
+  isMapReady: boolean
+  };
+const mapContext = createContext<MapContextType>({ mapRef: null, isMapReady: false });
 
-const MapProvider = ({ children }: Props) => {
+const MapProvider = ({ children, className }: Props) => {
   const [isPointerDown, setIsPointerDown] = useState(false);
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Maplibregl.Map | null>(null);
-
+  const [isMapReady, setMapReady] = useState(false);
   
 
   useEffect(() => {
     if (mapContainer.current) {
       mapRef.current = new Maplibregl.Map({
         container: mapContainer.current,
+        attributionControl: false,
         hash: true,
         style: "https://tiles.openfreemap.org/styles/bright",
         center: [120.2043, 11.9986],
@@ -45,8 +50,9 @@ const MapProvider = ({ children }: Props) => {
         "top-left",
       );
       mapRef.current.addControl(new Maplibregl.NavigationControl(), "bottom-right");
-
-      
+      mapRef.current.on("load", () => {
+        setMapReady(true);
+      });
     }
     
     return () => {
@@ -59,12 +65,12 @@ const MapProvider = ({ children }: Props) => {
   const handlePointerDown = () => setIsPointerDown(true);
   const handlePointerUp = () => setIsPointerDown(false);
   return (
-    <mapContext.Provider value={mapRef}>
+    <mapContext.Provider value={{mapRef, isMapReady}}>
       <div
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         ref={mapContainer}
-        className={`w-full  h-full relative ${isPointerDown ? "cursor-grabbing " : "cursor-grab"}`}
+        className={`w-full  h-full relative ${className} ${isPointerDown ? "cursor-grabbing " : "cursor-grab"}`}
       >
         <div className="absolute  inset-0 pointer-events-none z-10">
           {children}

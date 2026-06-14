@@ -4,7 +4,7 @@ import { ComplaintsRouteButton } from "./buttons/complaints";
 import { HomeRouteButton } from "./buttons/home";
 const DocNavigation = () => {
   const currentRoute = usePathname();
-  const invisibleRoutes = ["/landing"];
+  const invisibleRoutes = ["/landing","/biselco-admin-login","/agma-registration","/agma-registration/registered"];
   const isActive =
     currentRoute === "/"
       ? "home"
@@ -13,7 +13,7 @@ const DocNavigation = () => {
         : "logout";
   return (
     <div
-      className={`dock text-xs dock-xs   bg-base-100  lg:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}
+      className={`dock text-xs dock-xs z-50   bg-base-100  lg:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}
     >
       <div className={`${isActive === "home" ? "dock-active" : ""} `}>
         <HomeRouteButton

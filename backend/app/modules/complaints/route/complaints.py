@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Depends, Form, Body, Query, File, UploadFile
+from fastapi.requests import Request
 from fastapi.exceptions import HTTPException
 from sqlalchemy import select,  desc,  and_, update
 from sqlalchemy.orm import selectinload
@@ -12,7 +13,7 @@ from datetime import date, datetime
 from ...websocket.websocket_manager import manager
 from .. import *
 from sqlalchemy.dialects.postgresql import UUID
-from ..schema.response_model import  ComplaintStatusName, ComplaintsModelLists
+from ..schema.response_model import ComplaintStatusName, ComplaintsModelLists
 from ...user.schema.response_model import UserModel
 from typing import Optional
 from ...gis.franchise_area.services.get_location import verifyLocation
@@ -43,6 +44,8 @@ async def get_user_complaints(user: UserModel = Depends(get_current_user), get_s
     return complaint
 
 # GET ALL COMPLAINTS
+
+
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
         search: Optional[str] = Query(None),
@@ -66,10 +69,12 @@ async def get_complaints_status_name(session: AsyncSession = Depends(get_session
     return status_name
 
 # CREATE COMPLAINTS ON SPECIFIC USER  (METER)
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
     user: UserModel = Depends(get_current_user),
-    accountNumber:Optional[str]= Form(None),
+    accountNumber: Optional[str] = Form(None),
     issue: str = Form(...),
     details: str = Form(...),
     is_meter_complaint: bool = Form(...),
@@ -77,8 +82,9 @@ async def create_complaints(
     attachment: Optional[UploadFile] = File(None),
     post_service: PostServices = Depends(PostServices),
     get_user: GetUserServices = Depends(GetUserServices),
-    get_dashboard_services: GetDashboardServices = Depends(GetDashboardServices)
-    
+    get_dashboard_services: GetDashboardServices = Depends(
+        GetDashboardServices),
+
 ):
     data = CreateComplaints(
         account_no=accountNumber,
@@ -89,38 +95,31 @@ async def create_complaints(
         municipality=location.municipality,
         user_id=str(user.id)
     )
-    
+
     results = await post_service.post_new_complaint(
         data=data,
         is_meter_complaint=is_meter_complaint,
         image=attachment)
     new_stats = await get_dashboard_services.get_complaints_stats()
     results['stats'] = new_stats
-    
-    
+
     # ADMIN USER
     admins = await get_user.get_users_by_roles(roles="admin")
-    if str(user.id) not in admins: 
+    if str(user.id) not in admins:
         admins.append(str(user.id))
-        
-    # # BROADCAST TO USERS
-    # for users in admins:
-    for admin in admins:
-        # await manager.broad_cast_personal_json(
-        #     user_id=admin,
-        #     data=results
-        # )
-        payload = {
-            'type': 'personal',
-            'user_id': admin,
-            'data': results
-        }
-        await redis_client.publish(CHANNEL,json.dumps(payload))
+
+    payload = {
+        'type': 'admins',
+        'user_ids': admins,
+        'data': results
+    }
+    dumped_payload = json.dumps(payload)
+
+    await redis_client.publish(CHANNEL, dumped_payload)
 
     return {
         "detail": "Complaints Submitted"
     }
-
 
 
 @router.delete("/{complaint_id}", status_code=status.HTTP_200_OK)
@@ -128,7 +127,7 @@ async def delete_complaint(
         complaint_id: int,
         session: AsyncSession = Depends(get_session),
         user: UserModel = Depends(get_current_user),
-        get_user:GetUserServices = Depends(GetUserServices)):
+        get_user: GetUserServices = Depends(GetUserServices)):
     try:
         select_stmt = select(Complaints).where(Complaints.id == complaint_id)
         data = (await session.execute(select_stmt)).scalar_one_or_none()
@@ -155,17 +154,23 @@ async def delete_complaint(
                      "deleted_at": datetime.now()}))
         await session.execute(delete_stmt)
         await session.commit()
-        
+
         deleted = {
             "detail": "deleted_complaints",
             "data": deleted_complaint,
         }
+        
+        
         admins = await get_user.get_users_by_roles(roles="admin")
         if str(user.id) not in admins:
             admins.append(str(user.id))
-        for admin in admins:
-            await manager.broad_cast_personal_json(user_id=admin, data=deleted)
-        
+
+        payload = {
+            'type': 'admins',
+            'user_ids': admins,
+            'data': deleted
+        }
+        await redis_client.publish(CHANNEL, json.dumps(payload))
 
     except Exception as e:
         return e
@@ -183,16 +188,17 @@ async def update_complaint_status(
         put_services: PutServices = Depends(PutServices),
         get_services: GetServices = Depends(GetServices),
         user: UserModel = Depends(get_current_user),
-        get_user:GetUserServices = Depends(GetUserServices),
-        get_dashboard_services: GetDashboardServices = Depends(GetDashboardServices)
-        ):
+        get_user: GetUserServices = Depends(GetUserServices),
+        get_dashboard_services: GetDashboardServices = Depends(
+            GetDashboardServices)
+):
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
     try:
         is_status_added, selected_status, selected_complaint = (await put_services.add_new_status(complaints_id=complaint_id,
-                                                                                stats=data.status_id,
-                                                                                current_status_id=data.current_status_id))
+                                                                                                  stats=data.status_id,
+                                                                                                  current_status_id=data.current_status_id))
         if not is_status_added:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Status Not Added")
@@ -203,12 +209,12 @@ async def update_complaint_status(
             user_id=str(user.id),
             comments=f"Updated to {s.status_name}"
         ).model_dump(mode="python")
-        for s in selected_status]
+            for s in selected_status]
         is_history_added = await put_services.add_complaints_history(data=data_history)
         if not is_history_added:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="History Not Added")
-        
+
         # SEND TO ADMIN AND TO SPECIFIC CLIENT
         admins = await get_user.get_users_by_roles(roles="admin")
         # APPEND USER ID IF IT IS NOT IN ADMIN
@@ -221,9 +227,13 @@ async def update_complaint_status(
             "complaint_status": new_status,
             "complaints_stats": new_stats
         }
+        payload = {
+            'type': 'admins',
+            'user_ids': admins,
+            'data': new_complaint_status
+        }
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
-        for admin in admins:
-            await manager.broad_cast_personal_json(user_id=admin, data=new_complaint_status)
+        await redis_client.publish(CHANNEL, json.dumps(payload))
     except Exception as e:
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return {
@@ -235,14 +245,15 @@ async def update_complaint_status(
 @router.delete("/status/{complaint_id}", status_code=status.HTTP_200_OK)
 async def delete_complaint_status(
     complaint_id: int,
-    delete_services:DeleteServices = Depends(DeleteServices),
-    get_user:GetUserServices = Depends(GetUserServices),
-    get_dashboard_services:GetDashboardServices = Depends(GetDashboardServices),
+    delete_services: DeleteServices = Depends(DeleteServices),
+    get_user: GetUserServices = Depends(GetUserServices),
+    get_dashboard_services: GetDashboardServices = Depends(
+        GetDashboardServices),
     data: ComplaintsStatus = Body(...),
     user: UserModel = Depends(get_current_user),
 ):
     if "admin" not in [role.name for role in user.roles]:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
     try:
         new_complaints_status, selected_complaints = await delete_services.delete_complaint_status(
@@ -252,21 +263,24 @@ async def delete_complaint_status(
             current_status_id=data.current_status_id
         )
         new_stats = await get_dashboard_services.get_complaints_stats()
-        roles = await get_user.get_users_by_roles(roles="admin")
-        
+        admins = await get_user.get_users_by_roles(roles="admin")
+
         # APPEND USER ID IF IT IS NOT IN ADMIN
-        if str(selected_complaints.user_id) not in roles:
-            roles.append(str(selected_complaints.user_id))
+        if str(selected_complaints.user_id) not in admins:
+            admins.append(str(selected_complaints.user_id))
         # TASK
         new_status = {
             "detail": "new_status",
             "complaint_status": new_complaints_status,
             "complaints_stats": new_stats
         }
+        payload = {
+            'type': 'admins',
+            'user_ids': admins,
+            'data': new_status
+        }
         # BROAD CAST NEW UPDATED DATA TO ALL ADMINS AND SPECIFIC CLIENT
-        for admin in roles:
-            await manager.broad_cast_personal_json(
-                user_id=admin, data=new_status)
+        await redis_client.publish(CHANNEL, json.dumps(payload))
     except Exception as e:
         return e
     return {
@@ -275,19 +289,25 @@ async def delete_complaint_status(
 
 # ------------------------------------------------------Message----------------------------------------------------------------------------
 # Complaints Message
+
+
 @router.get("/message", status_code=status.HTTP_200_OK, response_model=list[Message])
 async def get_complaints_message(get_message_services: GetMessageServices = Depends(GetMessageServices), complaints_id: int = Query(...)):
     return await get_message_services.get_message(complaints_id=complaints_id)
 
 #  ------------------------------------------------------DashBoard-----------------------------------------------------------------------------
 # Complaints Stats
+
+
 @router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[Stat])
 async def complaints_stats(get_dashboardservices: GetDashboardServices = Depends(GetDashboardServices)):
     return await get_dashboardservices.get_complaints_stats()
 
+
 @router.get("/top", status_code=status.HTTP_200_OK)
 async def get_top_complaints(get_dashboardservices: GetDashboardServices = Depends(GetDashboardServices)):
     return await get_dashboardservices.get_top_complaints()
+
 
 @router.get("/overtime", status_code=status.HTTP_200_OK)
 async def complaint_overtime(get_dasboardservices: GetDashboardServices = Depends(GetDashboardServices)):

@@ -8,15 +8,16 @@ from ..schema.requests import ScheduleEvent
 from typing import List
 from ..schema.response import EventSchedule
 from sqlalchemy.exc import NoResultFound
-from ...websocket.websocket_manager import manager
+from ....core.redis import redis_client, CHANNEL
 from uuid import uuid4
-
+from ...user.service.get_user import GetUserServices
+import json
 class PostEventServices:
-    def __init__(self, get_services:GetEventServices = Depends(GetEventServices)):
+    def __init__(self, get_services:GetEventServices = Depends(GetEventServices), get_user:GetUserServices = Depends(GetUserServices)):
         self.session = get_services.session
         self.get_services = get_services
-        self.manager = manager
         self.event_id = uuid4()
+        self.get_user = get_user
     async def agma_event_schedule(self,schedules:List[ScheduleEvent]):
         try:
             agma_id = (await self.session.execute(select(Events.id).where(Events.title.ilike("%AGMA%")))).scalar_one()
@@ -41,18 +42,28 @@ class PostEventServices:
                     await self.session.execute(upsert_stmt)
                     await self.session.commit()
             new_agma_schedules = (await self.get_services.getAgmaEventsSchedule())
-            await manager.broadcast({
+            admins = await self.get_user.get_users_by_roles(roles="admin")
+            print(admins    )
+            data = {
                 "detail": "agma_scheds",
-                "event_id": self.event_id,
+                "event_id": str(self.event_id),
                 "message": "new_agma_event",
                 "data" : [EventSchedule(**scheds).model_dump(mode="json") for scheds in new_agma_schedules],
-            })
+            }
+          
+            payload = {
+                "type": "admins",
+                "user_ids": admins,
+                "data": data,
+            }
+            await redis_client.publish(CHANNEL, json.dumps(payload))
             return {
                 "message": "You have successfully updated the Agma Schedule",
             }
         except NoResultFound:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Setup Agma Event First")  
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail=str(e))
     
     

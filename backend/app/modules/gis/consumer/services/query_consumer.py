@@ -1,6 +1,6 @@
 from geoalchemy2.shape import to_shape
 from shapely.geometry import mapping
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from ..model.consumer import ConsumerMeter
@@ -25,7 +25,7 @@ async def get_consumer(session: AsyncSession, query: Optional[Any] = None):
     if query:
         query_str = str(query)
         stmt = stmt.where(or_(
-            ConsumerMeter.account_no.cast(str).ilike(f"%{query_str}%"),
+            ConsumerMeter.account_no.cast(String).ilike(f"%{query_str}%"),
             ConsumerMeter.account_name.ilike(f"%{query_str}%"),
             ConsumerMeter.meter_brand.ilike(f"%{query_str}%"),
             ConsumerMeter.meter_no.ilike(f"%{query_str}%"),

@@ -209,7 +209,6 @@ const ChangeMeterForm = () => {
       const res = await SubmitChangeMeter(NewData, page ? page : 1);
       switch (res?.status) {
         case 201:
-          console.log(res);
           reset();
           showLoading(false);
           showAlert("success", "Successfully submitted change meter");

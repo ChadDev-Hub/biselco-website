@@ -5,7 +5,7 @@ import { useMap } from "./MapProvider";
 import { useEffect, useRef } from "react";
 
 const Drawing = () => {
-  const mapRef = useMap();
+  const {mapRef} = useMap();
   const geomanRef = useRef<Geoman | null>(null);
   useEffect(() => {
     const interval = setInterval(() => {

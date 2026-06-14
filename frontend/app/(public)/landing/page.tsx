@@ -12,10 +12,14 @@ import AnimatedBackground from "./components/AnimatedBackground";
 import EventsLoadingFallback from "./components/EventsLoadingFallback";
 import { Suspense } from "react";
 import Image from "next/image";
+import MapProvider from "../distribution-map/components/MapProvider";
+import { GetOffices } from '../../../lib/landing';
+import BiselcoOffices from "./components/biselcoOfficesLayer";
+import LoadingIndicator from '../distribution-map/components/LoadingIndicator';
 
 export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
-
+  const Offices = GetOffices();
   return (
     <div className="bg-linear-to-b  from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
       <main className="w-full">
@@ -66,6 +70,18 @@ export default function Landing() {
               <Events event={AgmaEvents} />
             </Suspense>
           </div>
+        </AnimatedSection>
+        
+        <AnimatedSection className="w-full p-2 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100">
+          <div className="h-60 flex items-center justify-center ">
+            <MapProvider className="w-full max-w-7xl rounded-2xl shadow ring ring-blue-500 overflow-hidden" >
+            <Suspense fallback={<LoadingIndicator/>}>
+              <BiselcoOffices promise={Offices} />
+            </Suspense>
+          </MapProvider>
+
+          </div>
+          
         </AnimatedSection>
 
         {/* FOOTER SECTION */}

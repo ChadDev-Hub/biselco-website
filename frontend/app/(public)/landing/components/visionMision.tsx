@@ -37,7 +37,7 @@ const VisionMission = () => {
                 <h2 className="card-title text-3xl font-bold mb-4 text-shadow-md text-blue-800">Our Vision</h2>
                 <p className="text-md italic opacity-80 leading-relaxed ">
                   Busuanga Island Electric Cooperative Inc.(BISELCO)
-                  is commited to the vision of premier, modern and autonomous
+                  is committed to the vision of premier, modern and autonomous
                   electric cooperative that ensures the welfeare of its member-consumers
                   and fullfills its expected role in rural development.
                 </p>
@@ -55,7 +55,7 @@ const VisionMission = () => {
                 </div>
                 <h2 className="card-title text-3xl font-bold mb-4  text-blue-800">Our Mission</h2>
                 <p className="text-md italic opacity-80 leading-relaxed">
-                  We aim to provide a continous Power Supply to all Barangays and Sitis within our Franchised Area at a reasonable costs
+                  We aim to provide a continuous Power Supply to all Barangays and Sitis within our Franchised Area at a reasonable costs
                   and through quality service with the active participation of our member-consumers.
                 </p>
               </div>

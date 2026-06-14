@@ -21,6 +21,8 @@ from ..services.get import get_change_meter, deleteChangeMeter, changeMeterRepor
 from ..services.post import post_change_meter
 from sqlalchemy import select, func
 from .....dependencies.bucket3 import upload_image
+from .....core.redis import CHANNEL, redis_client
+import json
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
 
@@ -94,8 +96,12 @@ async def create_change_meter(
 
         data = NewChangeMeterResponse.model_validate(
             change_meter_data).model_dump(mode="json")
-        for admin in admin_user:
-            await manager.broad_cast_personal_json(user_id=str(admin), data=data)
+        payload = {
+            "type" : "admins",
+            "user_ids" : admin_user,
+            "data" : data
+        }
+        await redis_client.publish(CHANNEL, json.dumps(payload))
     except Exception as e:
         print(e)
         raise HTTPException(
@@ -124,8 +130,12 @@ async def delete_change_meter(
     new_data = DeletedChangeMeterResponse.model_validate(
         data).model_dump(mode="json")
     new_data['detail'] = "deleted_change_meter"
-    for admin in admins:
-        await manager.broad_cast_personal_json(str(admin), new_data)
+    payload = {
+        "type" : "admins",
+        "user_ids" : admins,
+        "data" : new_data
+    }
+    await redis_client.publish(CHANNEL, json.dumps(payload))
     return {
         "detail": "Change Meter Deleted Successfully"}
 

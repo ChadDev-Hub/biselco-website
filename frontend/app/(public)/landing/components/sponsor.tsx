@@ -31,7 +31,7 @@ const itemVariants = {
 
 
 export default function Sponsor() {
-    const items = ["/coron.jpg", "/busuanga.jpg", "/culion.jpg", "/linapacan.png", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
+    const items = ["/coron.jpg", "/busuanga.jpg", "/culion.jpg", "/linapacan.jpg", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
     return (
         <motion.div
             variants={ParentContainer}

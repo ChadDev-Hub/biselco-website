@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from .redis import redis_listener
+from .listener import redis_listener
 from ..modules.websocket.websocket_manager import manager
 import asyncio
 

@@ -1,28 +1,32 @@
 "use client";
 import { FunnelPlusIcon } from "lucide-react";
 import { useState, use } from "react";
-import { useRouter, useSearchParams, usePathname,redirect } from 'next/navigation';
+import {
+  useRouter,
+  useSearchParams,
+  usePathname,
+  redirect,
+} from "next/navigation";
 
 type PromiseType = {
   status: number;
   data: FilterType;
-}
+};
 type Props = {
-  data: Promise<PromiseType>
+  data: Promise<PromiseType>;
 };
 
 type FilterType = {
   year: number[];
   barangay: string[];
-}
+};
 
-
-const Filter = ({data}: Props) => {
-  const initialData = use(data)
-  if (initialData.status === 403) redirect("/")
+const Filter = ({ data }: Props) => {
+  const initialData = use(data);
+  if (initialData.status === 403) redirect("/");
+  if (initialData.status === 401) redirect("/");
   const years = initialData.data.year;
   const barangays = initialData.data.barangay;
-  
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const handleOpen = () => setDropdownOpen(!dropdownOpen);
@@ -30,13 +34,12 @@ const Filter = ({data}: Props) => {
   const searchParms = useSearchParams();
   const pathname = usePathname();
 
-  const buildParms = (key: string,value:string|number|undefined) => {
+  const buildParms = (key: string, value: string | number | undefined) => {
     const params = new URLSearchParams();
     searchParms.forEach((value, key) => params.set(key, value));
     params.set(key, String(value));
     return params.toString();
-  }
-
+  };
 
   return (
     <div
@@ -56,7 +59,7 @@ const Filter = ({data}: Props) => {
           <label className="label font-bold">Year </label>
           <select
             onChange={(e) => {
-              router.push(`${pathname}?${buildParms("year",e.target.value)}`)
+              router.push(`${pathname}?${buildParms("year", e.target.value)}`);
               router.refresh();
             }}
             title="Select Year"
@@ -76,7 +79,9 @@ const Filter = ({data}: Props) => {
           <label className="label font-bold">Barangay</label>
           <select
             onChange={(e) => {
-              router.push(`${pathname}?${buildParms("barangay",e.target.value)}`)
+              router.push(
+                `${pathname}?${buildParms("barangay", e.target.value)}`,
+              );
               router.refresh();
             }}
             title="Select Year"

@@ -11,9 +11,10 @@ type Props = {
 
 const TransformerLayer = ({ promise }: Props) => {
   const data = use(promise);
-  const mapRef = useMap();
+  const {mapRef, isMapReady }= useMap();
 
   useEffect(() => {
+    if(!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !data?.data) return;
 
@@ -95,12 +96,10 @@ const TransformerLayer = ({ promise }: Props) => {
       }
     };
 
-    if (map.isStyleLoaded()){
-      setup();
-    }else{
-      map.once("load", setup);
-    }
 
+
+    const attachEvents = () => {
+    if(!map.getLayer(layerId)) return;
     const handleMouseEnter = () => {
       map.getCanvas().style.cursor = "pointer";
     };
@@ -111,6 +110,19 @@ const TransformerLayer = ({ promise }: Props) => {
     map.on("mouseenter", layerId, handleMouseEnter);
     map.on("mouseleave", layerId, handleMouseLeave);
 
+    }
+    const run = async() => {
+      await setup();
+      attachEvents();
+    }
+
+    if (map.isStyleLoaded()){
+      run();
+    }else{
+      map.once("load", run);
+    }
+    
+
     return () => {
       if (map && map.getStyle()) {
         map.removeLayer(layerId);
@@ -119,7 +131,7 @@ const TransformerLayer = ({ promise }: Props) => {
         map.removeSource(sourceId);
       }
     };
-  }, [data, mapRef]);
+  }, [data, mapRef, isMapReady]);
   return null;
 };
 

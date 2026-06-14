@@ -7,7 +7,8 @@ from sqlalchemy.exc import DBAPIError, DataError
 from .get import GetAgmaRegistrationService
 from ...websocket.websocket_manager import manager
 from ...user.service.get_user import GetUserServices
-
+from ....core.redis import redis_client, CHANNEL
+import json
 
 class AgmaRegistrationPatchService():
     def __init__(self,
@@ -28,13 +29,14 @@ class AgmaRegistrationPatchService():
             new_stats = await self.get_services.raffle_stats()
             
             admins = await self.get_user.get_users_by_roles(roles="admin")
-            for admin in admins:
-                data = {"detail": "agma_raffle_stats",
+            data = {"detail": "agma_raffle_stats",
                         "data": new_stats.model_dump(mode="json")}
-                await manager.broad_cast_personal_json(
-                    user_id=admin,
-                    data=data
-                )
+            payload = {
+                "type": "admins",
+                "user_ids": admins,
+                "data": data,
+            }
+            await redis_client.publish(CHANNEL, json.dumps(payload))
             return {"message": "Winner Saved Successfully"}
             
         except DBAPIError  as e:

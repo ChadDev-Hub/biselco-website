@@ -2,6 +2,7 @@
 import AgmaTicketCard from "@/app/agma-registration/registered/components/ticketCard";
 import { use, useState, useEffect} from "react";
 import {useWebsocket} from "@/app/utils/websocketprovider";
+
 type RegisteredType = {
   id: string;
   account_no: string;
@@ -53,6 +54,7 @@ const MembersTable = ({ data }: Props) => {
       setTicket();
     }
   },[message]);
+ 
   return (
     <section>
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">

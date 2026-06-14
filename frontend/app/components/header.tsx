@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation';
 const HomePageHeader = () => {
     const {user} = useAuth();
     if (!user) {
-        console.log(user)
         redirect("/landing")
     }
   return (

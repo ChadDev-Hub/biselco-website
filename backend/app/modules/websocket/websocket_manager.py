@@ -4,7 +4,6 @@ import asyncio
 from typing import Set, Dict
 from uuid import UUID
 from collections import defaultdict
-from ...core.redis import redis_client, CHANNEL
 import json
 
 class ConnectionManager:
@@ -52,16 +51,11 @@ class ConnectionManager:
 
     async def broadcastPresence(self, user_id: str, status: str):
         payload = {
-            "detail": "presence",
-            "data": {
                 "user_id": str(user_id),
                 "user_status": status
             }
-        }
-        await redis_client.publish(
-            CHANNEL,
-            json.dumps(payload),
-        )
+        
+        await self.broadcast(payload)
 
 
 manager = ConnectionManager()

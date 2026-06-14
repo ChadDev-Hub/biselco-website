@@ -14,7 +14,9 @@ from ...websocket.websocket_manager import manager
 from ...user.service.get_user import GetUserServices
 from ..schema.response import AgmaSetup, RegisteredOvertime, AgmaStats, AgmaCountRegistered
 from ...events.services.get import GetEventServices
+from ....core.redis import CHANNEL, redis_client
 from uuid import uuid4
+import json
 
 
 
@@ -79,24 +81,19 @@ class PostAgmaRegistrationService:
                     # REGISTERED OVERTIME
                     registered_overtime = await self.get_agma_registration_service.get_registered_overtime()
                     admins = await self.get_user_services.get_users_by_roles(roles="admin")
-                    payload = {
+                    reg_data = {
                             "detail": "new_registered",
                             "new_regs": new_registered,
                             "new_stats": [AgmaStats(**stat).model_dump(mode="json") for stat in new_stats],
                             "count_per_village": [AgmaCountRegistered(**item).model_dump(mode="json") for item in count_per_village],
                             "registered_overtime": [RegisteredOvertime(**item).model_dump(mode="json") for item in registered_overtime]
                             }
-                    
-                    for admin in admins:
-                        try:
-                            await self.websocket_manager.broad_cast_personal_json(
-                                user_id=admin,
-                                data=payload
-                            )
-                        except Exception as e:
-                            print(e)
-                            raise HTTPException(
-                                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+                    payload = {
+                        "type" : "admins",
+                        "user_ids": admins,
+                        "data": reg_data
+                    }
+                    await redis_client.publish(CHANNEL, json.dumps(payload))
                     return {
                         "message": "Registered Successfully",
                         "id": new_row
@@ -122,16 +119,19 @@ class PostAgmaRegistrationService:
             # SEND NOTIFICATION ON NEW AGMA SETUP IN EVERY ADMINS
             latest_agma_setup = await self.get_agma_registration_service.get_agma_setup()
             admins = await self.get_user_services.get_users_by_roles(roles="admin")
-            for admin in admins:
-                await self.websocket_manager.broad_cast_personal_json(
-                    user_id=admin,
-                    data={
+            data={
                         "detail": "agma_setup",
                         "event_id": self.event_id,
                         "message": "New Agma Setup Updated",
                         "data": AgmaSetup(**latest_agma_setup).model_dump(mode="json")
                     }
-                )
+            payload = {
+                "type": "admins",
+                "user_ids": admins,
+                "data": data,
+            }
+            await redis_client.publish(CHANNEL, json.dumps(payload))
+            
             return {"message": "You have successfully updated the Agma Setup"}
         except Exception as e:
             print(e)

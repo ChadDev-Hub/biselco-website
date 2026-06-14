@@ -13,46 +13,46 @@ type Props = {
 
 const PrimaryLineLayer = ({ promise }: Props) => {
   const initialData = use(promise);
-  const mapRef = useMap();
-
+  const {mapRef, isMapReady} = useMap();
   useEffect(() => {
+    if(!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !initialData?.data) return;
 
     const sourceId = "primary-lines";
     const layerId = "primary-lines-layer";
     const geojson = initialData.data;
-    const setup = async() => {
+    const setup = () => {
+      if (!map.isStyleLoaded()) return;
+
       if (!map.getSource(sourceId)) {
-      map.addSource(sourceId, {
-        type: "geojson",
-        data: geojson,
-      });
-    }
-    map.on("load", async()=>{
-      
-    })
-    if (!map.getLayer(layerId)) {
-      map.addLayer({
-        id: layerId,
-        type: "line",
-        source: sourceId,
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": ["get", "color"],
-          "line-width": 2,
-        },
-      });
-    }}
-    if(map.isStyleLoaded()){
+        map.addSource(sourceId, {
+          type: "geojson",
+          data: geojson,
+        });
+      }
+
+      if (!map.getLayer(layerId)) {
+        map.addLayer({
+          id: layerId,
+          type: "line",
+          source: sourceId,
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": 2,
+          },
+        });
+      }
+    };
+    if (map.isStyleLoaded()) {
       setup();
-    }else{
-      map.once("load", setup)
+    } else {
+      map.once("load", setup);
     }
-    
 
     // SHOW POPUP
     const handleMapClick = (
@@ -113,7 +113,7 @@ const PrimaryLineLayer = ({ promise }: Props) => {
       }
     };
     //
-  }, [initialData, mapRef]);
+  }, [initialData, mapRef, isMapReady]);
 
   return null;
 };

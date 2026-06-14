@@ -5,7 +5,7 @@ import AgmaRegistrationFooter from "./components/footer";
 import AgmaCircleIcon from "./components/agmacircle";
 
 import Return from "../common/Return";
-import {GetAgmaRegistrationSchedules} from "@/lib/serverFetch";
+import {GetAgmaRegistrationSchedules} from "@/lib/agma";
 import ScheduleSection from "./components/ScheduleSection"
 const Page = () => {
   const Agma = [

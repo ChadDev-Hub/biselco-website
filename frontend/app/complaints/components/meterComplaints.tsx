@@ -172,7 +172,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
         break;
     }
   };
-  console.log(isSubmitSuccessful);
+  
   return (
     <>
       {isSubmitSuccessful ? (

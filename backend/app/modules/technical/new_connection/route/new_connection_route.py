@@ -17,8 +17,8 @@ from geoalchemy2.functions import ST_X, ST_Y
 from ....websocket.websocket_manager import manager
 from ..schema.response_model import NewConnectionInitialData
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
-
-
+from .....core.redis import CHANNEL, redis_client
+import json
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def new_connection(session: AsyncSession = Depends(get_session), 
@@ -52,8 +52,12 @@ async def new_connection(session: AsyncSession = Depends(get_session),
     }
     response = await create_new_connection(session=session, new_connection=data, image=attachment)
     admins = await get_user_services.get_users_by_roles(roles="admin")
-    for admin in admins:
-        await manager.broad_cast_personal_json(str(admin), response)
+    payload = {
+        "type" : "admins",
+        "user_ids" : admins,
+        "data" : response
+    }
+    await redis_client.publish(CHANNEL, json.dumps(payload))
     # QUERY ADMINS
     return {"detail": "New Connection Created Successfully"}
 
@@ -76,8 +80,12 @@ async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optio
 @router.delete("/", status_code=status.HTTP_200_OK)
 async def del_n_connection(deleted=Depends(delete_new_connection), get_user_services:GetUserServices = Depends(GetUserServices)):
     admins = await get_user_services.get_users_by_roles(roles="admin")
-    for admin in admins:
-        await manager.broad_cast_personal_json(str(admin), deleted)
+    payload = {
+        "type" : "admins",
+        "user_ids" : admins,
+        "data" : deleted
+    }
+    await redis_client.publish(CHANNEL, json.dumps(payload))
     return {
         "detail" : "New Connection Deleted Successfully"
     }
