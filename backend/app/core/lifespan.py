@@ -9,7 +9,7 @@ async def lifespan(app: FastAPI):
     redis_task = asyncio.create_task(redis_listener(manager))
 
     print("App Started")
-
+   
     try:
         yield
     finally:

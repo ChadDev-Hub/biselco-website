@@ -8,10 +8,13 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 async def logout(response:Response):
     response.delete_cookie(
         "refresh_token",
+        path="/",
         httponly=True,
-        samesite="lax")
+        samesite="lax",
+        )
     response.delete_cookie(
         "access_token",
+        path="/",
         httponly=True,
         samesite="lax"
         )

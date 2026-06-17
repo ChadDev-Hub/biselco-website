@@ -1,15 +1,15 @@
 "use client"
-import { useRouter } from 'next/navigation'
-import React from 'react'
+
 import { Logout } from '@/app/actions/auth'
 
 
+
 const LogoutButton = () => {
-    const router = useRouter()
+
     const handleLogout = async () => {
         const res = await Logout()
         if (res.status === 202) {
-            router.replace("/landing")
+            window.location.href = "/landing";
         };
     }
     return (

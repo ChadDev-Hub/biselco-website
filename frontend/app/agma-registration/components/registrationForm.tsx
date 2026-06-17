@@ -7,21 +7,17 @@ import { RegisterAgma } from "@/app/actions/agma";
 import { redirect, useRouter } from "next/navigation";
 import { useAlert } from "@/app/common/alert";
 import Image from "next/image";
-import { Contact, Phone, Zap, Camera, ReceiptText } from "lucide-react";
-type FormType = {
-  account_no: string;
-  name: string;
-  mobile_number: string;
-  image: File;
-  signature: File;
-  sample_bill: File;
-};
+import SearchResults from "./searchResults";
+import { Contact, Phone, Zap, Camera, ReceiptText, FileText} from "lucide-react";
+import { FormType } from "@/types/agma";
+
 const labelClassName =
   "label font-bold text-xs text-shadow-white text-shadow-md";
 const inputClassName =
   "input w-full input-sm rounded-box focus:ring-2 focus:ring-blue-600 outline-none";
 const RegistrationForm = () => {
   const {
+    setValue,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -34,6 +30,13 @@ const RegistrationForm = () => {
   const signaturePadRef = useRef<SignaturePad | null>(null);
   const router = useRouter();
   const { showAlert } = useAlert();
+
+  // WATCH INPUTS
+  const accountNoWatched = useWatch({
+    control: control,
+    name: "account_no",
+  });
+
   const ImageWatched = useWatch({
     control: control,
     name: "image",
@@ -44,13 +47,18 @@ const RegistrationForm = () => {
     name: "sample_bill",
   });
 
+
+  const AuthorizationLetterWatched = useWatch({
+    control: control,
+    name: "authorization_letter",
+  })
   const clearSignatureErrror = () => {
     clearErrors("signature");
   };
 
   const ImageFile = ImageWatched?.[0];
   const SampleBillFile = SampleBillWatched?.[0];
-  // FUNCTIONS
+  const AuthorizationLetter = AuthorizationLetterWatched?.[0];
 
   // ---------------------------------------------------------------------------
   const getSignatureFile = async (signaturePad: SignaturePad | null) => {
@@ -103,6 +111,7 @@ const RegistrationForm = () => {
       formData.append("image", data.image[0]);
       formData.append("sample_bill", data.sample_bill[0]);
       formData.append("signature", signature);
+      if(data.authorization_letter) formData.append("authorization_letter", data.authorization_letter[0]);
 
       const res = await RegisterAgma(formData);
       switch (res.status) {
@@ -134,7 +143,6 @@ const RegistrationForm = () => {
     },
     [setError, reset, router, handleError, showAlert],
   );
-
   return (
     <div className="w-full flex justify-center max-w-lg">
       <form
@@ -224,7 +232,7 @@ const RegistrationForm = () => {
                     <Image
                       fill /* Uses modern Next.js absolute layout fill */
                       src={URL.createObjectURL(SampleBillFile)}
-                      alt="Profile preview"
+                      alt="Sample Bill preview"
                       sizes="112px"
                       className="object-cover transition-transform duration-200 group-hover:scale-105"
                     />
@@ -248,45 +256,51 @@ const RegistrationForm = () => {
                 </p>
               )}
             </section>
+
+            
           </div>
 
           <div className="col-span-2">
             {/* ACCOUNT NO */}
             <section>
-              <label className={labelClassName}>Account Number</label>
-              <label
-                className={`${inputClassName} ${errors.account_no && "input-error"}`}
-              >
-                <Zap size={15} />
-                <input
-                  {...register("account_no", {
-                    required: "Please Enter Your Account Number",
-                    pattern: {
-                      value: /^\d{10}$/,
-                      message: "Must Be A valid Digit",
-                    },
-                    minLength: {
-                      value: 10,
-                      message: "Invalid Account Number",
-                    },
-                    maxLength: {
-                      value: 10,
-                      message: "Invalid Account Number",
-                    },
-                  })}
-                  title="Account Number"
-                  type="text"
-                  className="w-full "
-                  placeholder="Your 10 Digit Account Number"
-                />
-              </label>
+              <div className="dropdown dropdown-start w-full">
+                <label className={labelClassName}>Account Number</label>
+                <label
+                  className={`${inputClassName} ${errors.account_no && "input-error"}`}
+                >
+                  <Zap size={15} />
+                  <input
+                    {...register("account_no", {
+                      required: "Please Enter Your Account Number",
+                      pattern: {
+                        value: /^\d{10}$/,
+                        message: "Must Be A valid Digit",
+                      },
+                      minLength: {
+                        value: 10,
+                        message: "Invalid Account Number",
+                      },
+                      maxLength: {
+                        value: 10,
+                        message: "Invalid Account Number",
+                      },
+                    })}
+                    title="Account Number"
+                    type="text"
+                    className="w-full "
+                    placeholder="Your 10 Digit Account Number"
+                  />
+                </label>
 
-              {errors.account_no && (
-                <p className="text-error text-xs italic">
-                  
-                  <span>⚠️</span> {errors.account_no.message}
-                </p>
-              )}
+                {errors.account_no && (
+                  <p className="text-error text-xs italic">
+                    <span>⚠️</span> {errors.account_no.message}
+                  </p>
+                )}
+                
+                  <SearchResults setValue={setValue} input={accountNoWatched} />
+                
+              </div>
             </section>
 
             {/* NAME */}
@@ -307,7 +321,6 @@ const RegistrationForm = () => {
 
               {errors.name && (
                 <p className="text-error text-xs italic">
-                  
                   <span>⚠️</span> {errors.name.message}
                 </p>
               )}
@@ -345,10 +358,49 @@ const RegistrationForm = () => {
 
               {errors.mobile_number && (
                 <p className="text-error text-xs italic">
-              
-                 <span>⚠️</span> {errors.mobile_number.message}
+                  <span>⚠️</span> {errors.mobile_number.message}
                 </p>
               )}
+            </section>
+            <section className="flex flex-col gap-3">
+              <label className={labelClassName}>Authorization Letter</label>
+              
+              <label className="relative group flex self-center items-center justify-center h-20 w-25  rounded-box border-2 border-dashed border-base-300 hover:border-violet-500 bg-base-100 hover:bg-base-200/50 cursor-pointer shadow-sm transition-all duration-200 overflow-hidden">
+                <input
+                  {...register("authorization_letter")}
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                />
+                {
+                  AuthorizationLetter ? (
+                  <div className="absolute inset-0 w-full h-full  overflow-hidden">
+                    <Image
+                      fill 
+                      src={URL.createObjectURL(AuthorizationLetter)}
+                      alt="authorization letter"
+                      className="w-full h-full object-cover group-hover:scale-105 duration-200 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <FileText className="text-white w-5 h-5" />
+                    </div>
+
+                  </div> ):
+                  <div className="flex flex-col items-center justify-center gap-1 text-base-content/40 group-hover:text-violet-600 transition-colors duration-200">
+                  <FileText className="w-6 h-6 stroke-[1.5]"/>
+                  <span className="text-[10px] text-center font-medium tracking-wide uppercase">
+                    Authorization Letter
+                  </span>
+                </div>}
+                
+              </label>
+              <p className="text-info text-xs italic text-center">
+                <span>
+                    Note: Optional, Upload Authorization Letter if you are authorized to register the account.
+                </span>
+                <br/>
+                <span className="font-bold">For Juridical Entity such as Corporation, Business, Public Building, etc</span>
+              </p>
             </section>
           </div>
         </div>
@@ -363,7 +415,6 @@ const RegistrationForm = () => {
           />
           {errors.signature && (
             <p className="text-error text-xs italic">
-  
               <span>⚠️</span> {errors.signature.message}
             </p>
           )}

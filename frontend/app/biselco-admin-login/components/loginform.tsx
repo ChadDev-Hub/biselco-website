@@ -1,7 +1,7 @@
 "use client"
 import AdminGoogleLogin from "./adminGoogleLogin";
 import { GoogleLoginRoute } from "@/app/actions/auth";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler} from "react-hook-form";
 
 
@@ -9,7 +9,7 @@ type FormType = {
     adminLoginSecretKey: string
 }
 const LoginForm = () => {
-//   const [adminLoginSecretKey, setAdminLoginSecretKey] = useState<string>("");
+  const router = useRouter()
   const {
     register,
     setError,
@@ -20,7 +20,7 @@ const LoginForm = () => {
     const res = await GoogleLoginRoute(data.adminLoginSecretKey);
     switch (res?.status) {
       case 200:
-         redirect(res.data.url);
+         router.push(res.data.url);
         break;
       case 409:
         setError("adminLoginSecretKey", { message: res.error });

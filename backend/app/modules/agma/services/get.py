@@ -1,6 +1,7 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_, true
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import NoResultFound
 from ....dependencies.db_session import get_session
 from ..model.agma_registration import AgmaRegistration
 from ...gis.consumer.model.consumer import ConsumerMeter
@@ -42,29 +43,38 @@ class GetAgmaRegistrationService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def get_registered(self, id: str):
-        stmt = (select(AgmaRegistration)
-                .options(selectinload(AgmaRegistration.consumer)
-                         .selectinload(ConsumerMeter.village),
-                         selectinload(AgmaRegistration.consumer)
-                         .selectinload(ConsumerMeter.municipal))
-                .where(AgmaRegistration.id == id))
-        d = (await self.session.execute(stmt)).scalars().one()
-        return {
-            "id": str(d.id),
-            "account_no": d.account_no,
-            "name": d.name,
-            "phone": d.phone,
-            "image": d.image,
-            "signature": d.signature,
-            "account_name": d.consumer.account_name,
-            "village": d.consumer.village.name,
-            "municipality": d.consumer.municipal.name,
-            "meter_no": d.consumer.meter_no,
-            "meter_brand": d.consumer.meter_brand,
-            "date_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-            "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-            "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
-        }
+        try: 
+            stmt = (select(AgmaRegistration)
+                    .options(selectinload(AgmaRegistration.consumer)
+                            .selectinload(ConsumerMeter.village),
+                            selectinload(AgmaRegistration.consumer)
+                            .selectinload(ConsumerMeter.municipal))
+                    .where(AgmaRegistration.id == id))
+            d = (await self.session.execute(stmt)).scalars().one()
+            return {
+                "id": str(d.id),
+                "account_no": d.account_no,
+                "name": d.name,
+                "phone": d.phone,
+                "image": d.image,
+                "signature": d.signature,
+                "account_name": d.consumer.account_name,
+                "village": d.consumer.village.name,
+                "municipality": d.consumer.municipal.name,
+                "meter_no": d.consumer.meter_no,
+                "meter_brand": d.consumer.meter_brand,
+                "date_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+                "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+                "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
+            }
+        except NoResultFound:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No Registered Consumer Found",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     # GET STATS
 
     async def get_stats(self):
@@ -77,7 +87,6 @@ class GetAgmaRegistrationService:
                     literal("Registered").label("description"),
                     literal(False).label("is_percentage")
                 )
-
             ).cte("total_registered")
 
             # Total Consumer
@@ -86,20 +95,30 @@ class GetAgmaRegistrationService:
                     func.count(
                         ConsumerMeter.id
                     ).label("value"),
-                )
+                ).where(ConsumerMeter.is_agma)
             ).cte("total_consumer")
 
             # Percentage form total consumer
             percent_registered = (
                 select(
                     literal("Percentage").label("title"),
-                    func.coalesce(func.round((func.cast(total_registered.c.value, Numeric) /
-                                  func.cast(total_consumer.c.value, Numeric)) * 100, 2), 0).label("value"),
-                    literal(f"% from total consumer").label("description"),
+                    case(
+                        (
+                            total_consumer.c.value > 0,
+                            func.round(
+                                (
+                                    cast(total_registered.c.value, Numeric)
+                                    / cast(total_consumer.c.value, Numeric)
+                                ) * 100,
+                                2
+                            )
+                        ),
+                        else_=0
+                    ).label("value"),
+                    literal("% from total consumer").label("description"),
                     literal(True).label("is_percentage")
-                ).select_from(total_consumer)
-                .select_from(total_registered)
-
+                )
+                .select_from(total_consumer.join(total_registered, true(    )))
             ).cte("percent_registered")
 
             # DAILY
@@ -217,6 +236,8 @@ class GetAgmaRegistrationService:
                 "date_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
                 "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
                 "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
+                "sample_bill": res.sample_bill,
+                "authorization_letter": res.authorization_letter
 
             }
                 for res in results

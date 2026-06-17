@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useRef, useState, useCallback } from "react";
 import { motion } from 'framer-motion';
-
+import {ImageOff} from "lucide-react";
 
 type Props = {
   image: string | null;
+  className?: string;
 };
 
-const ImageViewer = ({ image }: Props) => {
+const ImageViewer = ({ image, className }: Props) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -41,7 +42,7 @@ const ImageViewer = ({ image }: Props) => {
         type="button"
         title="View Image"
         onClick={handleOpen}
-        className="relative ring ring-secondary  cursor-pointer overflow-hidden rounded-box border-2 border-blue-600 border-dashed w-34.25 h-15"
+        className={`relative   cursor-pointer overflow-hidden rounded-box ${ className ? className : "border-2 border-blue-600 border-dashed ring ring-secondary" } w-34.25 h-15`}
       >
         {image? <Image
           src={image}
@@ -51,8 +52,8 @@ const ImageViewer = ({ image }: Props) => {
           quality={75}
           loading="lazy"
           sizes="(max-width: 768px) 100vw, 329px"
-          className="object-contain hover:scale-110 transition-all duration-200"
-        />: <span>No Image Available</span>}
+          className="object-contain  hover:scale-110 transition-all duration-200"
+        />: <ImageOff width={30} height={30} className="object-contain text-red-500 stroke-1 place-self-center hover:scale-110 transition-all duration-200"/>}
       </button>
 
       {/* Modal */}
@@ -63,7 +64,7 @@ const ImageViewer = ({ image }: Props) => {
         <div className="modal-box relative w-full  p-2 bg-base-100">
 
           {/* Controls */}
-          <div className="absolute top-2 right-2 z-50 flex gap-2">
+          <div className="absolute top-2  right-2 z-50 flex gap-2">
             <button
               type="button"
               onClick={zoomOut}
@@ -105,7 +106,7 @@ const ImageViewer = ({ image }: Props) => {
                   alt="change meter image"
                   fill
                   priority
-                  quality={75}
+                  quality={100}
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 329px"
                 /> : <span>No Image Available</span>}

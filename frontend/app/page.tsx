@@ -4,7 +4,11 @@ import InstallPrompt from './common/InstallPrompt';
 import Events from "./(public)/landing/components/agmaeventContainer";
 import {GetAgmaEvents} from "../lib/serverFetch";
 import {Suspense} from 'react';
+import EventLoadingFallback from "./(public)/landing/components/EventsLoadingFallback";
+
+
 export default function CooperativeHome() {
+  
   const agmaEvent = GetAgmaEvents();
   return (
     <div className="min-h-screen w-full bg-base-300 pb-20">
@@ -16,7 +20,7 @@ export default function CooperativeHome() {
         <HomePageTools/>
         {/* Events */}
         <section className="w-full space-y-3 mt-10">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<EventLoadingFallback />}>
             <Events event={agmaEvent}/>
           </Suspense>
           

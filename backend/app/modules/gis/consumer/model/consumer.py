@@ -32,6 +32,8 @@ class ConsumerMeter(BaseModel):
     remarks: Mapped[str] = mapped_column(Text, nullable=True)
     image: Mapped[str] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=True)
+    is_solar: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
+    is_agma: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
     
     # RELATIONSHIPS
     village: Mapped["Village"] = relationship("Village", back_populates="consumer_meters")

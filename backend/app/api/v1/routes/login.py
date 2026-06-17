@@ -156,6 +156,7 @@ async def refresh_token(
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
 async def get_user(user: UserModel = Depends(get_current_user)):
+    print(user)
     return user
 
 
@@ -247,6 +248,7 @@ async def google_login_callback(
     redirect = RedirectResponse(url=f"{FRONTEND}/")
     redirect.set_cookie(
         key="refresh_token",
+        path="/",
         value=refresh_token,
         expires=datetime.now(timezone.utc) + timedelta(days=7),
         httponly=True,
@@ -256,6 +258,7 @@ async def google_login_callback(
 
     redirect.set_cookie(
         key="access_token",
+        path="/",
         value=access_token,
         expires=datetime.now(timezone.utc) + timedelta(minutes=15),
         httponly=True,

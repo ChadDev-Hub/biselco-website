@@ -73,8 +73,10 @@ async def check_image(image_location: VerifiedLocation = Depends(extract_address
     }
 
 @router.get("/",status_code=status.HTTP_200_OK, response_model=NewConnectionInitialData)
-async def get_nconnection(session:AsyncSession=Depends(get_session), page: Optional[int] = Query(None)):
-    data = await get_new_connection(session=session, page=page)
+async def get_nconnection(session:AsyncSession=Depends(get_session), 
+                          page: Optional[int] = Query(None),
+                          search:Optional[str]=Query(None)):
+    data = await get_new_connection(session=session, page=page, search=search)
     return data
 
 @router.delete("/", status_code=status.HTTP_200_OK)

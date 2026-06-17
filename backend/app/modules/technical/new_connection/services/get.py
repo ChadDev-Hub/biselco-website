@@ -1,5 +1,5 @@
 from ..model.new_connection import NewConnection
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_, cast , Text
 from sqlalchemy.orm import selectinload, load_only
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,7 @@ from datetime import date
 PAGESIZE=12 
 
 
-async def get_new_connection(session: AsyncSession, page:Optional[int] = None):
+async def get_new_connection(session: AsyncSession, page:Optional[int] = None, search:Optional[str] = None):
     if page is None: 
         page = 1
     stmt = (select(NewConnection)
@@ -37,7 +37,25 @@ async def get_new_connection(session: AsyncSession, page:Optional[int] = None):
                 NewConnection.geom
                 ))
             .order_by(NewConnection.times_tamped.desc())
-            .offset((page-1)*PAGESIZE).limit(PAGESIZE))
+            .offset((PAGESIZE * (page - 1)))
+            .limit(PAGESIZE))
+    if search:
+        page=1
+        stmt = stmt.where(
+            or_(
+                cast(NewConnection.times_tamped, Text).ilike(f"%{search}%"),
+                cast(NewConnection.date_accomplished, Text).ilike(f"%{search}%"),
+                NewConnection.consumer_name.ilike(f"%{search}%"),
+                NewConnection.location.ilike(f"%{search}%"),
+                NewConnection.meter_serial_no.ilike(f"%{search}%"),
+                NewConnection.meter_brand.ilike(f"%{search}%"),
+                cast(NewConnection.meter_sealed,Text).ilike(f"%{search}%"),
+                cast(NewConnection.initial_reading,Text).ilike(f"%{search}%"),
+                cast(NewConnection.multiplier,Text).ilike(f"%{search}%"),
+                NewConnection.accomplished_by.ilike(f"%{search}%"),
+                NewConnection.remarks.ilike(f"%{search}%"),
+            )
+        ).offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
     total_page = await get_total_page(session=session, model=NewConnection, pagesize=PAGESIZE)
     data = (await session.execute(stmt)).scalars().all()
     results = [

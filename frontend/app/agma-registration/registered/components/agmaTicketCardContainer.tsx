@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import AgmaTicketCard from "./ticketCard";
+import {useRouter} from "next/navigation";
 type PromiseType = {
   status?: number;
   data: RegisteredType;
@@ -29,9 +30,11 @@ type Props = {
 };
 
 const AgmaTicketCardContainer = ({ registered }: Props) => {
-  const { data } = use(registered);
+  const data = use(registered);
+  const router = useRouter();
+  if(data.status === 404) router.push("/");
   return (
-    <AgmaTicketCard data={data} />
+    <AgmaTicketCard data={data.data} />
   );
 };
 

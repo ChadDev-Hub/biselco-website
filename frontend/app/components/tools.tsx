@@ -49,6 +49,7 @@ const ComingSoon = ({ children }: Props) => {
 const HomePageTools = () => {
     const { user } = useAuth()
     const isAdmin = user?.roles.map(role => role.name).includes("admin")
+
     return (
         <>
             <h3 className="text-gray-800 font-bold mt-8 mb-4 px-1 text-lg">Member Tools</h3>

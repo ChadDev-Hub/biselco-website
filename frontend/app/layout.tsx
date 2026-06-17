@@ -136,7 +136,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentUSER = await getCurrentUser();
+  const currentUser = await getCurrentUser();
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <head>
@@ -147,7 +147,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
       >
 
-        <AuthProvider initialUser={currentUSER?.detail}>
+        <AuthProvider initialUser={currentUser.detail}>
           <WebsocketProvider>
             <AlertComponent>
               <LoadingIndicator>

@@ -5,6 +5,8 @@ import Return from "../../common/Return";
 import DownloadTicket from "./components/DownloadTicket";
 import AgmaTicketSkeletonCard from "./components/agmaTicketSkeletonCard";
 import AgmaTicketCardContainer from "./components/agmaTicketCardContainer";
+import { redirect } from 'next/navigation';
+
 type Props = {
   searchParams: Promise<searchParamsType>;
 };
@@ -15,6 +17,7 @@ type searchParamsType = {
 const AgmaTicketPage = ({ searchParams }: Props) => {
   const params = use(searchParams);
   const id = params.id;
+  if (id === undefined) redirect("/");
   const result = GetAgmaRegistered(id);
   return (
     <div className="w-full   flex-col min-h-screen flex ">

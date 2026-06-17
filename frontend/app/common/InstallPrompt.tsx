@@ -49,12 +49,11 @@ const InstallPrompt = () => {
     const choice = await deferredPrompt.userChoice;
 
     if (choice.outcome === "accepted") {
-      console.log("PWA installed");
+      setIsStandalone(true);
     }
 
     setDeferredPrompt(null);
   };
-  console.log(isStandalone);
   if (isStandalone) return null;
 
   return (

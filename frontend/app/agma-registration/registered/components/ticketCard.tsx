@@ -1,38 +1,28 @@
+"use client";
 
-import React from 'react'
-import Image from 'next/image'
+import Image from "next/image";
+import { TicketInfoType } from "../../../../types/agma";
+import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
+import { useAuth } from "@/app/utils/authProvider";
+4;
+import { usePathname } from "next/navigation";
+
 type Props = {
-    data: data
-}
+  data: TicketInfoType;
+};
 
-type data = {
-    account_no: string;
-    account_name: string;
-    year: string;
-    image: string;
-    name: string;
-    village: string;
-    municipality: string;
-    phone: string;
-    meter_no: string;
-    meter_brand: string;
-    date_registered: string;
-    time_registered: string;
-    signature: string
-
-
-}
-
-const AgmaTicketCard = ({data}: Props) => {
+const AgmaTicketCard = ({ data }: Props) => {
+  const { user } = useAuth();
+  const currentPath = usePathname();
   return (
     <div
       id="agma-ticket"
-      className="relative  w-full max-w-lg  mx-auto overflow-hidden bg-white border-slate-200 rounded-2xl shadow-md"
+      className="relative  w-full max-w-md  mx-auto overflow-hidden bg-white border-slate-200 rounded-2xl shadow-md"
     >
       <div className="h-2 absolute top-0 bg-yellow-500 w-full"></div>
       {/* Top Section: Header & Profile */}
       <div className="p-6 bg-primary/5">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex gap-3 justify-between items-start mb-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
               Official Ticket
@@ -113,36 +103,45 @@ const AgmaTicketCard = ({data}: Props) => {
               <span>{data.date_registered}</span>
               <br />
               <span>{data.time_registered}</span>
-           
             </p>
           </div>
         </div>
-        <div className="h-30 flex items-end w-full">
-         
+        <div className="h-30 flex gap-2 items-end w-full">
           {/* Signature & Action */}
-          <div className="pt-6 flex justify-between items-end ">
-            <div className="w-32 border-b  border-slate-300  pb-1">
-              <Image
-                loading="eager"
-                width={120}
-                height={40}
-                src={data.signature}
-                alt="Signature"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover contrast-200 w-auto h-auto"
-              />
-              <p className="text-[9px] uppercase text-center text-slate-400 mt-1">
-                Signature
-              </p>
-            </div>
+
+          <div className="w-32 h-32 items-end flex justify-center   border-b relative  border-slate-300  pb-1">
+            <Image
+              loading="eager"
+              fill
+              src={data.signature}
+              alt="Signature"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-contain"
+            />
+            <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
+              Signature
+            </p>
           </div>
+
+          {currentPath == "/agma-dashboard" &&
+            user?.roles.map((role) => role.name).includes("admin") && (
+              <div className=" items-center flex flex-col justify-center  border-b relative  border-slate-300  pb-1">
+                <div>
+                  <ImageViewer className={`${data.sample_bill ? "border border-dashed": "border-none"}`} image={data.sample_bill ?? null} />
+                </div>
+
+                <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
+                  Sample Bill
+                </p>
+              </div>
+            )}
         </div>
       </div>
 
       {/* Bottom Decorative Bar */}
       <div className="h-2 bg-primary w-full absolute bottom-0"></div>
     </div>
-  )
-}
+  );
+};
 
-export default AgmaTicketCard
+export default AgmaTicketCard;

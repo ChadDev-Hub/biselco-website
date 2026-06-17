@@ -58,7 +58,8 @@ class PostAgmaRegistrationService:
                     image_url = await upload_image(data.image, folder="agma/profiles")
                     signature_url = await upload_image(data.signature, folder="agma/signatures")
                     sample_bill_url = await upload_image(data.sample_bill, folder="agma/sample_billing_invoice")
-                    if not image_url and not signature_url:
+                    authorization_letter_url = await upload_image(data.authorization_letter, folder="agma/authorization_letters")
+                    if not image_url and not signature_url and not sample_bill_url:
                         raise HTTPException(
                             status_code=status.HTTP_424_FAILED_DEPENDENCY, detail="Image Upload Failed")
                     stmt = insert(AgmaRegistration).values(
@@ -67,7 +68,8 @@ class PostAgmaRegistrationService:
                         phone=data.mobile_no,
                         image=image_url,
                         signature=signature_url,
-                        sample_bill=sample_bill_url
+                        sample_bill=sample_bill_url,
+                        authorization_letter=authorization_letter_url
                     ).returning(AgmaRegistration.id)
                     results = await self.session.execute(stmt)
                     await self.session.commit()

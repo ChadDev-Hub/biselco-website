@@ -68,7 +68,6 @@ export const GoogleLoginRoute = async(secretKey?:string)=>{
   }
   return {
     status: res.status,
-    data: results,
+    data: results
   };
-
 }

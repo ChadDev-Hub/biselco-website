@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from fastapi import UploadFile
-
+from typing import Optional
 class AgmaRegistrationRequest(BaseModel):
     account_no: str
     name: str 
@@ -8,6 +8,7 @@ class AgmaRegistrationRequest(BaseModel):
     image:UploadFile
     signature:UploadFile
     sample_bill:UploadFile
+    authorization_letter:Optional[UploadFile] = None
 
 
 class AgmaValidationRequest(BaseModel):
@@ -16,6 +17,7 @@ class AgmaValidationRequest(BaseModel):
     mobile_no: str
     image_url: str
     signature_url: str
+    authorization_letter_url: str
     
     
 class AccountNumberRequest(BaseModel):

@@ -1,5 +1,25 @@
 import {Stats} from "./stats";
 
+
+
+export type TicketInfoType = {
+    account_no: string;
+    account_name: string;
+    year: string;
+    image: string;
+    name: string;
+    village: string;
+    municipality: string;
+    phone: string;
+    meter_no: string;
+    meter_brand: string;
+    date_registered: string;
+    time_registered: string;
+    signature: string
+    sample_bill?: string;
+    authorization_letter?: string;
+}
+
 export type WinnerInfoType = {
     id: string; 
     account_no: string;
@@ -14,3 +34,13 @@ export type AgmaStatsType = {
     w_per_mun: Stats[];
     w_per_vill: Stats[];
 }
+
+export type FormType = {
+  account_no: string;
+  name: string;
+  mobile_number: string;
+  image: File;
+  signature: File;
+  sample_bill: File;
+  authorization_letter: File | null;
+};

@@ -3,7 +3,7 @@ import BiselcoMap from "@/app/common/Map";
 import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import { queryConsumer } from "@/lib/serverFetch";
+import { queryConsumer } from "@/lib/consumer-meter";
 import { CirclePlus } from "lucide-react"
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
 import { useLoading } from "@/app/common/loadingIndication";
@@ -13,6 +13,7 @@ import { useCallback } from "react";
 import { useAlert } from "@/app/common/alert";
 import ImageViewer from "./imageViewr";
 import { Camera } from "lucide-react"
+import {Consumer} from "@/types/consumer-meter";
 
 type FormField = {
   dateAccomplished: string;
@@ -33,20 +34,6 @@ type FormField = {
   realtimeImage?: File;
 };
 
-type Consumer = {
-  account_name: string;
-  account_no: string;
-  meter_brand: string;
-  meter_no: string;
-  municipality: string;
-  village: string;
-  geolocation: Location;
-};
-
-type Location = {
-  type: string;
-  coordinates: [number, number];
-};
 
 
 const ChangeMeterForm = () => {
@@ -295,7 +282,7 @@ const ChangeMeterForm = () => {
                       </span>
                     )}
                     {consumer.length > 0 ? (
-                      <ul className="dropdown-conten rounded-box drop-shadow-md  grid grid-cols-1 menu absolute max-h-60 overflow-y-auto w-full bg-base-100  z-10">
+                      <ul className="dropdown-content rounded-box drop-shadow-md  grid grid-cols-1 menu absolute max-h-60 overflow-y-auto w-full bg-base-100  z-10">
                         {consumer.map((item: Consumer) => (
                           <li
                             key={item.account_no}

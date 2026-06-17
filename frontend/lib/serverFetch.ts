@@ -11,7 +11,7 @@ export async function getCurrentUser() {
     const accessToken = cookie.get("access_token")?.value
     const res = await fetch(`${baseUrl}/v1/auth/user/me`,{
         method: "GET",
-        cache: "no-store",
+        cache: "no-cache",
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
@@ -163,27 +163,7 @@ export async function ComplaintStatusName() {
 }
 
 
-// VERIFY CONSUMER
-export const queryConsumer = async(query?:string)=>{
-    const param = new URLSearchParams();
-    if (query) param.set("consumer", query);
-    const url = `${baseUrl}/v1/consumers/?${param.toString()}`;
-    const res = await fetch(url,{
-        next: { revalidate: 300 },
-        method:"GET"})
-    const data = await res.json()
-    
-    if (!res.ok){
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
+
 
 //  GET CHANGE METER DATA
 export const GetChangeMeter = async (page?:number,search?:string) => {
@@ -277,28 +257,6 @@ export const GetComplaintOvertime = async () => {
 
 
 // NEW CONNECTION
-export const GetNewConnection = async (page?:number) => {
-    const params = new URLSearchParams();
-    
-    if(page){
-        params.set("page",page.toString())
-    }
-    const res = await fetch(`${baseUrl}/v1/new_connection/?${params?.toString()}`, {
-        method: "GET",
-        cache: "no-cache"
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
 
 
 

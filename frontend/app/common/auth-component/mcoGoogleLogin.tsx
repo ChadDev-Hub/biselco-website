@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { GoogleLoginRoute } from '@/app/actions/auth';
 
 
+
+
 const McoGoogleLogin = () => {
     const [loading, setLoading] = useState(false)
     const handleClick = async() => {
@@ -14,6 +16,7 @@ const McoGoogleLogin = () => {
             break;
         case 400:
             alert(res.error);
+            setLoading(false);
             break;
         default:
             break;

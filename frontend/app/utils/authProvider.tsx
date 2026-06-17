@@ -1,8 +1,10 @@
 "use client"
-import React, {createContext, useState, useContext} from 'react'
+import React, {createContext,  useContext, useMemo} from 'react'
+
+
 type Props = {
     children: React.ReactNode;
-    initialUser?: User
+    initialUser: User
 }
 
 
@@ -24,15 +26,15 @@ type Roles = {
 
 type contextType = {
     user: User | undefined;
-    setUser: React.Dispatch<React.SetStateAction<User | undefined>>
+    // setUser: React.Dispatch<React.SetStateAction<User | undefined>>
 }
 
-const authContext = createContext<contextType | null>(null)
+const authContext = createContext<contextType | undefined>(undefined)
 const AuthProvider = ({children, initialUser}: Props) => {
-    const [user, setUser] = useState<User | undefined>(initialUser)
-    
+    // const [user, setUser] = useState<User | undefined>(initialUser)
+    const user = useMemo(() => initialUser, [initialUser])
   return (
-    <authContext.Provider value={{user, setUser}}>
+    <authContext.Provider value={{user}}>
         {children}
     </authContext.Provider>
   )
@@ -40,7 +42,7 @@ const AuthProvider = ({children, initialUser}: Props) => {
 
 const useAuth = () => {
     const context = useContext(authContext)
-    if (context === null) {
+    if (context === undefined) {
         throw new Error("useAuth must be used within a AuthProvider");
     }
     return context

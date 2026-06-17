@@ -15,11 +15,11 @@ type PromiseType = Promise<{
 type Props = {
   promise: PromiseType;
 };
-const icon = renderToStaticMarkup(<Building2 size={20} color="#3b82f6" />);
+
 const BiselcoOffices = ({ promise }: Props) => {
   const initialData = use(promise);
-  console.log(initialData);
   const { mapRef, isMapReady } = useMap();
+  const icon = renderToStaticMarkup(<Building2 size={20} color="#3b82f6" />);
   useEffect(() => {
     if (!isMapReady) return;
     const map = mapRef?.current;

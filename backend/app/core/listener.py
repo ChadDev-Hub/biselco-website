@@ -5,6 +5,7 @@ import json
 
 async def process_incoming_payload(message, manager):
     """Safely processes a single Redis message payload without affecting the loop."""
+    
     try:
         if message.get("type") != "message":
             return

@@ -45,7 +45,7 @@ const ChangeMeteCards = ({
 }: Props) => {
   return (
     <CardComponent
-      className={`w-full flex flex-col justify-center items-center  ${selectedRow.has(id) ? "border border-blue-600" : "border border-gray-100 border-t-emerald-500 border-t-2"} hover:cursor-pointer bg-base-100 shadow-md shadow-gray-700 rounded-box  `}
+      className={`w-full flex flex-col justify-center items-center  ${selectedRow.has(id) ? "border border-blue-600" : "border border-gray-100 border-t-emerald-500 border-t-2"} hover:cursor-pointer bg-base-100 shadow-md shadow-gray-700 rounded-box h-100  `}
     >
       <div className="p-2 w-full relative flex flex-col gap-2">
         <input

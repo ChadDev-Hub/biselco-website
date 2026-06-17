@@ -27,4 +27,5 @@ class AgmaRegistration(BaseModel):
     sample_bill: Mapped[str] = mapped_column(type_=Text, nullable=True)
     is_winner: Mapped[bool] = mapped_column(type_=Boolean, nullable=True, default=False)
     is_dismissed: Mapped[bool] = mapped_column(type_=Boolean, nullable=True, default=False)
+    authorization_letter: Mapped[str]  = mapped_column(type_=Text, nullable=True)
     consumer: Mapped[ConsumerMeter] = relationship("ConsumerMeter", back_populates="agma")

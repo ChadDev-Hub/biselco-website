@@ -3,7 +3,7 @@
 import { useEffect, useState} from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import { queryConsumer } from "../../../lib/serverFetch";
+import { queryConsumer } from "../../../lib/consumer-meter";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/app/actions/complaint";
 import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";

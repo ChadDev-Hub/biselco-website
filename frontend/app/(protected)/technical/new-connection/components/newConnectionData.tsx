@@ -42,9 +42,10 @@ type NewConnectionData = {
 
 type Props = {
     data: Promise<PromiseType>
+    searchComponent: React.ReactNode;
 }
 
-const NewConnectionDataContainer = ({ data }: Props) => {
+const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
     const newConnection = use(data)
     const [newConnectionData, setNewConnectionData] = useState<NewConnectionData[] | []>([])
     const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set())
@@ -176,11 +177,7 @@ const NewConnectionDataContainer = ({ data }: Props) => {
                     {/*Search*/}
                     <div>
 
-                        <input
-                            placeholder="Find"
-                            type="text"
-                            className="input bg-base-200 drop-shadow-md  rounded-box w-full max-w-xs input-md"
-                        />
+                        {searchComponent}
                     </div>
 
                 </div>

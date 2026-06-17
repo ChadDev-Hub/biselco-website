@@ -1,4 +1,4 @@
-import Stats from "./components/stats";
+  import Stats from "./components/stats";
 import { GetChangeMeter } from "@/lib/serverFetch";
 import { Suspense } from "react";
 import StatsSkeleton from "@/app/common/statsSkeleton";
