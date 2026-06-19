@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useRef, useContext, useEffect, useState } from 'react'
 import { useAuth } from './authProvider'
-import { AgmaStatsType } from '../../types/agma';
+import { AgmaStatsType, AgmaVerificationType } from '../../types/agma';
 
 type Props = {
   children: React.ReactNode;
@@ -91,6 +91,9 @@ type WSMessage = {
 } | {
   detail: "agma_raffle_stats"
   data: AgmaStatsType;
+} | {
+  detail: "agma_verified_consumer",
+  data : AgmaVerificationType
 }
 type RegisteredOvertime = {
   name: string;
@@ -125,7 +128,6 @@ type NewAgmaRegistered = {
   date_registered: string;
   time_registered: string;
   year: string;
-
 }
 
 type EventSchedules = {

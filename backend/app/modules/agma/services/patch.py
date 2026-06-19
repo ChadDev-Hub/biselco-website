@@ -61,3 +61,37 @@ class AgmaRegistrationPatchService():
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
+    async def verify_registered(self, id:str, is_verified:bool):
+        try:
+            consumer = (await self.session.execute(
+                update(AgmaRegistration)
+                .where(AgmaRegistration.id == id)
+                .values(is_verified=is_verified)
+                .returning(AgmaRegistration)
+            )).scalars().first()
+            await self.session.commit()
+            admins = await self.get_user.get_users_by_roles(roles="admin")
+            data = {
+                "id": str(consumer.id),
+                "is_verified": consumer.is_verified,
+            }
+
+            to_send = {
+                "detail": "agma_verified_consumer",
+                "data": data
+            }
+            payload = {
+                "type": "admins",
+                "user_ids": admins,
+                "data": to_send
+            }
+            await redis_client.publish(CHANNEL, json.dumps(payload))
+            return {"message": "Registered Verified Status Changes Successfully"}
+        
+        except DBAPIError  as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Consumer Not Found")
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

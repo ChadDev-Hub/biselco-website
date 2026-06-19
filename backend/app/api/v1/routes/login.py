@@ -156,7 +156,6 @@ async def refresh_token(
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
 async def get_user(user: UserModel = Depends(get_current_user)):
-    print(user)
     return user
 
 

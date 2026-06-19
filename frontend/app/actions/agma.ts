@@ -98,3 +98,19 @@ export const DismissedWinner = async (id:string)=> {
     )
     return res;
 }
+
+
+export const VerifyRegistered = async (id:string, is_verified: boolean) => {
+    const res = await serverFetchAutoRefresh(
+        `${baseUrl}/v1/agma/registered/verify`,
+        "PATCH",
+        JSON.stringify({
+            id: id,
+            is_verified: is_verified
+        }),
+        {
+            "Content-Type": "application/json",
+        }
+    )
+    return res
+}

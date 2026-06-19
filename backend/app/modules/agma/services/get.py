@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_, true
+from sqlalchemy import select, func, cast, and_, Date, extract, literal, Numeric, union_all, Integer, case, or_, true, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import NoResultFound
@@ -185,7 +185,9 @@ class GetAgmaRegistrationService:
                                  search: Optional[str] = None,
                                  page: Optional[int] = 1,
                                  year: Optional[int] = None,
-                                 barangay: Optional[str] = None):
+                                 barangay: Optional[str] = None,
+                                 municipality: Optional[str] = None,
+                                 ):
         try:
             stmt = (select(AgmaRegistration)
                     .join(AgmaRegistration.consumer)
@@ -215,6 +217,8 @@ class GetAgmaRegistrationService:
                         AgmaRegistration.timestamped, Date)) == year)
                 if barangay:
                     stmt = stmt.where(Village.name == barangay)
+                if municipality:
+                    stmt = stmt.where(Municipality.name == municipality)    
             results = (await self.session.execute(stmt)).scalars().all()
 
             # TOTAL PAGE
@@ -237,8 +241,8 @@ class GetAgmaRegistrationService:
                 "time_registered": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
                 "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
                 "sample_bill": res.sample_bill,
-                "authorization_letter": res.authorization_letter
-
+                "authorization_letter": res.authorization_letter,
+                "is_verified": res.is_verified
             }
                 for res in results
             ]
@@ -252,15 +256,21 @@ class GetAgmaRegistrationService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    async def get_filters(self):
+    async def get_filters(self, municipality: Optional[str] = None):
         try:
             year = (await self.session.execute(select(func.distinct(func.extract("year", AgmaRegistration.timestamped))))).scalars().all()
-            barangay_stmt = (await self.session.execute(select(AgmaRegistration).options(
-                selectinload(AgmaRegistration.consumer)
-                .selectinload(ConsumerMeter.village)))).scalars().all()
-            barangay = list(
-                set([res.consumer.village.name for res in barangay_stmt]))
-            return {"year": year, "barangay": barangay}
+            barangay_stmt = (select(distinct(Village.name))
+                             .join(AgmaRegistration.consumer)
+                             .join(ConsumerMeter.municipal)
+                             .join(ConsumerMeter.village)
+                             .order_by(Village.name.asc()))
+            if municipality:
+                barangay_stmt = barangay_stmt.where(Municipality.name == municipality)
+            barangay_results = (await self.session.execute(barangay_stmt)).scalars().all()
+            barangay = list(set(barangay_results))
+            municipality_stmt = (await self.session.execute(select(Municipality.name))).scalars().all()
+            municipality = list(set(municipality_stmt))
+            return {"year": year, "barangay": barangay, "municipality": municipality}
         except Exception as e:
             print(e)
             raise HTTPException(
@@ -376,6 +386,7 @@ class GetAgmaRegistrationService:
             stmt = (select(AgmaRegistration.account_no)
                     .where(AgmaRegistration.is_winner == False,
                            AgmaRegistration.is_dismissed == False,
+                           AgmaRegistration.is_verified,
                            func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
                     .order_by(func.random())
                     .limit(self.RAFFLE_ENTRIES_LIMIT))
@@ -392,6 +403,7 @@ class GetAgmaRegistrationService:
                        .where(
                            AgmaRegistration.is_winner == False,
                            AgmaRegistration.is_dismissed == False,
+                           AgmaRegistration.is_verified,
                            func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
                        .order_by(func.random())
                        .limit(self.RAFFLE_ENTRIES_LIMIT)).cte("entries")

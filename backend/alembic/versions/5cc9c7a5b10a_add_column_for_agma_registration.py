@@ -21,9 +21,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.add_column("agma_registration", sa.Column("authorization_letter", sa.Text(), nullable=True), schema="public")
-    
+    op.add_column("agma_registration", sa.Column("is_verified", sa.Boolean(), nullable=False, server_default=sa.false()), schema="public")
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_column("agma_registration", "authorization_letter", schema="public", if_exists=True)
+    op.drop_column("agma_registration", "is_verified", schema="public", if_exists=True)

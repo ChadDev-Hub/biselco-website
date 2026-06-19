@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response, Body
 from ..services.post import PostAgmaRegistrationService
-from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest
+from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest, VerificationRequest
 from ...user.schema.response_model import UserModel
 from ....dependencies.bucket3 import upload_image
 from ..services.get import GetAgmaRegistrationService
@@ -22,7 +22,8 @@ async def register_agma(
     data: AgmaRegistrationRequest = Form(...),
     post_agma_registration_service: PostAgmaRegistrationService = Depends(
         PostAgmaRegistrationService),
-):
+):  
+    print(data)
     return await post_agma_registration_service.register_agma(data=data)
 
 
@@ -65,23 +66,33 @@ async def get_all(
         page: Optional[int] = Query(None),
         year: Optional[int] = Query(None),
         barangay: Optional[str] = Query(None),
+        municipality: Optional[str] = Query(None),
         search: Optional[str] = Query(None)):
 
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search)
+    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search, municipality=municipality)
 
+
+@router.patch("/registered/verify", status_code=status.HTTP_200_OK)
+async def verify_reg(
+    data: VerificationRequest = Body(...),
+    patch_agma_registration_service: AgmaRegistrationPatchService = Depends(
+        AgmaRegistrationPatchService),
+):
+    return await patch_agma_registration_service.verify_registered(id=data.id, is_verified=data.is_verified)
 
 @router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
 async def get_agma_filter(
         get_agma_registration_service: GetAgmaRegistrationService = Depends(
             GetAgmaRegistrationService),
-        user: UserModel = Depends(get_current_user)):
+        user: UserModel = Depends(get_current_user),
+        municipality: Optional[str] = Query(None)):
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_agma_registration_service.get_filters()
+    return await get_agma_registration_service.get_filters(municipality=municipality)
 
 
 @router.post("/setup", status_code=status.HTTP_201_CREATED)
@@ -203,4 +214,3 @@ async def get_raffle_stats(
                             detail="Admin Only Transaction Allowed")
     return await get_services.raffle_stats()
 
-    

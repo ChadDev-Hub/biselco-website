@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { GetAgmaFilters, GetAgmaTicketAll } from "../../../../lib/serverFetch";
+
+import { GetAgmaTicketAll , GetAgmaFilters} from "../../../../lib/agma";
 import MembersTable from "./MembersTicket";
 import Pagination from "../../technical/change-meter/components/pagination";
 import MembersTicketSkeleton from "./MembersTicketSkeleton";
@@ -14,11 +15,12 @@ type Props = {
   page: string | string[] | undefined;
   year: string | string[] | undefined;
   barangay: string | string[] | undefined;
+  municipality: string | string[] | undefined;
 };
 
-const OverViewSection = ({ page, year, barangay, search }: Props) => {
-  const filters = GetAgmaFilters();
-  const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search);
+const OverViewSection = ({ page, year, barangay, search, municipality }: Props) => {
+  const filters = GetAgmaFilters(municipality);
+  const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search, municipality);
   
   return (
     <section>

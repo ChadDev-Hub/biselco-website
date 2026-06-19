@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DocNavigation from "./common/doc";
-import Drawer from "./common/drawer";
+import DocNavigation from "./common/navigations/doc";
+import Drawer from "./common/navigations/drawer";
 import ThemeController from "./common/themeController";
 import { WebsocketProvider } from "./utils/websocketprovider";
 import { AuthProvider } from "./utils/authProvider";
@@ -10,10 +10,10 @@ import AlertComponent from "./common/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
-import { getCurrentUser } from '@/lib/serverFetch';
-import type { Viewport } from "next"
+import { getCurrentUser } from "@/lib/serverFetch";
+import type { Viewport } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
-import PullToRefresh from './common/PulltoRefresh';
+import PullToRefresh from "./common/PulltoRefresh";
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
 
 const baseurl = process.env.BASESERVERURL;
@@ -33,15 +33,15 @@ export const viewport: Viewport = {
   maximumScale: 1,
   minimumScale: 1,
   viewportFit: "cover",
-  userScalable: false
-}
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://biselco79.com"),
 
   // Basic SEO
   title: "BISELCO",
-  description:"Electric service updates and complaints system",
+  description: "Electric service updates and complaints system",
 
   keywords: [
     "BISELCO",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     "Consumer",
     "General Membership Assembly Meeting",
     "AGMA",
-    "Busuanga Island Electric Cooperative"
+    "Busuanga Island Electric Cooperative",
   ],
 
   authors: [{ name: "Richard Rojo Jr." }],
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   },
 
   // Open Graph (Facebook, Messenger, LinkedIn, etc.)
-   openGraph: {
+  openGraph: {
     title: "BISELCO",
     description: "Electric service updates and complaints system",
     url: "https://biselco79.com",
@@ -98,7 +98,6 @@ export const metadata: Metadata = {
   },
 
   // Icons (favicon, apple touch, etc.)
-
 
   // PWA / Mobile
   manifest: "/manifest.webmanifest",
@@ -129,6 +128,14 @@ export const metadata: Metadata = {
       url: "https://biselco79.com",
     },
   },
+
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default async function RootLayout({
@@ -141,12 +148,10 @@ export default async function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <head>
         <meta name="apple-mobile-web-app-title" content="BISELCO" />
-
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
       >
-
         <AuthProvider initialUser={currentUser.detail}>
           <WebsocketProvider>
             <AlertComponent>
@@ -154,9 +159,7 @@ export default async function RootLayout({
                 <ThemeController />
                 <NotificationProvider>
                   <Drawer baseurl={baseurl}>
-                    <PullToRefresh>
-                    {children}
-                    </PullToRefresh>
+                    <PullToRefresh>{children}</PullToRefresh>
                     <DocNavigation />
                   </Drawer>
                 </NotificationProvider>

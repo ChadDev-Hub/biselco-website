@@ -7,6 +7,8 @@ import { useRouletteSound } from "./rouletSound";
 import { useSearchParams } from "next/navigation";
 import WinnerModal from "./winner-modal";
 import { useAlert } from "../../../common/alert";
+import {useRouter} from "next/navigation";
+
 const SIZE = 500;
 const RADIUS = 240;
 
@@ -65,6 +67,8 @@ type Props = {
 
 export default function WheelPage({ promise }: Props) {
   const InitialEntries = use(promise);
+  const router = useRouter();
+  if (InitialEntries.status === 401) router.replace("/");
   const searchParams = useSearchParams();
   const spinTimer = searchParams.get("spin_time");
   const [entries, setEntries] = useState<string[]>(InitialEntries.data || []);

@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useAuth } from "../utils/authProvider";
-import LogoutButton from "./auth-component/logout";
+import { useAuth } from "../../utils/authProvider";
+import LogoutButton from "../auth-component/logout";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ export default function NavBar() {
     setOpen(!open);
   };
   return (
-    <nav className="sticky top-0 z-60 p-4  h-12 w-full flex items-center justify-between  bg-base-200/45 backdrop-blur-sm shadow-md transition-all">
+    <nav className="sticky top-0 z-10 p-4  h-12 w-full flex items-center justify-between  bg-base-200/45 backdrop-blur-sm shadow-md transition-all">
       {/* LEFT SIDE: Sidebar Toggle + Logo */}
       <div className="flex items-center gap-2">
         <label

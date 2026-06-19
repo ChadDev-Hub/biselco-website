@@ -69,7 +69,7 @@ class PostAgmaRegistrationService:
                         image=image_url,
                         signature=signature_url,
                         sample_bill=sample_bill_url,
-                        authorization_letter=authorization_letter_url
+                        authorization_letter=authorization_letter_url   
                     ).returning(AgmaRegistration.id)
                     results = await self.session.execute(stmt)
                     await self.session.commit()
@@ -105,6 +105,9 @@ class PostAgmaRegistrationService:
                     raise HTTPException(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+    
+    
+    
     async def setup_agma_event(self, data: AgmaEventSetup):
         try:
 

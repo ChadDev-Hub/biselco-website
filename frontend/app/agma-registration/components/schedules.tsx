@@ -36,7 +36,7 @@ const Schedules = ({ children }: Props) => {
             </div>
             <div className="flex w-full z-auto justify-center gap-2 py-2">
                     {children.map((child, index) => (
-                    <button key={index} onClick={() => setCurrent(index)} className={`btn ${current === index ? "btn-active" : ""} btn-xs drop-shadow-md drop-shadow-black`}>{index + 1}</button>
+                    <button type="button" key={index} onClick={() => setCurrent(index)} className={`btn ${current === index ? "btn-active" : ""} btn-xs drop-shadow-md drop-shadow-black`}>{index + 1}</button>
                 ))}
                 </div>
         </div>

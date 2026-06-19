@@ -92,7 +92,7 @@ const RegistrationForm = () => {
   const onSubmit: SubmitHandler<FormType> = useCallback(
     async (data) => {
       const pad = signaturePadRef.current;
-
+    
       const signature = await getSignatureFile(pad);
 
       if (!signature) {
@@ -111,8 +111,8 @@ const RegistrationForm = () => {
       formData.append("image", data.image[0]);
       formData.append("sample_bill", data.sample_bill[0]);
       formData.append("signature", signature);
-      if(data.authorization_letter) formData.append("authorization_letter", data.authorization_letter[0]);
-
+      if(data.authorization_letter?.[0]) formData.append("authorization_letter", data.authorization_letter[0]);
+      console.log([...formData.entries()]);
       const res = await RegisterAgma(formData);
       switch (res.status) {
         case 400:
@@ -394,12 +394,12 @@ const RegistrationForm = () => {
                 </div>}
                 
               </label>
-              <p className="text-info text-xs italic text-center">
+              <p className="text-info text-xs italic text-center space-x-1">
                 <span>
-                    Note: Optional, Upload Authorization Letter if you are authorized to register the account.
+                    Note: Required for Juridical Entity Only
                 </span>
-                <br/>
-                <span className="font-bold">For Juridical Entity such as Corporation, Business, Public Building, etc</span>
+                <br />
+                <span className="font-bold">Sample: Schools, Public Building, Churches, Barangay Hall, Business Buildings, Government Offices, etc.</span>
               </p>
             </section>
           </div>

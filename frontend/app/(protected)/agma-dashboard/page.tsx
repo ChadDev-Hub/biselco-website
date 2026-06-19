@@ -58,6 +58,7 @@ const AgmaDashboard = async ({
                 year={year}
                 barangay={barangay}
                 search={search}
+                municipality={municipality}
               />
             )}
             {tab === "setup" && (

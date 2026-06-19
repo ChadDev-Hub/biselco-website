@@ -3,6 +3,85 @@
 import { cookies } from "next/headers";
 const baseUrl = process.env.BASESERVERURL;
 
+
+
+export const GetAgmaTicketAll = async(
+    page:string | string[] | undefined,
+    year: string | string[] | undefined,
+    barangay: string | string[] | undefined,
+    search: string | string[] | undefined,
+    municipality: string | string[] | undefined
+)=>{
+    const params =new URLSearchParams();
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
+    if(page){
+        params.set("page", typeof page === "string" ? page : "");
+    }
+    if(year !== "All" && year){
+        params.set("year", typeof year === "string" ? year : "");
+    }
+    if(barangay !== "All" && barangay){
+        params.set("barangay", typeof barangay === "string" ? barangay : "");
+    }
+    if(municipality !== "All" && municipality){
+        params.set("municipality", typeof municipality === "string" ? municipality : "");
+    }
+    if (search){
+        params.set("search", typeof search === "string" ? search : "");
+    }
+    const res = await fetch(`${baseUrl}/v1/agma/registered/all?${params.toString()}`, {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        }
+    })
+    
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}
+
+
+
+
+export const GetAgmaFilters = async(municipality: string | string[] | undefined) => {
+    const cookie = await cookies()
+    const accessToken = cookie.get("access_token")?.value
+    const params = new URLSearchParams();
+    if (municipality!== "All" && municipality) params.set("municipality", typeof municipality === "string" ? municipality : "");
+    const res = await fetch(`${baseUrl}/v1/agma/registered/all/filters?${params.toString()}`, {
+        method: "GET",
+        
+        headers: {
+             "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        }
+    })
+    const data = await res.json()
+    if (!res.ok){
+        return {
+            status: res.status,
+            data: data.detail
+        }
+    }
+    return {
+        status: res.status,
+        data: data
+    }
+}
+
+
 export const GetAgmaCountRegistered = async (municipality: string | string[] | undefined) => {
   const cookie = await cookies();
   const accessToken = cookie.get("access_token")?.value;

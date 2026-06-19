@@ -4,8 +4,8 @@ import Image from "next/image";
 import { TicketInfoType } from "../../../../types/agma";
 import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
 import { useAuth } from "@/app/utils/authProvider";
-4;
 import { usePathname } from "next/navigation";
+import VerificationButton from './verification-btn';
 
 type Props = {
   data: TicketInfoType;
@@ -31,8 +31,11 @@ const AgmaTicketCard = ({ data }: Props) => {
               BISELCO AGMA {data.year}
             </h1>
           </div>
-          <div className="text-right">
-            <span className="px-2 py-1 text-xs font-mono font-bold bg-slate-800 text-white rounded">
+          <div className="text-right flex flex-col gap-2">
+            {
+            currentPath === "/agma-dashboard" &&
+            user?.roles.map((role) => role.name).includes("admin") && <VerificationButton verification={{id: data.id, is_verified: data.is_verified}} />}
+            <span className="px-2 py-1 text-xs self-end w-fit font-mono font-bold bg-slate-800 text-white rounded">
               #{data.account_no}
             </span>
           </div>

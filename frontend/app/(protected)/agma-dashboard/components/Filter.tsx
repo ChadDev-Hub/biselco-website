@@ -19,6 +19,7 @@ type Props = {
 type FilterType = {
   year: number[];
   barangay: string[];
+  municipality: string[];
 };
 
 const Filter = ({ data }: Props) => {
@@ -27,23 +28,25 @@ const Filter = ({ data }: Props) => {
   if (initialData.status === 401) redirect("/");
   const years = initialData.data.year;
   const barangays = initialData.data.barangay;
-
+  const municipalities = initialData.data.municipality;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const handleOpen = () => setDropdownOpen(!dropdownOpen);
   const router = useRouter();
   const searchParms = useSearchParams();
   const pathname = usePathname();
 
-  const buildParms = (key: string, value: string | number | undefined) => {
+  const buildParms = (key: string, value: string | number | undefined, reset_brgy?: boolean) => {
     const params = new URLSearchParams();
-    searchParms.forEach((value, key) => params.set(key, value));
+    searchParms.forEach((value, key) => 
+      params.set(key, value));
     params.set(key, String(value));
+    if (reset_brgy) params.delete("barangay");
     return params.toString();
   };
 
   return (
     <div
-      className={`dropdown dropdown-bottom dropdown-end ${dropdownOpen ? "dropdown-open" : "dropdown-close"}`}
+      className={`dropdown dropdown-bottom z-10 ${dropdownOpen ? "dropdown-open" : "dropdown-close"}`}
     >
       <button
         type="button"
@@ -60,7 +63,6 @@ const Filter = ({ data }: Props) => {
           <select
             onChange={(e) => {
               router.push(`${pathname}?${buildParms("year", e.target.value)}`);
-              router.refresh();
             }}
             title="Select Year"
             className="select select-bordered select-sm w-fit max-w-xs"
@@ -82,7 +84,6 @@ const Filter = ({ data }: Props) => {
               router.push(
                 `${pathname}?${buildParms("barangay", e.target.value)}`,
               );
-              router.refresh();
             }}
             title="Select Year"
             className="select select-bordered select-sm w-fit max-w-xs"
@@ -92,6 +93,26 @@ const Filter = ({ data }: Props) => {
             {barangays.map((barangay) => (
               <option key={barangay} value={barangay}>
                 {barangay}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* MUNICIPALITY FILTER */}
+        <div className="flex justify-between  gap-2">
+          <label className="label font-bold">Municipality</label>
+          <select
+            onChange={(e) => {
+              router.push(`${pathname}?${buildParms("municipality", e.target.value, true)}`);
+            }}
+            title="Select Year"
+            className="select select-bordered select-sm w-fit max-w-xs"
+            defaultValue={undefined}
+          >
+            <option value={undefined}>All</option>
+            {municipalities.map((mun) => (
+              <option key={mun} value={mun}>
+                {mun}
               </option>
             ))}
           </select>

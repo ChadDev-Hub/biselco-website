@@ -11,7 +11,7 @@ export default function CooperativeHome() {
   
   const agmaEvent = GetAgmaEvents();
   return (
-    <div className="min-h-screen w-full bg-base-300 pb-20">
+    <div className="min-h-screen w-full bg-base-300 pb-20 z-60">
       <InstallPrompt />
       {/* Header */}
       <HomePageHeader />

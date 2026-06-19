@@ -9,6 +9,7 @@ type PromiseType = {
 };
 
 type RegisteredType = {
+  id: string;
   account_no: string;
   name: string;
   phone: string;

@@ -34,8 +34,8 @@ class GetEventServices:
                 target_date=(start_date.timestamp()*1000 if start_date >
                              self.now else end_date.timestamp()*1000),
                 is_active=False if start_date > self.now else True if end_date > self.now else False,
-                qoute_title="Beyond Power.",
-                qoute_description="Electric Cooperative Empowering Communities, Changing Lives.",
+                qoute_title="BISELCO Power",
+                qoute_description="Governance Stronger, Service Smarter, Future Brighter",
                 footer="Makiisa, Makilahok, Manalo, Magkaisa sa AGMA!",
                 image_src="/agma_image.jpg",
                 abrevation=[

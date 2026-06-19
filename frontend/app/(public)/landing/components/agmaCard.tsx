@@ -118,7 +118,7 @@ const EventCard = ({ data }: Props) => {
               {/* DESCRIPTION */}
               <motion.h2
                 variants={textTyping}
-                className="text-md italic font-bold"
+                className="text-md italic text-blue-700 font-bold"
               >
                 {`${data?.qoute_description}"`.split("").map((char, index) => (
                   <motion.span key={index} variants={letterVariant}>
@@ -129,7 +129,7 @@ const EventCard = ({ data }: Props) => {
             </div>
 
             {/* FOOTER */}
-            <div className="z-100 text-center text-xs mt-2 italic w-full ">
+            <div className="z-100 text-center  text-xs mt-2 italic w-full ">
               <motion.h1 variants={textTyping}>
                 {data?.footer?.split("").map((char, index) => (
                   <motion.span key={index} variants={letterVariant}>

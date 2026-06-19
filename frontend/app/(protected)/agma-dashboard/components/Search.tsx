@@ -32,14 +32,14 @@ const SearchComponent = ({promise}:Props) => {
     },[status])
   return (
   
-        <label className="input input-sm rounded-full  shadow-sm bg-base-200">
+        <label className="input input-sm rounded-full w-fit  shadow-sm bg-base-200">
           {loading ? <Loader className="animate-spin  bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text"/>:<Search/>}
           <input
           title="Search"
           type="text"
           onChange={(e) => debouced(e.target.value)}
           placeholder="Search"
-          className="   w-full"
+          className="w-full"
         />
         </label>
         

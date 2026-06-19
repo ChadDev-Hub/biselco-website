@@ -3,6 +3,7 @@ import {Stats} from "./stats";
 
 
 export type TicketInfoType = {
+    id: string;
     account_no: string;
     account_name: string;
     year: string;
@@ -18,6 +19,12 @@ export type TicketInfoType = {
     signature: string
     sample_bill?: string;
     authorization_letter?: string;
+    is_verified?: boolean
+}
+
+export type AgmaVerificationType = {
+    id: string;
+    is_verified?: boolean
 }
 
 export type WinnerInfoType = {
