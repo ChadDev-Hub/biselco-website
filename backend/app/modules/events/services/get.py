@@ -107,7 +107,7 @@ class GetEventServices:
                 "event_id": result.event_id,
                 "area": result.area,
                 "event_location": result.event_location,
-                "event_date": result.event_date
+                "event_date":result.event_date.astimezone(self.tz).strftime("%Y-%m-%dT%H:%M")
             } for result in results]
             return data
         except Exception as e:
@@ -117,19 +117,18 @@ class GetEventServices:
 
     async def get_agma_schedules(self):
         try:
-            is_agam_event_available = await self.VerifyAgmaEventActive()
-            print(is_agam_event_available)
+            await self.VerifyAgmaEventActive()
             agmaEvent = await self.getAgmaEventsSchedule()
             result = [{
                 "id": scheds.get("id"),
                 "area": scheds.get("area"),
-                "date": scheds.get("event_date").strftime("%a, %b %d, %Y") if scheds.get("event_date") else None,
-                "time": scheds.get("event_date").strftime("%I:%M %p") if scheds.get("event_date") else None,
+                "date": datetime.fromisoformat(scheds.get("event_date")).astimezone(self.tz).strftime("%a, %b %d, %Y") if scheds.get("event_date") else None,
+                "time":datetime.fromisoformat   (scheds.get("event_date")).astimezone(self.tz).strftime("%I:%M %p") if scheds.get("event_date") else None,
                 "location": scheds.get("event_location"),
                 "image": f"/{scheds.get('area').split(' ')[-1].lower()}.jpg" if scheds.get("area") else None
             } for scheds in agmaEvent]
-
             return result
         except Exception as e:
+            print(e)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

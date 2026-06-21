@@ -4,7 +4,7 @@ import Header from './components/header'
 import Main from './components/main';
 import BriefHistorySection from './components/brief-history-section';
 import StrategySection from './components/strategy-section';
-import DataTableSection from './components/data-table-section';
+
 import Footer from './components/footer';
 const Page = () => {
   return (
@@ -17,7 +17,7 @@ const Page = () => {
             {/* STRATEGY SECTION */}
             <StrategySection/>
             {/* DATA TABLE */}
-            <DataTableSection/>
+          
         </Main>
         <Footer/>
     </article>

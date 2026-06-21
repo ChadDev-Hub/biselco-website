@@ -31,7 +31,7 @@ async def get_consumer(session: AsyncSession, query: Optional[Any] = None):
             ConsumerMeter.meter_no.ilike(f"%{query_str}%"),
             Village.name.ilike(f"%{query_str}%"),
             Municipality.name.ilike(f"%{query_str}%")
-        )).limit(60)
+        ), ConsumerMeter.is_agma).limit(60)
     else:
         return []
     results = (await session.execute(stmt)).mappings().all()

@@ -66,6 +66,8 @@ class GetAgmaRegistrationService:
                 "date_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
                 "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
                 "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
+                "sample_bill": d.sample_bill,
+                "authorization_letter": d.authorization_letter
             }
         except NoResultFound:
             raise HTTPException(
@@ -118,7 +120,7 @@ class GetAgmaRegistrationService:
                     literal("% from total consumer").label("description"),
                     literal(True).label("is_percentage")
                 )
-                .select_from(total_consumer.join(total_registered, true(    )))
+                .select_from(total_consumer.join(total_registered, true()))
             ).cte("percent_registered")
 
             # DAILY

@@ -28,7 +28,7 @@ class EventSchedule(BaseModel):
     event_id: Optional[int] = None
     area: Optional[str] = None
     event_location: Optional[str] = None
-    event_date: Optional[datetime] = None
+    event_date: Optional[str] = None
     
 class AgmaEventSchedules(BaseModel):
     id:Optional[str] = None

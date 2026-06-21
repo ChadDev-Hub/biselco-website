@@ -19,6 +19,6 @@ RUN apt-get update && apt-get install -y tzdata
 ENV TZ=Asia/Manila
 
 
-CMD ["gunicorn", "app.main:app","-k","uvicorn.workers.UvicornWorker","-w","1", "--bind","0.0.0.0:8001","--log-level","info","--access-logfile","-","--error-logfile","-","--capture-output","--enable-stdio-inheritance"]
+CMD ["gunicorn", "app.main:app","-k","uvicorn.workers.UvicornWorker","-w","2", "--bind","0.0.0.0:8001","--log-level","info","--access-logfile","-","--error-logfile","-","--capture-output","--enable-stdio-inheritance"]
 
 EXPOSE 8001

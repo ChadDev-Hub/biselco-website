@@ -13,7 +13,6 @@ import { NotificationProvider } from "./common/NotificationProvider";
 import { getCurrentUser } from "@/lib/serverFetch";
 import type { Viewport } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
-import PullToRefresh from "./common/PulltoRefresh";
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
 
 const baseurl = process.env.BASESERVERURL;
@@ -159,7 +158,7 @@ export default async function RootLayout({
                 <ThemeController />
                 <NotificationProvider>
                   <Drawer baseurl={baseurl}>
-                    <PullToRefresh>{children}</PullToRefresh>
+                    {children}
                     <DocNavigation />
                   </Drawer>
                 </NotificationProvider>

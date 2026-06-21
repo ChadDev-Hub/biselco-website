@@ -107,12 +107,12 @@ const RegistrationForm = () => {
 
       formData.append("account_no", data.account_no);
       formData.append("name", data.name);
-      formData.append("mobile_no", data.mobile_number);
+      if(data.mobile_number) formData.append("mobile_no", data.mobile_number);
       formData.append("image", data.image[0]);
       formData.append("sample_bill", data.sample_bill[0]);
       formData.append("signature", signature);
       if(data.authorization_letter?.[0]) formData.append("authorization_letter", data.authorization_letter[0]);
-      console.log([...formData.entries()]);
+     
       const res = await RegisterAgma(formData);
       switch (res.status) {
         case 400:
@@ -274,7 +274,7 @@ const RegistrationForm = () => {
                       required: "Please Enter Your Account Number",
                       pattern: {
                         value: /^\d{10}$/,
-                        message: "Must Be A valid Digit",
+                        message: "Must Be A valid Digit or Avoid using '-' or special characters",
                       },
                       minLength: {
                         value: 10,
@@ -282,7 +282,7 @@ const RegistrationForm = () => {
                       },
                       maxLength: {
                         value: 10,
-                        message: "Invalid Account Number",
+                        message: "Please Avoid using '-' or special characters",
                       },
                     })}
                     title="Account Number"
@@ -335,19 +335,10 @@ const RegistrationForm = () => {
                 <Phone size={15} />
                 <input
                   {...register("mobile_number", {
-                    required: "Please Enter Your Mobile Number",
-                    pattern: {
-                      value: /^09\d{9}$/,
-                      message: "Please Enter Valid Mobile Number",
-                    },
-                    maxLength: {
-                      value: 11,
-                      message: "Please Enter Valid Mobile Number",
-                    },
-                    minLength: {
-                      value: 11,
-                      message: "Please Enter Valid Mobile Number",
-                    },
+                    validate: (value) => {
+                      if (!value) return true
+                      return /^09\d{9}$/.test(value) || "Please enter a valid mobile number";
+                    } 
                   })}
                   title="Mobile"
                   type="tel"

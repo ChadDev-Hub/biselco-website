@@ -9,10 +9,12 @@ import RefreshButton from "./components/refresh";
 import { Suspense } from "react";
 import LoadingIndicator from "../../(public)/distribution-map/components/LoadingIndicator";
 import StatsModal from "./components/statsModal";
+import PullToRefresh from "../../common/PulltoRefresh";
 const Page = () => {
   const initialRaffleEntries = GetRaffleInitialEntries();
   const initialRaffleStats = GetRaffleStatsData();
   return (
+    <PullToRefresh>
     <RouletteSound>
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-slate-100 font-sans p-6 overflow-hidden relative">
         <FullScreen />
@@ -40,6 +42,7 @@ const Page = () => {
         </Tools>
       </div>
     </RouletteSound>
+    </PullToRefresh>
   );
 };
 

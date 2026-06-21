@@ -60,6 +60,7 @@ const inputClassName = "input bg-base-100 w-full rounded-box focus:outline-none 
 
 const Schedules = ({ promiseData }: Props) => {
   const initialData = use(promiseData);
+  
   const { message } = useWebsocket();
   const { showAlert } = useAlert();
   const [processedEvent, setProcessedEvent] = useState<string[]>(() => {

@@ -45,7 +45,7 @@ export type AgmaStatsType = {
 export type FormType = {
   account_no: string;
   name: string;
-  mobile_number: string;
+  mobile_number: string | null;
   image: File;
   signature: File;
   sample_bill: File;

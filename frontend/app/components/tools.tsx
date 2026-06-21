@@ -60,12 +60,12 @@ const HomePageTools = () => {
                 <ToolCard icon={<Map className="text-violet-500" />} title="Distribution Map" href="/distribution-map" />
 
                 <ComingSoon>
-                    <ToolCard icon={<CreditCard className="text-emerald-500" />} title="Billing Help" />
+                    <ToolCard icon={<CreditCard className="text-emerald-500 text-center" />} title="Billing Help" />
                 </ComingSoon>
                 
                 {/* APPLY FOR NEW CONNECTION */}
                 <ComingSoon>
-                    <ToolCard icon={<FileUser className="text-slate-500" />} title="Apply for New Connection" />
+                    <ToolCard icon={<FileUser className="text-slate-500 text-center" />} title="Apply for New Connection" />
                 </ComingSoon>
                 
                 {isAdmin && <ToolCard icon={<ToolCase className="text-yellow-500" />} title="Technical Reports" href="/technical"/>}

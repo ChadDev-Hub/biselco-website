@@ -11,12 +11,17 @@ import { GetAgmaSetup, GetAgmaSchedules } from "../../../lib/serverFetch";
 import Schedules from "./components/Schedules";
 import SetupSkeleton from "./components/SetupSkeleton";
 import StatisticsCharts from "./components/StatisticsCharts";
-import { GetAgmaCountRegistered, GetRegisteredOverTime } from "../../../lib/agma";
+import {
+  GetAgmaCountRegistered,
+  GetRegisteredOverTime,
+} from "../../../lib/agma";
 import CountRegistered from "./components/CountRegistered";
 import RegisteredOverTime from "./components/RegisteredOvertime";
-import ChartSkeleton from '../../common/ChartSkeleton';
+import ChartSkeleton from "../../common/ChartSkeleton";
 import SpinNavigation from "../agma-spin-wheel/components/spin-navigation";
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
+import PulltoRefresh from "../../common/PulltoRefresh";
+
 const AgmaDashboard = async ({
   searchParams,
 }: {
@@ -29,67 +34,68 @@ const AgmaDashboard = async ({
   const schedules = GetAgmaSchedules();
   const countRegistered = GetAgmaCountRegistered(municipality);
   const registeredOverTime = GetRegisteredOverTime();
-  if(!tab) redirect('/agma-dashboard?tab=overview')
+  if (!tab) redirect("/agma-dashboard?tab=overview");
   return (
-    <div className="w-full min-h-screen pb-20 place-items-center">
-      {/* Headers */}
-      <Headers
-        title="Agma Dashboard"
-        subtitle="Welcome back! Here's AGMA Overview"
-      />
-      <main className="flex flex-col h-full max-w-4xl w-full items-center">
-        {/* Stats Cards Grid */}
-        <section className="p-2 sm:px-2 md:px-2 lg:px-0 w-full">
-          <Suspense
-            fallback={
-              <StatsContainer className="">
-                <StatsSkeleton numberofStats={4} />
-              </StatsContainer>
-            }
-          >
-            <StatsGrid stats={stats} />
-          </Suspense>
-        </section>
-        <section className="w-full ">
-          <AgmaDashboardContainer key={`tab-${tab}`}>
-            {tab === "overview" && (
-              <OverViewSection
-                page={page}
-                year={year}
-                barangay={barangay}
-                search={search}
-                municipality={municipality}
-              />
-            )}
-            {tab === "setup" && (
-              <section className="w-full h-full">
-                <Suspense fallback={<SetupSkeleton />}>
-                  <SetupSection initialData={AgmaEvent} />
-                </Suspense>
-                <Suspense fallback={<SetupSkeleton />}>
-                  <Schedules promiseData={schedules} />
-                </Suspense>
-              </section>
-            )}
-            {/* Dashboard Content */}
-            {tab === "stats" && (
-              <StatisticsCharts>
+    <PulltoRefresh>
+      <div className="w-full min-h-screen pb-20 place-items-center">
+        {/* Headers */}
+        <Headers
+          title="Agma Dashboard"
+          subtitle="Welcome back! Here's AGMA Overview"
+        />
+        <main className="flex flex-col h-full max-w-4xl w-full items-center">
+          {/* Stats Cards Grid */}
+          <section className="p-2 sm:px-2 md:px-2 lg:px-0 w-full">
+            <Suspense
+              fallback={
+                <StatsContainer className="">
+                  <StatsSkeleton numberofStats={4} />
+                </StatsContainer>
+              }
+            >
+              <StatsGrid stats={stats} />
+            </Suspense>
+          </section>
+          <section className="w-full ">
+            <AgmaDashboardContainer key={`tab-${tab}`}>
+              {tab === "overview" && (
+                <OverViewSection
+                  page={page}
+                  year={year}
+                  barangay={barangay}
+                  search={search}
+                  municipality={municipality}
+                />
+              )}
+              {tab === "setup" && (
+                <section className="w-full h-full">
+                  <Suspense fallback={<SetupSkeleton />}>
+                    <SetupSection initialData={AgmaEvent} />
+                  </Suspense>
+                  <Suspense fallback={<SetupSkeleton />}>
+                    <Schedules promiseData={schedules} />
+                  </Suspense>
+                </section>
+              )}
+              {/* Dashboard Content */}
+              {tab === "stats" && (
+                <StatisticsCharts>
                   <Suspense fallback={<ChartSkeleton />}>
-                      <CountRegistered promise={countRegistered} />
+                    <CountRegistered promise={countRegistered} />
                   </Suspense>
 
                   <Suspense fallback={<ChartSkeleton />}>
-                      <RegisteredOverTime promise={registeredOverTime} />
+                    <RegisteredOverTime promise={registeredOverTime} />
                   </Suspense>
-              </StatisticsCharts>
-            )}
-          </AgmaDashboardContainer>
-          
-        </section>
-        
-        <SpinNavigation />
-      </main>
-    </div>
+                </StatisticsCharts>
+              )}
+            </AgmaDashboardContainer>
+          </section>
+
+          <SpinNavigation />
+        </main>
+      </div>
+    </PulltoRefresh>
   );
 };
 

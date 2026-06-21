@@ -37,7 +37,7 @@ export default function PullToRefresh({
 
       setTimeout(() => {
         setRefreshing(false);
-      }, 2000);
+      }, 3000);
     }
 
     setPull(0);

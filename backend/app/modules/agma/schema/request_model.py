@@ -10,7 +10,7 @@ class VerificationRequest(BaseModel):
 class AgmaRegistrationRequest(BaseModel):
     account_no: str
     name: str 
-    mobile_no: str
+    mobile_no: Optional[str] = None
     image:UploadFile
     signature:UploadFile
     sample_bill:UploadFile

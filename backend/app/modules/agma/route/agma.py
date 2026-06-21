@@ -23,7 +23,6 @@ async def register_agma(
     post_agma_registration_service: PostAgmaRegistrationService = Depends(
         PostAgmaRegistrationService),
 ):  
-    print(data)
     return await post_agma_registration_service.register_agma(data=data)
 
 

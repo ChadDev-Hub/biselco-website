@@ -43,7 +43,6 @@ class PostEventServices:
                     await self.session.commit()
             new_agma_schedules = (await self.get_services.getAgmaEventsSchedule())
             admins = await self.get_user.get_users_by_roles(roles="admin")
-            print(admins    )
             data = {
                 "detail": "agma_scheds",
                 "event_id": str(self.event_id),

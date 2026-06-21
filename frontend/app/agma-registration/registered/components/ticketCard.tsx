@@ -112,7 +112,7 @@ const AgmaTicketCard = ({ data }: Props) => {
         <div className="h-30 flex gap-2 items-end w-full">
           {/* Signature & Action */}
 
-          <div className="w-32 h-32 items-end flex justify-center   border-b relative  border-slate-300  pb-1">
+          <div className="w-32 h-full items-end flex justify-center max-h-20  border-b relative  border-slate-300  pb-1">
             <Image
               loading="eager"
               fill
@@ -128,9 +128,9 @@ const AgmaTicketCard = ({ data }: Props) => {
 
           {currentPath == "/agma-dashboard" &&
             user?.roles.map((role) => role.name).includes("admin") && (
-              <div className=" items-center flex flex-col justify-center  border-b relative  border-slate-300  pb-1">
+              <div className=" items-center max-h-10  flex flex-col justify-end  border-b relative  border-slate-300  pb-1">
                 <div>
-                  <ImageViewer className={`${data.sample_bill ? "border border-dashed": "border-none"}`} image={data.sample_bill ?? null} />
+                  <ImageViewer className={`${data.sample_bill ? "border border-dashed": "border-none"} max-h-12 h-fit`} image={data.sample_bill ?? null} />
                 </div>
 
                 <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">

@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from PIL import Image
 from io import BytesIO
 from pillow_heif import register_heif_opener
-
+import asyncio
 
 register_heif_opener()
 load_dotenv()
@@ -26,12 +26,12 @@ s3_client= boto3.client( "s3",
 async def preprocess_image(image:UploadFile):
     image.file.seek(0)
     img = Image.open(image.file)
-    max_size = (600, 600)
+    max_size = (400, 400)
     img.thumbnail(max_size, Image.Resampling.LANCZOS)
     # img = img.convert("RGB")
     
     buffer = BytesIO()
-    img.save(buffer, format="WEBP", quality=100, optimize=True, lossless=True)
+    img.save(buffer, format="WEBP", quality=75, method=6)
     buffer.seek(0)
     return buffer
 
@@ -43,7 +43,9 @@ async def upload_image(file: UploadFile, folder:str):
     buffer = await preprocess_image(file)
     file.file.seek(0)
     
-    complaint_key = f"{folder}/{uuid4()}.webp"
-    s3_client.upload_fileobj(buffer, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
-    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{complaint_key}"
+    image_key = f"{folder}/{uuid4()}.webp"
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, s3_client.upload_fileobj, buffer, AWS_BUCKET_NAME, image_key,{"ContentType": "image/webp"})
+    # s3_client.upload_fileobj(buffer, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
+    return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{image_key}"
 
