@@ -20,11 +20,28 @@ export type TicketInfoType = {
     sample_bill?: string;
     authorization_letter?: string;
     is_verified?: boolean
+    monitoring?: monitoringType[]
+}
+
+
+export type UserMonitoringType = {
+    id: string;
+    first_name: string;
+    last_name: string;
+    photo: string;
+}
+
+export type monitoringType = {
+    id: string;
+    comment: string;
+    date: string;
+    time: string;
+    user?: UserMonitoringType
 }
 
 export type AgmaVerificationType = {
     id: string;
-    is_verified?: boolean
+    is_verified?: boolean,
 }
 
 export type WinnerInfoType = {
@@ -34,6 +51,7 @@ export type WinnerInfoType = {
     image: string; 
     municipality: string; 
     village: string;
+
 }
 
 

@@ -48,7 +48,6 @@ const MembersTable = ({ data }: Props) => {
         setTicket();
         break;
       case "agma_verified_consumer":
-        
           const update = async () => {
             setConsumerTickets((prev) =>
             prev.map((ticket) =>
@@ -61,8 +60,6 @@ const MembersTable = ({ data }: Props) => {
             ),
           )};
           update();
-          
-       
         break;
       default:
         break;

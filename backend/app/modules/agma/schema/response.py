@@ -53,3 +53,46 @@ class CountItem(BaseModel):
 class RaffleStats(BaseModel):
     w_per_mun: List[CountItem]
     w_per_vill: List[CountItem]
+
+
+class User(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    photo: str
+    
+class Monitoring(BaseModel):
+    id: str
+    comment: str
+    date: str
+    time: str
+    comment: str
+    user: User
+
+class RegisteredConsumer(BaseModel):
+    id: str
+    account_no: str
+    name: str
+    image: str
+    phone: Optional[str] = None
+    signature: str
+    village: Optional[str] = None
+    municipality: Optional[str] = None
+    meter_no: Optional[str] = None
+    meter_brand: Optional[str] = None
+    date_registered: str
+    time_registered: str
+    is_verified: Optional[bool] = None
+    year: str
+    sample_bill: Optional[str] = None
+    authorization_letter: Optional[str] = None
+    monitoring: Optional[List[Monitoring]] = None
+    
+class RegisteredConsumerAll(BaseModel):
+    data: Optional[List[RegisteredConsumer]] = None
+    page: Optional[int] = None
+    
+class VerificationClass(BaseModel):
+    id: str;
+    is_verified: bool
+    monitoring: Optional[List[Monitoring]]

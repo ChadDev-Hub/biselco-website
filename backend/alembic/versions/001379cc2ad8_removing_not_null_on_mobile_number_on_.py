@@ -27,4 +27,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.alter_column('agma_registration', 'phone', nullable=False)
-    op.alter_column('event_schedules',"event_date", type_=sa.TIMESTAMP(timezone=False), existing_type=sa.Timestamp(with_timezone=True))
+    op.alter_column('event_schedules',"event_date", type_=sa.TIMESTAMP(timezone=False), existing_type=sa.TIMESTAMP(timezone=True))

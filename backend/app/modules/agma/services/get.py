@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import NoResultFound
 from ....dependencies.db_session import get_session
-from ..model.agma_registration import AgmaRegistration
+from ..model.agma_registration import AgmaRegistration, AgmaVerificationMonitoring
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ...gis.franchise_area.model.villages import Village
 from ...gis.franchise_area.model.municipality import Municipality
@@ -48,10 +48,12 @@ class GetAgmaRegistrationService:
                     .options(selectinload(AgmaRegistration.consumer)
                             .selectinload(ConsumerMeter.village),
                             selectinload(AgmaRegistration.consumer)
-                            .selectinload(ConsumerMeter.municipal))
+                            .selectinload(ConsumerMeter.municipal),
+                            selectinload(AgmaRegistration.monitoring)
+                            .selectinload(AgmaVerificationMonitoring.user))
                     .where(AgmaRegistration.id == id))
             d = (await self.session.execute(stmt)).scalars().one()
-            return {
+            data = {
                 "id": str(d.id),
                 "account_no": d.account_no,
                 "name": d.name,
@@ -67,8 +69,22 @@ class GetAgmaRegistrationService:
                 "time_registered": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
                 "year": d.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
                 "sample_bill": d.sample_bill,
-                "authorization_letter": d.authorization_letter
+                "authorization_letter": d.authorization_letter,
+                "is_verified": d.is_verified,
+                "monitoring": [{
+                    "id": str(m.id),
+                    "date": m.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+                    "time": m.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+                    "comment": m.comment,
+                    "user": {
+                        "id": str(m.user.id),
+                        "first_name": m.user.first_name,
+                        "last_name": m.user.last_name,
+                        "photo": m.user.photo,
+                    }
+                } for m in d.monitoring]
             }
+            return data
         except NoResultFound:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -198,7 +214,9 @@ class GetAgmaRegistrationService:
                     .options(selectinload(AgmaRegistration.consumer)
                              .selectinload(ConsumerMeter.village),
                              selectinload(AgmaRegistration.consumer)
-                             .selectinload(ConsumerMeter.municipal))
+                             .selectinload(ConsumerMeter.municipal),
+                             selectinload(AgmaRegistration.monitoring)
+                             .selectinload(AgmaVerificationMonitoring.user))
                     .limit(self.PAGESIZE))
             if search:
                 stmt = stmt.where(
@@ -244,11 +262,22 @@ class GetAgmaRegistrationService:
                 "year": res.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y"),
                 "sample_bill": res.sample_bill,
                 "authorization_letter": res.authorization_letter,
-                "is_verified": res.is_verified
+                "is_verified": res.is_verified,
+                "monitoring": [{
+                    "id": str(m.id),
+                    "date": m.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
+                    "time": m.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
+                    "comment": m.comment,
+                    "user": {
+                        "id": str(m.user.id),
+                        "first_name": m.user.first_name,
+                        "last_name": m.user.last_name,
+                        "photo": m.user.photo,
+                    }
+                } for m in res.monitoring]
             }
                 for res in results
             ]
-
             return {
                 "data": data,
                 "total_page": total_page

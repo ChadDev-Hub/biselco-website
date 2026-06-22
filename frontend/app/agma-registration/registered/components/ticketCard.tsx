@@ -5,7 +5,8 @@ import { TicketInfoType } from "../../../../types/agma";
 import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
 import { useAuth } from "@/app/utils/authProvider";
 import { usePathname } from "next/navigation";
-import VerificationButton from './verification-btn';
+import VerificationButton from "./verification-btn";
+import VerficationAuditTrail from "./verification-audit-trail";
 
 type Props = {
   data: TicketInfoType;
@@ -14,6 +15,7 @@ type Props = {
 const AgmaTicketCard = ({ data }: Props) => {
   const { user } = useAuth();
   const currentPath = usePathname();
+
   return (
     <div
       id="agma-ticket"
@@ -31,10 +33,17 @@ const AgmaTicketCard = ({ data }: Props) => {
               BISELCO AGMA {data.year}
             </h1>
           </div>
-          <div className="text-right flex flex-col gap-2">
-            {
-            currentPath === "/agma-dashboard" &&
-            user?.roles.map((role) => role.name).includes("admin") && <VerificationButton verification={{id: data.id, is_verified: data.is_verified}} />}
+          <div className="text-right flex flex-col items-end gap-2">
+            {currentPath === "/agma-dashboard" &&
+              user?.roles.map((role) => role.name).includes("admin") && (
+                  <VerificationButton
+                    verification={{
+                      id: data.id,
+                      is_verified: data.is_verified,
+                    }}
+                  />
+              )}
+            <VerficationAuditTrail data={data.monitoring} />
             <span className="px-2 py-1 text-xs self-end w-fit font-mono font-bold bg-slate-800 text-white rounded">
               #{data.account_no}
             </span>
@@ -109,10 +118,10 @@ const AgmaTicketCard = ({ data }: Props) => {
             </p>
           </div>
         </div>
-        <div className="h-30 flex gap-2 items-end w-full">
+        <div className="h-30  gap-2 grid grid-cols-3 items-end w-full">
           {/* Signature & Action */}
 
-          <div className="w-32 h-full items-end flex justify-center max-h-20  border-b relative  border-slate-300  pb-1">
+          <div className="w-32 h-full items-center flex flex-col justify-end   max-h-20  border-b relative  border-slate-300  pb-1">
             <Image
               loading="eager"
               fill
@@ -130,11 +139,30 @@ const AgmaTicketCard = ({ data }: Props) => {
             user?.roles.map((role) => role.name).includes("admin") && (
               <div className=" items-center max-h-10  flex flex-col justify-end  border-b relative  border-slate-300  pb-1">
                 <div>
-                  <ImageViewer className={`${data.sample_bill ? "border border-dashed": "border-none"} max-h-12 h-fit`} image={data.sample_bill ?? null} />
+                  <ImageViewer
+                    className={`${data.sample_bill ? "border border-dashed" : "border-none"} max-h-12 h-fit`}
+                    image={data.sample_bill ?? null}
+                  />
                 </div>
 
                 <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
                   Sample Bill
+                </p>
+              </div>
+            )}
+
+          {currentPath == "/agma-dashboard" &&
+            user?.roles.map((role) => role.name).includes("admin") && (
+              <div className=" items-center max-h-20  p-4   flex flex-col justify-end  border-b relative  border-slate-300  pb-1">
+                <div>
+                  <ImageViewer
+                    className={`${data.authorization_letter ? "border border-dashed" : "border-none"} max-h-12 h-fit`}
+                    image={data.authorization_letter ?? null}
+                  />
+                </div>
+
+                <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
+                  Authorization Letter
                 </p>
               </div>
             )}

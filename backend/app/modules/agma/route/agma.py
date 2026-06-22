@@ -12,7 +12,7 @@ from typing import Optional, List
 from ..schema.request_model import AccountNumberRequest, Registeredid
 from ..schema.response import AgmaSpin, WinnerInfo
 from ..services.patch import AgmaRegistrationPatchService
-from ..schema.response import RaffleStats
+from ..schema.response import RaffleStats, RegisteredConsumer, RegisteredConsumerAll
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -26,7 +26,7 @@ async def register_agma(
     return await post_agma_registration_service.register_agma(data=data)
 
 
-@router.get("/registered", status_code=status.HTTP_200_OK)
+@router.get("/registered", status_code=status.HTTP_200_OK, response_model=RegisteredConsumer)
 async def get_registered(
     id: str = Query(...),
     get_agma_registration_service: GetAgmaRegistrationService = Depends(
@@ -57,7 +57,7 @@ async def complaints_stats(
     return await get_agma_registration_service.get_stats()
 
 
-@router.get("/registered/all", status_code=status.HTTP_200_OK)
+@router.get("/registered/all", status_code=status.HTTP_200_OK, response_model=RegisteredConsumerAll)
 async def get_all(
         get_agma_registration_service: GetAgmaRegistrationService = Depends(
             GetAgmaRegistrationService),
@@ -76,11 +76,15 @@ async def get_all(
 
 @router.patch("/registered/verify", status_code=status.HTTP_200_OK)
 async def verify_reg(
+    user: UserModel = Depends(get_current_user),
     data: VerificationRequest = Body(...),
     patch_agma_registration_service: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService),
 ):
-    return await patch_agma_registration_service.verify_registered(id=data.id, is_verified=data.is_verified)
+    if "admin" not in [role.name.lower() for role in user.roles]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Admin Only Transaction Allowed")
+    return await patch_agma_registration_service.verify_registered(id=data.id, is_verified=data.is_verified, user_id=user.id)
 
 @router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
 async def get_agma_filter(

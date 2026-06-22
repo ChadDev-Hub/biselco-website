@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from ...news.model.news import News
     from ...complaints.model.complaints_history import ComplaintsStatusHistory
     from ...complaints.model.complaints_message import ComplaintsMessage
+    from ...agma.model.agma_registration import AgmaVerificationMonitoring
 def _sender_fk():
     from ...complaints.model.complaints_message import ComplaintsMessage
     return [ComplaintsMessage.sender_id]
@@ -49,3 +50,4 @@ class Users(BaseModel):
     complaint_status_history: Mapped[List["ComplaintsStatusHistory"]] = relationship(back_populates="user")
     complaint_messages_sender: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="sender", foreign_keys=_sender_fk)
     complaint_messages_receiver: Mapped[List["ComplaintsMessage"]] = relationship(back_populates="receiver" ,foreign_keys= _receiver_fk)
+    agma_monitoring: Mapped[List["AgmaVerificationMonitoring"]] = relationship(back_populates="user", cascade="all, delete-orphan")
