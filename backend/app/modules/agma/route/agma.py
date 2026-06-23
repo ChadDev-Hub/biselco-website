@@ -66,12 +66,14 @@ async def get_all(
         year: Optional[int] = Query(None),
         barangay: Optional[str] = Query(None),
         municipality: Optional[str] = Query(None),
+        is_verified: Optional[bool] = Query(None),
         search: Optional[str] = Query(None)):
 
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
-    return await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search, municipality=municipality)
+    data = await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search, municipality=municipality, is_verified=is_verified)
+    return data
 
 
 @router.patch("/registered/verify", status_code=status.HTTP_200_OK)

@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useRef, useContext, useEffect, useState } from 'react'
 import { useAuth } from './authProvider'
-import { AgmaStatsType, AgmaVerificationType } from '../../types/agma';
+import { AgmaStatsType, AgmaVerificationType, TicketInfoType } from '../../types/agma';
 
 type Props = {
   children: React.ReactNode;
@@ -83,7 +83,7 @@ type WSMessage = {
   data: EventSchedules[];
 } | {
   detail: "new_registered";
-  new_regs: NewAgmaRegistered;
+  new_regs: TicketInfoType;
   new_stats: AgmaStats[];
   count_per_village: CountPerVillage[];
   registered_overtime: RegisteredOvertime[];
@@ -113,22 +113,23 @@ type AgmaStats = {
   is_percentage: boolean
 }
 
-type NewAgmaRegistered = {
-  id:string;
-  account_no: string;
-  name: string;
-  phone: string;
-  image: string;
-  signature: string;
-  account_name: string;
-  village: string;
-  municipality: string;
-  meter_no: string;
-  meter_brand: string;
-  date_registered: string;
-  time_registered: string;
-  year: string;
-}
+// type NewAgmaRegistered = {
+//   id:string;
+//   account_no: string;
+//   name: string;
+//   phone: string;
+//   image: string;
+//   signature: string;
+//   account_name: string;
+//   village: string;
+//   municipality: string;
+//   meter_no: string;
+//   meter_brand: string;
+//   date_registered: string;
+//   time_registered: string;
+
+//   year: string;
+// }
 
 type EventSchedules = {
   id?: string | null;

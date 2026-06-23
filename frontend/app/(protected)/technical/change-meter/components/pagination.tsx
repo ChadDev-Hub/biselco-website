@@ -38,8 +38,16 @@ const Pagination = ({ data}: Props) => {
     }
   }, [pages]);
 
+
+  useEffect(() => {
+    if (query.get("page")) {
+      queueMicrotask(() => setCurrentPage(parseInt(query.get("page") as string)));
+    }
+  },[query]);
+
   const buildParms = (page:number) => {
     const params = new URLSearchParams();
+    query.forEach((value, key) => params.set(key, value));
     if (query.get("q")) params.set("q", query.get("q") as string);
     if (query.get("tab")) params.set("tab", query.get("tab") as string);
     params.set("page", String(page));

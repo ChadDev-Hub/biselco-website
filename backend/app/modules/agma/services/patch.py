@@ -74,7 +74,7 @@ class AgmaRegistrationPatchService():
             insrt_stmt = insert(AgmaVerificationMonitoring).values({
                 "agma_ticket_id": consumer,
                 "user_id": user_id,
-                "comment": "update to verified" if is_verified else "update to unverify"
+                "comment": "verified" if is_verified else "unverify"
             })
             await self.session.execute(insrt_stmt)
             await self.session.commit()

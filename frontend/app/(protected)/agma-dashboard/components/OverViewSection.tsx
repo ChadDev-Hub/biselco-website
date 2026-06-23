@@ -16,11 +16,12 @@ type Props = {
   year: string | string[] | undefined;
   barangay: string | string[] | undefined;
   municipality: string | string[] | undefined;
+  is_verified: string | string[] | undefined | boolean;
 };
 
-const OverViewSection = ({ page, year, barangay, search, municipality }: Props) => {
+const OverViewSection = ({ page, year, barangay, search, municipality, is_verified }: Props) => {
   const filters = GetAgmaFilters(municipality);
-  const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search, municipality);
+  const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search, municipality, is_verified);
   
   return (
     <section>

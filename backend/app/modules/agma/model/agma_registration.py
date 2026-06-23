@@ -33,7 +33,7 @@ class AgmaRegistration(BaseModel):
     is_verified: Mapped[bool]  = mapped_column(type_=Boolean, nullable=True, default=False)
     consumer: Mapped[ConsumerMeter] = relationship("ConsumerMeter", back_populates="agma")
     
-    monitoring: Mapped[List["AgmaVerificationMonitoring"]] = relationship(back_populates="registration", cascade="all, delete-orphan")
+    monitoring: Mapped[List["AgmaVerificationMonitoring"]] = relationship(back_populates="registration", cascade="all, delete-orphan", order_by="desc(AgmaVerificationMonitoring.timestamped)")
     
 class AgmaVerificationMonitoring(BaseModel):
     __tablename__ = "agma_verification_monitoring"

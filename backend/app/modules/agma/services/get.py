@@ -16,6 +16,7 @@ import pytz
 import random
 from ..schema.response import RaffleStats, CountItem
 from pprint import pprint
+import math
 
 
 class GetAgmaRegistrationService:
@@ -43,14 +44,14 @@ class GetAgmaRegistrationService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def get_registered(self, id: str):
-        try: 
+        try:
             stmt = (select(AgmaRegistration)
                     .options(selectinload(AgmaRegistration.consumer)
-                            .selectinload(ConsumerMeter.village),
-                            selectinload(AgmaRegistration.consumer)
-                            .selectinload(ConsumerMeter.municipal),
-                            selectinload(AgmaRegistration.monitoring)
-                            .selectinload(AgmaVerificationMonitoring.user))
+                             .selectinload(ConsumerMeter.village),
+                             selectinload(AgmaRegistration.consumer)
+                             .selectinload(ConsumerMeter.municipal),
+                             selectinload(AgmaRegistration.monitoring)
+                             .selectinload(AgmaVerificationMonitoring.user))
                     .where(AgmaRegistration.id == id))
             d = (await self.session.execute(stmt)).scalars().one()
             data = {
@@ -205,6 +206,7 @@ class GetAgmaRegistrationService:
                                  year: Optional[int] = None,
                                  barangay: Optional[str] = None,
                                  municipality: Optional[str] = None,
+                                 is_verified: Optional[bool] = None
                                  ):
         try:
             stmt = (select(AgmaRegistration)
@@ -216,8 +218,7 @@ class GetAgmaRegistrationService:
                              selectinload(AgmaRegistration.consumer)
                              .selectinload(ConsumerMeter.municipal),
                              selectinload(AgmaRegistration.monitoring)
-                             .selectinload(AgmaVerificationMonitoring.user))
-                    .limit(self.PAGESIZE))
+                             .selectinload(AgmaVerificationMonitoring.user)))
             if search:
                 stmt = stmt.where(
                     or_(AgmaRegistration.name.ilike(f"%{search}%"),
@@ -229,22 +230,23 @@ class GetAgmaRegistrationService:
                         ConsumerMeter.meter_brand.ilike(f"%{search}%"),
                         Municipality.name.ilike(f"%{search}%"),
                         ))
-            else:
-                stmt = stmt.offset(
-                    (page - 1) * self.PAGESIZE).order_by(AgmaRegistration.timestamped.desc())
-                if year:
-                    stmt = stmt.where(extract("year", cast(
-                        AgmaRegistration.timestamped, Date)) == year)
-                if barangay:
-                    stmt = stmt.where(Village.name == barangay)
-                if municipality:
-                    stmt = stmt.where(Municipality.name == municipality)    
-            results = (await self.session.execute(stmt)).scalars().all()
+
+            if year:
+                stmt = stmt.where(extract("year", cast(
+                    AgmaRegistration.timestamped, Date)) == year)
+            if barangay:
+                stmt = stmt.where(Village.name == barangay)
+            if municipality:
+                stmt = stmt.where(Municipality.name == municipality)
+
+            if is_verified is not None:
+                stmt = stmt.where(AgmaRegistration.is_verified == is_verified)
 
             # TOTAL PAGE
-            stmt = (select(func.count(AgmaRegistration.id)))
-            total = (await self.session.execute(stmt)).scalar_one_or_none()
-            total_page = total // self.PAGESIZE if total % self.PAGESIZE == 0 else total // self.PAGESIZE + 1
+            count_stmt = (select(func.count()).select_from(stmt.subquery()))
+            total = (await self.session.execute(count_stmt)).scalar_one_or_none()
+            results = (await self.session.execute(stmt.order_by(AgmaRegistration.timestamped.desc()).offset((page - 1) * self.PAGESIZE).limit(self.PAGESIZE))).scalars().all()
+            total_page = math.ceil(total / self.PAGESIZE)
             data = [{
                 "id": str(res.id),
                 "account_no": res.account_no,
@@ -296,7 +298,8 @@ class GetAgmaRegistrationService:
                              .join(ConsumerMeter.village)
                              .order_by(Village.name.asc()))
             if municipality:
-                barangay_stmt = barangay_stmt.where(Municipality.name == municipality)
+                barangay_stmt = barangay_stmt.where(
+                    Municipality.name == municipality)
             barangay_results = (await self.session.execute(barangay_stmt)).scalars().all()
             barangay = list(set(barangay_results))
             municipality_stmt = (await self.session.execute(select(Municipality.name))).scalars().all()
@@ -352,23 +355,33 @@ class GetAgmaRegistrationService:
         try:
             registered = (select(
                 AgmaRegistration.account_no,
-                func.extract(
-                    "hour", AgmaRegistration.timestamped).label("date"),
+                AgmaRegistration.timestamped.label("date"),
                 Municipality.name.label("municipality"),
             )
                 .join(AgmaRegistration.consumer)
                 .join(ConsumerMeter.municipal)
                 .where(func.date(AgmaRegistration.timestamped) == self.date_now)).cte("registered")
-            cumulative_cte = (select(
-                registered.c.date,
-                registered.c.municipality,
-                func.count(registered.c.account_no).label("count"),
-                func.sum(func.count(registered.c.account_no)).over(
-                    partition_by=registered.c.municipality,
-                    order_by=registered.c.date
-                ).label("cumulative_sum")
-            ).select_from(registered)
-                .group_by(registered.c.date, registered.c.municipality)
+            daily = (
+                select(
+                    registered.c.date,
+                    registered.c.municipality,
+                    func.count().label("daily_count")
+                )
+                .group_by(
+                    registered.c.date,
+                    registered.c.municipality
+                )
+            ).cte("daily")
+            cumulative_cte = (
+                select(
+                    daily.c.date,
+                    daily.c.municipality,
+                    daily.c.daily_count,
+                    func.sum(daily.c.daily_count).over(
+                        partition_by=daily.c.municipality,
+                        order_by=daily.c.date
+                    ).label("cumulative_sum")
+                )
             ).cte("cumulative_cte")
 
             stmt = (
@@ -398,7 +411,7 @@ class GetAgmaRegistrationService:
             result = (await self.session.execute(stmt)).mappings().all()
             data = [
                 {
-                    "name": f"{int(res['name']):02d}:00",
+                    "name": res["name"].astimezone(self.tz).strftime("%H:00"),
                     "coron": res["coron"],
                     "culion": res["culion"],
                     "busuanga": res["busuanga"],

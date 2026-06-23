@@ -8,9 +8,12 @@ import { ImageOff } from "lucide-react";
 type Props = {
   image: string | null;
   className?: string;
+  showImagePreview?: boolean;
+  customPreview?: React.ReactNode;
+  customlabel?: React.ReactNode;
 };
 
-const ImageViewer = ({ image, className }: Props) => {
+const ImageViewer = ({ image, className, showImagePreview = true, customPreview, customlabel }: Props) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -42,12 +45,13 @@ const ImageViewer = ({ image, className }: Props) => {
         type="button"
         title="View Image"
         onClick={handleOpen}
-        className={`relative cursor-pointer overflow-hidden rounded-box flex items-center justify-center ${className ?? "border-2 border-blue-600 border-dashed ring ring-secondary"} w-34.25 h-15`}
+        className={` ${className ?? "border-2 border-blue-600 border-dashed ring ring-secondary relative cursor-pointer overflow-hidden rounded-box flex items-center justify-center w-34.25 h-15"} `}
       >
-        {image ? (
+        
+        {showImagePreview ? image ? (
           <Image
             src={image}
-            alt="change meter image"
+            alt="Image Viewer"
             width={137}
             height={60}
             quality={75}
@@ -61,7 +65,8 @@ const ImageViewer = ({ image, className }: Props) => {
             height={30}
             className="object-contain text-red-500 stroke-1 place-self-center hover:scale-110 transition-all duration-200"
           />
-        )}
+        ) : customPreview ?? null}
+        {customlabel ? customlabel : null}
       </button>
 
       {/* Modal */}

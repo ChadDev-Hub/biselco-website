@@ -13,7 +13,7 @@ class AgmaRegistrationRequest(BaseModel):
     mobile_no: Optional[str] = None
     image:UploadFile
     signature:UploadFile
-    sample_bill:UploadFile
+    sample_bill:Optional[UploadFile] = None
     authorization_letter:Optional[UploadFile] = None
 
 

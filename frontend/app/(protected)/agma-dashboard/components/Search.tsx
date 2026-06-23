@@ -22,7 +22,7 @@ const SearchComponent = ({promise}:Props) => {
         const params = new URLSearchParams(searchParams.toString());
         if(value !== "") {params.set("search", value)}
         else params.delete("search");
-        router.push(`?${params.toString()}`);
+        router.push(`?${params.toString()}`, { scroll: false });
         setLoading(true);
     }, 500);
     useEffect(()=>{

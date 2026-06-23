@@ -12,7 +12,7 @@ PORT = os.getenv("PORT")
 
 
 
-engine = create_async_engine(f"postgresql+asyncpg://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}")
+engine = create_async_engine(f"postgresql+asyncpg://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}", pool_size=10, max_overflow=10, pool_pre_ping=True)
 
 async def create_table():
     '''

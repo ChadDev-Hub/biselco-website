@@ -7,7 +7,8 @@ import { useAuth } from "@/app/utils/authProvider";
 import { usePathname } from "next/navigation";
 import VerificationButton from "./verification-btn";
 import VerficationAuditTrail from "./verification-audit-trail";
-
+import Tools from "./tools";
+import { MailCheck, ReceiptText } from "lucide-react";
 type Props = {
   data: TicketInfoType;
 };
@@ -36,14 +37,14 @@ const AgmaTicketCard = ({ data }: Props) => {
           <div className="text-right flex flex-col items-end gap-2">
             {currentPath === "/agma-dashboard" &&
               user?.roles.map((role) => role.name).includes("admin") && (
-                  <VerificationButton
-                    verification={{
-                      id: data.id,
-                      is_verified: data.is_verified,
-                    }}
-                  />
+                <VerificationButton
+                  verification={{
+                    id: data.id,
+                    is_verified: data.is_verified,
+                  }}
+                />
               )}
-            <VerficationAuditTrail data={data.monitoring} />
+            
             <span className="px-2 py-1 text-xs self-end w-fit font-mono font-bold bg-slate-800 text-white rounded">
               #{data.account_no}
             </span>
@@ -55,13 +56,13 @@ const AgmaTicketCard = ({ data }: Props) => {
               src={data.image}
               fill
               className="object-cover"
-              alt={data.name}
+              alt={data.account_name}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold leading-tight text-slate-900">
-              {data.name}
+              {data.account_name}
             </h2>
             <p className="text-sm text-slate-500">
               {data.village}, {data.municipality}
@@ -118,7 +119,7 @@ const AgmaTicketCard = ({ data }: Props) => {
             </p>
           </div>
         </div>
-        <div className="h-30  gap-2 grid grid-cols-3 items-end w-full">
+        <div className="h-30  gap-2 flex  justify-between items-end w-full">
           {/* Signature & Action */}
 
           <div className="w-32 h-full items-center flex flex-col justify-end   max-h-20  border-b relative  border-slate-300  pb-1">
@@ -134,38 +135,58 @@ const AgmaTicketCard = ({ data }: Props) => {
               Signature
             </p>
           </div>
+          { currentPath == "/agma-dashboard" && user?.roles.map((role) => role.name).includes("admin") && <Tools>
+            <ul className="absolute bottom-full right-0 menu bg-base-100 rounded-box z-50 w-45 p-0 shadow-md border border-zinc-200">
+              <li>
+                {currentPath == "/agma-dashboard" &&
+                  user?.roles.map((role) => role.name).includes("admin") && (
+                    <div className=" w-full border-b border-dashed flex border-slate-300 p-0">
+                      
+                        <ImageViewer
+                          customlabel={
+                            <p className="text-[9px]  uppercase  text-blue-500 mt-1">
+                              Sample Bill
+                            </p>
+                          }
+                          showImagePreview={false}
+                          customPreview={<ReceiptText className="size-6 text-blue-500" />}
+                          className={` w-full flex items-center justify-start p-2 gap-2 cursor-pointer `}
+                          image={data.sample_bill ?? null}
+                        />
+                      
+                    </div>
+                  )}
+              </li>
 
-          {currentPath == "/agma-dashboard" &&
-            user?.roles.map((role) => role.name).includes("admin") && (
-              <div className=" items-center max-h-10  flex flex-col justify-end  border-b relative  border-slate-300  pb-1">
-                <div>
-                  <ImageViewer
-                    className={`${data.sample_bill ? "border border-dashed" : "border-none"} max-h-12 h-fit`}
-                    image={data.sample_bill ?? null}
-                  />
+              <li>
+                {currentPath === "/agma-dashboard" &&
+                  user?.roles.map((role) => role.name).includes("admin") && (
+                    <div className="w-full border-b flex border-dashed border-slate-300 p-0">
+                      <ImageViewer
+                        customlabel={
+                          <p className="text-[8px] uppercase text-center text-blue-500 mt-1">
+                            Authorization Letter
+                          </p>
+                        }
+                        showImagePreview={false}
+                        customPreview={
+                          <MailCheck className="size-6 text-blue-500" />
+                        }
+                        className=" w-full flex items-center justify-start p-2 gap-2 h-10  cursor-pointer "
+                        image={data.authorization_letter ?? null}
+                      />
+                    </div>
+                  )}
+              </li>
+              <li>
+                <div className="w-full flex border-b border-dashed border-slate-300 p-0">
+                  <VerficationAuditTrail data={data.monitoring} />
+
                 </div>
-
-                <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
-                  Sample Bill
-                </p>
-              </div>
-            )}
-
-          {currentPath == "/agma-dashboard" &&
-            user?.roles.map((role) => role.name).includes("admin") && (
-              <div className=" items-center max-h-20  p-4   flex flex-col justify-end  border-b relative  border-slate-300  pb-1">
-                <div>
-                  <ImageViewer
-                    className={`${data.authorization_letter ? "border border-dashed" : "border-none"} max-h-12 h-fit`}
-                    image={data.authorization_letter ?? null}
-                  />
-                </div>
-
-                <p className="text-[9px]  uppercase text-center text-slate-400 mt-1">
-                  Authorization Letter
-                </p>
-              </div>
-            )}
+                
+              </li>
+            </ul>
+          </Tools>}
         </div>
       </div>
 

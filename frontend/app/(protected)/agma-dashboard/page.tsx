@@ -27,7 +27,7 @@ const AgmaDashboard = async ({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
-  const { tab, page, year, barangay, search, municipality } =
+  const { tab, page, year, barangay, search, municipality, is_verified } =
     await searchParams;
   const stats = GetAgmaStats();
   const AgmaEvent = GetAgmaSetup();
@@ -65,6 +65,7 @@ const AgmaDashboard = async ({
                   barangay={barangay}
                   search={search}
                   municipality={municipality}
+                  is_verified={is_verified}
                 />
               )}
               {tab === "setup" && (

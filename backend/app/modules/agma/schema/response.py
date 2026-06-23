@@ -72,7 +72,7 @@ class Monitoring(BaseModel):
 class RegisteredConsumer(BaseModel):
     id: str
     account_no: str
-    name: str
+    account_name: str
     image: str
     phone: Optional[str] = None
     signature: str
@@ -90,7 +90,7 @@ class RegisteredConsumer(BaseModel):
     
 class RegisteredConsumerAll(BaseModel):
     data: Optional[List[RegisteredConsumer]] = None
-    page: Optional[int] = None
+    total_page: Optional[int] = None
     
 class VerificationClass(BaseModel):
     id: str;

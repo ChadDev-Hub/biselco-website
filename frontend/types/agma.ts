@@ -42,6 +42,7 @@ export type monitoringType = {
 export type AgmaVerificationType = {
     id: string;
     is_verified?: boolean,
+    monitoring?: monitoringType[]
 }
 
 export type WinnerInfoType = {

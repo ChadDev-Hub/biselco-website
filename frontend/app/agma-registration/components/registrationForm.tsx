@@ -109,7 +109,7 @@ const RegistrationForm = () => {
       formData.append("name", data.name);
       if(data.mobile_number) formData.append("mobile_no", data.mobile_number);
       formData.append("image", data.image[0]);
-      formData.append("sample_bill", data.sample_bill[0]);
+      if(data.sample_bill?.[0]) formData.append("sample_bill", data.sample_bill[0]);
       formData.append("signature", signature);
       if(data.authorization_letter?.[0]) formData.append("authorization_letter", data.authorization_letter[0]);
      
@@ -213,18 +213,15 @@ const RegistrationForm = () => {
             </section>
 
             <section className="flex flex-col gap-3">
-              <label className={labelClassName}>Sample Bill</label>
+              <label className={labelClassName}>Sample Bill <span className="text-[10px] text-base-content/40">
+                (Optional)
+              </span></label>
               <label className="relative group flex self-center items-center justify-center h-20 w-20 rounded-box border-2 border-dashed border-base-300 hover:border-violet-500 bg-base-100 hover:bg-base-200/50 cursor-pointer shadow-sm transition-all duration-200 overflow-hidden">
                 <input
                   className="hidden"
                   type="file"
                   accept="image/*"
-                  {...register("sample_bill", {
-                    required: {
-                      value: true,
-                      message: "Please Upload Your Sample Billing",
-                    },
-                  })}
+                  {...register("sample_bill")}
                 />
 
                 {SampleBillFile ? (
@@ -250,11 +247,7 @@ const RegistrationForm = () => {
                   </div>
                 )}
               </label>
-              {errors.sample_bill && (
-                <p className="text-error text-xs italic">
-                  <span>⚠️</span> {errors.sample_bill.message}
-                </p>
-              )}
+              
             </section>
 
             
@@ -263,7 +256,7 @@ const RegistrationForm = () => {
           <div className="col-span-2">
             {/* ACCOUNT NO */}
             <section>
-              <div className="dropdown dropdown-start w-full">
+              <div className="w-full relative">
                 <label className={labelClassName}>Account Number</label>
                 <label
                   className={`${inputClassName} ${errors.account_no && "input-error"}`}
@@ -298,7 +291,7 @@ const RegistrationForm = () => {
                   </p>
                 )}
                 
-                  <SearchResults setValue={setValue} input={accountNoWatched} />
+                  <SearchResults  setValue={setValue} input={accountNoWatched} />
                 
               </div>
             </section>

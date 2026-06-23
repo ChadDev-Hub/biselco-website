@@ -35,12 +35,14 @@ const Filter = ({ data }: Props) => {
   const searchParms = useSearchParams();
   const pathname = usePathname();
 
-  const buildParms = (key: string, value: string | number | undefined, reset_brgy?: boolean) => {
+  const buildParms = (key: string, value: string | number | undefined | boolean, reset_brgy?: boolean, reset_page?: boolean) => {
     const params = new URLSearchParams();
     searchParms.forEach((value, key) => 
       params.set(key, value));
     params.set(key, String(value));
-    if (reset_brgy) params.delete("barangay");
+    if (reset_brgy && params.get("barangay") && !barangays.includes(params.get("barangay") as string)) {
+      params.delete("barangay")};
+    if (reset_page) params.set("page", "1");
     return params.toString();
   };
 
@@ -62,7 +64,7 @@ const Filter = ({ data }: Props) => {
           <label className="label font-bold">Year </label>
           <select
             onChange={(e) => {
-              router.push(`${pathname}?${buildParms("year", e.target.value)}`);
+              router.push(`${pathname}?${buildParms("year", e.target.value)}`, {scroll: false});
             }}
             title="Select Year"
             className="select select-bordered select-sm w-fit max-w-xs"
@@ -82,10 +84,11 @@ const Filter = ({ data }: Props) => {
           <select
             onChange={(e) => {
               router.push(
-                `${pathname}?${buildParms("barangay", e.target.value)}`,
+                `${pathname}?${buildParms("barangay", e.target.value, false, true)}`,
+                { scroll: false }
               );
             }}
-            title="Select Year"
+            title="Select Village"
             className="select select-bordered select-sm w-fit max-w-xs"
             defaultValue={undefined}
           >
@@ -103,9 +106,9 @@ const Filter = ({ data }: Props) => {
           <label className="label font-bold">Municipality</label>
           <select
             onChange={(e) => {
-              router.push(`${pathname}?${buildParms("municipality", e.target.value, true)}`);
+              router.push(`${pathname}?${buildParms("municipality", e.target.value, true, true)}`, {scroll: false});
             }}
-            title="Select Year"
+            title="Select Municipality"
             className="select select-bordered select-sm w-fit max-w-xs"
             defaultValue={undefined}
           >
@@ -115,6 +118,22 @@ const Filter = ({ data }: Props) => {
                 {mun}
               </option>
             ))}
+          </select>
+        </div>
+      {/* VERFICATION FILTER */}
+      <div className="flex justify-between  gap-2">
+          <label className="label font-bold">Verification</label>
+          <select
+            onChange={(e) => {
+              router.push(`${pathname}?${buildParms("is_verified", e.target.value === "verified" ? true : e.target.value === "unverified" ? false : "All", false, true)}`, {scroll: false});
+            }}
+            title="Select Verification Status"
+            className="select select-bordered select-sm w-fit max-w-xs"
+            defaultValue={undefined}
+          >
+            <option value={undefined}>All</option>
+            <option value={"verified"}>Verified</option>
+            <option value={"unverified"}>Unverified</option>
           </select>
         </div>
       </div>
