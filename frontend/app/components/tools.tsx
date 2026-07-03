@@ -23,7 +23,7 @@ function ToolCard({ icon, title, href }: { icon: React.ReactNode, title: string,
             <div className="p-3 bg-gray-50 rounded-full">
                 {icon}
             </div>
-            <span className="text-xs font-semibold text-gray-700">{title}</span>
+            <span className="text-xs text-center font-semibold text-gray-700">{title}</span>
         </Link>
     );
 }
@@ -32,7 +32,7 @@ const ComingSoon = ({ children }: Props) => {
     return (
         <div className="relative w-full h-full group">
             {/* Overlay Layer */}
-            <div className="absolute inset-0  z-10 rounded-2xl flex items-center justify-center pointer-events-none">
+            <div className="absolute inset-0  z-5 rounded-2xl flex items-center justify-center pointer-events-none">
                 <span className="glass text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
                     Coming Soon
                 </span>

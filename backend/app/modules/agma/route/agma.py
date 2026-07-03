@@ -147,6 +147,12 @@ async def get_registered_overtime(
                             detail="Admin Only Transaction Allowed")
     return await get_services.get_registered_overtime()
 
+@router.get("/statistic/total_per_mun")
+async def get_total_per_mun(
+        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    return await get_services.get_total_by_mun()
+
+
 
 @router.get("/raffle/initial_entries", status_code=status.HTTP_200_OK, response_model=List[str])
 async def get_initial_raffle_entries(

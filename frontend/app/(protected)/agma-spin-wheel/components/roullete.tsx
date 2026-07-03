@@ -67,6 +67,7 @@ type Props = {
 
 export default function WheelPage({ promise }: Props) {
   const InitialEntries = use(promise);
+
   const router = useRouter();
   if (InitialEntries.status === 401) router.replace("/");
   const searchParams = useSearchParams();

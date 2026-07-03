@@ -424,6 +424,21 @@ class GetAgmaRegistrationService:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            
+    async def get_total_by_mun(self):
+        try:
+            stmt = (select(Municipality.name, func.count(AgmaRegistration.id).label("value"))
+                    .join(AgmaRegistration.consumer)
+                    .join(ConsumerMeter.municipal)
+                    .where(func.extract("YEAR", func.current_date()) == func.extract("YEAR", AgmaRegistration.timestamped))
+                    .group_by(Municipality.name)
+                    .order_by(Municipality.name.asc()))
+            result = (await self.session.execute(stmt)).mappings().all()
+            return result
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def get_initial_raffle_entries(self):
         try:

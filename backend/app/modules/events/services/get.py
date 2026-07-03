@@ -107,7 +107,7 @@ class GetEventServices:
                 "event_id": result.event_id,
                 "area": result.area,
                 "event_location": result.event_location,
-                "event_date":result.event_date.astimezone(self.tz).strftime("%Y-%m-%dT%H:%M")
+                "event_date": result.event_date.astimezone(self.tz).strftime("%Y-%m-%dT%H:%M") if result.event_date is not None else None
             } for result in results]
             return data
         except Exception as e:
@@ -122,11 +122,23 @@ class GetEventServices:
             result = [{
                 "id": scheds.get("id"),
                 "area": scheds.get("area"),
-                "date": datetime.fromisoformat(scheds.get("event_date")).astimezone(self.tz).strftime("%a, %b %d, %Y") if scheds.get("event_date") else None,
-                "time":datetime.fromisoformat   (scheds.get("event_date")).astimezone(self.tz).strftime("%I:%M %p") if scheds.get("event_date") else None,
+                "date": (
+                    datetime.fromisoformat(scheds.get("event_date")).astimezone(
+                        self.tz).strftime("%a, %b %d, %Y")
+                    if scheds.get("event_date") is not None
+                    else None
+                ),
+                "time": (
+                    datetime.fromisoformat(scheds.get("event_date")).astimezone(
+                        self.tz).strftime("%I:%M %p")
+                    if scheds.get("event_date") is not None
+                    else None
+                ),
+
                 "location": scheds.get("event_location"),
                 "image": f"/{scheds.get('area').split(' ')[-1].lower()}.jpg" if scheds.get("area") else None
             } for scheds in agmaEvent]
+  
             return result
         except Exception as e:
             print(e)
