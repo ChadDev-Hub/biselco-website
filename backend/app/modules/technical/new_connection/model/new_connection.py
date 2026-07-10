@@ -1,12 +1,12 @@
 from __future__ import annotations
-from sqlalchemy import Integer, ForeignKey, Date, DateTime, func, Text
+from sqlalchemy import Integer, ForeignKey, Date, DateTime, func, Text, Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geometry,WKBElement
 from datetime import date
 from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
-
+import uuid
 if TYPE_CHECKING:
     from ....forms.model.form import CompanyForm
 
@@ -28,9 +28,11 @@ class NewConnection (BaseModel):
     initial_reading: Mapped[int] = mapped_column(type_=Integer, nullable=False)
     multiplier: Mapped[int] = mapped_column(type_=Integer, nullable=True)
     remarks: Mapped[str] = mapped_column(type_=Text, nullable=True)
-    
     accomplished_by: Mapped[str] = mapped_column(type_=Text, nullable=True)
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))
+    uuid: Mapped[uuid.UUID] = mapped_column(type_=UUID, default=uuid.uuid4)
+    is_synced: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    sitio: Mapped[str] = mapped_column(type_=Text, nullable=True)
     
 
     # Relationship
@@ -43,6 +45,6 @@ class NewConnectionImage(BaseModel):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
     new_connection_id: Mapped[int] = mapped_column(ForeignKey("technical_dep.new_connection.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     image: Mapped[str] = mapped_column(type_=Text, nullable=False)
-    
+    image_hash: Mapped[str] = mapped_column(type_=String(64), nullable=True)
     # Relationship
     new_connection: Mapped["NewConnection"] = relationship(back_populates="images")

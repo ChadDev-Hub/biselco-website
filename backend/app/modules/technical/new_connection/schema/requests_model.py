@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
-from fastapi import File
+from fastapi import UploadFile
 from typing import List
-
+from datetime import date
+from ....gis.franchise_area.services.get_location import verifyLocation
 
 class NewConnectionRequest(BaseModel):
     date: str
@@ -29,4 +30,20 @@ class NewConnectionReportRequests(BaseModel):
     checked_position: str
     approved_by: str
     approved_position: str
-    
+
+
+class NewConnectionSyncRequests(BaseModel):
+    uuid: str
+    date_accomplished: date
+    consumer_name:str
+    meter_brand: str
+    meter_serial_no:str
+    meter_sealed: Optional[str] = None
+    multiplier: int
+    initial_reading: int
+    remarks: Optional[str] = None
+    accomplished_by: str
+    image: UploadFile
+    lat: float
+    lon: float
+    sitio: Optional[str] = None
