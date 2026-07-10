@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
-
 import { textTyping } from "@/app/utils/framerFunctions";
 import AgmaCircleIcon from "@/app/agma-registration/components/agmacircle";
 import { letterVariant } from "@/app/utils/framerFunctions";
@@ -19,6 +18,7 @@ const EventCard = ({ data }: Props) => {
     <motion.div
       initial="hidden"
       whileInView="visible"
+      viewport={{ once: true }}
       variants={fadeInUp}
       className="card image-full  relative overflow-hidden h-100 shadow-md w-full max-w-2xl"
     >

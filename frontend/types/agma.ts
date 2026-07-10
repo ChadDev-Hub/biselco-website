@@ -70,3 +70,9 @@ export type FormType = {
   sample_bill: File;
   authorization_letter: File | null;
 };
+
+
+export type CountPerMunicipality = {
+    name: string;
+    value?: number
+}

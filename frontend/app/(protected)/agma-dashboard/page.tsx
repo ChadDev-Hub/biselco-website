@@ -13,14 +13,15 @@ import SetupSkeleton from "./components/SetupSkeleton";
 import StatisticsCharts from "./components/StatisticsCharts";
 import {
   GetAgmaCountRegistered,
-  GetRegisteredOverTime,
+  GetAgmaRegisterByMunicipality,
 } from "../../../lib/agma";
 import CountRegistered from "./components/CountRegistered";
-import RegisteredOverTime from "./components/RegisteredOvertime";
 import ChartSkeleton from "../../common/ChartSkeleton";
 import SpinNavigation from "../agma-spin-wheel/components/spin-navigation";
 import { redirect } from "next/navigation";
 import PulltoRefresh from "../../common/PulltoRefresh";
+import RadarChartSimple from "@/app/common/Radar";
+
 
 const AgmaDashboard = async ({
   searchParams,
@@ -33,14 +34,14 @@ const AgmaDashboard = async ({
   const AgmaEvent = GetAgmaSetup();
   const schedules = GetAgmaSchedules();
   const countRegistered = GetAgmaCountRegistered(municipality);
-  const registeredOverTime = GetRegisteredOverTime();
+  const registerByMunicipality = GetAgmaRegisterByMunicipality();
   if (!tab) redirect("/agma-dashboard?tab=overview");
   return (
     <PulltoRefresh>
       <div className="w-full min-h-screen pb-20 place-items-center">
         {/* Headers */}
         <Headers
-          title="Agma Dashboard"
+          title="AGMA Dashboard"
           subtitle="Welcome back! Here's AGMA Overview"
         />
         <main className="flex flex-col h-full max-w-4xl w-full items-center">
@@ -85,10 +86,15 @@ const AgmaDashboard = async ({
                     <CountRegistered promise={countRegistered} />
                   </Suspense>
 
-                  <Suspense fallback={<ChartSkeleton />}>
+                  {/* <Suspense fallback={<ChartSkeleton />}>
                     <RegisteredOverTime promise={registeredOverTime} />
+                  </Suspense> */}
+
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <RadarChartSimple prom={registerByMunicipality} title="Registered By Municipality" valueName="Registered" />
                   </Suspense>
                 </StatisticsCharts>
+
               )}
             </AgmaDashboardContainer>
           </section>

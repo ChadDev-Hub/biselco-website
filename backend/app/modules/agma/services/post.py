@@ -82,13 +82,18 @@ class PostAgmaRegistrationService:
                     count_per_village = await self.get_agma_registration_service.get_graph_data()
                     # REGISTERED OVERTIME
                     registered_overtime = await self.get_agma_registration_service.get_registered_overtime()
+                    
+                    # REGISTER PER MUNICIPALITY
+                    registered_per_municipality = await self.get_agma_registration_service.get_total_by_mun()
                     admins = await self.get_user_services.get_users_by_roles(roles="admin")
+                    
                     reg_data = {
                             "detail": "new_registered",
                             "new_regs": new_registered,
                             "new_stats": [AgmaStats(**stat).model_dump(mode="json") for stat in new_stats],
                             "count_per_village": [AgmaCountRegistered(**item).model_dump(mode="json") for item in count_per_village],
-                            "registered_overtime": [RegisteredOvertime(**item).model_dump(mode="json") for item in registered_overtime]
+                            "registered_overtime": [RegisteredOvertime(**item).model_dump(mode="json") for item in registered_overtime],
+                            "registered_per_municipality": [AgmaCountRegistered(**item).model_dump(mode="json") for item in registered_per_municipality]
                             }
                     payload = {
                         "type" : "admins",

@@ -224,3 +224,27 @@ export const GetAgmaRegistrationSchedules = async () => {
     data: res,
   };
 };
+
+
+export const GetAgmaRegisterByMunicipality = async()=>{
+  const cookie = await cookies()
+  const accessToken = cookie.get("access_token")?.value
+  const res = await fetch(`${baseUrl}/v1/agma/statistic/total_per_mun`,{
+      method: "GET",
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+      }
+  })
+  const data = await res.json()
+  if(!res.ok){
+      return {
+          status: res.status,
+          error: data.detail
+      }
+  }
+  return {
+      status: res.status,
+      data: data
+  }
+}
