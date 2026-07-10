@@ -66,3 +66,18 @@ class NewConnectionCreatedResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
     
+class NewConnectionSyncResponse(BaseModel):
+    uuid: str
+    date_accomplished: date
+    consumer_name:str
+    meter_brand: str
+    meter_serial_no:str
+    meter_sealed: Optional[str] = None
+    multiplier: int
+    initial_reading: int
+    remarks: Optional[str] = None
+    accomplished_by: str
+    image: Optional[List[str]] = None
+    lat: float
+    lon: float
+    sitio: Optional[str] = None

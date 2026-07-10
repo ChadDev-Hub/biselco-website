@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile, Form, Query, Body
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
@@ -12,13 +12,15 @@ from .....dependencies.bucket3 import upload_image
 from ..services.delete import delete_new_connection
 from typing import Optional
 from datetime import datetime
-from shapely import Point
 from geoalchemy2.functions import ST_X, ST_Y
 from ....websocket.websocket_manager import manager
 from ..schema.response_model import NewConnectionInitialData
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
 from .....core.redis import CHANNEL, redis_client
+from typing import List
 import json
+from ..schema.requests_model import NewConnectionSyncRequests
+from ..services.put import PutNewConnectionService
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def new_connection(session: AsyncSession = Depends(get_session), 
@@ -101,3 +103,10 @@ async def download_report(data = Depends(download_new_connection_report)):
 @router.get("/stats")
 async def new_connection_stats(session: AsyncSession = Depends(get_session)):
     return await get_new_connection_stats(session=session)
+
+
+@router.put("/sync", status_code=status.HTTP_200_OK)
+async def new_connection_sync(data: NewConnectionSyncRequests = Form(...), 
+                              put_services: PutNewConnectionService = Depends(PutNewConnectionService)
+                              ):
+    return await put_services.sync_new_connection(data=data)

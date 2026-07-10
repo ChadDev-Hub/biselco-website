@@ -22,6 +22,8 @@ from ..services.post import post_change_meter
 from sqlalchemy import select, func
 from .....dependencies.bucket3 import upload_image
 from .....core.redis import CHANNEL, redis_client
+from ..schema.requests_model import ChangeMeterSyncRequests
+from ..services.put import ChangeMeterPutServices
 import json
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
@@ -160,3 +162,9 @@ async def change_meter_stats(data: ChangeMeterReport, session: AsyncSession = De
         headers={
             "Content-Disposition": "attachment; filename=report.xlsx"
         })
+
+@router.put("/sync", status_code=status.HTTP_200_OK)
+async def change_meter_sync(data: ChangeMeterSyncRequests = Form(...), 
+                              put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)
+                              ):
+    return await put_services.sync_change_meter(data=data)

@@ -26,8 +26,8 @@ async def GetLocation(geometry:List[float], session:AsyncSession):
     return {"location":result}
 
 
-async def verifyLocation(lon:str = Form(...),
-                         lat:str = Form(...),
+async def verifyLocation(lon:float = Form(...),
+                         lat:float = Form(...),
                          session: AsyncSession= Depends(get_session)) -> VerifiedLocation:
     if not lon or not lat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please Provide Location")
@@ -43,6 +43,5 @@ async def verifyLocation(lon:str = Form(...),
     return VerifiedLocation(
         village=data.villages.name,
         municipality=data.municipal.name,
-        
         geom = WKTElement('POINT({} {})'.format(lon, lat), srid=4326)    
     )
