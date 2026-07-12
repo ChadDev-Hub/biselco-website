@@ -3,7 +3,7 @@ from sqlalchemy import Integer, ForeignKey, Date, DateTime, func, Text, Boolean,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from geoalchemy2 import Geometry,WKBElement
-from datetime import date
+from datetime import date, datetime
 from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
 import uuid
@@ -32,7 +32,10 @@ class NewConnection (BaseModel):
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))
     uuid: Mapped[uuid.UUID] = mapped_column(type_=UUID, default=uuid.uuid4)
     is_synced: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_synced: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     sitio: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_deleted: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     
 
     # Relationship

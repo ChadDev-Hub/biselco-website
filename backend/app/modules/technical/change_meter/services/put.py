@@ -8,8 +8,8 @@ from ..schema.requests_model import ChangeMeterSyncRequests
 from .....dependencies.hash_image import hash_image
 from .....dependencies.bucket3 import upload_image
 from sqlalchemy import select
-
-
+from datetime import datetime
+from pytz import timezone
 class ChangeMeterPutServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
@@ -34,7 +34,11 @@ class ChangeMeterPutServices:
                 "remarks": data.remarks,
                 "accomplished_by": data.accomplished_by,
                 "is_synced": True,
-                "geom": location.geom
+                "datetime_synced": datetime.now(),
+                "geom": location.geom,
+                "sitio": data.sitio,
+                "is_deleted": data.is_deleted,
+                "datetime_deleted": data.datetime_deleted
             }
 
             insrt_stmt = insert(ChangeMeter).values(insertdata)
@@ -55,7 +59,11 @@ class ChangeMeterPutServices:
                     ChangeMeter.remarks: insrt_stmt.excluded.remarks,
                     ChangeMeter.accomplished_by: insrt_stmt.excluded.accomplished_by,
                     ChangeMeter.is_synced: insrt_stmt.excluded.is_synced,
+                    ChangeMeter.datetime_synced: insrt_stmt.excluded.datetime_synced,
                     ChangeMeter.geom: insrt_stmt.excluded.geom,
+                    ChangeMeter.sitio: insrt_stmt.excluded.sitio,
+                    ChangeMeter.is_deleted: insrt_stmt.excluded.is_deleted,
+                    ChangeMeter.datetime_deleted: insrt_stmt.excluded.datetime_deleted
                 }
             ).returning(ChangeMeter.id)
             change_meter_id = (await self.session.execute(upsert_stms)).scalar_one()
@@ -89,7 +97,8 @@ class ChangeMeterPutServices:
             result = (await self.session.execute(select(ChangeMeter).where(ChangeMeter.id == change_meter_id))).scalar_one_or_none()
             return {
                 "uuid": result.uuid,
-                "is_synced": result.is_synced
+                "is_synced": result.is_synced,
+                "datetime_synced": result.datetime_synced.astimezone(timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p")
             }
             
         except Exception as e:

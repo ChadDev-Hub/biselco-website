@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime 
 from typing import Optional
 from fastapi import UploadFile
 
@@ -26,6 +26,9 @@ class ChangeMeterSyncRequests(BaseModel):
     initial_reading: int
     remarks: Optional[str] = None
     accomplished_by: str
+    is_deleted: Optional[bool] = None
+    datetime_deleted: Optional[datetime] = None
+    sitio: Optional[str] = None
     lat: float
     lon: float
     image: UploadFile

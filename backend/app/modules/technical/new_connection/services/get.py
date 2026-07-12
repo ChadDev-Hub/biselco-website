@@ -36,6 +36,7 @@ async def get_new_connection(session: AsyncSession, page:Optional[int] = None, s
                 NewConnection.remarks,
                 NewConnection.geom
                 ))
+            .where(NewConnection.is_deleted == False)
             .order_by(NewConnection.times_tamped.desc())
             .offset((PAGESIZE * (page - 1)))
             .limit(PAGESIZE))

@@ -7,6 +7,7 @@ from datetime import date
 from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
 import uuid
+from datetime import datetime
 
 if TYPE_CHECKING:
     from ....forms.model.form import CompanyForm
@@ -35,7 +36,10 @@ class ChangeMeter(BaseModel):
     geom: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="POINT", srid=4326))
     uuid: Mapped[uuid.UUID] = mapped_column(type_=UUID, default=uuid.uuid4)
     is_synced: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_synced: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     sitio: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_deleted: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     
     # Relationship
     form: Mapped["CompanyForm"] = relationship(back_populates="change_meters")

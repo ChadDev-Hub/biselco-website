@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from fastapi import UploadFile
 from typing import List
-from datetime import date
+from datetime import date, datetime
 from ....gis.franchise_area.services.get_location import verifyLocation
 
 class NewConnectionRequest(BaseModel):
@@ -47,3 +47,5 @@ class NewConnectionSyncRequests(BaseModel):
     lat: float
     lon: float
     sitio: Optional[str] = None
+    is_deleted: Optional[bool] = None
+    datetime_deleted: Optional[datetime] = None

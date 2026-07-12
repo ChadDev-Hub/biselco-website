@@ -10,7 +10,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 FRONTENDBASEURL = os.getenv("FRONTEND_BASE_URL")
-BISECOLLECT = os.getenv("BISCOLLECT_BASE_UR")
+BISECOLLECT = os.getenv("BISCOLLECT_BASE_URL")
 if not FRONTENDBASEURL:
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Frontend Base URL Not Found")
 

@@ -69,6 +69,7 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
     change_meter = (select(
         ChangeMeter
     ).options(selectinload(ChangeMeter.images))
+    .where(ChangeMeter.is_deleted == False)
     .order_by(ChangeMeter.timestamped.desc()))
     
     # GET TOTAL PAGE

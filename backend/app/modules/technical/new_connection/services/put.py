@@ -9,6 +9,8 @@ from .....dependencies.bucket3 import upload_image
 from ..model.new_connection import NewConnection, NewConnectionImage
 from .....dependencies.hash_image import hash_image
 from sqlalchemy import select
+from datetime import datetime
+from pytz import timezone
 class PutNewConnectionService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
@@ -30,7 +32,12 @@ class PutNewConnectionService:
                 "accomplished_by": data.accomplished_by,
                 "location": f"{location.village} | {location.municipality}",
                 "geom": location.geom,
-                "is_synced": True
+                "is_synced": True,
+                "datetime_synced": datetime.now(),
+                "sitio": data.sitio,
+                "is_deleted": data.is_deleted,
+                "datetime_deleted": data.datetime_deleted
+                
             }
             insert_stmt = insert(NewConnection).values(insertdata)
             upsert_stmt = insert_stmt.on_conflict_do_update(
@@ -48,7 +55,11 @@ class PutNewConnectionService:
                     NewConnection.remarks: insert_stmt.excluded.remarks,
                     NewConnection.accomplished_by: insert_stmt.excluded.accomplished_by,
                     NewConnection.is_synced: insert_stmt.excluded.is_synced,
+                    NewConnection.datetime_synced: insert_stmt.excluded.datetime_synced,
+                    NewConnection.sitio: insert_stmt.excluded.sitio,
                     NewConnection.geom: insert_stmt.excluded.geom,
+                    NewConnection.is_deleted: insert_stmt.excluded.is_deleted,
+                    NewConnection.datetime_deleted: insert_stmt.excluded.datetime_deleted
                     }
             ).returning(NewConnection.id)
             new_connection = (await self.session.execute(upsert_stmt)).scalar_one()
@@ -87,6 +98,7 @@ class PutNewConnectionService:
             new_connection_data = {
                 "uuid": result.uuid,
                 "is_synced": result.is_synced,
+                "datetime_synced": (result.datetime_synced.astimezone(timezone('Asia/Manila'))).strftime("%Y-%m-%d %I:%M %p"),
             }
             return new_connection_data
         except Exception as e:
