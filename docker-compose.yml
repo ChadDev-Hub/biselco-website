@@ -1,21 +1,35 @@
 services:
   db:
-    image: postgis/postgis:17-3.4
+    build:
+      context: './database'
+      dockerfile: Dockerfile
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRESUSER}
+      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_DB: ${DBNAME}
     ports:
-      - "${DB_PORT}:5432"
+      - "${PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      
+    command: 
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_cron"
+      - "-c"
+      - "cron.database_name=${DBNAME}"
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: 
+        - CMD-SHELL
+        - "pg_isready -U ${POSTGRESUSER} -d ${DBNAME}"
       interval: 10s
       timeout: 5s
       retries: 5
+    
+
 
   backend:
     container_name: fastapi_app

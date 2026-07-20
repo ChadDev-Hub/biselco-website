@@ -31,7 +31,7 @@ async def preprocess_image(image:UploadFile):
     # img = img.convert("RGB")
     
     buffer = BytesIO()
-    img.save(buffer, format="WEBP", quality=75, method=6)
+    img.save(buffer, format="WEBP", quality=95, method=6)
     buffer.seek(0)
     return buffer
 
