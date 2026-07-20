@@ -29,8 +29,6 @@ const TechniclaFormLists = ({ initialData }: Props) => {
         setForms(formsData?.data));
     },[formsData])
     
-
-  
     return (
         <div className='flex flex-col pt-2 w-full justify-center items-center'>
             <div className='grid grid-cols-1 max-w-3xl place-items-center w-full sm:grid-cols-1 md:grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-2 place-content-center'>

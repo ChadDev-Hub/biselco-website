@@ -14,6 +14,7 @@ async def landing_page():
             "description": """Providing reliable electricity distribution across
                     the Calamianes Islands, 
                     powering communities and supporting sustainable development.
+                    Sample text goes here
                     """
         }
     }

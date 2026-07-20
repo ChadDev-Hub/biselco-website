@@ -1,5 +1,5 @@
 "use client";
-import SimpleBarChart from "@/app/common/Barchart";
+import SimpleBarChart from "@/app/common/charts/Barchart";
 import { use, useState, useEffect } from "react";
 import { TooltipContentProps } from "recharts";
 import { useWebsocket } from "@/app/utils/websocketprovider";
