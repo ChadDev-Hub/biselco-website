@@ -23,6 +23,7 @@ export default function Landing() {
   return (
     <div className="bg-linear-to-b  from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
       <main className="w-full">
+        hello wfdsfds
         {/* HERO SECTION */}
         <section className="w-full relative ">
           <Hero>
