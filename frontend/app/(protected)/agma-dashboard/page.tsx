@@ -16,11 +16,11 @@ import {
   GetAgmaRegisterByMunicipality,
 } from "../../../lib/agma";
 import CountRegistered from "./components/CountRegistered";
-import ChartSkeleton from "../../common/ChartSkeleton";
+import ChartSkeleton from "../../common/charts/ChartSkeleton";
 import SpinNavigation from "../agma-spin-wheel/components/spin-navigation";
 import { redirect } from "next/navigation";
 import PulltoRefresh from "../../common/PulltoRefresh";
-import RadarChartSimple from "@/app/common/Radar";
+import RadarChartSimple from "@/app/common/charts/Radar";
 
 
 const AgmaDashboard = async ({

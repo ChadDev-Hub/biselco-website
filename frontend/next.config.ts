@@ -1,24 +1,24 @@
-
 import type { NextConfig } from "next";
 
-
 const nextConfig: NextConfig = {
-  /* config options here */
-  productionBrowserSourceMaps: true,
-  allowedDevOrigins: ["http://localhost:3001"],
-};
-
-module.exports = {
   reactStrictMode: false,
+
+  productionBrowserSourceMaps: true,
+
+  allowedDevOrigins: [
+    "http://localhost:3001",
+    "local-origin.dev",
+    "*.local-origin.dev",
+  ],
+
   experimental: {
     serverActions: {
       bodySizeLimit: "30mb",
     },
     proxyClientMaxBodySize: 52428800,
   },
-  allowedDevOrigins: ["local-origin.dev", "*.local-origin.dev"],
+
   images: {
-  
     remotePatterns: [
       {
         protocol: "https",
@@ -48,19 +48,14 @@ module.exports = {
       },
     ],
   },
+
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
@@ -80,8 +75,8 @@ module.exports = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self'"
-          }
+            value: "default-src 'self'; script-src 'self'",
+          },
         ],
       },
     ];

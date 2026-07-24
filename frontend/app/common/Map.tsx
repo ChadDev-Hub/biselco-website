@@ -102,7 +102,7 @@ export default function BiselcoMap({
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [markerPopup, onSelectLocation]);
 
   // consumermeters marker update
   useEffect(() => {

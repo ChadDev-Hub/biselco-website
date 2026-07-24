@@ -16,6 +16,7 @@ const Drawer = ({ children }: Props) => {
     "/biselco-admin-login",
     "/agma-registration",
     "/agma-registration/registered",
+    "/about",
   ];
   const isActive =
     currentRoute === "/"

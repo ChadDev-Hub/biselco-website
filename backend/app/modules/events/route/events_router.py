@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/agma/", status_code=200)
+@router.get("/agma", status_code=200)
 async def get_events(get_services=Depends(GetEventServices)):
     return await get_services.getAgmaEvents()
 

@@ -34,7 +34,6 @@ const MapProvider = ({ children, className }: Props) => {
       mapRef.current = new Maplibregl.Map({
         container: mapContainer.current,
         attributionControl: false,
-        hash: true,
         style: "https://tiles.openfreemap.org/styles/bright",
         center: [120.2043, 11.9986],
         zoom: 10,

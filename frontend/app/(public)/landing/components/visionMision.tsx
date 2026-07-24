@@ -18,7 +18,7 @@ const VisionMission = () => {
   return (
     
       
-        <div className="w-full px-2">
+        <div  className="w-full px-2">
           <motion.div 
             initial="hidden"
             whileInView="visible"

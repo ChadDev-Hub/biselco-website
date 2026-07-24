@@ -6,11 +6,13 @@ import { ReactNode, useEffect, useState } from "react";
 interface AnimatedSectionProps {
   children: ReactNode;
   className?: string;
+  id?: string
 }
 
 export default function AnimatedSection({
   children,
   className,
+  id
 }: AnimatedSectionProps) {
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
@@ -28,11 +30,12 @@ export default function AnimatedSection({
 
   // Disable heavy animations on mobile or for reduced-motion users
   if (isMobile || prefersReducedMotion) {
-    return <section className={className}>{children}</section>;
+    return <section id={id} className={className}>{children}</section>;
   }
 
   return (
     <motion.section
+      id={id}
       className={className}
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
