@@ -249,7 +249,7 @@ async def google_login_callback(
         key="refresh_token",
         path="/",
         value=refresh_token,
-        expires=datetime.now(timezone.utc) + timedelta(days=7),
+        expires=datetime.now(timezone.utc) + timedelta(days=30),
         httponly=True,
         secure=True,
         samesite="lax",
@@ -265,3 +265,7 @@ async def google_login_callback(
         samesite="lax",
     )
     return redirect
+
+
+
+
