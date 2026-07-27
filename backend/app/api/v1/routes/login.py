@@ -157,11 +157,7 @@ async def refresh_token(
 
 
 
-# REFRESH TOKEN V2
-@router.get("/refresh/token/v2", status_code=status.HTTP_200_OK)
-def refresh_token_v2(token= Cookie(...)):
-    print(token)
-    return {"message": "refresh token"}
+
     
 
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)

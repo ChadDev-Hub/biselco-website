@@ -11,6 +11,7 @@ from ....core.security import verify_google_login, get_biscollect_google_token
 from ....core.security import create_access_token, create_refresh_token
 from ...user.service.add_user import add_user
 from datetime import datetime, timedelta, timezone
+from ..services.get import GetServices
 
 load_dotenv()
 BISCOLLECT_SECRET_KEY = os.getenv("BISCOLLECT_SECRET_KEY")
@@ -29,12 +30,9 @@ router = APIRouter(
 
 
 @router.get("/refresh/token", status_code=status.HTTP_200_OK)
-async def refresh_token(
-    cookie = Cookie(...),
-    session: AsyncSession = Depends(get_session),
-): 
-    print(cookie)
-    return {"message": "refresh token"}
+async def refresh_token(get_services:GetServices = Depends(GetServices)): 
+    
+    return await get_services.refresh_access_token()
 
 
 @router.post("/validate", status_code=status.HTTP_200_OK)
