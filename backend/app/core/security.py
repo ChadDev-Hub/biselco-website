@@ -21,19 +21,19 @@ load_dotenv()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE")
+REFRESH_TOKEN_EXPIRE_DAYS = os.getenv("REFRESH_TOKEN_EXPIRE")
 G_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 G_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
-
+BISCOLLECT_REDIRECT_URI = os.getenv("BISCOLLECT_REDIRECT_URI")
 
 # CREATE ACCESS TOKEN
 async def create_access_token(data: Token):
     if not SECRET_KEY:
         raise ValueError("No secret key")
     to_encode = data.model_dump()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire, "type": "access_token"})
     encoded_jwt = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -44,7 +44,7 @@ async def create_refresh_token(data:Token):
     if not SECRET_KEY:
         raise ValueError("No secret key")
     to_encode = data.model_dump()
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(days=float(REFRESH_TOKEN_EXPIRE_DAYS))
     to_encode.update({"exp": expire, "type": "refresh_token"})
     refresh_token = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return refresh_token
@@ -71,7 +71,8 @@ async def verify_token(token):
 
 # GET CURRENT USER
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)
+    token: str = Depends(oauth2_scheme), 
+    session: AsyncSession = Depends(get_session)
 ):
     if not SECRET_KEY:
         raise ValueError("No secret key")
@@ -135,6 +136,20 @@ async def get_google_token(code: str):
         )
         return token_res.json()
 
+
+async def get_biscollect_google_token(code: str):
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": G_CLIENT_ID,
+                "client_secret": G_SECRET,
+                "redirect_uri": BISCOLLECT_REDIRECT_URI,
+                "grant_type": "authorization_code",
+            },
+        )
+        return token_res.json()
 
 # VERIFY GOOGLE LOGIN
 async def verify_google_login(token: str):

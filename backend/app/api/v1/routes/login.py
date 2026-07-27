@@ -8,6 +8,7 @@ from fastapi import (
     Request,
     Body,
     Query,
+    Cookie
 )
 from fastapi.responses import RedirectResponse
 from fastapi.exceptions import ResponseValidationError
@@ -54,7 +55,8 @@ REDIRECT_URI = os.getenv("REDIRECT_URI")
 GOOGLE_ENDPOINT = os.getenv("GOOGLE_AUTH_ENDPOINT")
 FRONTEND = os.getenv("FRONTEND_BASE_URL")
 BASESERVERURL=os.getenv("BASESERVERURL")
-
+REFRESH_TOKEN_EXPIRE=os.getenv("REFRESH_TOKEN_EXPIRE")
+ACCESS_TOKEN_EXPIRE=os.getenv("ACCESS_TOKEN_EXPIRE")
 @router.post("/token", status_code=status.HTTP_202_ACCEPTED)
 async def login_for_access_token(
     response: Response,
@@ -154,6 +156,14 @@ async def refresh_token(
     return AccessToken(access_token=access_token, type="Bearer")
 
 
+
+# REFRESH TOKEN V2
+@router.get("/refresh/token/v2", status_code=status.HTTP_200_OK)
+def refresh_token_v2(token= Cookie(...)):
+    print(token)
+    return {"message": "refresh token"}
+    
+
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
 async def get_user(user: UserModel = Depends(get_current_user)):
     return user
@@ -249,7 +259,7 @@ async def google_login_callback(
         key="refresh_token",
         path="/",
         value=refresh_token,
-        expires=datetime.now(timezone.utc) + timedelta(days=30),
+        expires=datetime.now(timezone.utc) + timedelta(days=float(REFRESH_TOKEN_EXPIRE)),
         httponly=True,
         secure=True,
         samesite="lax",
@@ -259,7 +269,7 @@ async def google_login_callback(
         key="access_token",
         path="/",
         value=access_token,
-        expires=datetime.now(timezone.utc) + timedelta(minutes=15),
+        expires=datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE)),
         httponly=True,
         secure=True,
         samesite="lax",

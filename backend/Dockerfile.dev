@@ -22,8 +22,10 @@ COPY . .
 RUN apt-get update && apt-get install -y tzdata
 ENV TZ=Asia/Manila
 
+ENV WATCHPACK_POLLING=true
+
 
 CMD ["uvicorn", "app.main:app","--reload","--host","0.0.0.0","--port","8000"]
 
-
+EXPOSE 8000
 

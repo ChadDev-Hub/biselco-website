@@ -48,8 +48,11 @@ const SimpleLineChart = <T,>({ data, dataKey, xaxisStyle, yaxisStyle, customTool
           <YAxis tick={{ fontSize: yaxisStyle?.fontSize, fill: 'black', angle: yaxisStyle?.angle }} />
           <Tooltip content={customToolTip} />
           <Legend
-            style={{
-              width: "100%",
+            wrapperStyle={{
+              width:"100%",
+              top: 0,
+              right: 0,
+              transform: "translate(0, 0)",
             }}
           />
           {dataKey?.map((item, index) => (

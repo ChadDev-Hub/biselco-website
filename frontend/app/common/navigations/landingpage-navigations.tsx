@@ -1,5 +1,7 @@
 "use client";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import AboutDropDown from "./about-dropdown";
+import { useState } from "react";
 
 const LandingPageNavigation = () => {
   const scrollElements = [
@@ -20,10 +22,10 @@ const LandingPageNavigation = () => {
       id: "offices",
     },
   ];
-
+  const [open, setOpen] = useState(false);
   const scrollToElement = (elementId: string) => {
     const element = document.getElementById(elementId);
-    console.log(element);
+
     if (element) {
       element.scrollIntoView({
         behavior: "smooth",
@@ -32,6 +34,7 @@ const LandingPageNavigation = () => {
       });
     }
   };
+  console.log(open);
   return (
     <>
       <div className="hidden md:flex navbar-end items-center gap-5">
@@ -44,27 +47,44 @@ const LandingPageNavigation = () => {
             {item.label}
           </button>
         ))}
+        <AboutDropDown />
       </div>
 
       <div className="dropdown md:hidden  dropdown-bottom navbar-end">
-        <div tabIndex={0} role="button" className="btn btn-ghost">
-          <Menu />
-        </div>
-        <ul
-          tabIndex={-1}
-          className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+        <button
+          onClick={() => setOpen(!open)}
+          className="btn btn-circle"
+        >
+          {open ? (
+            <label className="swap swap-active swap-rotate">
+              <Menu className="swap-off fill-current" />
+              <X className="swap-on fill-current" />
+            </label>
+            
+          ) : (
+            <label className="swap  swap-rotate">
+              <Menu className="swap-off fill-current" />
+              <X className="swap-on fill-current" />
+            </label>
+          )}
+        </button>
+        {open && <ul
+          className="dropdown-content menu text-xs  bg-base-100 rounded-box z-1  p-2 shadow-sm"
         >
           {scrollElements.map((item) => (
             <li key={item.id}>
               <button
                 onClick={() => scrollToElement(item.id)}
-                className="link link-hover hover:text-blue-500 text-md label font-semibold"
+                className="link link-hover w-full hover:text-blue-500  label font-semibold"
               >
                 {item.label}
               </button>
             </li>
           ))}
-        </ul>
+          <li>
+            <AboutDropDown />
+          </li>
+        </ul>}
       </div>
     </>
   );

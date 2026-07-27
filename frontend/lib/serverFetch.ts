@@ -319,7 +319,7 @@ export const GetAgmaRegistered = async (id: string) => {
 
 
 export const GetAgmaEvents = async() => {
-    const res = await fetch(`${baseUrl}/v1/events/agma/`, {
+    const res = await fetch(`${baseUrl}/v1/events/agma`, {
         method: "GET",
         cache: "no-store"
     })

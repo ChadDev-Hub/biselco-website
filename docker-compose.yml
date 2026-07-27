@@ -63,10 +63,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    volumes:
-      - ./backend:/app
     image: chaddevhub/fastapi_app:dev
     restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+        - action: rebuild
+          path: ./backend/requirements.txt
     ports:
       - "8000:8000"
     env_file:
@@ -84,8 +89,6 @@ services:
   frontend:
     build: 
       context: ./frontend
-      args:
-        NEXT_PUBLIC_WEBSOCKET_URL: ${PRODUCTIONWEBSOCKET}
     image: chaddevhub/nextjs_app
     container_name: nextjs_app
 
@@ -102,8 +105,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-      args:
-        NEXT_PUBLIC_WEBSOCKET_URL: ${LOCALWEBSOCKET}
     image: chaddevhub/nextjs_app:dev
     container_name: nextjs_app_dev
     restart: always

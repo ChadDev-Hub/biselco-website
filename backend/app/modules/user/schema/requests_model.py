@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-
+from typing import Optional
 # SIGN UP PYDANTIC MODEL
 class SignUpUser(BaseModel):
     firstname:str
@@ -27,3 +27,4 @@ class RefreshToken(BaseModel):
 class AccessToken(BaseModel):
     access_token: str
     type: str
+    
