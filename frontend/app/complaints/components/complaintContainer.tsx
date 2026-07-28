@@ -1,10 +1,10 @@
 "use client"
 import { use, useEffect, useState } from 'react'
-import { useWebsocket } from '@/app/utils/websocketprovider'
+import { useWebsocket } from '@/app/context/websocketprovider'
 import { useRouter } from 'next/navigation';
 import Messaging from '../dashboard/components/messagingModal2'
 import { GetComplaintsMessage } from '@/app/actions/complaint'
-import { useAuth } from '@/app/utils/authProvider'
+import { useAuth } from '@/app/context/authProvider'
 import { useNotification } from '@/app/common/NotificationProvider'
 import DeletConfirmation from './deleteComplaintsConfirmation'
 import ConcernCard from './modernConcernCard';

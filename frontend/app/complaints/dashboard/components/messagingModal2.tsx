@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useEffect } from "react";
-import { useAuth } from "@/app/utils/authProvider";
+import { useAuth } from "@/app/context/authProvider";
 import { SubmitHandler, useWatch, useForm } from "react-hook-form";
 import MessagingSkeleton from "@/app/common/MessagingSkeleton";
 import { LucideMessagesSquare, Send } from "lucide-react";

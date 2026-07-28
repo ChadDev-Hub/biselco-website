@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from ...modules.auth.routes import auth
 from ...modules.landing.route import landing
 
 from ...modules.gis.consumer.route import consumers
@@ -10,7 +11,7 @@ from ...modules.technical.change_meter.route import change_meter
 from ...modules.agma.route import agma
 from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
-from .routes import login, logout, meter, news, signup, technical_form
+from .routes import  meter, news, signup, technical_form
 from ...modules.events.route import events_router
 from ...modules.gis.distribution_lines.route import distribution_lines
 from ...modules.user.route import user
@@ -19,8 +20,7 @@ from ...modules.user.route import user
 router = APIRouter(prefix="/v1", tags=["V1"])
 router.include_router(complaints.router)
 router.include_router(landing.router)
-router.include_router(login.router)
-router.include_router(logout.router)
+router.include_router(auth.router)
 router.include_router(meter.router)
 router.include_router(news.router)
 router.include_router(signup.router)

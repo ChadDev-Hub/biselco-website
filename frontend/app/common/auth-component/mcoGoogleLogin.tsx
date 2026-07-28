@@ -10,6 +10,7 @@ const McoGoogleLogin = () => {
     try {
       const res = await GoogleLoginRoute();
       window.location.href = res.url;
+      localStorage.setItem("LoginStatus", "true");
     } catch (error) {
       console.log(error);
     }

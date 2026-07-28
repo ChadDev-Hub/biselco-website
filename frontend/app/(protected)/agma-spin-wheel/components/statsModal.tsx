@@ -6,7 +6,7 @@ import SimpleBarChart from "@/app/common/charts/Barchart";
 import { TooltipContentProps } from "recharts";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 
 type PromiseType = {
   status: number;

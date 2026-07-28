@@ -16,14 +16,14 @@ from fastapi import Response
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from ....dependencies.db_session import get_session
-from ....modules.user import Users, Roles
+from ...user import Users, Roles
 from sqlalchemy.exc import IntegrityError
-from ....modules.user.schema.requests_model import LoginUser
+from ...user.schema.requests_model import LoginUser
 from datetime import timedelta, datetime, timezone
 from jwt.exceptions import InvalidTokenError
 from fastapi.security import OAuth2PasswordRequestForm
 from ....core.authentication import authenticate_user
-from ....modules.user.schema.response_model import UserModel
+from ...user.schema.response_model import UserModel
 from dotenv import load_dotenv
 from sqlalchemy.orm import selectinload
 from ....core.security import (
@@ -36,13 +36,13 @@ from ....core.security import (
     ALGORITHM,
     SECRET_KEY,
 )
-from ....modules.user.schema.requests_model import GoogleLogin
-from ....modules.user.schema.requests_model import RefreshToken, AccessToken
-from ....modules.user.schema.response_model import Token
+from ...user.schema.requests_model import GoogleLogin
+from ...user.schema.requests_model import RefreshToken, AccessToken
+from ...user.schema.response_model import Token
 from urllib.parse import urlencode
 from typing import Optional
 import os
-from ....modules.user.service.add_user import add_user
+from ...user.service.add_user import add_user
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -156,16 +156,13 @@ async def refresh_token(
     return AccessToken(access_token=access_token, type="Bearer")
 
 
-
-
-    
-
+# GET CURRENT USER
 @router.get("/user/me", status_code=status.HTTP_200_OK, response_model=UserModel)
 async def get_user(user: UserModel = Depends(get_current_user)):
     return user
 
 
-# GOOGLE LOGIN
+# GOOGLE LOGIN VALIDATION
 @router.post("/google/validate", status_code=status.HTTP_200_OK)
 async def validate_role(secret: Optional[str] = Query(None)):
     role = "mco"
@@ -185,7 +182,7 @@ async def validate_role(secret: Optional[str] = Query(None)):
         "url": url
     }
 
-
+# GOOGLE LOGIN ROUTES
 @router.get("/google/login")
 async def google_login(role: Optional[str] = Query(None)):
     queryparms = {
@@ -201,6 +198,8 @@ async def google_login(role: Optional[str] = Query(None)):
     url = f"{GOOGLE_ENDPOINT}?{urlencode(queryparms)}"
     return RedirectResponse(url=url)
 
+
+# GOOGLE LOGIN SUCCESSULL CALLBACK
 
 @router.get("/google/login/callback")
 async def google_login_callback(
@@ -273,5 +272,23 @@ async def google_login_callback(
     return redirect
 
 
+# LOGOUT
 
-
+@router.post("/logout", status_code=status.HTTP_202_ACCEPTED)
+async def logout(response:Response):
+    response.delete_cookie(
+        "refresh_token",
+        path="/",
+        httponly=True,
+        samesite="lax",
+        )
+    response.delete_cookie(
+        "access_token",
+        path="/",
+        httponly=True,
+        samesite="lax"
+        )
+    return {
+        "success": True
+    }
+    

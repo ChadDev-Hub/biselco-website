@@ -34,7 +34,6 @@ const LandingPageNavigation = () => {
       });
     }
   };
-  console.log(open);
   return (
     <>
       <div className="hidden md:flex navbar-end items-center gap-5">

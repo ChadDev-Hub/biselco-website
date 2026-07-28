@@ -7,9 +7,10 @@ RUN npm install
 
 COPY . .
 
-ARG NEXT_PUBLIC_WEBSOCKET_URL
-ENV NEXT_PUBLIC_WEBSOCKET_URL=$NEXT_PUBLIC_WEBSOCKET_URL
 
 RUN npm run build
 
+EXPOSE 3001
+
 CMD ["npm", "run", "start"]
+

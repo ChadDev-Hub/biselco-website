@@ -2,13 +2,13 @@
   import { useState, useEffect, use} from "react";
   import MapButton from "./mapbutton";
   import ComplaintStatusButton from "./statusButton";
-  import { useWebsocket } from "@/app/utils/websocketprovider";
+  import { useWebsocket } from "@/app/context/websocketprovider";
   import { redirect, useSearchParams } from "next/navigation";
   import { useAlert } from "@/app/common/alert";
   import StatusHistoryModal from "./statusHistory";
   import { GetComplaintsMessage } from "@/app/actions/complaint";
   import Messaging from "./messagingModal2";
-  import { useAuth } from "@/app/utils/authProvider";
+  import { useAuth } from "@/app/context/authProvider";
   import { useNotification } from "@/app/common/NotificationProvider";
   import ConcernCard from '../../components/modernConcernCard';
   import ComplaintsTimeLine from '../../components/complaintsTimeLine';

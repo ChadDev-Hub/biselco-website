@@ -1,6 +1,6 @@
 "use client";
 import { use, useEffect, useState } from "react";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import { CopyPlus, CalendarDays, CirclePlus } from "lucide-react";
 import StatsContainer from "@/app/common/Stats";

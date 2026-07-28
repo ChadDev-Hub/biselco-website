@@ -2,7 +2,7 @@
 
 import StatsCard from "@/app/complaints/dashboard/components/statsCard";
 import { use, useState, useEffect } from "react";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"
 import StatsContainer from "@/app/common/Stats";
 type PromiseType = {

@@ -1,6 +1,6 @@
 
 'use client'
-import { useAuth } from '@/app/utils/authProvider'
+import { useAuth } from '@/app/context/authProvider'
 import Link from 'next/link';
 import {
     CreditCard,

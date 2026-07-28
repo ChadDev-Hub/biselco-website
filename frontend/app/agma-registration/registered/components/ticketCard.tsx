@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { TicketInfoType } from "../../../../types/agma";
 import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
-import { useAuth } from "@/app/utils/authProvider";
+import { useAuth } from "@/app/context/authProvider";
 import { usePathname } from "next/navigation";
 import VerificationButton from "./verification-btn";
 import VerficationAuditTrail from "./verification-audit-trail";

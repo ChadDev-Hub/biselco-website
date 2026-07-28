@@ -5,7 +5,7 @@ import StatsContainer from "@/app/common/Stats";
 import { Users, CalendarDays, BadgePercent, CalendarArrowUp } from "lucide-react";
 import CustomIcon from "./customeIcon";
 import { redirect } from 'next/navigation';
-import { useWebsocket } from '@/app/utils/websocketprovider';
+import { useWebsocket } from '@/app/context/websocketprovider';
 
 type Stat = {
   title: string;

@@ -7,10 +7,16 @@ import { Logout } from '@/lib/auth'
 const LogoutButton = () => {
 
     const handleLogout = async () => {
-        const res = await Logout()
-        if (res.status === 202) {
-            window.location.href = "/landing";
-        };
+        try {
+            const res = await Logout()
+            if (res.success){
+                localStorage.removeItem("LoginStatus");
+                window.location.href = "/landing";
+            }
+        } catch (error) {
+            console.log(error); 
+        }
+        
     }
     return (
         <button onClick={handleLogout} type="button" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Logout">

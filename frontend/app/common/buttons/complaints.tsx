@@ -1,5 +1,5 @@
 "use client"
-import { useAuth } from '@/app/utils/authProvider'
+import { useAuth } from '@/app/context/authProvider'
 import {BookMarked} from "lucide-react"
 import Link from 'next/link';
 

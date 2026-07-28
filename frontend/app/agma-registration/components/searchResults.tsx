@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
-import { useAuth } from "@/app/utils/authProvider";
+import { useAuth } from "@/app/context/authProvider";
 import { queryConsumer } from "../../../lib/consumer-meter";
 import { Consumer } from "@/types/consumer-meter";
 import { UseFormSetValue } from "react-hook-form";

@@ -1,6 +1,6 @@
 "use client";
 import { use, useState, useEffect } from "react";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 import Delete from "./deleteChangeMeter";
 import { DeleteChangeMeter } from "@/app/actions/changeMeter";
 import DownloadReport from "./download";

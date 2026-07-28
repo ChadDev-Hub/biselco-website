@@ -2,7 +2,7 @@
 import SimpleBarChart from "@/app/common/charts/Barchart";
 import { use, useState, useEffect } from "react";
 import { TooltipContentProps } from "recharts";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 type PromiseType = {
   status: number;
   data?: CountRegistered[];

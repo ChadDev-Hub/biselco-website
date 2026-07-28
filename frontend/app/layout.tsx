@@ -4,13 +4,12 @@ import "./globals.css";
 import DocNavigation from "./common/navigations/doc";
 import Drawer from "./common/navigations/drawer";
 import ThemeController from "./common/themeController";
-import { WebsocketProvider } from "./utils/websocketprovider";
-import { AuthProvider } from "./utils/authProvider";
+import { WebsocketProvider } from "./context/websocketprovider";
+import { AuthProvider } from "./context/authProvider";
 import AlertComponent from "./common/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
-import { getCurrentUser } from "@/lib/serverFetch";
 import type { Viewport } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
@@ -142,7 +141,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentUser = await getCurrentUser();
   return (
     <html lang="en" data-scroll-behavior="smooth" className="scroll-smooth">
       <head>
@@ -151,7 +149,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
       >
-        <AuthProvider initialUser={currentUser.detail}>
+        <AuthProvider>
           <WebsocketProvider>
             <AlertComponent>
               <LoadingIndicator>

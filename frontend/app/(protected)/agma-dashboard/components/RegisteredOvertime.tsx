@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import SimpleLineChart from "@/app/common/LineChart";
 import { TooltipContentProps } from "recharts";
-import {useWebsocket} from "@/app/utils/websocketprovider";
+import {useWebsocket} from "@/app/context/websocketprovider";
 type PromiseType = {
   status: number;
   data?: Data[];

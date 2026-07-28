@@ -1,7 +1,7 @@
 "use client"
 import { use, useState, useEffect } from "react"
 import NewConnectionCard from "./newConnectionCard";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 import { deleteNewConnection } from "@/app/actions/newConnectionMeter"
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";

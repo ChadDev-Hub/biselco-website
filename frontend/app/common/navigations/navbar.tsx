@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useAuth } from "../../utils/authProvider";
+import { useAuth } from "../../context/authProvider";
 import LogoutButton from "../auth-component/logout";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, UserCircle } from "lucide-react";
 import { useState } from "react";
 import LandingPageNavigation from "./landingpage-navigations";
 export default function NavBar() {
@@ -23,9 +23,6 @@ export default function NavBar() {
     setOpen(!open);
   };
 
-
-
- 
   return (
     <nav className="sticky top-0 z-50 p-4 navbar  h-12 w-full    bg-base-200 backdrop-blur-sm shadow-md transition-all">
       {/* LEFT SIDE: Sidebar Toggle + Logo */}
@@ -65,33 +62,36 @@ export default function NavBar() {
       </div>
 
       {/* CENTER SIDE: Search Bar (Hidden on Landing) */}
-      {isLandingPage &&
-        <LandingPageNavigation />
-        }
-        
+      {isLandingPage && <LandingPageNavigation />}
 
       {/* RIGHT SIDE: Actions (Hidden on Landing) */}
       {!isInvisible && (
         <div className="flex navbar-end items-center gap-1">
           <div className="dropdown dropdown-end">
-            <div
+            <div className="aura rounded-full text-primary aura-glow">
+              <div
               title="Profile"
               tabIndex={0}
               role="button"
-              className="btn btn-ghost btn-circle avatar"
+              className="btn btn-ghost btn-circle avatar size-10 overflow-hidden"
             >
-              <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                <Image
-                  src={
-                    user?.photo ??
-                    "https://img.daisyui.com/images/profile/demo/distracted1@192.webp"
-                  }
-                  alt="User Profile"
-                  width={40}
-                  height={40}
-                />
-              </div>
+                  {user?.photo ? (
+                    <Image
+                      src={user?.photo}
+                      alt="User Profile"
+                      width={30}
+                      height={30}
+                      priority
+                      className="object-cover"
+                    />
+                  ) : (
+                    <UserCircle className="w-10 h-10" />
+                  )}
+                
+              
             </div>
+            </div>
+            
             <ul
               tabIndex={0}
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow-xl border border-base-300"

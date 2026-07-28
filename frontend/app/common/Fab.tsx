@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useAuth } from "../utils/authProvider";
+import { useAuth } from "../context/authProvider";
 
 type Props = {
   children: React.ReactNode;

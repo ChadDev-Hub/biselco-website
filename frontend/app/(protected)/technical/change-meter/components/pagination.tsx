@@ -1,7 +1,7 @@
 "use client";
 import  { useState, useEffect, use } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useWebsocket } from "@/app/utils/websocketprovider";
+import { useWebsocket } from "@/app/context/websocketprovider";
 
 type PromiseType = {
   status: number;
