@@ -1,6 +1,6 @@
 "use client"
 import AdminGoogleLogin from "./adminGoogleLogin";
-import { GoogleLoginRoute } from "@/app/actions/auth";
+import { GoogleLoginRoute } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler} from "react-hook-form";
 

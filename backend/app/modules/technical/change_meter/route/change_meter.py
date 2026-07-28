@@ -24,6 +24,7 @@ from .....dependencies.bucket3 import upload_image
 from .....core.redis import CHANNEL, redis_client
 from ..schema.requests_model import ChangeMeterSyncRequests
 from ..services.put import ChangeMeterPutServices
+from ....user.service.get_user import GetUserServices
 import json
 router = APIRouter(prefix="/change_meter", tags=["Electric Meter"])
 
@@ -164,7 +165,12 @@ async def change_meter_stats(data: ChangeMeterReport, session: AsyncSession = De
         })
 
 @router.put("/sync", status_code=status.HTTP_200_OK)
-async def change_meter_sync(data: ChangeMeterSyncRequests = Form(...), 
-                              put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)
+async def change_meter_sync(
+    get_user_services: GetUserServices = Depends(GetUserServices),
+    data: ChangeMeterSyncRequests = Form(...), 
+    put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)
                               ):
+    # CHECK USER
+    user = await get_user_services.get_current_user()
+    print(user)
     return await put_services.sync_change_meter(data=data)

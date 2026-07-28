@@ -1,6 +1,6 @@
 "use client"
 
-import { Logout } from '@/app/actions/auth'
+import { Logout } from '@/lib/auth'
 
 
 

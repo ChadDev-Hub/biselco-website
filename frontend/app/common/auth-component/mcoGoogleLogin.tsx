@@ -1,23 +1,17 @@
 "use client";
 import { useState } from "react";
-import { GoogleLoginRoute } from "@/app/actions/auth";
+import { GoogleLoginRoute } from "@/lib/auth";
 
 
 const McoGoogleLogin = () => {
   const [loading, setLoading] = useState(false);
   const handleClick = async () => {
     setLoading(true);
-    const res = await GoogleLoginRoute();
-    switch (res.status) {
-      case 200:
-        window.location.href = res.data.url;
-        break;
-      case 400:
-        alert(res.error);
-        setLoading(false);
-        break;
-      default:
-        break;
+    try {
+      const res = await GoogleLoginRoute();
+      window.location.href = res.url;
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
