@@ -5,6 +5,7 @@ import {LandingPageInfoType} from "@/types/info";
 import {use} from "react"
 import Image from "next/image";
 import Sponsor from "./sponsor";
+
 // Simple animation variants
 const fadeLeftSide = {
   hidden: { opacity: 0, x: -70 },
@@ -44,11 +45,9 @@ type Props =  {
 
 
 export default function Hero({ children, promise }: Props) {
-  const info = use(promise);
-  console.log(info)
-  const title = "Sustainable Energy for a";
-  const subtitle = "Busuanga Island Electric Cooperative,Inc."
-  const description = "Providing reliable electricity distribution across the Calamianes Islands, powering communities and supporting sustainable development."
+  const { subtitle, description, badge, qoute} = use(promise);
+  
+  
   return (
     <div
       className="
@@ -80,33 +79,22 @@ export default function Hero({ children, promise }: Props) {
           className="flex flex-col shrink-0 w-full items-center gap-2 lg:items-start  order-2 lg:order-1"
         >
           <div className="badge text-center sm:text-center md:text-end lg:text-start  badge-primary badge-outline">
-            Empowering Our Community
+            {badge}
           </div>
           <div className=" flex w-full flex-col gap-2">
 
             {/* TITLE */}
             <motion.h1
               variants={textTyping}
-              className="text-4xl text-center sm:text-center md:text-center lg:text-start sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word font-black mb-6s leading-normal"
+              className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word"
             >
-              {title.split("").map((letter, index) => (
+              {qoute.split("").map((letter, index) => (
                 <motion.span key={index} variants={letterVariant}>
                   {letter}
                 </motion.span>
               ))}
             </motion.h1>
 
-            {/* SUBTITLE */}
-            <motion.h2
-              variants={textTyping}
-              className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word"
-            >
-              {"Brighter Tomorrow".split("").map((letter, index) => (
-                <motion.span key={index} variants={letterVariant}>
-                  {letter}
-                </motion.span>
-              ))}
-            </motion.h2>
 
             {/* DESCRIPTION */}
             <motion.p

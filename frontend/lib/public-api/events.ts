@@ -1,6 +1,6 @@
 
 const baseUrl = process.env.BASESERVERURL
-console.log(baseUrl)
+
 export const GetAgmaEvents = async() => {
     const res = await fetch(`${baseUrl}/v1/events/agma`, {
         method: "GET",

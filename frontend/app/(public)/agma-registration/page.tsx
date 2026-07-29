@@ -3,8 +3,7 @@ import Hero from "./components/hero";
 import RegistrationForm from "./components/registrationForm";
 import AgmaRegistrationFooter from "./components/footer";
 import AgmaCircleIcon from "./components/agmacircle";
-
-import Return from "../common/Return";
+import Return from "@/app/common/Return";
 import {GetAgmaRegistrationSchedules} from "@/lib/agma";
 import ScheduleSection from "./components/ScheduleSection"
 const Page = () => {

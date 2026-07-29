@@ -4,7 +4,7 @@ import Link from "next/link";
 import CopyRight from "@/app/common/copyright";
 const Footer = () => {
   return (
-    <footer className="footer  px-10 pt-4 md:px-40 bg-neutral text-neutral-content rounded-t-3xl">
+    <footer className="footer  px-10 pt-4 md:px-20 border lg:px-40 bg-neutral text-neutral-content rounded-t-3xl">
       <div className="grid  grid-cols-1 md:grid-cols-4 gap-8 w-full">
         <div>
           <div className="text-2xl font-black mb-4">

@@ -20,24 +20,11 @@ const LandingStats = () => {
 
     return () => controls.stop();
   }, [servedConsumer]);
-    // GRID RELIABILITY
-    const gridReliability = useMotionValue(0);
-    const [reliability, setReliability] = useState(0);
-
-    useMotionValueEvent(gridReliability, "change", (latest) => {
-        setReliability((Number(latest.toFixed(1))));
-    });
-    useEffect(() => {
-    const controls = animate(gridReliability, 99.8, {
-      duration: 4,
-      ease: "easeInOut",
-    });
-
-    return () => controls.stop();
-  }, [gridReliability]);
+    
+    
     // RENEWABLE ENERGY
     const renewableEnergy = useMotionValue(0);
-    const [energy, setEnergy] = useState(0);
+    const [,setEnergy] = useState(0);
 
     useMotionValueEvent(renewableEnergy, "change", (latest) => {
         setEnergy(Math.round(latest));

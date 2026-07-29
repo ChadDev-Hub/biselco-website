@@ -1,6 +1,6 @@
 "use client"
 import Image from "next/image"
-import { textTyping, letterVariant, StaggeringFadeInUp, StaggeringChildren } from '../../utils/framerFunctions';
+import { textTyping, letterVariant, StaggeringFadeInUp, StaggeringChildren } from "@/app/utils/framerFunctions";
 import { motion } from 'framer-motion';
 
 type Props = {

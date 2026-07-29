@@ -5,7 +5,7 @@ import { HomeRouteButton } from "../buttons/home";
 import { PanelLeftOpen } from "lucide-react"
 const DocNavigation = () => {
   const currentRoute = usePathname();
-  const invisibleRoutes = ["/landing","/biselco-admin-login","/agma-registration","/agma-registration/registered"];
+  const invisibleRoutes = ["/","/landing","/biselco-admin-login","/agma-registration","/agma-registration/registered","/distribution-map"];
   const isActive =
     currentRoute === "/"
       ? "home"

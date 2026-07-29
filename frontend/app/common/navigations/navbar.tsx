@@ -9,6 +9,8 @@ import LandingPageNavigation from "./landingpage-navigations";
 export default function NavBar() {
   const currentRouter = usePathname();
   const invisibleRoutes = [
+    "/distribution-map",
+    "/",
     "/landing",
     "/biselco-admin-login",
     "/agma-registration",

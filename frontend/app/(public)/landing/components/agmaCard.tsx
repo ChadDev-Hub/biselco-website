@@ -2,11 +2,11 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { textTyping } from "@/app/utils/framerFunctions";
-import AgmaCircleIcon from "@/app/agma-registration/components/agmacircle";
+import AgmaCircleIcon from "@/app/(public)/agma-registration/components/agmacircle";
 import { letterVariant } from "@/app/utils/framerFunctions";
 import { fadeInUp } from "@/app/utils/framerFunctions";
 import Link from "next/link";
-import CountDown from "../../../agma-registration/components/countDown";
+import CountDown from "@/app/(public)/agma-registration/components/countDown";
 import { AgmaEventType } from "../../../../types/events";
 
 type Props = {
