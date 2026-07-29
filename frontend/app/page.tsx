@@ -2,7 +2,7 @@ import HomePageHeader from "./components/header";
 import HomePageTools from "./components/tools";
 import InstallPrompt from "./common/InstallPrompt";
 import Events from "./(public)/landing/components/agmaeventContainer";
-import { GetAgmaEvents } from "../lib/serverFetch";
+import { GetAgmaEvents } from "@/lib/public-api/events";
 import { Suspense } from "react";
 import EventLoadingFallback from "./(public)/landing/components/EventsLoadingFallback";
 import PullToRefresh from "./common/PulltoRefresh";

@@ -1,6 +1,6 @@
 "use client"
 
-import { Logout } from '@/lib/auth'
+import { Logout } from '@/lib/private-api/auth'
 
 
 

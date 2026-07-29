@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { GetUser } from "@/lib/auth";
+import { GetUser } from "@/lib/private-api/auth";
 import { User } from "@/types/user";
 
 type Props = {

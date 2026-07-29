@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, } from "framer-motion";
-
+import {LandingPageInfoType} from "@/types/info";
+import {use} from "react"
 import Image from "next/image";
 import Sponsor from "./sponsor";
 // Simple animation variants
@@ -35,13 +36,16 @@ const letterVariant = {
   visible: { opacity: 1, y: 0 },
 };
 
-interface Props {
 
+type Props =  {
+  promise:  Promise<LandingPageInfoType>
   children?: React.ReactNode;
 }
 
 
-export default function Hero({ children }: Props) {
+export default function Hero({ children, promise }: Props) {
+  const info = use(promise);
+  console.log(info)
   const title = "Sustainable Energy for a";
   const subtitle = "Busuanga Island Electric Cooperative,Inc."
   const description = "Providing reliable electricity distribution across the Calamianes Islands, powering communities and supporting sustainable development."

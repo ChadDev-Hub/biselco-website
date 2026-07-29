@@ -5,43 +5,8 @@ import { cookies } from "next/headers"
 
 const baseUrl = process.env.BASESERVERURL
 
-//  GET CURRENT USER
-export async function getCurrentUser() {
-    const cookie = await cookies()
-    const accessToken = cookie.get("access_token")?.value
-    const res = await fetch(`${baseUrl}/v1/auth/user/me`,{
-        method: "GET",
-        cache: "no-cache",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`
-        }
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return { 
-            status: res.status,
-            error: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        detail: data
-    }
-};
 
 
-// GET LANDING PAGE DATA
-
-export async function getLandingPageData() {
-    const res = await fetch(`${baseUrl}/v1/`, {
-        method: "GET",
-        cache: "no-store",
-
-    })
-    const data = await res.json()
-    return data
-}
 
 
 
@@ -278,25 +243,6 @@ export const GetNewConnectionStats = async () => {
 }
 
 
-//  GET TECHNICAL FORMS
-export const GetTechnicalForms = async () => {
-    const res = await fetch(`${baseUrl}/v1/technical_form/all`, {
-        method: "GET"
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
-
-
 // AGMA REGISTERED
 export const GetAgmaRegistered = async (id: string) => {
     const params = new URLSearchParams();
@@ -318,23 +264,7 @@ export const GetAgmaRegistered = async (id: string) => {
 }
 
 
-export const GetAgmaEvents = async() => {
-    const res = await fetch(`${baseUrl}/v1/events/agma`, {
-        method: "GET",
-        cache: "no-store"
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            erorr: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data 
-    }
-}
+
 
 export const GetAgmaStats= async() => {
     const cookie = await cookies()

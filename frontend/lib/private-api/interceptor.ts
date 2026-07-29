@@ -16,13 +16,14 @@ fastapi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if(error.response.status === 401 && !originalRequest._retry) {
+    if(error.response?.status === 401 && !originalRequest._retry) {
         try{
             originalRequest._retry = true;
             await fastapiRefresh.get('/v1/auth/token/refresh');
             return fastapi(originalRequest);
         } catch (refreshError) {
             localStorage.removeItem("LoginStatus");
+            window.location.href = "/landing";
             return Promise.reject(refreshError);
         }
     }

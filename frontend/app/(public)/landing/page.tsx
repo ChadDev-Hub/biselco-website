@@ -1,4 +1,4 @@
-import { GetAgmaEvents } from "../../../lib/serverFetch";
+import { GetAgmaEvents } from "@/lib/public-api/events";
 import Hero from "./components/hero";
 import McoGoogleLogin from "../../common/auth-component/mcoGoogleLogin";
 import LandingStats from "./components/stats";
@@ -13,22 +13,25 @@ import EventsLoadingFallback from "./components/EventsLoadingFallback";
 import { Suspense } from "react";
 import Image from "next/image";
 import MapProvider from "../distribution-map/components/MapProvider";
-import { GetOffices } from '../../../lib/landing';
+import { GetOffices } from "../../../lib/public-api/offices";
 import BiselcoOffices from "./components/biselcoOfficesLayer";
-import LoadingIndicator from '../distribution-map/components/LoadingIndicator';
+import LoadingIndicator from "../distribution-map/components/LoadingIndicator";
+import { GetLandingPageData } from "@/lib/public-api/info";
 
 export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
   const Offices = GetOffices();
+  const Info = GetLandingPageData();
   return (
     <div className="bg-linear-to-b  from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
       <main className="w-full">
-        
         {/* HERO SECTION */}
         <section className="w-full relative ">
-          <Hero>
-            <McoGoogleLogin />
-          </Hero>
+          <Suspense fallback={<LoadingIndicator />}>
+            <Hero promise={Info}>
+              <McoGoogleLogin />
+            </Hero>
+          </Suspense>
         </section>
 
         {/* STATS SECTION */}
@@ -37,7 +40,10 @@ export default function Landing() {
         </AnimatedSection>
 
         {/* VISION AND MISSION SECTION */}
-        <AnimatedSection id="mission-vision" className="py-12 px-4 md:py-20 w-full place-items-center  bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden ">
+        <AnimatedSection
+          id="mission-vision"
+          className="py-12 px-4 md:py-20 w-full place-items-center  bg-linear-to-t from-blue-100 to-blue-50 relative overflow-hidden "
+        >
           <AnimatedBackground variant="subtle" />
           <div className="grid grid-cols-1  md:grid-cols-2 gap-2 w-full max-w-7xl  items-stretch ">
             <div className="absolute md:relative z-10 w-full max-w-2xl  inset-0 ">
@@ -58,12 +64,18 @@ export default function Landing() {
         </AnimatedSection>
 
         {/* SERVICES AND FEATURES SECTION */}
-        <AnimatedSection id="features" className="w-full py-12 px-4 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100">
+        <AnimatedSection
+          id="features"
+          className="w-full py-12 px-4 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100"
+        >
           <ServiceFeature />
         </AnimatedSection>
 
         {/* EVENTS SECTION */}
-        <AnimatedSection id="events"  className="relative py-12 px-4 bg-linear-to-t from-blue-300 to-blue-100">
+        <AnimatedSection
+          id="events"
+          className="relative py-12 px-4 bg-linear-to-t from-blue-300 to-blue-100"
+        >
           <AnimatedBackground variant="animated" />
 
           <div className="relative z-10 w-full ">
@@ -72,17 +84,18 @@ export default function Landing() {
             </Suspense>
           </div>
         </AnimatedSection>
-        
-        <AnimatedSection id="offices"  className="w-full p-2 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100">
-          <div className="h-60 flex items-center justify-center ">
-            <MapProvider className="w-full max-w-7xl rounded-2xl shadow ring ring-blue-500 overflow-hidden" >
-            <Suspense fallback={<LoadingIndicator/>}>
-              <BiselcoOffices promise={Offices} />
-            </Suspense>
-          </MapProvider>
 
+        <AnimatedSection
+          id="offices"
+          className="w-full p-2 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100"
+        >
+          <div className="h-60 flex items-center justify-center ">
+            <MapProvider className="w-full max-w-7xl rounded-2xl shadow ring ring-blue-500 overflow-hidden">
+              <Suspense fallback={<LoadingIndicator />}>
+                <BiselcoOffices promise={Offices} />
+              </Suspense>
+            </MapProvider>
           </div>
-          
         </AnimatedSection>
 
         {/* FOOTER SECTION */}

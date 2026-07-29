@@ -1,22 +1,18 @@
 from fastapi import APIRouter, Depends, status
 from ....core.security import get_current_user
 from ....common.schema.response import FeatureCollection, Feature, Geometry
-
+from ..schema.response import LandingPageHeroInformation
 router = APIRouter(tags=["Landing Page"])
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/info", status_code=status.HTTP_200_OK, response_model=LandingPageHeroInformation)
 async def landing_page():
     return {
-        "hero": {
-            "title": "BISELCO",
-            "subtitle": "Busuanga Island Electric Cooperative,Inc.",
-            "description": """Providing reliable electricity distribution across
-                    the Calamianes Islands, 
-                    powering communities and supporting sustainable development.
-                    Sample text goes here
-                    """
-        }
+        "title": "BISELCO",
+        "subtitle": "Busuanga Island Electric Cooperative,Inc.",
+        "badge": "Empowering Communities",
+        "qoute" : "Sustainable Energy for a Brighter Tommorow",
+        "description": "Providing reliable electricity distribution across the Calamianes Islands, powering communities and supporting sustainable development.",
     }
 
 
@@ -28,7 +24,7 @@ async def biselco_offices():
             type="Feature",
             geometry=Geometry(
                 type="Point",
-                coordinates=[ 120.20134142023916, 12.01359545920979],
+                coordinates=[120.20134142023916, 12.01359545920979],
             ),
             properties=dict(
                 label="Biselco Main Office",
@@ -39,8 +35,8 @@ async def biselco_offices():
             type="Feature",
             geometry=Geometry(
                 type="Point",
-                coordinates=[119.93614564153128,12.131310746444637],
-                
+                coordinates=[119.93614564153128, 12.131310746444637],
+
             ),
             properties=dict(
                 label="Biselco Sub Office Busuanga Palawan",
@@ -48,27 +44,27 @@ async def biselco_offices():
                 google_link="https://maps.app.goo.gl/cwS6Vq1CT8DBeFAQA"
             )),
             Feature(
-                    type="Feature",
-                    geometry=Geometry(
-                        type="Point",
-                        coordinates=[ 120.01940196660988, 11.894592619164872]
-                    ),
-                    properties=dict(
-                        label="Biselco Sub Office Culion Palawan",
-                        address="Brgy. Balala Culion Palawan",
-                        google_link="https://maps.app.goo.gl/QZnXLeDAzzLBp8US6"
-                    )
+            type="Feature",
+            geometry=Geometry(
+                type="Point",
+                coordinates=[120.01940196660988, 11.894592619164872]
             ),
+            properties=dict(
+                label="Biselco Sub Office Culion Palawan",
+                address="Brgy. Balala Culion Palawan",
+                google_link="https://maps.app.goo.gl/QZnXLeDAzzLBp8US6"
+            )
+        ),
             Feature(
-                    type="Feature",
-                    geometry=Geometry(
-                        type="Point",
-                        coordinates=[119.86625217898758, 11.490785497576127]
-                    ),
-                    properties=dict(
-                        label="Biselco Sub Office Linapacan Palawan",
-                        address="Brgy. San Miguel Linapacan Palawan",
-                        google_link="https://maps.app.goo.gl/xJhyaLAqDkPYTZK7A"
-                    ))
-            ]
+            type="Feature",
+            geometry=Geometry(
+                type="Point",
+                coordinates=[119.86625217898758, 11.490785497576127]
+            ),
+            properties=dict(
+                label="Biselco Sub Office Linapacan Palawan",
+                address="Brgy. San Miguel Linapacan Palawan",
+                google_link="https://maps.app.goo.gl/xJhyaLAqDkPYTZK7A"
+            ))
+        ]
     )

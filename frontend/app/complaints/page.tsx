@@ -8,6 +8,7 @@ import ComplaintsContainer from './components/complaintContainer'
 import ComplaintHeader from './components/header'
 import ModernConcernCardSkeleton from './components/modernConcernCardSkeleton';
 
+export const dynamic = 'force-dynamic';
 
 const ComplaintsPage = () => {
   const data = UserComplaints()

@@ -1,10 +1,11 @@
 
-import {GetTechnicalForms} from "@/lib/serverFetch"
+import {GetTechnicalForm} from '@/lib/private-api/technical';
 import TechniclaFormLists from './components/optionsLists'
 import { Suspense } from 'react'
 import OptionListsSkeleton from './components/optionlistsSkeleton'
+export const dynamic = 'force-dynamic';
 const TechnicalPage = () => {
-  const technicalForms = GetTechnicalForms()
+  const technicalForms = GetTechnicalForm()
   return (
     <Suspense fallback={<OptionListsSkeleton forms={4} />}>
       <TechniclaFormLists initialData={technicalForms} />

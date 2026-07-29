@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { GoogleLoginRoute } from "@/lib/auth";
+import { GoogleLoginRoute } from "@/lib/private-api/auth";
 
 
 const McoGoogleLogin = () => {
