@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { TicketInfoType } from "../../../../types/agma";
+import { TicketInfoType } from "@/types/agma";
 import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
 import { useAuth } from "@/app/context/authProvider";
 import { usePathname } from "next/navigation";

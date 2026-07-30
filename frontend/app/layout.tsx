@@ -6,7 +6,7 @@ import Drawer from "./common/navigations/drawer";
 import ThemeController from "./common/themeController";
 import { WebsocketProvider } from "./context/websocketprovider";
 import { AuthProvider } from "./context/authProvider";
-import AlertComponent from "./common/alert";
+import AlertComponent from "./context/alert";
 import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";

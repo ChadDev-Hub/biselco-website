@@ -5,7 +5,7 @@ import Confetti from "react-confetti";
 import { GetWinnerInfo, DismissedWinner, UpdateWinnerStatus } from '../../../actions/agma';
 import { WinnerInfoType } from "../../../../types/agma";
 import InfoCard from "./infoCard";
-import { useAlert } from '../../../common/alert';
+import { useAlert } from '../../../context/alert';
 type Props = {
   winner_account: string;
   showModal: (bolean: boolean) => void;

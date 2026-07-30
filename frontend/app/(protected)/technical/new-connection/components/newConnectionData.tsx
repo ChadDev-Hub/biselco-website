@@ -5,7 +5,7 @@ import { useWebsocket } from "@/app/context/websocketprovider";
 import { deleteNewConnection } from "@/app/actions/newConnectionMeter"
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useAlert } from "@/app/common/alert";
+import { useAlert } from "@/app/context/alert";
 import { DownloadNewConnectionReport } from "@/app/actions/newConnectionMeter";
 import Delete from "../../change-meter/components/deleteChangeMeter";
 import DownloadReport from "../../change-meter/components/download";

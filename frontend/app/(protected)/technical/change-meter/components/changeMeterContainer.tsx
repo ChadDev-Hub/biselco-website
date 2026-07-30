@@ -6,7 +6,7 @@ import { DeleteChangeMeter } from "@/app/actions/changeMeter";
 import DownloadReport from "./download";
 import { DownloadChangeMeterReport } from "@/app/actions/changeMeter";
 import { useRouter } from "next/navigation";
-import { useAlert } from "@/app/common/alert";
+import { useAlert } from "@/app/context/alert";
 
 import { useSearchParams } from "next/navigation";
 import ChangeMeteCards from "./changeMeterCards";

@@ -5,7 +5,7 @@ import SignaturePad from "signature_pad";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 import { RegisterAgma } from "@/app/actions/agma";
 import { redirect, useRouter } from "next/navigation";
-import { useAlert } from "@/app/common/alert";
+import { useAlert } from "@/app/context/alert";
 import Image from "next/image";
 import SearchResults from "./searchResults";
 import { Contact, Phone, Zap, Camera, ReceiptText, FileText} from "lucide-react";

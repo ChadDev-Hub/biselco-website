@@ -6,7 +6,7 @@ import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/app/actions/complaint";
 import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
-import { useAlert } from '../../common/alert';
+import { useAlert } from '../../context/alert';
 import { useState } from "react";
 
 

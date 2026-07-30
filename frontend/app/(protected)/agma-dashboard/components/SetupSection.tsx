@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { SetupAgmaEvent } from "../../../actions/events";
-import { useAlert } from "../../../common/alert";
+import { useAlert } from "../../../context/alert";
 import { useWebsocket } from "@/app/context/websocketprovider";
 
 

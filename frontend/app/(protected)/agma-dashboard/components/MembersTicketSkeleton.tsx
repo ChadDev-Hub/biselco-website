@@ -1,4 +1,4 @@
-import AgmaTicketSkeletonCard from '../../../agma-registration/registered/components/agmaTicketSkeletonCard';
+import AgmaTicketSkeletonCard from "@/app/(public)/agma-registration/registered/components/agmaTicketSkeletonCard";
 
 
 const MembersTicketSkeleton = () => {

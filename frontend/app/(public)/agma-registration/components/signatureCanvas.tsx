@@ -47,7 +47,7 @@ const SignatureCanvas = ({ canvasRef, signaturePadRef, clearError }: Props) => {
       <canvas
         onPointerUp={clearError}
         ref={canvasRef}
-        className="w-full min-h-64 rounded-box border-1  bg-white cursor-crosshair touch-one"
+        className="w-full min-h-64 rounded-box border bg-white cursor-crosshair touch-one"
       />
 
       <button

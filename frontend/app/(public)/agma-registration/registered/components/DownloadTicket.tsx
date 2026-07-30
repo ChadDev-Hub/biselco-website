@@ -3,8 +3,8 @@ import React, { useState } from "react";
 
 import { DownloadCloud } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { DownloadAgmaTicket } from "../../../actions/agma";
-import { useAlert } from "../../../common/alert";
+import { DownloadAgmaTicket } from "@/app/actions/agma";
+import { useAlert } from "@/app/context/alert";
 
 type props = {
   elementId: string;

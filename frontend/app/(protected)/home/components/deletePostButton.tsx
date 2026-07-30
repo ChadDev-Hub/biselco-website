@@ -2,7 +2,7 @@
 
 import React, {  useRef } from 'react'
 import { DeleteNews } from '@/app/actions/news'
-import { useAlert } from '@/app/common/alert'
+import { useAlert } from '@/app/context/alert'
 type Props = {
     postId: number;
 }

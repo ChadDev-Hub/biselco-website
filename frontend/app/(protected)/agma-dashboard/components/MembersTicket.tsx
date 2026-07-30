@@ -1,5 +1,5 @@
 "use client";
-import AgmaTicketCard from "@/app/agma-registration/registered/components/ticketCard";
+import AgmaTicketCard from "@/app/(public)/agma-registration/registered/components/ticketCard";
 import { use, useState, useEffect } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import { TicketInfoType } from "@/types/agma";

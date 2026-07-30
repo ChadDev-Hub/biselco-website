@@ -4,7 +4,7 @@
   import ComplaintStatusButton from "./statusButton";
   import { useWebsocket } from "@/app/context/websocketprovider";
   import { redirect, useSearchParams } from "next/navigation";
-  import { useAlert } from "@/app/common/alert";
+  import { useAlert } from "@/app/context/alert";
   import StatusHistoryModal from "./statusHistory";
   import { GetComplaintsMessage } from "@/app/actions/complaint";
   import Messaging from "./messagingModal2";

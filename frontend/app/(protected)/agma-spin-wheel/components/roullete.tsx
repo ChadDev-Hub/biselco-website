@@ -6,7 +6,7 @@ import { AgmaSpinRoulette } from "../../../actions/agma";
 import { useRouletteSound } from "./rouletSound";
 import { useSearchParams } from "next/navigation";
 import WinnerModal from "./winner-modal";
-import { useAlert } from "../../../common/alert";
+import { useAlert } from "../../../context/alert";
 import {useRouter} from "next/navigation";
 
 const SIZE = 500;

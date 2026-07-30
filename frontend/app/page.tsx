@@ -1,5 +1,5 @@
 
-import Redirect from './components/redirect';
+import Redirect from "./components/redirect";
 
 const InitialPage = () => {
   return (
@@ -9,4 +9,4 @@ const InitialPage = () => {
   )
 }
 
-export default InitialPage
+export default InitialPage;

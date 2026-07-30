@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { AgmaEventSchedules } from "../../../actions/events";
 import { useWebsocket } from "@/app/context/websocketprovider";
-import { useAlert } from "../../../common/alert";
+import { useAlert } from "../../../context/alert";
 import { event } from "next/dist/build/output/log";
 
 

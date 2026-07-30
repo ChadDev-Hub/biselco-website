@@ -7,7 +7,7 @@ import { queryConsumer } from "../../../lib/consumer-meter";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/app/actions/complaint";
 import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
-import { useAlert } from "@/app/common/alert";
+import { useAlert } from "@/app/context/alert";
 
 type ConsumerData = {
   account_no: string;

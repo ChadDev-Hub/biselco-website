@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { UpdateComplaintStatus, DeleteComplaintStatus } from '@/app/actions/complaint'
-import { useAlert } from '@/app/common/alert'
+import { useAlert } from '@/app/context/alert'
 type Props = {
     current_status_id?: number
     status_id?: number
@@ -19,7 +19,7 @@ const EnableButton = ({ current_status_id,status_id, complaint_id, name, enabled
     const { showAlert } = useAlert();
 
     useEffect(() => {
-        setChecked(enabled)
+        queueMicrotask(() => setChecked(enabled));
     }, [enabled])
 
     // HAND TOGGLE UPDATE OF COMPLAINT STATUS

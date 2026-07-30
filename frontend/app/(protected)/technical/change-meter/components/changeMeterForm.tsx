@@ -10,7 +10,7 @@ import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useCallback } from "react";
-import { useAlert } from "@/app/common/alert";
+import { useAlert } from "@/app/context/alert";
 import ImageViewer from "./imageViewr";
 import { Camera } from "lucide-react"
 import {Consumer} from "@/types/consumer-meter";
