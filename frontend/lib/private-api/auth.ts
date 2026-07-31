@@ -1,11 +1,11 @@
 
-import fastapi from "./interceptor";
+import clientApi from "./clientApi";
 import {GoogleValidateType, LogoutResponseType} from "@/types/auth"
 import {User} from "@/types/user"
 
 // LOUTOUT
 export const Logout = async () => {
-  const {data, status, statusText} = await fastapi.post("/v1/auth/logout",null,{onUploadProgress:({progress})=>{
+  const {data, status, statusText} = await clientApi.post("/v1/auth/logout",null,{onUploadProgress:({progress})=>{
     console.log(progress)
   }})
   switch (status) {
@@ -23,7 +23,7 @@ export const GoogleLoginRoute = async (secretKey?:string) => {
   if(secretKey){
     params.set("secret",secretKey)
   }
-  const {data, status, statusText} = await fastapi.post("/v1/auth/google/validate",null,{params})
+  const {data, status, statusText} = await clientApi.post("/v1/auth/google/validate",null,{params})
   switch (status) {
     case 200:
       return data as GoogleValidateType
@@ -36,7 +36,7 @@ export const GoogleLoginRoute = async (secretKey?:string) => {
 
 
 export const GetUser = async () => {
-  const {data, status, statusText} = await fastapi.get("/v1/users/me")
+  const {data, status, statusText} = await clientApi.get("/v1/users/me")
   switch (status) {
     case 200:
       return data as User

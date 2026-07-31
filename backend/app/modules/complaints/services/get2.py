@@ -10,17 +10,19 @@ from ...user import Users
 from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
 from ..model.complaints_history import ComplaintsStatusHistory
 from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus, ComplaintsImages
-from ....modules.websocket.schema.response_model import User, Message
+from ....modules.websocket.schema.response_model import Message
+from ...user.schema.response_model import UserModel
 from ....core.security import get_current_user
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from datetime import datetime
 from uuid import UUID
 from typing import Optional
-from ...user.schema.response_model import UserModel
+from ...user.schema.response_model import UserModel, Roles
 from ....common.total_page import get_total_page
 import pytz
 from pprint import pprint
+from ...user.service.get_user import GetUserServices
 
 
 def format_timedelta(td):
@@ -43,11 +45,13 @@ def format_timedelta(td):
     return " ".join(parts) if parts else "0s"
 
 
-class GetServices:
-    def __init__(self, user:UserModel = Depends(get_current_user), page_size:int = 10, session: AsyncSession = Depends(get_session)):
+class GetServices():
+    def __init__(self, page_size: int = 10, session: AsyncSession = Depends(get_session)):
         self.session = session
-        self.user_id = user.id
+        self.user = None
         self.PAGESIZE = page_size
+        
+
     def get_latest_status(self):
         latest_status = (
             select(
@@ -61,76 +65,84 @@ class GetServices:
                 latest_status.c.complaint_id.label("complaint_id"),
                 ComplaintsStatusName.id.label("id"),
                 ComplaintsStatusName.status_name,
-                
-                )
+
+            )
             .select_from(latest_status)
             .join(ComplaintsStatusName, ComplaintsStatusName.id == latest_status.c.status_id)
             .cte("latest_status_name")
         )
         return latest_status_name
 
-    def get_unread_message(self):
+    def get_unread_message(self, user_id:str):
         unread_message = (select(
             ComplaintsMessage.complaints_id,
             func.count(ComplaintsMessage.id).label("count"))
-            .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.sender_id != self.user_id))
+            .where(and_(ComplaintsMessage.receiver_status == "Unread", ComplaintsMessage.sender_id != user_id))
             .group_by(ComplaintsMessage.complaints_id)
             .cte("unread_messages")
         )
         return unread_message
-    
+
     # GET SELECTED COMPLAINTS
-    async def get_selected_complaints(self, complaints_id:int):
+    async def get_selected_complaints(self, complaints_id: int):
         selected_complaints = (await self.session.execute(select(Complaints).where(Complaints.id == complaints_id))).scalar_one_or_none()
         if not selected_complaints:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Complaint Not Found")
         return selected_complaints
-    
+
     # GET SELECTED STATUS NAME
-    async def get_seleted_status_name(self, status_id:int, current_status_id:Optional[int] = None, to_delete:bool= False):
+    async def get_seleted_status_name(self, status_id: int, current_status_id: Optional[int] = None, to_delete: bool = False):
         try:
             condition = []
             if to_delete:
                 condition.append(ComplaintsStatusName.id >= status_id)
                 if current_status_id:
-                    condition.append(ComplaintsStatusName.id <= current_status_id)
+                    condition.append(
+                        ComplaintsStatusName.id <= current_status_id)
                 stmt = (select(ComplaintsStatusName)
                         .where(and_(*condition)))
             else:
                 condition.append(ComplaintsStatusName.id <= status_id)
                 if current_status_id:
-                    condition.append(ComplaintsStatusName.id > current_status_id)
+                    condition.append(ComplaintsStatusName.id >
+                                     current_status_id)
                 stmt = (select(ComplaintsStatusName)
-                    .where(and_(*condition))
-                    .order_by((ComplaintsStatusName.id.asc())))
+                        .where(and_(*condition))
+                        .order_by((ComplaintsStatusName.id.asc())))
             results = (await self.session.execute(stmt)).scalars().all()
             # return selected_status
             selected_status = [
                 SelectecComplaintStatus(
-                id=status.id, 
-                status_name=status.status_name) for status in results]
+                    id=status.id,
+                    status_name=status.status_name) for status in results]
             if not selected_status:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Status Not Found")
             return selected_status
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-        
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
     # GET COMPLAINTS TOTAL PAGE
     async def get_complaints_total_page(self):
         total_complaint = (await self.session.execute(select(func.count(Complaints.id)).where(Complaints.is_deleted == False))).scalar_one()
         total_page = total_complaint // self.PAGESIZE if total_complaint % self.PAGESIZE == 0 else total_complaint // self.PAGESIZE + 1
         return total_page
-    
-    
+
     # GET SELECTED STATUS NAME TO DELETE
-    async def get_all_complaints(self, page: Optional[int] = None, query: Optional[str] = None, get_all:bool = True):
+    async def get_all_complaints(self,
+                                 page: Optional[int] = None, 
+                                 query: Optional[str] = None, 
+                                 get_all: bool = True,
+                                 user_id: str= None):
         if not page:
             page = 1
         latest_status_name = self.get_latest_status()
-        unread_message = self.get_unread_message()
+        unread_message = self.get_unread_message(user_id)
         stmt = (
-            select(Complaints, 
+            select(Complaints,
                    latest_status_name.c.status_name.label("latest_status"),
                    latest_status_name.c.id.label("latest_status_id"),
                    unread_message.c.count.label("unread_messages"))
@@ -147,23 +159,23 @@ class GetServices:
                      )
         ).order_by(desc(Complaints.id)).where(Complaints.is_deleted == False)
         if not get_all:
-            
-            stmt = stmt.where(Complaints.user_id == self.user_id)
+            if user_id:
+                stmt = stmt.where(Complaints.user_id == user_id)
         if query:
             page = 1
             stmt = stmt.where(or_(
                 func.to_char(Complaints.timestamped,
-                         "YYYY-MM-DD").ilike(f"%{query}%"),
-            func.to_char(Complaints.timestamped,
-                         "HH12:MI AM").ilike(f"%{query}%"),
-            Complaints.subject.ilike(f"%{query}%"),
-            Complaints.description.ilike(f"%{query}%"),
-            Complaints.village.ilike(f"%{query}%"),
-            Complaints.municipality.ilike(f"%{query}%"),
-            Users.first_name.ilike(f"%{query}%"),
-            Users.last_name.ilike(f"%{query}%"),
-            Users.email.ilike(f"%{query}%"),
-            latest_status_name.c.status_name.ilike(f"%{query}%"),
+                             "YYYY-MM-DD").ilike(f"%{query}%"),
+                func.to_char(Complaints.timestamped,
+                             "HH12:MI AM").ilike(f"%{query}%"),
+                Complaints.subject.ilike(f"%{query}%"),
+                Complaints.description.ilike(f"%{query}%"),
+                Complaints.village.ilike(f"%{query}%"),
+                Complaints.municipality.ilike(f"%{query}%"),
+                Users.first_name.ilike(f"%{query}%"),
+                Users.last_name.ilike(f"%{query}%"),
+                Users.email.ilike(f"%{query}%"),
+                latest_status_name.c.status_name.ilike(f"%{query}%"),
             )).offset((page - 1) * self.PAGESIZE).limit(self.PAGESIZE)
         else:
             stmt = stmt.offset((page - 1) * self.PAGESIZE).limit(self.PAGESIZE)
@@ -171,7 +183,7 @@ class GetServices:
         data = (await self.session.execute(stmt)).all()
         total_page = await self.get_complaints_total_page()
         results = []
-        
+
         for complaints, latests_updates, latest_status_id, unread_messages in data:
             status_lists = [
                 ComplaintStatus(
@@ -180,18 +192,21 @@ class GetServices:
                     status_id=s.status_id,
                     name=s.status.status_name,
                     description=s.status.description,
-                    date=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-                    time=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-                    ) for s in complaints.status_updates]
+                    date=s.timestamped.astimezone(pytz.timezone(
+                        "Asia/Manila")).strftime("%Y-%m-%d"),
+                    time=s.timestamped.astimezone(pytz.timezone(
+                        "Asia/Manila")).strftime("%I:%M %p"),
+                ) for s in complaints.status_updates]
             status_history = [
                 StatusHistory(
                     id=s.id,
                     first_name=s.user.first_name,
                     last_name=s.user.last_name,
                     comments=s.comments,
-                    timestamped=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                    timestamped=s.timestamped.astimezone(pytz.timezone(
+                        "Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                     user_photo=s.user.photo,
-                    ) for s in complaints.status_history]
+                ) for s in complaints.status_history]
             loc = Point(to_shape(complaints.location).coords)
             results.append(ComplaintsModel(
                 id=complaints.id,
@@ -208,49 +223,52 @@ class GetServices:
                     latitude=loc.y,
                     longitude=loc.x,
                     srid=complaints.location.srid
-                    ),
-                date_time_submitted=complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                ),
+                date_time_submitted=complaints.timestamped.astimezone(
+                    pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                 status=status_lists,
                 latest_status=Lateststatus(
                     id=latest_status_id,
                     name=latests_updates),
                 status_history=status_history,
-                resolution_time=format_timedelta(complaints.resolution_time) if complaints.resolution_time else None,
+                resolution_time=format_timedelta(
+                    complaints.resolution_time) if complaints.resolution_time else None,
                 unread_messages=unread_messages,
-                images=[ComplaintsImages(id=img.id, url=img.image_url) for img in complaints.complaints_image]
+                images=[ComplaintsImages(id=img.id, url=img.image_url)
+                        for img in complaints.complaints_image]
             ))
 
         return {
             "data": results,
             "total_page": total_page
         }
-    
-    async def get_new_complaints(self, complaint_id:int):
+
+    async def get_new_complaints(self, complaint_id: int, user_id: str):
         self.session.expire_all()
         try:
             latest_status_name = self.get_latest_status()
-            unread_message = self.get_unread_message()
+            unread_message = self.get_unread_message(user_id)
             total_page = await self.get_complaints_total_page()
             stmt = (
-            select(Complaints, 
-                   latest_status_name.c.status_name.label("latest_status"),
-                   latest_status_name.c.id.label("latest_status_id"),
-                   unread_message.c.count.label("unread_messages"))
-            .select_from(Complaints)
-            .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
-            .join(Users, Users.id == Complaints.user_id)
-            .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
-            .options(selectinload(Complaints.status_updates)
-                     .selectinload(ComplaintsStatusUpdates.status),
-                     selectinload(Complaints.user),
-                     selectinload(Complaints.status_history)
-                     .selectinload(ComplaintsStatusHistory.user),
-                     selectinload(Complaints.complaints_image)
-                     )
-            .where(and_(Complaints.is_deleted == False, Complaints.id == complaint_id)).order_by(desc(Complaints.id))
+                select(Complaints,
+                       latest_status_name.c.status_name.label("latest_status"),
+                       latest_status_name.c.id.label("latest_status_id"),
+                       unread_message.c.count.label("unread_messages"))
+                .select_from(Complaints)
+                .join(latest_status_name, latest_status_name.c.complaint_id == Complaints.id)
+                .join(Users, Users.id == Complaints.user_id)
+                .outerjoin(unread_message, unread_message.c.complaints_id == Complaints.id)
+                .options(selectinload(Complaints.status_updates)
+                         .selectinload(ComplaintsStatusUpdates.status),
+                         selectinload(Complaints.user),
+                         selectinload(Complaints.status_history)
+                         .selectinload(ComplaintsStatusHistory.user),
+                         selectinload(Complaints.complaints_image)
+                         )
+                .where(and_(Complaints.is_deleted == False, Complaints.id == complaint_id)).order_by(desc(Complaints.id))
             )
             new_complaints, latests_status, latests_status_id, unread_messages = (await self.session.execute(stmt)).one()
-            loc = Point(to_shape(new_complaints.location).coords)   
+            loc = Point(to_shape(new_complaints.location).coords)
             data = ComplaintsModel(
                 id=new_complaints.id,
                 user_id=str(new_complaints.user_id),
@@ -266,8 +284,9 @@ class GetServices:
                     latitude=loc.y,
                     longitude=loc.x,
                     srid=new_complaints.location.srid
-                    ),
-                date_time_submitted=new_complaints.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                ),
+                date_time_submitted=new_complaints.timestamped.astimezone(
+                    pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                 status=[
                     ComplaintStatus(
                         id=s.id,
@@ -275,45 +294,48 @@ class GetServices:
                         status_id=s.status_id,
                         name=s.status.status_name,
                         description=s.status.description,
-                        date=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-                        time=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-                        ) for s in new_complaints.status_updates
-                    ],
+                        date=s.timestamped.astimezone(pytz.timezone(
+                            "Asia/Manila")).strftime("%Y-%m-%d"),
+                        time=s.timestamped.astimezone(pytz.timezone(
+                            "Asia/Manila")).strftime("%I:%M %p"),
+                    ) for s in new_complaints.status_updates
+                ],
                 latest_status=Lateststatus(
                     id=latests_status_id,
                     name=latests_status
-                    ),
+                ),
                 status_history=[
                     StatusHistory(
                         id=s.id,
                         first_name=s.user.first_name,
                         last_name=s.user.last_name,
                         comments=s.comments,
-                        timestamped=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                        timestamped=s.timestamped.astimezone(pytz.timezone(
+                            "Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                         user_photo=s.user.photo,
-                        ) for s in new_complaints.status_history
-                    ],
-                resolution_time=format_timedelta(new_complaints.resolution_time) if new_complaints.resolution_time else None,
+                    ) for s in new_complaints.status_history
+                ],
+                resolution_time=format_timedelta(
+                    new_complaints.resolution_time) if new_complaints.resolution_time else None,
                 unread_messages=unread_messages,
-                images=[ComplaintsImages(id=img.id, url=img.image_url) for img in new_complaints.complaints_image]
+                images=[ComplaintsImages(id=img.id, url=img.image_url)
+                        for img in new_complaints.complaints_image]
             )
             return {
                 "detail": "new_complaint",
                 "data": data.model_dump(mode="json"),
                 "total_page": total_page,
             }
-                
+
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-        
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
-    
-    
-    async def get_new_complaints_status(self, complaints_id:int):
+    async def get_new_complaints_status(self, complaints_id: int):
         self.session.expire_all()
         latests_status = self.get_latest_status()
-        stmt = (select(Complaints,latests_status.c.status_name.label("latest_status"), latests_status.c.id.label("latest_status_id"))
+        stmt = (select(Complaints, latests_status.c.status_name.label("latest_status"), latests_status.c.id.label("latest_status_id"))
                 .select_from(Complaints)
                 .outerjoin(latests_status, latests_status.c.complaint_id == Complaints.id)
                 .options(selectinload(Complaints.status_updates)
@@ -325,7 +347,8 @@ class GetServices:
                 )
         new_complaints, latests_status, latests_status_id = (await self.session.execute(stmt)).one()
         if not new_complaints:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="New Status Complaint Not Found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="New Status Complaint Not Found")
         status_lists = [
             ComplaintStatus(
                 id=s.id,
@@ -333,18 +356,21 @@ class GetServices:
                 status_id=s.status_id,
                 name=s.status.status_name,
                 description=s.status.description,
-                date=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d"),
-                time=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%I:%M %p"),
-                ) for s in new_complaints.status_updates]
+                date=s.timestamped.astimezone(pytz.timezone(
+                    "Asia/Manila")).strftime("%Y-%m-%d"),
+                time=s.timestamped.astimezone(pytz.timezone(
+                    "Asia/Manila")).strftime("%I:%M %p"),
+            ) for s in new_complaints.status_updates]
         status_history = [
             StatusHistory(
                 id=s.id,
                 first_name=s.user.first_name,
                 last_name=s.user.last_name,
                 comments=s.comments,
-                timestamped=s.timestamped.astimezone(pytz.timezone("Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
+                timestamped=s.timestamped.astimezone(pytz.timezone(
+                    "Asia/Manila")).strftime("%Y-%m-%d %I:%M %p"),
                 user_photo=s.user.photo,
-                ) for s in new_complaints.status_history]
+            ) for s in new_complaints.status_history]
         return NewComplaintStatus(
             complaint_id=new_complaints.id,
             status=status_lists,
@@ -352,30 +378,32 @@ class GetServices:
                 id=latests_status_id,
                 name=latests_status),
             status_history=status_history,
-            resolution_time=format_timedelta(new_complaints.resolution_time) if new_complaints.resolution_time else None,
+            resolution_time=format_timedelta(
+                new_complaints.resolution_time) if new_complaints.resolution_time else None,
         ).model_dump(mode="json")
-     
 
+
+# DASHBOARD SERVICES
 class GetDashboardServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-    
+
     async def get_top_complaints(self):
         top_complaints = (
-        select(
-            func.jsonb_build_object(
-                'name', Complaints.subject,
-                'value', func.count(Complaints.id)
-            ).label("top_complaints"),
-            func.count(Complaints.id).label("total")
-        ).select_from(Complaints)
-        .where(Complaints.is_deleted == False)
-        .group_by(Complaints.subject)
-        .order_by(desc("total"))
-        .limit(5))
+            select(
+                func.jsonb_build_object(
+                    'name', Complaints.subject,
+                    'value', func.count(Complaints.id)
+                ).label("top_complaints"),
+                func.count(Complaints.id).label("total")
+            ).select_from(Complaints)
+            .where(Complaints.is_deleted == False)
+            .group_by(Complaints.subject)
+            .order_by(desc("total"))
+            .limit(5))
         data = (await self.session.execute(top_complaints)).scalars().all()
         return data
-    
+
     async def get_complaint_overtime(self):
         stmt = (select(
             func.jsonb_build_object(
@@ -383,11 +411,11 @@ class GetDashboardServices:
                 'value', func.count(Complaints.id)
             ).label("data")
         ).where(Complaints.is_deleted == False)
-        .group_by(func.date(Complaints.timestamped))
-        .order_by(func.date(Complaints.timestamped)))
+            .group_by(func.date(Complaints.timestamped))
+            .order_by(func.date(Complaints.timestamped)))
         data = (await self.session.execute(stmt)).scalars().all()
         return data
-    
+
     async def get_complaints_stats(self):
         # TOTAL COMPLAINTS
         total_complaints = (
@@ -426,14 +454,14 @@ class GetDashboardServices:
                     func.concat(
                         case(
                             (func.round(
-                                (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total,0)) * 100, 2) > 50, "📈"),
+                                (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total, 0)) * 100, 2) > 50, "📈"),
                             else_="📉"),
                         complaints_subquery.c.total,
                         ' ',
 
                         '(',
                         func.round(
-                            (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total,0)) * 100, 2),
+                            (complaints_subquery.c.completed / func.nullif(complaints_subquery.c.total, 0)) * 100, 2),
                         '%',
                         ')')
                 ).label("data"))
@@ -450,10 +478,8 @@ class GetDashboardServices:
                     'description', 'Today'
                 ).label("data"))
             .select_from(Complaints)
-            .where(and_(Complaints.is_deleted == False,(func.date(Complaints.timestamped) == func.current_date())))
+            .where(and_(Complaints.is_deleted == False, (func.date(Complaints.timestamped) == func.current_date())))
         ).cte("daily_complaints")
-
-        
 
         # UNION ALL CTE
         cte_union = (
@@ -473,35 +499,49 @@ class GetDashboardServices:
 
         data = (await self.session.execute(stats_data)).scalar()
         return data
-    
+
+
 class GetMessageServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-    
+
     async def get_message(self, complaints_id: int):
         message = (await self.session.execute(select(ComplaintsMessage)
-                                        .options(selectinload(ComplaintsMessage.sender), selectinload(ComplaintsMessage.receiver))
-                                        .where(ComplaintsMessage.complaints_id == complaints_id)
-                                        .order_by(ComplaintsMessage.timestamped))).scalars().all()
+                                              .options(selectinload(ComplaintsMessage.sender), selectinload(ComplaintsMessage.receiver))
+                                              .where(ComplaintsMessage.complaints_id == complaints_id)
+                                              .order_by(ComplaintsMessage.timestamped))).scalars().all()
         data = [
 
             Message(
                 id=str(m.id),
                 complaints_id=m.complaints_id,
-                sender=User(id=str(m.sender.id), first_name=m.sender.first_name,
-                            last_name=m.sender.last_name, photo=m.sender.photo),
-                receiver=User(id=str(m.receiver.id) if m.receiver else None,
-                            first_name=m.receiver.first_name if m.receiver else None,
-                            last_name=m.receiver.last_name if m.receiver else None,
-                            photo=m.receiver.photo) if m.receiver else None,
+                sender=UserModel(
+                    id=str(m.sender.id),
+                    first_name=m.sender.first_name,
+                    last_name=m.sender.last_name,
+                    user_name=m.sender.user_name,
+                    email=m.sender.email,
+                    roles=[Roles(
+                        id=r.id,
+                        name=r.name) for r in m.sender.roles],
+                    photo=m.sender.photo),
+                receiver=UserModel(
+                    id=str(m.receiver.id),
+                    first_name=m.receiver.first_name,
+                    last_name=m.receiver.last_name,
+                    user_name=m.receiver.user_name,
+                    email=m.receiver.email,
+                    roles = [Roles(id=r.id, name=r.name) for r in m.receiver.roles],
+                    photo=m.receiver.photo) if m.receiver else None,
                 sender_status=m.sender_status,
                 receiver_status=m.receiver_status,
                 message=m.message,
-                date=m.timestamped.astimezone(pytz.timezone('Asia/Manila')).strftime("%Y-%m-%d"),
-                time=m.timestamped.astimezone(pytz.timezone('Asia/Manila')).strftime("%I:%M %p"),
+                date=m.timestamped.astimezone(pytz.timezone(
+                    'Asia/Manila')).strftime("%Y-%m-%d"),
+                time=m.timestamped.astimezone(pytz.timezone(
+                    'Asia/Manila')).strftime("%I:%M %p"),
             )
             for m in message
         ]
-    
-        return data
 
+        return data

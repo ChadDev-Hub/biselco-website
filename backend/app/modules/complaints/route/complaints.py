@@ -18,7 +18,6 @@ from ...user.schema.response_model import UserModel
 from typing import Optional
 from ...gis.franchise_area.services.get_location import verifyLocation
 from ...gis.franchise_area.schema.response_model import VerifiedLocation
-from ..services.complaints_messages import get_message
 from ...websocket.schema.response_model import Message
 from ..schema.response_model import Stat
 from asyncio import gather
@@ -32,6 +31,7 @@ from ..services.delete import DeleteServices
 from ..services.post import PostServices
 from ..schema.requests_model import CreateComplaints
 from ....core.redis import CHANNEL, redis_client
+from ...user.service.get_user import GetUserServices
 import json
 # ROUTER INITIALIZATION
 router = APIRouter(prefix="/complaints", tags=["Complaints"])
@@ -39,13 +39,13 @@ router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
-async def get_user_complaints(user: UserModel = Depends(get_current_user), get_service: GetServices = Depends(GetServices)):
-    complaint = await get_service.get_all_complaints(get_all=False)
+async def get_user_complaints(get_user_services:GetUserServices = Depends(GetUserServices),
+                              get_service: GetServices = Depends(GetServices)):
+    user = await get_user_services.get_current_user()
+    complaint = await get_service.get_all_complaints(get_all=False, user_id=user.id)
     return complaint
 
 # GET ALL COMPLAINTS
-
-
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
         search: Optional[str] = Query(None),

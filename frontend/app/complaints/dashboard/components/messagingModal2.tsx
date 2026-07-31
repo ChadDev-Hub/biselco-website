@@ -6,13 +6,14 @@ import { useAuth } from "@/app/context/authProvider";
 import { SubmitHandler, useWatch, useForm } from "react-hook-form";
 import MessagingSkeleton from "@/app/common/MessagingSkeleton";
 import { LucideMessagesSquare, Send } from "lucide-react";
+import { ComplaintMessage} from "@/types/complaints";
 type Props = {
   complaint_id: number;
   messages: ComplaintMessage[];
   onOpen: () => void;
   onClosed: () => void;
   isOpen: boolean;
-  numberOfUnseenMessages: number;
+  numberOfUnseenMessages?: number;
   setInitialData: (data: {
     complaints_id: number;
     message: string;
@@ -21,25 +22,9 @@ type Props = {
   receiver_id?: string;
   messageLoading: boolean;
 };
-type ComplaintMessage = {
-  id: string;
-  complaints_id: number;
-  message: string;
-  receiver: User | undefined;
-  sender: User;
-  sender_status: string;
-  receiver_status: string;
-  date: string;
-  time: string;
-};
 
-type User = {
-  id: string;
-  user_name: string;
-  last_name: string;
-  first_name: string;
-  photo: string;
-};
+
+
 
 type FormType = {
   message: string;
@@ -120,7 +105,7 @@ const Messaging = ({
         className="btn tooltip w-20 relative indicator tooltip-top rounded-box flex flex-col items-center justify-center p-1 shadow-md border-gray-300"
         onClick={handleOpen}
       >
-        {numberOfUnseenMessages > 0 && (
+        {numberOfUnseenMessages && numberOfUnseenMessages > 0 && (
           <span className="indicator-item badge badge-secondary badge-xs">
             {numberOfUnseenMessages}
           </span>

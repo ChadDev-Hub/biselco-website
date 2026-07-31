@@ -1,20 +1,15 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from uuid import UUID
+from ...user.schema.response_model import UserModel
 
-class User(BaseModel):
-    id: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    photo: Optional[str]
-    
-    model_config = ConfigDict(from_attributes=True)
+
     
 class Message(BaseModel):
     id: str
     complaints_id: int
-    sender: User
-    receiver: Optional[User] = None
+    sender: UserModel
+    receiver: Optional[UserModel] = None
     sender_status: str
     receiver_status: str
     message: str

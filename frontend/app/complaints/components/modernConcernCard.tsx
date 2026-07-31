@@ -1,31 +1,19 @@
 import React from 'react';
-import { User,  Clock,  History} from 'lucide-react';
+import {   Clock,  History} from 'lucide-react';
 import Image from 'next/image';
 import ImageViewer from '../../(protected)/technical/change-meter/components/imageViewr';
+import { Complaints } from '../../../types/complaints';
 
 
 type Props = {
-  userComplaint: User;
+  userComplaint: Complaints;
   timeLine: React.ReactNode;
   deleteTool?: React.ReactNode;
   toolsComponent: React.ReactNode;
   mapViewer: React.ReactNode; 
 }
 
-type User = {
-  firstName:string;
-  lastName: string;
-  submittedAt: string;
-  subject: string;
-  refPole: string;
-  resolutionTime: string;
-  currentStatus: string;
-  details: string;
-  photo: string;
-  village: string; 
-  municipality: string;
-  image: string | null;
-}
+
 
 const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, deleteTool}: Props) => {
   return (
@@ -35,7 +23,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
       <div className="bg-base-200  max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
         <div className="bg-blue-100 ava avatar avatar-xs border p-3 rounded-full">
           <Image
-          src={userComplaint.photo}
+          src={userComplaint.user_photo}
           fill
           alt="Profile"
           sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
@@ -43,7 +31,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-800">
-            {userComplaint.firstName} {userComplaint.lastName}
+            {userComplaint.first_name} {userComplaint.last_name}
           </h2>
         </div>
       </div>
@@ -53,7 +41,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
         <div className="space-y-4">
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Submitted At</span>
-            <span className="text-slate-700 text-xs">{userComplaint.submittedAt}</span>
+            <span className="text-slate-700 text-xs">{userComplaint.date_time_submitted}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Subject</span>
@@ -61,13 +49,13 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Ref Pole</span>
-            <span className="text-slate-700 text-xs">{userComplaint.refPole}</span>
+            <span className="text-slate-700 text-xs">{userComplaint.reference_pole}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Resolution Time</span>
             <div className="flex items-center gap-2 text-slate-700">
               <Clock size={16} />
-              <span className="text-xs">{userComplaint.resolutionTime}</span>
+              <span className="text-xs">{userComplaint.resolution_time}</span>
             </div>
           </div>
           <div className="flex flex-col">
@@ -79,7 +67,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-slate-500 uppercase">Image</span>
-            <ImageViewer image={userComplaint.image}/>
+            {userComplaint.images && <ImageViewer image={userComplaint.images[0].url}/>}
           </div>
         </div>
 
@@ -87,7 +75,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
         <div className="space-y-6">
           <div>
             <span className="inline-block bg-blue-600 text-white px-4 py-1 rounded-md font-bold text-sm uppercase">
-              {userComplaint.currentStatus}
+              {userComplaint.latest_status?.name}
             </span>
           </div>
           
@@ -104,7 +92,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
       {/* Tabs & Details Section */}
       <div className="px-6 pb-6">
         <div className="bg-slate-50 text-xs p-4 rounded-lg text-slate-600  italic border border-slate-100">
-          {userComplaint.details}
+          {userComplaint.description}
         </div>
       </div>
 

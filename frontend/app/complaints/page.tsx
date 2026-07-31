@@ -2,9 +2,9 @@ import React, { Suspense} from 'react'
 import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
-import { UserComplaints, ComplaintStatusName } from '@/lib/serverFetch'
+import {  ComplaintStatusName } from '@/lib/serverFetch'
+import {UserComplaints} from "@/lib/private-api/complaints"
 import ComplaintsContainer from './components/complaintContainer'
-
 import ComplaintHeader from './components/header'
 import ModernConcernCardSkeleton from './components/modernConcernCardSkeleton';
 

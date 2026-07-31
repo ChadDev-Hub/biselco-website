@@ -5,7 +5,6 @@ from ....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from pprint import pprint
 from ..services.complaint_message_handler import add_message, update_message_status
-from ...user.model.users import Users
 from ...user.model.roles import Roles
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload

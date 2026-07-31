@@ -2,7 +2,7 @@
 import React, { createContext, useRef, useContext, useEffect, useState } from 'react'
 import { useAuth } from './authProvider'
 import { AgmaStatsType, AgmaVerificationType, TicketInfoType, CountPerMunicipality } from '../../types/agma';
-
+import {Complaints, ComplaintStatusData, ComplaintMessage} from "@/types/complaints"
 
 type Props = {
   children: React.ReactNode;
@@ -14,13 +14,13 @@ type WSMessage = {
   data: NewsData; 
 } | {
   detail: "new_complaint";
-  data: ComplaintData;
+  data: Complaints;
   total_page: number;
   stats: Stats[];
 } | {
   detail: "complaints_admin";
   data: {
-    data: ComplaintData;
+    data: Complaints;
     total_page: number;
   };
 }
@@ -35,7 +35,7 @@ type WSMessage = {
   data: NewsData;
 } | {
   detail: "deleted_complaints";
-  data: ComplaintData;
+  data: Complaints;
 
 } | {
   detail: "presence";
@@ -52,7 +52,7 @@ type WSMessage = {
   |
 {
   detail: "complaint_message"
-  data: ComlaintMessage;
+  data: ComplaintMessage;
 } | {
   detail: "seen_message";
   data: SeenMessage;
@@ -62,7 +62,7 @@ type WSMessage = {
 } | {
   detail: "sent_message";
   data: {
-    new_message: ComlaintMessage;
+    new_message: ComplaintMessage;
     unread: Unread;
   }
 } | {
@@ -235,27 +235,9 @@ type Unread = {
   sender_id: string;
 }
 
-type ComlaintMessage = {
-  id: string;
-  complaints_id: number;
-  message: string;
-  receiver: User | undefined;
-  sender: User;
-  sender_status: string;
-  receiver_status: string;
-  date: string;
-  time: string;
-}
 
-type User = {
-  id: string;
-  user_name: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  roles: string[];
-  photo: string;
-}
+
+
 
 
 type UserPresence = {
@@ -282,48 +264,6 @@ type NewsData = {
     photo: string;
   },
   news_images: string[]
-}
-
-type ComplaintData = {
-  id: number;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  user_photo: string;
-  subject: string;
-  description: string;
-  reference_pole: string;
-  date_time_submitted: string;
-  village: string;
-  municipality: string;
-  user_status?: string;
-  images?:{
-    id: number,
-    url: string
-  }[]
-  location: {
-    latitude: number;
-    longitude: number;
-    srid: number;
-  }
-  status: [];
-  status_history: [];
-  latest_status?: LatestsStatusType;
-  resolution_time: string;
-  unread_messages: number;
-}
-
-type ComplaintStatusData = {
-  complaint_id: number;
-  status: [];
-  status_history: [];
-  latest_status?: LatestsStatusType;
-  resolution_time?: string;
-}
-
-type LatestsStatusType = {
-  id: number;
-  name: string
 }
 
 

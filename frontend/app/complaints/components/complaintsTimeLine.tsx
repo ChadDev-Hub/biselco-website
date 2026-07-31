@@ -1,22 +1,17 @@
 "use client";
 
 import TimeLineSvg from "./timeLineSvg";
+import {ComplaintsStatus} from "@/types/complaints";
 type statusItem = {
   id: number;
   status_name: string;
   description: string;
 };
 
-type status = {
-  id: number;
-  name: string;
-  description: string;
-  date: string;
-  time: string;
-};
+
 type Props = {
   data: statusItem[];
-  status: status[];
+  status: ComplaintsStatus[];
 };
 const ComplaintsTimeLine = ({ data, status }: Props) => {
   const statuslist = status?.map((item) => item.name);

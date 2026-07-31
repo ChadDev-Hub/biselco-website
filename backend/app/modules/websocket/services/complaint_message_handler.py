@@ -1,7 +1,8 @@
 from sqlalchemy.dialects.postgresql import insert
 from ...complaints.model.complaints_message import ComplaintsMessage
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..schema.response_model import Message, User, SeenMessage, UnreadMessages
+from ..schema.response_model import Message,  SeenMessage, UnreadMessages
+from ...user.schema.response_model import UserModel, Roles
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, update, func, and_, or_
 import pytz
@@ -42,18 +43,24 @@ async def add_message(session: AsyncSession, data: dict):
         "new_message":Message(
         id=str(message.id),
         complaints_id=message.complaints_id,
-        sender=User(
+        sender=UserModel(
             id=str(message.sender.id),
             first_name=message.sender.first_name,
             last_name=message.sender.last_name,
+            user_name=message.sender.user_name,
+            email=message.sender.email,
+            roles=[Roles(id=r.id, name=r.name) for r in message.sender.roles],
             photo=message.sender.photo
         ),
-        receiver=User(
-            id=str(message.receiver.id) if message.receiver else None,
-            first_name=message.receiver.first_name if message.receiver else None,
-            last_name=message.receiver.last_name if message.receiver else None,
-            photo=message.receiver.photo if message.receiver else None
-        ),
+        receiver=UserModel(
+            id=str(message.receiver.id),
+            first_name=message.receiver.first_name,
+            last_name=message.receiver.last_name ,
+            user_name=message.receiver.user_name,
+            email=message.receiver.email,
+            roles=[Roles(id=r.id, name=r.name) for r in message.receiver.roles],
+            photo=message.receiver.photo 
+        ) if message.receiver else None,
         sender_status=message.sender_status,
         receiver_status=message.receiver_status,
         message=message.message,

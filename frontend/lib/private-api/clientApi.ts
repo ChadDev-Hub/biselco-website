@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const fastapi = axios.create({
+const clientApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASESERVERURL,
   withCredentials: true,
 });
@@ -11,16 +11,15 @@ const fastapiRefresh = axios.create({
 });
 
 
-
-fastapi.interceptors.response.use(
+clientApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     if(error.response?.status === 401 && !originalRequest._retry) {
         try{
             originalRequest._retry = true;
-            await fastapiRefresh.get('/v1/auth/token/refresh');
-            return fastapi(originalRequest);
+            await fastapiRefresh.get('/v1/auth/token/refresh_access_token');
+            return clientApi(originalRequest);
         } catch (refreshError) {
             localStorage.removeItem("LoginStatus");
             window.location.href = "/landing";
@@ -32,4 +31,4 @@ fastapi.interceptors.response.use(
 );
 
 
-export default fastapi;
+export default clientApi;

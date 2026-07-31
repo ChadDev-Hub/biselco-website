@@ -33,8 +33,6 @@ from ....core.security import (
     get_current_user,
     create_access_token,
     create_refresh_token,
-    ALGORITHM,
-    SECRET_KEY,
 )
 from ...user.schema.requests_model import GoogleLogin
 from ...user.schema.requests_model import RefreshToken, AccessToken
@@ -43,7 +41,7 @@ from urllib.parse import urlencode
 from typing import Optional
 import os
 from ...user.service.add_user import add_user
-
+from ..services.get import GetServices
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 load_dotenv()
@@ -115,14 +113,21 @@ async def login_for_access_token(
     }
 
 
+@router.get("/token/refresh_access_token", status_code=status.HTTP_200_OK)
+async def refresh_access_token(
+    get_services:GetServices = Depends(GetServices)
+):  
+    return await get_services.refresh_access_token()
+
 @router.post(
-    "/token/refresh", status_code=status.HTTP_202_ACCEPTED, response_model=AccessToken
+    "/token/refresh", status_code=status.HTTP_202_ACCEPTED
 )
 async def refresh_token(
     token: RefreshToken,
     session: AsyncSession = Depends(get_session)
 ):
     refresh_token = token.refresh_token
+    print(refresh_token)
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction"
