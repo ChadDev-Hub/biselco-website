@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { GoogleLoginRoute } from "@/lib/private-api/auth";
-
+import { ApiError } from "@/types/api-error";
 
 const McoGoogleLogin = () => {
   const [loading, setLoading] = useState(false);
@@ -12,16 +12,18 @@ const McoGoogleLogin = () => {
       window.location.href = res.url;
       localStorage.setItem("LoginStatus", "true");
     } catch (error) {
-      console.log(error);
+      if (error instanceof ApiError) {
+        alert(error.message);
+      } else if (error instanceof Error) {
+        alert(error.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
   return (
     <div className="aura text-blue-500  aura-dual">
-      <button
-        type="button"
-        onClick={handleClick}
-        className="btn shadow-sm"
-      >
+      <button type="button" onClick={handleClick} className="btn shadow-sm">
         <svg
           aria-label="Google logo"
           width="16"

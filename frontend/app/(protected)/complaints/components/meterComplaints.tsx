@@ -3,10 +3,10 @@
 import { useEffect, useState} from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import { queryConsumer } from "../../../lib/consumer-meter";
+import { queryConsumer } from "../../../../lib/consumer-meter";
 import BiselcoMap from "@/app/common/Map";
-import { PostComplaints } from "@/app/actions/complaint";
-import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
+import { PostComplaints } from "@/lib/private-api/actions/complaint";
+import ImageViewer from "../..//technical/change-meter/components/imageViewr";
 import { useAlert } from "@/app/context/alert";
 
 type ConsumerData = {
@@ -54,7 +54,6 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
     setValue,
     resetField,
     formState: { errors, isSubmitting },
-    setError,
     reset,
     control,
   } = useForm<ComplaintFormData>({});
@@ -145,31 +144,18 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
     if (data.attachment?.[0]) {
       formData.append("attachment", data.attachment[0]);
     }
-    const res = await PostComplaints(formData);
-    switch (res?.status) {
-      case 201:
-        reset();
-        setIsSubmitSuccessful(true);
-        break;
-      case 400:
+    try {
+      const res = await PostComplaints(formData);
+      showAlert("success", res.detail);
+      setIsSubmitSuccessful(true);
+      reset();
+    } catch (error) {
+      if (error instanceof Error) {
         reset();
         setIsSubmitSuccessful(false);
+        showAlert("error", error.message);
         handleClose();
-        showAlert(
-          "error",
-          "Sorry your concern didn't submitted please check your Internet Connection",
-        );
-        break;
-      case 403:
-        setError("lat", { message: res.data });
-        setError("lon", { message: res.data });
-        setIsSubmitSuccessful(false);
-        break;
-      case 404:
-        setError("lat", { message: res.data });
-        setError("lon", { message: res.data });
-        setIsSubmitSuccessful(false);
-        break;
+      }
     }
   };
   

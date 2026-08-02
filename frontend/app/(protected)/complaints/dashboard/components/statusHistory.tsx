@@ -2,18 +2,12 @@
 import { useRef } from "react";
 import Image from "next/image";
 import { Timeline } from "lucide-react";
+import {StatusHistory} from "@/types/complaints";
 type Props = {
-  data: StatusHistory[];
+  data?: StatusHistory[];
 };
 
-type StatusHistory = {
-  id: number;
-  first_name: string;
-  last_name: string;
-  comments: string;
-  timestamped: string;
-  user_photo: string;
-};
+
 const StatusHistoryModal = ({ data }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const handleOpen = () => {
@@ -64,7 +58,7 @@ const StatusHistoryModal = ({ data }: Props) => {
                 </tr>
               </thead>
               <tbody>
-                {data.map((item) => (
+                {data && data.map((item) => (
                   <tr key={item.id} className="text-[0.6rem] whitespace-nowrap">
                     <td className="items-center">
                       <span

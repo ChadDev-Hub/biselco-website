@@ -1,8 +1,8 @@
 import React from 'react';
 import {   Clock,  History} from 'lucide-react';
 import Image from 'next/image';
-import ImageViewer from '../../(protected)/technical/change-meter/components/imageViewr';
-import { Complaints } from '../../../types/complaints';
+import ImageViewer from '../../technical/change-meter/components/imageViewr';
+import { Complaints } from '../../../../types/complaints';
 
 
 type Props = {

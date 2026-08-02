@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
 from datetime import date, datetime
-from ...websocket.websocket_manager import manager
 from .. import *
 from sqlalchemy.dialects.postgresql import UUID
 from ..schema.response_model import ComplaintStatusName, ComplaintsModelLists
@@ -51,14 +50,17 @@ async def get_all_complaint(
         search: Optional[str] = Query(None),
         page: Optional[int] = Query(None),
         get_services: GetServices = Depends(GetServices),
-        user: UserModel = Depends(get_current_user)):
+        get_user_service: GetUserServices = Depends(GetUserServices)):
+    # GET CURRENT USER
+    user = await get_user_service.get_current_user()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
+    # RAISE EXCEPTION IF USER IS NOT ADMIN THIS IS A PROTECTED ROUTE FOR ADMIN ONLY 
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
-    data = await get_services.get_all_complaints(query=search, page=page)
+    data = await get_services.get_all_complaints(query=search, page=page, user_id=user.id)
     return data
 
 
@@ -73,7 +75,6 @@ async def get_complaints_status_name(session: AsyncSession = Depends(get_session
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_complaints(
-    user: UserModel = Depends(get_current_user),
     accountNumber: Optional[str] = Form(None),
     issue: str = Form(...),
     details: str = Form(...),
@@ -81,11 +82,14 @@ async def create_complaints(
     location: VerifiedLocation = Depends(verifyLocation),
     attachment: Optional[UploadFile] = File(None),
     post_service: PostServices = Depends(PostServices),
-    get_user: GetUserServices = Depends(GetUserServices),
+    get_user_service: GetUserServices = Depends(GetUserServices),
     get_dashboard_services: GetDashboardServices = Depends(
         GetDashboardServices),
 
 ):
+    # GET CURRENT USER
+    user  = await get_user_service.get_current_user()
+    
     data = CreateComplaints(
         account_no=accountNumber,
         subject=issue,
@@ -104,7 +108,7 @@ async def create_complaints(
     results['stats'] = new_stats
 
     # ADMIN USER
-    admins = await get_user.get_users_by_roles(roles="admin")
+    admins = await get_user_service.get_users_by_roles(roles="admin")
     if str(user.id) not in admins:
         admins.append(str(user.id))
 
@@ -118,7 +122,7 @@ async def create_complaints(
     await redis_client.publish(CHANNEL, dumped_payload)
 
     return {
-        "detail": "Complaints Submitted"
+        "detail": "Your Complaints Submitted Successfully",
     }
 
 
@@ -126,9 +130,10 @@ async def create_complaints(
 async def delete_complaint(
         complaint_id: int,
         session: AsyncSession = Depends(get_session),
-        user: UserModel = Depends(get_current_user),
-        get_user: GetUserServices = Depends(GetUserServices)):
+        get_user_service: GetUserServices = Depends(GetUserServices)):
     try:
+        # GET CURRENT USER
+        user = await get_user_service.get_current_user()
         select_stmt = select(Complaints).where(Complaints.id == complaint_id)
         data = (await session.execute(select_stmt)).scalar_one_or_none()
         if not data:
@@ -161,7 +166,7 @@ async def delete_complaint(
         }
         
         
-        admins = await get_user.get_users_by_roles(roles="admin")
+        admins = await get_user_service.get_users_by_roles(roles="admin")
         if str(user.id) not in admins:
             admins.append(str(user.id))
 
@@ -187,11 +192,12 @@ async def update_complaint_status(
         data: ComplaintsStatus = Body(...),
         put_services: PutServices = Depends(PutServices),
         get_services: GetServices = Depends(GetServices),
-        user: UserModel = Depends(get_current_user),
         get_user: GetUserServices = Depends(GetUserServices),
         get_dashboard_services: GetDashboardServices = Depends(
             GetDashboardServices)
 ):
+    # GET CURRENT USER
+    user = await get_user.get_current_user()
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")
@@ -249,9 +255,10 @@ async def delete_complaint_status(
     get_user: GetUserServices = Depends(GetUserServices),
     get_dashboard_services: GetDashboardServices = Depends(
         GetDashboardServices),
-    data: ComplaintsStatus = Body(...),
-    user: UserModel = Depends(get_current_user),
+    data: ComplaintsStatus = Body(...)
 ):
+    # GET CURRENT USER
+    user = await get_user.get_current_user()
     if "admin" not in [role.name for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Admin Only Transaction Allowed")

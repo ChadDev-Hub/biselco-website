@@ -1,6 +1,6 @@
 "use client"
 
-import StatsCard from "@/app/complaints/dashboard/components/statsCard";
+import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCard";
 import { use, useState, useEffect } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"

@@ -1,5 +1,5 @@
 
-import {GetTechnicalForm} from '@/lib/private-api/technical';
+import {GetTechnicalForm} from '@/lib/private-api/server-side/technical';
 import TechniclaFormLists from './components/optionsLists'
 import { Suspense } from 'react'
 import OptionListsSkeleton from './components/optionlistsSkeleton'

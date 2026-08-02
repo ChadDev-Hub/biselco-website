@@ -507,11 +507,14 @@ class GetMessageServices:
 
     async def get_message(self, complaints_id: int):
         message = (await self.session.execute(select(ComplaintsMessage)
-                                              .options(selectinload(ComplaintsMessage.sender), selectinload(ComplaintsMessage.receiver))
+                                              .options(selectinload(ComplaintsMessage.sender)
+                                                       .selectinload(Users.roles), 
+                                                       selectinload(ComplaintsMessage.receiver)
+                                                       .selectinload(Users.roles))
                                               .where(ComplaintsMessage.complaints_id == complaints_id)
                                               .order_by(ComplaintsMessage.timestamped))).scalars().all()
+        
         data = [
-
             Message(
                 id=str(m.id),
                 complaints_id=m.complaints_id,

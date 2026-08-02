@@ -3,6 +3,7 @@ from ...complaints.model.complaints_message import ComplaintsMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.response_model import Message,  SeenMessage, UnreadMessages
 from ...user.schema.response_model import UserModel, Roles
+from ...user.model.users import Users
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select, update, func, and_, or_
 import pytz
@@ -21,8 +22,11 @@ async def add_message(session: AsyncSession, data: dict):
     new_data = result.scalar_one()
 
     stmt = (select(ComplaintsMessage)
-            .options(selectinload(ComplaintsMessage.sender),
-                     selectinload(ComplaintsMessage.receiver))
+            .options(
+                selectinload(ComplaintsMessage.sender)
+                     .selectinload(Users.roles),
+                     selectinload(ComplaintsMessage.receiver)
+                     .selectinload(Users.roles))
             .where(ComplaintsMessage.id == new_data))
     
     unread = (await session.execute(select
@@ -39,7 +43,7 @@ async def add_message(session: AsyncSession, data: dict):
             complaints_id=data['complaints_id'],
             unread_messages=unread if unread else 0,
             sender_id=data['sender_id']
-        ).model_dump(),
+        ).model_dump(mode="json"),
         "new_message":Message(
         id=str(message.id),
         complaints_id=message.complaints_id,
@@ -49,18 +53,18 @@ async def add_message(session: AsyncSession, data: dict):
             last_name=message.sender.last_name,
             user_name=message.sender.user_name,
             email=message.sender.email,
-            roles=[Roles(id=r.id, name=r.name) for r in message.sender.roles],
+            roles=[Roles(id=r.id, name=r.name).model_dump(mode="json") for r in message.sender.roles],
             photo=message.sender.photo
-        ),
+        ).model_dump(mode="json"),
         receiver=UserModel(
             id=str(message.receiver.id),
             first_name=message.receiver.first_name,
             last_name=message.receiver.last_name ,
             user_name=message.receiver.user_name,
             email=message.receiver.email,
-            roles=[Roles(id=r.id, name=r.name) for r in message.receiver.roles],
+            roles=[Roles(id=r.id, name=r.name).model_dump(mode="json") for r in message.receiver.roles],
             photo=message.receiver.photo 
-        ) if message.receiver else None,
+        ).model_dump(mode="json") if message.receiver else None,
         sender_status=message.sender_status,
         receiver_status=message.receiver_status,
         message=message.message,
@@ -68,11 +72,10 @@ async def add_message(session: AsyncSession, data: dict):
             pytz.timezone('Asia/Manila')).strftime("%Y-%m-%d"),
         time=message.timestamped.astimezone(
             pytz.timezone('Asia/Manila')).strftime("%I:%M %p")
-    ).model_dump(),}
+    ).model_dump(mode="json"),}
 
 
 async def update_message_status(session: AsyncSession, data: dict):
-    
     stmt = await session.execute(update(ComplaintsMessage).values(
         receiver_status=data['receiver_status'])
         .where(ComplaintsMessage.id.in_(data['ids']))

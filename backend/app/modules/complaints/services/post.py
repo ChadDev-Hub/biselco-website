@@ -7,7 +7,6 @@ from ..model.complaint_image import ComplaintsImage
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...gis.consumer.model.consumer import ConsumerMeter
 from ..schema.requests_model import CreateComplaints
-from ....common.total_page import get_total_page
 from ....dependencies.bucket3 import upload_image
 from ..services.get2 import GetServices
 from typing import Optional
@@ -56,7 +55,6 @@ class PostServices:
             if is_meter_complaint:
                 self.description = await self.verify_consumer_account(account_no=data.account_no, detail=data.details)
             else:
-                
                 self.description = f"""Details: {data.details}"""
 
             # CREATE COMPLAINT
@@ -85,7 +83,7 @@ class PostServices:
                 )
                 self.session.add(images)
             await self.session.commit()
-            results = await self.get_services.get_new_complaints(complaint_id=new_complaints.id)
+            results = await self.get_services.get_new_complaints(complaint_id=new_complaints.id, user_id=data.user_id)
             return results
         except Exception as e:
             print(e)

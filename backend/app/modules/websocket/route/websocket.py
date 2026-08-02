@@ -12,7 +12,6 @@ router = APIRouter(prefix="/socket", tags=['Socket'])
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depends(get_session)):
-    print(websocket)
     user = await get_current_user_ws(websocket)
     if not user:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
@@ -31,10 +30,12 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                 data = json.get("data")
                 data['sender_id'] = str(user_id)
                 result = await add_message(session=session, data=data)
-                if result['new_message']:
-                    users = set([result['new_message']["receiver"]["id"]])
-                else:
-                    users = set()
+                
+                users = set()
+                
+                if result['new_message']['receiver'] is not None:
+                    users.add(result['new_message']["receiver"]["id"])
+                
                 
                 if result['new_message']['sender'] is not None:
                     users.add(result['new_message']["sender"]["id"])

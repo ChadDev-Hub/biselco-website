@@ -3,25 +3,22 @@
   import MapButton from "./mapbutton";
   import ComplaintStatusButton from "./statusButton";
   import { useWebsocket } from "@/app/context/websocketprovider";
-  import { redirect, useSearchParams } from "next/navigation";
+  import {  useSearchParams } from "next/navigation";
   import { useAlert } from "@/app/context/alert";
   import StatusHistoryModal from "./statusHistory";
-  import { GetComplaintsMessage } from "@/app/actions/complaint";
+  import { GetComplaintsMessage } from "@/lib/private-api/actions/complaint";
   import Messaging from "./messagingModal2";
   import { useAuth } from "@/app/context/authProvider";
   import { useNotification } from "@/app/common/NotificationProvider";
   import ConcernCard from '../../components/modernConcernCard';
   import ComplaintsTimeLine from '../../components/complaintsTimeLine';
+  import {Complaints, ComplaintMessage, UserComplaintsResponseType} from "@/types/complaints";
 
   type PromiseType = {
-    status?: number;
-    data: ComplaintsListData;
+    data: UserComplaintsResponseType;
+    status: number;
+  }
 
-  };
-
-  type ComplaintsListData = {
-    data: Complaint[];
-  };
 
   type ComplaintStatusType = {
     status?: number;
@@ -32,76 +29,7 @@
     complaintsStatusName: Promise<ComplaintStatusType>;
   };
 
-  type StatusHistory = {
-    id: number;
-    first_name: string;
-    last_name: string;
-    timestamped: string;
-    comments: string;
-    user_photo: string;
-  };
-
-  type Complaint = {
-    id: number;
-    user_id: string;
-    first_name: string;
-    last_name: string;
-    user_photo: string;
-    subject: string;
-    reference_pole: string;
-    description: string;
-    date_time_submitted: string;
-    village: string;
-    municipality: string;
-    location: Location;
-    status_history: StatusHistory[];
-    status: status[];
-    latest_status?: {
-      id: number;
-      name: string;
-    };
-    user_status?: string;
-    resolution_time: string;
-    images?: ComplaintsImages[];
-    unread_messages: number;
-  };
-
-  type Location = {
-    latitude: number;
-    longitude: number;
-    srid: number;
-  };
-
-  type status = {
-    id: number;
-    complaint_id: number;
-    status_id: number;
-    name: string;
-    description: string;
-    date: string;
-    time: string;
-  };
-
-  type ComplaintMessage = {
-    id: string;
-    complaints_id: number;
-    message: string;
-    receiver: User | undefined;
-    sender: User;
-    sender_status: string;
-    receiver_status: string;
-    date: string;
-    time: string;
-  };
-
-  type User = {
-    id: string;
-    user_name: string;
-    last_name: string;
-    first_name: string;
-    photo: string;
-  };
-
+ 
   type FormType = {
     complaints_id: number;
     receiver_id: string;
@@ -109,16 +37,12 @@
   };
 
 
-  type ComplaintsImages = {
-      id:number;
-      url:string; 
-  }
 
 
   const ComplaintsContainer = ({ data, complaintsStatusName }: Props) => {
     const complaintsIinitialData = use(data);
     const complaintStatusNameInitialData = use(complaintsStatusName);
-    const [allComplaints, setallComplaints] = useState<Complaint[] | []>([]);
+    const [allComplaints, setallComplaints] = useState<Complaints[] | []>([]);
     const searchParms = useSearchParams();
     const page = searchParms.get("page");
     const {playMessageNotification} = useNotification();
@@ -136,24 +60,10 @@
 
     // SET INITIAL DATA ON MOUNT
     useEffect(() => {
-      switch (complaintsIinitialData.status) {
-        case 404:
-          redirect("/landing");
-          break;
-        case 401:
-          redirect("/complaints");
-          break;
-        case 200:
-          queueMicrotask(() =>
-            setallComplaints(complaintsIinitialData.data.data),
-          );
-          break;
-        default:
-          redirect("/complaints");
-          break;
-      }
+      queueMicrotask(() => setallComplaints(complaintsIinitialData.data.data));
     }, [complaintsIinitialData]);
 
+    
     useEffect(() => {
         queueMicrotask(() =>
             setStatusName(complaintStatusNameInitialData.data)
@@ -169,16 +79,21 @@
 
 
     // MESSAGING MODAL OPEN HANDLER
-    const MessageOpen = (complaintsId: number) => {
-      if (complaintsId) {
-        setMessageLoading(true);
-        GetComplaintsMessage(complaintsId).then((res) => {
-          if (res?.status === 200) {
-            setComplaintsMessage(res.data);
-            setMessageLoading(false);
-          }
-        });
+    const MessageOpen = async(complaintsId: number) => {
+      setMessageLoading(true);
+      try {
+        if (!complaintsId) {
+          return;
+        }
+        const message = await GetComplaintsMessage(complaintsId);
+        if (!message) return
+        setComplaintsMessage(message);
+        setMessageLoading(false);
+      } catch (error) {
+        console.log(error);
+      } finally {
         setIsMessagingModalOpen(true);
+        setactiveComplaintsId(complaintsId);
       }
     };
 
@@ -248,7 +163,7 @@
 
           queueMicrotask(() =>
             setallComplaints((prev) => {
-              return prev.map((complaint: Complaint) =>
+              return prev.map((complaint: Complaints) =>
                 complaint.id === message.complaint_status.complaint_id
                   ? { ...complaint, ...message.complaint_status }
                   : complaint,
@@ -287,7 +202,7 @@
             })};
             setallComplaints((prev) => {
               if (message.data.unread.sender_id===user?.id) return prev
-              return prev.map((item: Complaint) => {
+              return prev.map((item: Complaints) => {
                 return item.id === message.data.unread.complaints_id ? { ...item, unread_messages: message.data.unread.unread_messages } : item
               })
             })
@@ -301,7 +216,7 @@
         case "seen_message":
           queueMicrotask(() => {
             setallComplaints((prev) => {
-              return prev.map((complaint: Complaint) =>
+              return prev.map((complaint: Complaints) =>
                 complaint.id === message.data.unread.complaints_id
                   ? { ...complaint, unread_messages: message.data.unread.unread_messages }
                   : complaint);
@@ -322,6 +237,7 @@
           break;
       }
     }, [message, showAlert, page, user, isMessaginModalOpen, playMessageNotification, activeComplaintsId]);
+
     useEffect(() => {
       if (!isMessaginModalOpen || !complaintsMessage.length) return;
 
@@ -347,23 +263,10 @@
     }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
     return (
       <>
-      {allComplaints.map((item:Complaint)=>
+      {allComplaints.map((item:Complaints)=>
       <ConcernCard
         key={item.id}
-        userComplaint={{
-          firstName: item.first_name,
-          lastName :item.last_name,
-          details : item.description,
-          submittedAt: item.date_time_submitted,
-          subject: item.subject,
-          refPole: item.reference_pole,
-          resolutionTime: item.resolution_time,
-          currentStatus: item.latest_status?.name ?? "",
-          photo: item.user_photo,
-          village: item.village,
-          municipality: item.municipality,
-          image: item.images?.[0]?.url ?? null
-        }}
+        userComplaint={item}
         timeLine={<ComplaintsTimeLine data={statusName} status={item.status} />}
         mapViewer={<MapButton title={item.subject} location={item.location} municipality={item.municipality} village={item.village} />}
         toolsComponent= {

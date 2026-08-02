@@ -1,5 +1,5 @@
 "use client";
-import Mapbutton from "@/app/complaints/dashboard/components/mapbutton";
+import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import CardComponent from "@/app/common/card";
 import ImageViewer from './imageViewr';
 

@@ -3,7 +3,7 @@ import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
 import {  ComplaintStatusName } from '@/lib/serverFetch'
-import {UserComplaints} from "@/lib/private-api/complaints"
+import {UserComplaints} from "@/lib/private-api/server-side/complaints"
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintHeader from './components/header'
 import ModernConcernCardSkeleton from './components/modernConcernCardSkeleton';

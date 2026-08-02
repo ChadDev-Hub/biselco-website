@@ -3,17 +3,20 @@ import { use, useEffect, useState } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import { useRouter } from "next/navigation";
 import Messaging from "../dashboard/components/messagingModal2";
-import { GetComplaintsMessage } from "@/app/actions/complaint";
+import { GetComplaintsMessage } from "@/lib/private-api/actions/complaint";
 import { useAuth } from "@/app/context/authProvider";
 import { useNotification } from "@/app/common/NotificationProvider";
 import DeletConfirmation from "./deleteComplaintsConfirmation";
 import ConcernCard from "./modernConcernCard";
 import ComplaintsTimeLine from "./complaintsTimeLine";
-import Mapbutton from "@/app/complaints/dashboard/components/mapbutton";
+import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import { Complaints, UserComplaintsResponseType, ComplaintMessage} from "@/types/complaints";
 
 
-type PromiseType = UserComplaintsResponseType;
+type PromiseType = {
+  data: UserComplaintsResponseType;
+  status: number;
+};
 
 type ComplaintStatusType = {
   status?: number;
@@ -59,17 +62,24 @@ const ComplaintsContainer = ({
   useEffect(() => {
     const SetComplaintsData = async () => {
       try {
-        setComplaints(complaintsInitialData.data);
-      } catch {
-        router.replace("/home");
+        setComplaints(complaintsInitialData.data.data);
+      } catch(err) {
+        console.log(err);
       }
     };
     SetComplaintsData();
-  }, [complaintsInitialData, router]);
+  }, [complaintsInitialData]);
 
   useEffect(() => {
-    queueMicrotask(() => setStatusName(complaintsStatusNameInitialData.data));
-  }, [complaintsStatusNameInitialData]);
+    const getInitialData = async () => {
+      try {
+        setStatusName(complaintsStatusNameInitialData.data);
+      } catch {
+        router.replace("/");
+      }
+    };
+    getInitialData();
+  }, [complaintsStatusNameInitialData, router]);
   // WEBSOCKET
   const { message, sendMessage } = useWebsocket();
   useEffect(() => {
@@ -183,19 +193,22 @@ const ComplaintsContainer = ({
   };
 
   // MESSAGING MODAL OPEN HANDLER
-  const MessageOpen = (complaintsId: number) => {
+  const MessageOpen = async (complaintsId: number) => {
     if (complaintsId) {
       setMessageLoading(true);
-      GetComplaintsMessage(complaintsId).then((res) => {
-        if (res?.status === 200) {
-          setComplaintsMessage(res.data);
-          setMessageLoading(false);
-        }
-      });
-      setactiveComplaintsId(complaintsId);
-      setIsMessagingModalOpen(true);
-    }
-  };
+      try {
+        const message = await GetComplaintsMessage(complaintsId);
+        if (!message) return  
+        setComplaintsMessage(message);
+        setMessageLoading(false);
+      }
+      catch(err) {
+        console.log(err);
+      } finally {
+        setIsMessagingModalOpen(true);
+        setactiveComplaintsId(complaintsId);
+      }
+    }}
 
   const handleInitialDataSending = (data: FormType) => {
     const id = crypto.randomUUID();

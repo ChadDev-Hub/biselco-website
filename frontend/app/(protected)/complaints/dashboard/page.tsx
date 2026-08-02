@@ -1,7 +1,6 @@
 import { Suspense, use } from "react";
 import Stats from "./components/status";
 import {
-  GetAllComplaints,
   GetComplaintStats,
   ComplaintStatusName,
 } from "@/lib/serverFetch";
@@ -9,10 +8,11 @@ import ComplaintsContainer from "./components/complaintsDashboardContainer";
 import ComplaintDashBoardHeader from "./components/header";
 import StatsSkeleton from "@/app/common/statsSkeleton";
 import ModernConcernCardSkeleton from '../components/modernConcernCardSkeleton';
-import Pagination from '../../(protected)/technical/change-meter/components/pagination';
-import PageNationLoading from '../../(protected)/technical/change-meter/components/pageNationSkeleton';
-import SearchComponent from "../../(protected)/agma-dashboard/components/Search"
-import SearchSkeleton from '../../common/SearchSkeleton';
+import Pagination from '../../technical/change-meter/components/pagination';
+import PageNationLoading from '../../technical/change-meter/components/pageNationSkeleton';
+import SearchComponent from "../../agma-dashboard/components/Search"
+import SearchSkeleton from '../../../common/SearchSkeleton';
+import {GetAllComplaints} from "@/lib/private-api/server-side/complaints";
 const DashBoardPage = ({
   searchParams,
 }: {

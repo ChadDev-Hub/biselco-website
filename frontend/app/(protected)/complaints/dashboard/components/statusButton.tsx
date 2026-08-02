@@ -2,21 +2,15 @@
 import { useRef } from "react";
 import EnableButton from "./complaintStatusToggle";
 import { NotebookPen } from "lucide-react";
+import {ComplaintsStatus} from "@/types/complaints";
 
 type Props = {
   currentStatus?: number;
-  status: status[];
+  status: ComplaintsStatus[];
   complaints_id: number;
   onOpen: (complaint_id: number) => void;
 };
-type status = {
-  id: number;
-  complaint_id: number;
-  name: string;
-  description: string;
-  date: string;
-  time: string;
-};
+
 
 type StatsType = {
   id: number;
@@ -90,15 +84,15 @@ const ComplaintStatusButton = ({
                   className="space-y-2 flex  flex-row space-x-2 justify-between w-full"
                 >
                   <span>{item.name}</span>
-                  {status.find((stats: status) => stats.name === item.name) ? (
+                  {status.find((stats: ComplaintsStatus) => stats.name === item.name) ? (
                     <span key={index}>
                       {
-                        status.find((stats: status) => stats.name === item.name)
+                        status.find((stats: ComplaintsStatus) => stats.name === item.name)
                           ?.date
                       }{" "}
                       •{" "}
                       {
-                        status.find((stats: status) => stats.name === item.name)
+                        status.find((stats: ComplaintsStatus) => stats.name === item.name)
                           ?.time
                       }
                     </span>
@@ -113,7 +107,7 @@ const ComplaintStatusButton = ({
                     status_id={item.id}
                     complaint_id={complaints_id}
                     enabled={
-                      status.find((stats: status) => stats.name == item.name)
+                      status.find((stats: ComplaintsStatus) => stats.name == item.name)
                         ? true
                         : false
                     }

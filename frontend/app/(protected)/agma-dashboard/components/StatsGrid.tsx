@@ -1,6 +1,6 @@
 "use client"
 import  { use, useState, useEffect } from "react";
-import StatsCard from "@/app/complaints/dashboard/components/statsCard";
+import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
 import { Users, CalendarDays, BadgePercent, CalendarArrowUp } from "lucide-react";
 import CustomIcon from "./customeIcon";

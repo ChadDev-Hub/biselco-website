@@ -31,11 +31,12 @@ export default function BiselcoMap({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
-
+  const onSelectLocationRef = useRef(onSelectLocation);
+  const markerSvgRef = useRef(markerSvg);
+  const markerPopupRef = useRef(markerPopup);
   // INIT MAP
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
-
     const map = new maplibregl.Map({
       container: mapContainer.current,
       attributionControl: false,
@@ -67,29 +68,27 @@ export default function BiselcoMap({
     // CLICK MAP → DROP MARKER
     map.on("click", (e) => {
       const { lng, lat } = e.lngLat;
-
       if (!markerRef.current) {
         const el = document.createElement("div");
         el.innerHTML = `
           <div style="transform: translate(-50%, -100%)">
-            ${renderToStaticMarkup(defaultSvg)}
+            ${markerSvgRef.current ? renderToStaticMarkup(markerSvgRef.current) : defaultSvg}
           </div>
         `;
-
         markerRef.current = new maplibregl.Marker(el)
           .setLngLat([lng, lat])
           .addTo(map);
       } else {
         markerRef.current.setLngLat([lng, lat]);
       }
-      if (markerPopup) {
+      if (markerPopupRef.current) {
         popup
           .setLngLat([lng, lat])
-          .setHTML(markerPopup ?? "")
+          .setHTML(markerPopupRef.current ?? "")
           .addTo(map);
       }
 
-      onSelectLocation?.(lat, lng);
+      onSelectLocationRef.current?.(lat, lng);
 
       map.flyTo({
         center: [lng, lat],
@@ -102,7 +101,23 @@ export default function BiselcoMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [markerPopup, onSelectLocation]);
+  }, []);
+
+  // UPAGE ON SELECT LOCATION
+  useEffect(() => {
+    onSelectLocationRef.current = onSelectLocation;
+  }, [onSelectLocation]);
+
+
+  // UPDATE MARKER SVG
+  useEffect(() => {
+    markerSvgRef.current = markerSvg;
+  }, [markerSvg]);
+
+  // UPDATE MARKER POPUP
+  useEffect(() => {
+    markerPopupRef.current = markerPopup;
+  }, [markerPopup]);
 
   // consumermeters marker update
   useEffect(() => {

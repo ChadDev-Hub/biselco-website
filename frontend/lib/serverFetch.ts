@@ -37,42 +37,7 @@ export async function getNewsPage() {
 
 
 
-// GET ALL COMPLAINTS 
-export async function GetAllComplaints(page?:number, q?:string|number|boolean) {
-    const cookie = await cookies()
-    const accessToken = cookie.get("access_token")?.value
-    const params = new URLSearchParams();
-    if(page){
-        params.set("page", page.toString())
-    }
-    if(q){
-        params.set("search", q.toString())
-    }
-     const url = `${baseUrl}/v1/complaints/all${
-        params.toString() ? `?${params.toString()}` : ""
-    }`;
-    const res = await fetch(
-        `${url}`,{
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`
-            },
-            cache: "no-store"
-        }
-    )
-    const data = await res.json()
-    if(!res.ok){
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-    
-    return {
-        status: res.status,
-        data: data
-    }
-}
+
 
 
 

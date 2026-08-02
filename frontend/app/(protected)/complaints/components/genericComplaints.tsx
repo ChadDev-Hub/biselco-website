@@ -1,18 +1,16 @@
 "use client";
 
-
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 
 import BiselcoMap from "@/app/common/Map";
-import { PostComplaints } from "@/app/actions/complaint";
-import ImageViewer from "../../(protected)/technical/change-meter/components/imageViewr";
-import { useAlert } from '../../context/alert';
+import { PostComplaints } from "@/lib/private-api/actions/complaint";
+import ImageViewer from "../../technical/change-meter/components/imageViewr";
+import { useAlert } from "../../../context/alert";
 import { useState } from "react";
-
+import { ApiError } from "../../../../types/api-error";
 
 // Define the type for form data
 type ComplaintFormData = {
- 
   issue: string | null;
   detail: string | null;
   lon?: number;
@@ -27,7 +25,7 @@ type Props = {
 };
 
 const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
-  const {showAlert} = useAlert()
+  const { showAlert } = useAlert();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   // DEFINE STATE VARIABLES------------------------------------------------------
   // CREATE FORM HOOK
@@ -35,10 +33,10 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting, },
-    setError,
+    formState: { errors, isSubmitting },
     reset,
     control,
+    setError,
   } = useForm<ComplaintFormData>({});
 
   // WATCH INPUTS ---------------------------------------------------------------
@@ -57,8 +55,6 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
     control: control,
     name: "attachment",
   });
-
-  
 
   // DEFINE STYLES -------------------------------------------------------
   const errorStyle = "text-error text-[0.75rem] italic ";
@@ -84,27 +80,32 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
     if (data.attachment?.[0]) {
       formData.append("attachment", data.attachment[0]);
     }
-
-    const res = await PostComplaints(formData);
-    switch (res?.status) {
-      case 201:
-        reset();
-        setIsSubmitSuccessful(true);
-        break;
-      case 400:
-        reset();
-        showAlert("error", "Sorry your concerns didn't submitted please Check your Internet Connection");
-        handleClose()
-        setIsSubmitSuccessful(false);
-        break; 
-      case 403:
-        setError("lat", { message: res.data });
-        setError("lon", { message: res.data });
-        break;
-      case 404:
-        setError("lat", { message: res.data });
-        setError("lon", { message: res.data });
-        break;
+    try {
+      const res = await PostComplaints(formData);
+      reset();
+      setIsSubmitSuccessful(true);
+      handleClose();
+      showAlert("success", res.detail);
+      
+    } catch (error) {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 403:
+            setIsSubmitSuccessful(false);
+            setError("lat", { message: error.message });
+            setError("lon", { message: error.message });
+            break;
+          case 404:
+            setIsSubmitSuccessful(false);
+            setError("lat", { message: error.message });
+            setError("lon", { message: error.message });
+            break;
+          default:
+            setIsSubmitSuccessful(false);
+            showAlert("error", error.message);
+            break;
+        }
+      }
     }
   };
   return (
@@ -116,9 +117,10 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
           </h1>
         </div>
       ) : (
-        <form className={`overflow-y-auto max-h-[80vh] ${formStyle}`} onSubmit={handleSubmit(onSubmit)}>
-          
-
+        <form
+          className={`overflow-y-auto max-h-[80vh] ${formStyle}`}
+          onSubmit={handleSubmit(onSubmit)}
+        >
           {/* ISSUE */}
 
           {!isother && (
@@ -184,15 +186,21 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
               })}
               className={`file-input file-input-sm w-full ${errors.attachment ? inputerrorStyle : ""}`}
             />
-            
+
             {errors.attachment && (
-              <p className={`${errorStyle} self-start`}>{errors.attachment.message}</p>
+              <p className={`${errorStyle} self-start`}>
+                {errors.attachment.message}
+              </p>
             )}
-            {attachment && 
-            <div className="p-2">
-              <ImageViewer image={attachment[0] ? URL.createObjectURL(attachment[0]) : ""} />
-            </div>
-            }
+            {attachment && (
+              <div className="p-2">
+                <ImageViewer
+                  image={
+                    attachment[0] ? URL.createObjectURL(attachment[0]) : ""
+                  }
+                />
+              </div>
+            )}
           </section>
 
           <button

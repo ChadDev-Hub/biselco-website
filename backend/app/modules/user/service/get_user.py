@@ -7,6 +7,7 @@ from ....dependencies.db_session import get_session
 from fastapi import Depends, HTTPException, status, Cookie
 from typing import Optional
 from ..schema.response_model import UserModel
+from typing import Optional
 from ....core.security import verify_token, create_access_token, create_refresh_token
 
 
@@ -48,6 +49,9 @@ class GetUserServices:
                 print("invalid token")
                 raise self.credential_exception
             user = await self.check_user(payload.user_id)
+            if not user:
+                raise self.credential_exception
+    
             return UserModel.model_validate(user)
         except Exception as e: 
             print(e)

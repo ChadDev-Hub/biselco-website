@@ -1,7 +1,9 @@
 
-import clientApi from "./clientApi";
+import clientApi from "./actions/clientApi";
 import {GoogleValidateType, LogoutResponseType} from "@/types/auth"
 import {User} from "@/types/user"
+import { ApiError } from '../../types/api-error';
+import axios from 'axios';
 
 // LOUTOUT
 export const Logout = async () => {
@@ -23,29 +25,30 @@ export const GoogleLoginRoute = async (secretKey?:string) => {
   if(secretKey){
     params.set("secret",secretKey)
   }
-  const {data, status, statusText} = await clientApi.post("/v1/auth/google/validate",null,{params})
-  switch (status) {
-    case 200:
-      return data as GoogleValidateType
-    case 401:
-      throw new Error(statusText);
-    default:
-      throw new Error(statusText);
+  try {
+    const {data} = await clientApi.post("/v1/auth/google/validate",null,{params})
+    return data as GoogleValidateType
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new ApiError(error.response?.data.detail, error.response?.status || 500)
+    }
+    throw error
   }
-}
-
+  }
+  
 
 export const GetUser = async () => {
-  const {data, status, statusText} = await clientApi.get("/v1/users/me")
-  switch (status) {
-    case 200:
-      return data as User
-    case 401:
-      throw new Error(statusText);
-    default:
-      throw new Error(statusText);
+  try {
+    const {data} = await clientApi.get("/v1/users/me")
+    return data as User
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new ApiError(error.response?.data.detail, error.response?.status || 500)
+    }
+    throw error
   }
-}
+  }
+  
 
   
 

@@ -49,3 +49,9 @@ async def upload_image(file: UploadFile, folder:str):
     # s3_client.upload_fileobj(buffer, AWS_BUCKET_NAME, complaint_key, ExtraArgs={"ContentType": file.content_type})
     return f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{image_key}"
 
+
+async def delete_image(image_key: str):
+    is_deleted = False
+    s3_client.delete_object(Bucket=AWS_BUCKET_NAME, Key=image_key)
+    is_deleted = True
+    return is_deleted

@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_, cast, Text, func, delete, join, true
+from sqlalchemy import select, or_, cast, Text, func, delete, join, true, and_, text
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from ..model.change_meter import ChangeMeter, ChangeMeterImage
 from geoalchemy2.functions import ST_AsGeoJSON
@@ -12,6 +12,7 @@ from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 from pprint import pprint
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 PAGE_SIZE = 12
 
@@ -27,7 +28,8 @@ async def get_change_meter_stats(session: AsyncSession):
     ).cte("daily_total")
     monthly_count = (select(
         func.coalesce(func.count(), 0).label("m_count"))
-        .where(func.extract("month", ChangeMeter.date_accomplished) == func.extract("month", func.current_date()))
+        .where(and_(ChangeMeter.date_accomplished >= func.current_date() - text("INTERVAL '1 month'"),
+                    ChangeMeter.date_accomplished < func.current_date()))
     ).cte("monthly_count")
     
     data = (await session.execute(
@@ -55,9 +57,9 @@ async def get_change_meter_stats(session: AsyncSession):
             new_data.append(daily)
         elif key == "m_count":
             average = {
-                "label": "Monthly",
+                "label": "Last Month",
                 "value": value,
-                "description": date.today().strftime("%B")
+                "description": (date.today() - relativedelta(months=1)).strftime("%B")
             }
             new_data.append(average)
     return new_data

@@ -1,5 +1,5 @@
 "use client"
-import { DeleteComplaint } from '@/app/actions/complaint'
+import { DeleteComplaint } from "@/lib/private-api/actions/complaint";
 import {Trash2} from 'lucide-react'
 import { useRef } from 'react';
 type DeletConfirmationProps = {

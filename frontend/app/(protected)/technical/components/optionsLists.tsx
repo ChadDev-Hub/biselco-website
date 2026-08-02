@@ -9,10 +9,6 @@ type Props = {
     initialData: Promise<TechnicalFormsType[]>
 }
 
-
-
-
-
 const TechniclaFormLists = ({ initialData }: Props) => {
     const formsData = use(initialData)
     const [forms, setForms] = useState<TechnicalFormsType[] | [] >([]);

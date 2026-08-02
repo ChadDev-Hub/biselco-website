@@ -82,3 +82,8 @@ export type ComplaintMessage = {
   date: string;
   time: string;
 }
+
+
+export type ComplaintResponse  = {
+    detail: string 
+}

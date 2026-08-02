@@ -4,7 +4,7 @@ import { AgmaStatsType } from "@/types/agma";
 import { ChartNoAxesCombined, XCircle } from "lucide-react";
 import SimpleBarChart from "@/app/common/charts/Barchart";
 import { TooltipContentProps } from "recharts";
-import StatsCard from "@/app/complaints/dashboard/components/statsCard";
+import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCard";
 import StatsContainer from "@/app/common/Stats";
 import { useWebsocket } from "@/app/context/websocketprovider";
 
