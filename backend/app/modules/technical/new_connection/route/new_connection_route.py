@@ -113,11 +113,8 @@ async def new_connection_stats(session: AsyncSession = Depends(get_session)):
 
 @router.put("/sync", status_code=status.HTTP_200_OK)
 async def new_connection_sync(
-    get_user_services: GetUserServices = Depends(GetUserServices),
     data: NewConnectionSyncRequests = Form(...),
     put_services: PutNewConnectionService = Depends(PutNewConnectionService)
 ):
-    print(data);
     # CHECK USER
-    await get_user_services.get_current_user()
     return await put_services.sync_new_connection(data=data)

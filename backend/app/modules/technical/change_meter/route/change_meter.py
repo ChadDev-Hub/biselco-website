@@ -166,11 +166,7 @@ async def change_meter_stats(data: ChangeMeterReport, session: AsyncSession = De
 
 @router.put("/sync", status_code=status.HTTP_200_OK)
 async def change_meter_sync(
-    get_user_services: GetUserServices = Depends(GetUserServices),
     data: ChangeMeterSyncRequests = Form(...), 
     put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)
                               ):
-    # CHECK USER
-    user = await get_user_services.get_current_user()
-    print(user)
     return await put_services.sync_change_meter(data=data)
