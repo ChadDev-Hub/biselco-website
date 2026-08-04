@@ -63,7 +63,6 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* CENTER SIDE: Search Bar (Hidden on Landing) */}
       {isLandingPage && <LandingPageNavigation />}
 
       {/* RIGHT SIDE: Actions (Hidden on Landing) */}

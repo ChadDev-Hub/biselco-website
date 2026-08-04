@@ -1,18 +1,21 @@
-"use client"
-import { animate,useMotionValueEvent, motion, useMotionValue} from "framer-motion"
+"use client";
+import {
+  animate,
+  useMotionValueEvent,
+  motion,
+  useMotionValue,
+} from "framer-motion";
 import { useState, useEffect } from "react";
 
-
 const LandingStats = () => {
+  // SERVE CONSUMER
+  const servedConsumer = useMotionValue(0);
+  const [count, setCount] = useState(0);
 
-    // SERVE CONSUMER
-    const servedConsumer = useMotionValue(0);
-    const [count, setCount] = useState(0);
-
-    useMotionValueEvent(servedConsumer, "change", (latest) => {
-        setCount(Math.round(latest));
-    });
-    useEffect(() => {
+  useMotionValueEvent(servedConsumer, "change", (latest) => {
+    setCount(Math.round(latest));
+  });
+  useEffect(() => {
     const controls = animate(servedConsumer, 20000, {
       duration: 4,
       ease: "easeInOut",
@@ -20,16 +23,15 @@ const LandingStats = () => {
 
     return () => controls.stop();
   }, [servedConsumer]);
-    
-    
-    // RENEWABLE ENERGY
-    const renewableEnergy = useMotionValue(0);
-    const [,setEnergy] = useState(0);
 
-    useMotionValueEvent(renewableEnergy, "change", (latest) => {
-        setEnergy(Math.round(latest));
-    });
-    useEffect(() => {
+  // RENEWABLE ENERGY
+  const renewableEnergy = useMotionValue(0);
+  const [, setEnergy] = useState(0);
+
+  useMotionValueEvent(renewableEnergy, "change", (latest) => {
+    setEnergy(Math.round(latest));
+  });
+  useEffect(() => {
     const controls = animate(renewableEnergy, 35, {
       duration: 4,
       ease: "easeInOut",
@@ -37,32 +39,35 @@ const LandingStats = () => {
 
     return () => controls.stop();
   }, [renewableEnergy]);
-    return (
-        <div className="w-full  relative px-2 flex justify-center  overflow-x-clip">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-                className="stats stats-vertical lg:stats-horizontal shadow-md max-w-5xl bg-base-100 w-full border border-base-200"
-            >
-                <div className="stat p-8 place-items-center">
-                    <div className="stat-title font-medium">Members Served</div>
-                    <motion.pre className="stat-value text-primary">{count}+</motion.pre>
-                    <div className="stat-desc font-bold">Community-Owned</div>
-                </div>
-                <div className="stat p-8 place-items-center">
-                    <div className="stat-title font-medium">Categorization</div>
-                    <div className="stat-value text-secondary">AAA</div>
-                    <div className="stat-desc text-secondary">Top Reliability Rating</div>
-                </div>
-                <div className="stat p-8 place-items-center">
-                    <div className="stat-title font-medium">Classification</div>
-                    <div className="stat-value text-accent">Large</div>
-                    <div className="stat-desc">Growing Annually</div>
-                </div>
-            </motion.div>
+  return (
+    <div className="w-full  relative px-2 flex justify-center  overflow-x-clip">
+      <motion.div
+        viewport={{
+          once: true,
+        }}
+        initial={{ opacity: 0, scale: 0.85 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="stats stats-vertical lg:stats-horizontal shadow-md max-w-5xl bg-base-100 w-full border border-base-200"
+      >
+        <div className="stat p-8 place-items-center">
+          <div className="stat-title font-medium">Members Served</div>
+          <motion.pre className="stat-value text-primary">{count}+</motion.pre>
+          <div className="stat-desc font-bold">Community-Owned</div>
         </div>
-    )
-}
+        <div className="stat p-8 place-items-center">
+          <div className="stat-title font-medium">Categorization</div>
+          <div className="stat-value text-secondary">AAA</div>
+          <div className="stat-desc text-secondary">Top Reliability Rating</div>
+        </div>
+        <div className="stat p-8 place-items-center">
+          <div className="stat-title font-medium">Classification</div>
+          <div className="stat-value text-accent">Large</div>
+          <div className="stat-desc">Growing Annually</div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
-export default LandingStats
+export default LandingStats;

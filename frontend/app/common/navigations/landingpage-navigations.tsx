@@ -36,7 +36,7 @@ const LandingPageNavigation = () => {
   };
   return (
     <>
-      <div className="hidden md:flex navbar-end items-center gap-5">
+      <div className="hidden relative md:flex navbar-end items-center gap-5">
         {scrollElements.map((item) => (
           <button
             key={item.id}
@@ -49,26 +49,26 @@ const LandingPageNavigation = () => {
         <AboutDropDown />
       </div>
 
-      <div className="dropdown md:hidden  dropdown-bottom navbar-end">
+      <div className="relative md:hidden navbar-end ">
         <button
           onClick={() => setOpen(!open)}
           className="btn btn-circle"
         >
           {open ? (
-            <label className="swap swap-active swap-rotate">
+            <span className="swap swap-active swap-rotate">
               <Menu className="swap-off fill-current" />
               <X className="swap-on fill-current" />
-            </label>
+            </span>
             
           ) : (
-            <label className="swap  swap-rotate">
+            <span className="swap  swap-rotate">
               <Menu className="swap-off fill-current" />
               <X className="swap-on fill-current" />
-            </label>
+            </span>
           )}
         </button>
         {open && <ul
-          className="dropdown-content menu text-xs  bg-base-100 rounded-box z-1  p-2 shadow-sm"
+          className="absolute right-0 top-full mt-2 w-56 menu bg-base-100 rounded-box shadow-lg z-9999"
         >
           {scrollElements.map((item) => (
             <li key={item.id}>
@@ -81,6 +81,7 @@ const LandingPageNavigation = () => {
             </li>
           ))}
           <li>
+            
             <AboutDropDown />
           </li>
         </ul>}

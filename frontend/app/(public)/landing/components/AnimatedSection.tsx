@@ -46,6 +46,7 @@ export default function AnimatedSection({
       transition={{
         duration: 0.25,
       }}
+      
     >
       {children}
     </motion.section>

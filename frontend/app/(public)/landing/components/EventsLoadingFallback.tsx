@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 export default function EventsLoadingFallback() {
   return (
     <motion.div
+      viewport={{ once: true }}
       className="text-center py-8"
       animate={{ opacity: [0.5, 1] }}
       transition={{ repeat: Infinity, duration: 1 }}

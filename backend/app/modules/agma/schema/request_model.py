@@ -35,5 +35,7 @@ class Registeredid(BaseModel):
     
     
 class TicketToPdfRequests(BaseModel):
-    ticket_id: str
+    start_page: int
+    end_page: int
+    selector: str
     current_route: str

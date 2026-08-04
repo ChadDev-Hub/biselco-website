@@ -34,6 +34,7 @@ export default function Sponsor() {
     const items = ["/coron.jpg", "/busuanga.jpg", "/culion.jpg", "/linapacan.jpg", "/erc.png", "/nea.png", "/npc.png", "/vivant.png"];
     return (
         <motion.div
+            viewport={{ once: true }}
             variants={ParentContainer}
             initial="hidden"
             whileInView="visible"

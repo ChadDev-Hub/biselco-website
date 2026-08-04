@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response, Body, Cookie
+from fastapi.responses import StreamingResponse
 from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest, VerificationRequest
 from ...user.schema.response_model import UserModel
@@ -53,8 +54,25 @@ async def download_tickets_pdf(
     access_token: str = Cookie(None),
     refresh_token: str = Cookie(None),
     get_ticket_services: GetTicketServices = Depends(GetTicketServices)):
-    file = await get_ticket_services.ticket_to_pdf(id=data.ticket_id, path=data.current_route, token=access_token, refresh_token=refresh_token)
-    return Response(content=file, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=tickets.pdf"})
+    file = await get_ticket_services.convert_to_doc_bulk(
+        start_page=data.start_page,
+        end_page=data.end_page,
+        path=data.current_route,
+        selector=data.selector,
+        token=access_token,
+        refresh_token=refresh_token
+    )
+    file.seek(0,2)
+    size = file.tell()
+    file.seek(0)
+    return StreamingResponse(
+    file,
+    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    headers={
+        "Content-Disposition": "attachment; filename=tickets.docx",
+        "Content-Length": str(size),
+    },
+)
 
 @router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[AgmaStats])
 async def complaints_stats(

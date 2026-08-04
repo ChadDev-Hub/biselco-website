@@ -2,7 +2,7 @@
 import Link from "next/link";
 function AboutDropDown() {
   return (
-    <div className="dropdown  dropdown-left   md:dropdown-bottom">
+    <div className="dropdown  dropdown-center   md:dropdown-bottom">
       <button
         tabIndex={0}
         

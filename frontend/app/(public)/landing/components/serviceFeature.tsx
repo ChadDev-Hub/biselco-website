@@ -19,8 +19,15 @@ const ServiceFeature = () => {
     title: "Live Monitoring",
     description: "Track service status, outages, and updates in real time through our monitoring system."  }];
   return (
-    <motion.div className="w-full flex flex-col mx-auto gap-2 max-w-3xl px-2 overflow-x-clip">
+    <motion.div
+      viewport={{
+        once:true
+      }}
+     className="w-full flex flex-col mx-auto gap-2 max-w-3xl px-2 overflow-x-clip">
       <motion.div
+      viewport={{
+        once:true
+      }}
         variants={staggerContainer}
         initial="hidden"
         whileInView="visible"
@@ -28,6 +35,9 @@ const ServiceFeature = () => {
       >
         {services.map((service, index) => (
           <motion.div
+          viewport={{
+        once:true
+      }}
             initial="hidden"
             whileInView="visible"
             key={index}

@@ -30,6 +30,7 @@ const textTyping = {
       staggerChildren: 0.05,
     },
   },
+
 };
 
 const letterVariant = {
@@ -63,6 +64,9 @@ export default function Hero({ children, promise }: Props) {
       <motion.div
         initial="hidden"
         whileInView="visible"
+        viewport={{
+          once: true
+        }}
         variants={fadeinSide}
         className="flex justify-center w-full"
       >
@@ -75,6 +79,9 @@ export default function Hero({ children, promise }: Props) {
         <motion.div   
           initial="hidden"
           whileInView="visible"
+          viewport={{
+            once: true
+          }}
           variants={fadeLeftSide}
           className="flex flex-col shrink-0 w-full items-center gap-2 lg:items-start  order-2 lg:order-1"
         >
@@ -85,6 +92,9 @@ export default function Hero({ children, promise }: Props) {
 
             {/* TITLE */}
             <motion.h1
+              viewport={{
+                once: true
+              }}
               variants={textTyping}
               className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word"
             >
@@ -98,6 +108,9 @@ export default function Hero({ children, promise }: Props) {
 
             {/* DESCRIPTION */}
             <motion.p
+            viewport={{
+              once: true
+            }}
             variants={textTyping} 
             className="text-black text-base break-normal text-center sm:text-center my-4 md:text-center lg:text-start wrap-break-word whitespace-normal">
               {description.split("").map((char, index)=> (
@@ -118,7 +131,7 @@ export default function Hero({ children, promise }: Props) {
         </motion.div>
         <motion.div className="order-1 flex flex-col justify-center items-center  gap-4 px-2 md:px-15 lg:px-20  lg:order-2">
           <motion.div
-
+            viewport={{ once: true }}
             className="rounded-full  lg:hover-3d "
             initial="hidden"
             whileInView="visible"

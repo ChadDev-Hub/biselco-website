@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="grid  grid-cols-1 md:grid-cols-4 gap-8 w-full">
         <div>
           <div className="text-2xl font-black mb-4">
-            BUSUANGA <span className="text-primary">ISLAND</span>
+            <span className="text-yellow-400">BUSUANGA</span> <span className="text-primary">ISLAND</span>
           </div>
           <p>
             Electric Cooperative Inc.
@@ -73,7 +73,7 @@ const Footer = () => {
 
           <div>
             <h6 className="footer-title font-bold">Developer</h6>
-            <label>Richard F. Rojo Jr.</label>
+            <label>Richard Rojo Jr.</label>
           </div>
       </div>
 
