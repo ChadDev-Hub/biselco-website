@@ -10,6 +10,7 @@ import FilterSkeleton from "./FilterSkeleton";
 import PageNationLoading from "../../technical/change-meter/components/pageNationSkeleton";
 import SearchSkeleton from "../../../common/SearchSkeleton";
 import SearchComponent from "./Search";
+import DownloadAction from "./Download";
 type Props = {
   search: string | string[] | undefined;
   page: string | string[] | undefined;
@@ -26,6 +27,10 @@ const OverViewSection = ({ page, year, barangay, search, municipality, is_verifi
   return (
     <section>
       <NavbarTools>
+        {/* Download */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <DownloadAction promise={agmaTicketData} />
+        </Suspense>
         {/* Filter */}
         <Suspense fallback={<FilterSkeleton />}>
           <Filter data={filters} />
@@ -34,6 +39,9 @@ const OverViewSection = ({ page, year, barangay, search, municipality, is_verifi
         <Suspense fallback={<SearchSkeleton />}>
           <SearchComponent promise={agmaTicketData} />
         </Suspense>
+
+        
+
       </NavbarTools>
       <Suspense key={`${year}-${page}`} fallback={<MembersTicketSkeleton />}>
         <MembersTable data={agmaTicketData} />

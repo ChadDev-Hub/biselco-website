@@ -93,10 +93,10 @@ const MembersTable = ({ data }: Props) => {
 
   return (
     <section>
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
+      <div id="tickets" className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
         {Array.isArray(consumerTickets) &&
           consumerTickets.map((ticket, index) => (
-            <AgmaTicketCard key={index} data={ticket} />
+            <AgmaTicketCard  key={index} data={ticket} />
           ))}
       </div>
     </section>

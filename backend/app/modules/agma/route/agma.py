@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response, Body
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Query, Response, Body, Cookie
 from ..services.post import PostAgmaRegistrationService
 from ..schema.request_model import AgmaRegistrationRequest, AgmaValidationRequest, VerificationRequest
 from ...user.schema.response_model import UserModel
 from ....dependencies.bucket3 import upload_image
 from ..services.get import GetAgmaRegistrationService
 from ....core.security import get_current_user
-from ..services.screenshot import generate_ticket
+from ..services.screenshot import GetTicketServices
 from ...events.schema.requests import AgmaEventSetup
 from ..schema.response import AgmaSetup, AgmaCountRegistered, RegisteredOvertime, AgmaStats
 from typing import Optional, List
-from ..schema.request_model import AccountNumberRequest, Registeredid
+from ..schema.request_model import AccountNumberRequest, Registeredid, TicketToPdfRequests
 from ..schema.response import AgmaSpin, WinnerInfo
 from ..services.patch import AgmaRegistrationPatchService
 from ..schema.response import RaffleStats, RegisteredConsumer, RegisteredConsumerAll
@@ -40,10 +40,21 @@ async def get_registered(
 async def downlaod_ticket(
     id: str = Query(...),
     path: str = Query(...),
+    get_ticket_services: GetTicketServices = Depends(GetTicketServices),
 ):
-    screenshot = await generate_ticket(id, path)
+    screenshot = await get_ticket_services.generate_ticket(id, path)
     return Response(content=screenshot, media_type="image/png")
 
+
+
+@router.post("/tickets/to_pdf", status_code=status.HTTP_200_OK)
+async def download_tickets_pdf(
+    data: TicketToPdfRequests = Body(...),
+    access_token: str = Cookie(None),
+    refresh_token: str = Cookie(None),
+    get_ticket_services: GetTicketServices = Depends(GetTicketServices)):
+    file = await get_ticket_services.ticket_to_pdf(id=data.ticket_id, path=data.current_route, token=access_token, refresh_token=refresh_token)
+    return Response(content=file, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=tickets.pdf"})
 
 @router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[AgmaStats])
 async def complaints_stats(

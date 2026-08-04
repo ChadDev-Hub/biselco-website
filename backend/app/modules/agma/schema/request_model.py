@@ -32,3 +32,8 @@ class AccountNumberRequest(BaseModel):
     
 class Registeredid(BaseModel):
     id: str
+    
+    
+class TicketToPdfRequests(BaseModel):
+    ticket_id: str
+    current_route: str
