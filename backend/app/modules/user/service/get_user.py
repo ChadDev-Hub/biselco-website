@@ -39,7 +39,7 @@ class GetUserServices:
         
         if not self.access_token:
             raise self.credential_exception
-        
+        print(self.access_token, "access_token")
         try:
             payload = await verify_token(self.access_token)
             print("payload: ", payload)

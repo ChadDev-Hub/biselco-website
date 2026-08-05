@@ -12,4 +12,5 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/me", status_code=200, response_model=dict)
 async def get_me(get_service:GetUserServices = Depends(GetUserServices)):
     user = await get_service.get_current_user()
+    
     return user.model_dump(mode="json")

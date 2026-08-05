@@ -26,7 +26,6 @@ export async function proxy(request: NextRequest) {
       if (setCookie) {
         res.headers.append("set-cookie", setCookie);
       }
-      console.log("Incoming access:", request.cookies.get("access_token")?.value);
       return res;
     }
   }

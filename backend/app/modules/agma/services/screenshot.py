@@ -13,14 +13,15 @@ from docx import Document
 from docx.shared import Inches
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-
+from datetime import datetime, timedelta, timezone
 load_dotenv()
 
 
 class GetTicketServices:
     def __init__(self):
         self.FRONTEND = os.getenv("PLAYWRIGHTFRONTEND")
-
+        self.ACCESS_TOKEN_EXPIRE = os.getenv("ACCESS_TOKEN_EXPIRE")
+        self.REFRESH_TOKEN_EXPIRE = os.getenv("REFRESH_TOKEN_EXPIRE")
     def generate(self, id: str, path: str):
         with sync_playwright() as p:
             browser = p.chromium.launch()
@@ -68,22 +69,26 @@ class GetTicketServices:
                         "name": "access_token",
                         "value": str(token),
                         "url": self.FRONTEND,
+                        "httpOnly": True,
+                        "expires":int((datetime.now(timezone.utc) + timedelta(minutes=float(self.ACCESS_TOKEN_EXPIRE))).timestamp())
                     },
                         {
                         "name": "refresh_token",
                         "value": str(refresh_token),
                         "url": self.FRONTEND,
-
+                        "httpOnly": True,
+                        "expires": int((datetime.now(timezone.utc) + timedelta(days=float(self.REFRESH_TOKEN_EXPIRE))).timestamp())
                     }]
                 )
-
+                
                 page = await context.new_page()
-                await page.add_init_script(
-                    """localStorage.setItem("LoginStatus", "true");"""
-                )
-
+                
+                # await page.add_init_script(
+                #     """localStorage.setItem("LoginStatus", "true");"""
+                # )
+                
                 await page.goto(path, wait_until="networkidle")
-                await page.wait_for_timeout(2000)
+                await page.wait_for_timeout(3000)
                 await page.wait_for_selector(id)
                 tickets = page.locator(id)
 
@@ -96,9 +101,13 @@ class GetTicketServices:
                 await browser.close()
                 return images   
         except PlaywrightTimeoutError as e:
+            print(e, "timeout")
             raise HTTPException(
                 status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=str(e))
-        
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     
     async def convert_to_doc_bulk(self, start_page:int, end_page:int, path:str, selector:str, token: str, refresh_token: str):
