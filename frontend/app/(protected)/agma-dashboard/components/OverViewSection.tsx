@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
-import { GetAgmaTicketAll , GetAgmaFilters} from "../../../../lib/agma";
+import {  GetAgmaFilters} from "../../../../lib/agma";
+import { GetAgmaTicketAll } from "@/lib/private-api/server-side/agma";
 import MembersTable from "./MembersTicket";
 import Pagination from "../../technical/change-meter/components/pagination";
 import MembersTicketSkeleton from "./MembersTicketSkeleton";
@@ -22,8 +23,7 @@ type Props = {
 
 const OverViewSection = ({ page, year, barangay, search, municipality, is_verified }: Props) => {
   const filters = GetAgmaFilters(municipality);
-  const agmaTicketData = GetAgmaTicketAll(page, year, barangay, search, municipality, is_verified);
-  
+  const agmaTicketData = GetAgmaTicketAll({ search, page, year, barangay, municipality, is_verified });
   return (
     <section>
       <NavbarTools>
@@ -39,8 +39,6 @@ const OverViewSection = ({ page, year, barangay, search, municipality, is_verifi
         <Suspense fallback={<SearchSkeleton />}>
           <SearchComponent promise={agmaTicketData} />
         </Suspense>
-
-        
 
       </NavbarTools>
       <Suspense key={`${year}-${page}`} fallback={<MembersTicketSkeleton />}>

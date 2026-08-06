@@ -14,6 +14,7 @@ from ..schema.request_model import AccountNumberRequest, Registeredid, TicketToP
 from ..schema.response import AgmaSpin, WinnerInfo
 from ..services.patch import AgmaRegistrationPatchService
 from ..schema.response import RaffleStats, RegisteredConsumer, RegisteredConsumerAll
+from ...user.service.get_user import GetUserServices
 router = APIRouter(prefix="/agma", tags=["agma"])
 
 
@@ -54,7 +55,7 @@ async def download_tickets_pdf(
     access_token: str = Cookie(None),
     refresh_token: str = Cookie(None),
     get_ticket_services: GetTicketServices = Depends(GetTicketServices)):
-    file = await get_ticket_services.convert_to_doc_bulk(
+    file = await get_ticket_services.screenshot_tickets(
         start_page=data.start_page,
         end_page=data.end_page,
         path=data.current_route,
@@ -90,14 +91,14 @@ async def complaints_stats(
 async def get_all(
         get_agma_registration_service: GetAgmaRegistrationService = Depends(
             GetAgmaRegistrationService),
-        user: UserModel = Depends(get_current_user),
+        get_user_service:GetUserServices = Depends(GetUserServices),
         page: Optional[int] = Query(None),
         year: Optional[int] = Query(None),
         barangay: Optional[str] = Query(None),
         municipality: Optional[str] = Query(None),
         is_verified: Optional[bool] = Query(None),
         search: Optional[str] = Query(None)):
-
+    user = await get_user_service.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")

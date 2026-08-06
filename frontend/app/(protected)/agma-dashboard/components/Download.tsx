@@ -5,9 +5,10 @@ import { DownloadAgmaTicketToPdf } from "../../../../lib/private-api/actions/agm
 import { usePathname } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { AllTicketInfoType } from "@/types/agma"
 
 type PromiseType = {
-  status: number;
+  data: AllTicketInfoType
 };
 
 type FormType = {
@@ -20,7 +21,8 @@ type Props = {
 };
 
 const DownloadAction = ({ promise }: Props) => {
-  use(promise);
+  const data = use(promise);
+  
   // MODAL COMPONENTS
   const modal = useRef<HTMLDialogElement>(null);
 
@@ -31,6 +33,7 @@ const DownloadAction = ({ promise }: Props) => {
   const current_path = usePathname();
   const params = useSearchParams();
   const tab = params.get("tab");
+  const municipality = params.get("municipality");
   const [progress, setProgress] = useState<number>(0);
   const [success, setSuccess] = useState<boolean>(false);
   const [showProgress, setShowProgress] = useState<boolean>(false);
@@ -43,23 +46,41 @@ const DownloadAction = ({ promise }: Props) => {
 
   // HANDLE DOWNLOAD
   const onSubmit: SubmitHandler<FormType> = async (data) => {
-    setSuccess(false);
-    setShowProgress(true);
-    const res = await DownloadAgmaTicketToPdf(
-      "#agma-ticket",
-      `${current_path}?tab=${tab}`,
-      data.start_page,
-      data.end_page,
-      setProgress,
-    );
-    const url = URL.createObjectURL(res.data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "agma-ticket.docx";
-    a.click();
-    a.remove();
-    setShowProgress(false);
-    setSuccess(true);
+    try {
+
+      // SET INITIAL STATE
+      setSuccess(false);
+      setShowProgress(true);
+      // CREATING NEW PARAMS AND APPENDING THE EXISTING PARAMETERS IF EXISTS
+      const new_params = new URLSearchParams();
+      if (tab) new_params.append("tab", tab);
+      if (municipality) new_params.append("municipality", municipality);
+
+      // SEND DOWNLOAD REQUESTS
+      const res = await DownloadAgmaTicketToPdf(
+        "#agma-ticket",
+        `${current_path}?${new_params.toString()}`,
+        data.start_page,
+        data.end_page,
+        setProgress,
+      );
+
+      // HANDLING RESPONSE
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "agma-ticket.docx";
+      a.click();
+      a.remove();
+      setShowProgress(false);
+      setSuccess(true);
+    } catch (error) {
+      // HANDLE ERRORS
+      console.log(error);
+      setShowProgress(false);
+      setSuccess(false);
+      setProgress(0);
+    }
   };
 
   // CLEANUP
@@ -74,7 +95,11 @@ const DownloadAction = ({ promise }: Props) => {
   }, [success]);
   return (
     <>
-      <button onClick={handleOpen} className="btn btn-sm btn-circle ">
+      <button
+        onClick={handleOpen}
+        data-tip="Download Tickets"
+        className="btn btn-sm btn-circle tooltip tooltip-bottom"
+      >
         <FileDown className="size-5 text-black" />
       </button>
       <dialog ref={modal} className="modal">
@@ -82,7 +107,13 @@ const DownloadAction = ({ promise }: Props) => {
           <h3 className="font-bold text-lg">Download Agma Tickets</h3>
           {showProgress && (
             <div className="w-full">
-              <p className="py-4 skeleton skeleton-text">Downloading... {progress}%</p>
+              {progress > 0 ? (
+                <p className="py-4">Downloading... {progress}%</p>
+              ) : (
+                <p className="py-4 skeleton skeleton-text">
+                  Preparing to Download
+                </p>
+              )}
               <progress
                 value={progress}
                 max="100"
@@ -114,7 +145,7 @@ const DownloadAction = ({ promise }: Props) => {
                 className="input input-bordered"
               />
               {errors.start_page && (
-                <span className="text-red-500">
+                <span className="text-red-500 text-xs italic">
                   {errors.start_page.message}
                 </span>
               )}
@@ -126,21 +157,27 @@ const DownloadAction = ({ promise }: Props) => {
               <input
                 {...register("end_page", {
                   required: { value: true, message: "End Page is required" },
+                  max: { value: data?.data.total_page, message: `End Page must not exceed${data?.data.total_page}` },
+                  validate: (value) => {
+                    if (value < 1) {
+                      return "End Page must be greater than 0";
+                    }
+                  },
                 })}
                 type="number"
                 placeholder="End Page"
                 className="input input-bordered"
               />
               {errors.end_page && (
-                <span className="text-red-500">{errors.end_page.message}</span>
+                <span className="text-red-500 text-xs italic">{errors.end_page.message}</span>
               )}
             </div>
           </div>
           <div className="modal-action">
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" disabled={showProgress} className="btn btn-primary">
               Download
             </button>
-            <button  type="button" onClick={handleClose} className="btn">
+            <button type="button" disabled={showProgress} onClick={handleClose} className="btn">
               Close
             </button>
           </div>

@@ -23,7 +23,10 @@ export type TicketInfoType = {
     monitoring?: monitoringType[]
 }
 
-
+export type AllTicketInfoType = {
+    data: TicketInfoType[];
+    total_page: number
+}
 export type UserMonitoringType = {
     id: string;
     first_name: string;

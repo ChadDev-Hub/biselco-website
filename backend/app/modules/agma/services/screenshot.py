@@ -42,7 +42,7 @@ class GetTicketServices:
     async def generate_ticket(self, id: str, path: str):
         return await asyncio.to_thread(self.generate, id, path)
 
-    async def screenshot_tickets(self, id: str, path: str, token: str, refresh_token: str):
+    async def screenshot_tickets(self, selector: str, path: str, token: str, refresh_token: str, start_page:int, end_page:int):
         """
         CONVERTS A BULK OF TICKETS INTO 1 WORD DOCUMENTS
         FOR EVERY PAGE IN THE WEBAPP ROUTE
@@ -82,24 +82,24 @@ class GetTicketServices:
                 )
                 
                 page = await context.new_page()
+         
+                bulk_images =[]
                 
-                # await page.add_init_script(
-                #     """localStorage.setItem("LoginStatus", "true");"""
-                # )
-                
-                await page.goto(path, wait_until="networkidle")
-                await page.wait_for_timeout(3000)
-                await page.wait_for_selector(id)
-                tickets = page.locator(id)
+                for i in range(start_page, end_page+1):
+                    path_with_page = f"{path}&page={i}"
+                    print("extracting page: ", i)
+                    await page.goto(path_with_page, wait_until="load")
+                    await page.wait_for_timeout(3000)
+                    await page.wait_for_selector(selector)
+                    tickets = page.locator(selector)
 
-                images = []
-                count = await tickets.count()
+                    count = await tickets.count()
 
-                for ticket in range(count):
-                    screenshot = await tickets.nth(ticket).screenshot(omit_background=True)
-                    images.append(Image.open(BytesIO(screenshot)))
+                    for ticket in range(count):
+                        screenshot = await tickets.nth(ticket).screenshot(omit_background=True)
+                        bulk_images.append(Image.open(BytesIO(screenshot)))
                 await browser.close()
-                return images   
+                return await self.convert_to_doc(bulk_images)   
         except PlaywrightTimeoutError as e:
             print(e, "timeout")
             raise HTTPException(
@@ -108,33 +108,6 @@ class GetTicketServices:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-    
-    async def convert_to_doc_bulk(self, start_page:int, end_page:int, path:str, selector:str, token: str, refresh_token: str):
-        """
-        CONVERTS A BULK OF TICKETS INTO 1 WORD DOCUMENTS
-        FOR EVERY PAGE IN THE WEBAPP ROUTE
-
-        Args:
-            start_page (int): the startpage of the webapp route
-            end_page (int):  the endpage of the webapp route
-            path (str): the current route of the webapp
-            selector (str): the id for the tickets 
-            token (str): access_token sends from the frontend
-            refresh_token (str): refresh_token sends from the frontend
-
-        Returns:
-            BytesIO or Bytes: a stream of bytes documents
-        """
-        bulk_images = []
-        for page in range(start_page, end_page+1):
-            print(page)
-            path_with_page = f"{path}&page={page}"
-            images = await self.screenshot_tickets(selector,path_with_page, token, refresh_token)
-            bulk_images.extend(images)
-        
-        return await self.convert_to_doc(bulk_images)
-    
     
 
     async def convert_to_doc(self, images: list):
