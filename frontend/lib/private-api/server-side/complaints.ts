@@ -1,4 +1,4 @@
-import { UserComplaintsResponseType } from "@/types/complaints";
+import { UserComplaintsResponseType, ComplaintsStatuName } from "@/types/complaints";
 import getServerApi from "./server-api";
 import axios from "axios";
 import { ApiError } from "@/types/api-error";
@@ -29,6 +29,9 @@ export async function UserComplaints() {
   }
 }
 
+
+// GET ALL COMPLAINTS
+
 export async function GetAllComplaints(
   page?: number,
   q?: string | number | boolean,
@@ -46,6 +49,30 @@ export async function GetAllComplaints(
       status: status,
     }
     return response
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      switch (error.response?.status) {
+        case 401:
+          redirect("/");
+        default:
+          throw new ApiError(
+            error.response?.data.detail,
+            error.response?.status || 500,
+          );
+      }
+    }
+    throw error;
+  }
+}
+
+
+
+// GET COMPLAINT STATUS NAME
+export async function GetComplaintStatusName() {
+  try {
+    const serverApi = await getServerApi();
+    const {data} = await serverApi.get("/v1/complaints/status/name");
+    return data as ComplaintsStatuName[]
   } catch (error) {
     if (axios.isAxiosError(error)) {
       switch (error.response?.status) {

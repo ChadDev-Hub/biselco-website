@@ -52,15 +52,16 @@ async def downlaod_ticket(
 @router.post("/tickets/to_pdf", status_code=status.HTTP_200_OK)
 async def download_tickets_pdf(
     data: TicketToPdfRequests = Body(...),
-    access_token: str = Cookie(None),
     refresh_token: str = Cookie(None),
-    get_ticket_services: GetTicketServices = Depends(GetTicketServices)):
+    get_ticket_services: GetTicketServices = Depends(GetTicketServices),
+    get_user_service:GetUserServices = Depends(GetUserServices)):
+    await get_user_service.get_current_user()
+    
     file = await get_ticket_services.screenshot_tickets(
         start_page=data.start_page,
         end_page=data.end_page,
         path=data.current_route,
         selector=data.selector,
-        token=access_token,
         refresh_token=refresh_token
     )
     file.seek(0,2)
@@ -79,8 +80,9 @@ async def download_tickets_pdf(
 async def complaints_stats(
     get_agma_registration_service: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user)
+    get_user_services: GetUserServices = Depends(GetUserServices),
 ):
+    user = await get_user_services.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
@@ -122,8 +124,9 @@ async def verify_reg(
 async def get_agma_filter(
         get_agma_registration_service: GetAgmaRegistrationService = Depends(
             GetAgmaRegistrationService),
-        user: UserModel = Depends(get_current_user),
+        get_user_service:GetUserServices = Depends(GetUserServices),
         municipality: Optional[str] = Query(None)):
+    user = await get_user_service.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
@@ -146,8 +149,9 @@ async def setup(
 @router.get("/setup", status_code=status.HTTP_200_OK, response_model=AgmaSetup)
 async def get_setup(
     get_services=Depends(GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user)
+    get_user_service:GetUserServices = Depends(GetUserServices),
 ):
+    user = await get_user_service.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
@@ -159,9 +163,10 @@ async def get_setup(
 async def get_graph(
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user),
+    get_user_service:GetUserServices = Depends(GetUserServices),
     municipality: Optional[str] = Query(None)
 ):
+    user = await get_user_service.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")

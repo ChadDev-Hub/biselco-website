@@ -5,10 +5,8 @@ from fastapi import (
     HTTPException,
     status,
     Response,
-    Request,
-    Body,
     Query,
-    Cookie
+  
 )
 from fastapi.responses import RedirectResponse
 from fastapi.exceptions import ResponseValidationError
@@ -127,7 +125,6 @@ async def refresh_token(
     session: AsyncSession = Depends(get_session)
 ):
     refresh_token = token.refresh_token
-    print(refresh_token)
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized Transaction"

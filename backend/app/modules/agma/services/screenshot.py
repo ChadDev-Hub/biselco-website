@@ -9,11 +9,13 @@ import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
+from ....core.security import verify_token, create_access_token
 from docx import Document
 from docx.shared import Inches
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from datetime import datetime, timedelta, timezone
+from ...user.schema.response_model import Token
 load_dotenv()
 
 
@@ -22,6 +24,9 @@ class GetTicketServices:
         self.FRONTEND = os.getenv("PLAYWRIGHTFRONTEND")
         self.ACCESS_TOKEN_EXPIRE = os.getenv("ACCESS_TOKEN_EXPIRE")
         self.REFRESH_TOKEN_EXPIRE = os.getenv("REFRESH_TOKEN_EXPIRE")
+        self.PLAYWRIGHT_ACCESS_TOKEN_EXPIRE = os.getenv(
+            "PLAYWRIGHT_ACCESS_TOKEN_EXPIRE")
+
     def generate(self, id: str, path: str):
         with sync_playwright() as p:
             browser = p.chromium.launch()
@@ -42,64 +47,77 @@ class GetTicketServices:
     async def generate_ticket(self, id: str, path: str):
         return await asyncio.to_thread(self.generate, id, path)
 
-    async def screenshot_tickets(self, selector: str, path: str, token: str, refresh_token: str, start_page:int, end_page:int):
+    async def screenshot_tickets(self, selector: str, path: str, refresh_token: str, start_page: int, end_page: int):
         """
         CONVERTS A BULK OF TICKETS INTO 1 WORD DOCUMENTS
         FOR EVERY PAGE IN THE WEBAPP ROUTE
 
         Args:
-            id (str): the selector for the tickets 
+            id (str): the selector for the tickets
             path (str): the current route of the webapp
             token (str): access_token sends from the frontend
             refresh_token (str): refresh_token sends from the frontend
 
         Returns:
             Image (list): a lists of screenshots images"""
-        
-        try: 
+
+        try:
             async with async_playwright() as p:
                 browser = await p.chromium.launch()
                 context = await browser.new_context(
                     device_scale_factor=1,
                     base_url=self.FRONTEND,
                 )
+                page = await context.new_page()
+                payload = await verify_token(refresh_token)
+
+                # CREATE A LONG LIVE ACCESS TOKEN
+                access_token = await create_access_token(
+                    data=Token(
+                        sub="access_token",
+                        email=payload.email,
+                        user_id=str(payload.user_id),
+                        role=[r for r in payload.role]
+                    ),
+                    expires=self.PLAYWRIGHT_ACCESS_TOKEN_EXPIRE
+                )
 
                 await context.add_cookies(
                     [{
                         "name": "access_token",
-                        "value": str(token),
+                        "value": access_token,
                         "url": self.FRONTEND,
-                        "httpOnly": True,
-                        "expires":int((datetime.now(timezone.utc) + timedelta(minutes=float(self.ACCESS_TOKEN_EXPIRE))).timestamp())
+                        "httpOnly": True
                     },
                         {
                         "name": "refresh_token",
                         "value": str(refresh_token),
                         "url": self.FRONTEND,
-                        "httpOnly": True,
-                        "expires": int((datetime.now(timezone.utc) + timedelta(days=float(self.REFRESH_TOKEN_EXPIRE))).timestamp())
+                        "httpOnly": True
                     }]
                 )
-                
-                page = await context.new_page()
-         
-                bulk_images =[]
-                
-                for i in range(start_page, end_page+1):
+
+                bulk_images = []
+
+                for i in range(start_page, end_page + 1):
+                    print("extracting page:", i)
                     path_with_page = f"{path}&page={i}"
-                    print("extracting page: ", i)
-                    await page.goto(path_with_page, wait_until="load")
-                    await page.wait_for_timeout(3000)
-                    await page.wait_for_selector(selector)
+                    await page.goto(
+                        path_with_page,
+                        wait_until="load"
+                    )
+
+                    await page.wait_for_selector(selector, timeout=30000)
                     tickets = page.locator(selector)
 
                     count = await tickets.count()
 
                     for ticket in range(count):
                         screenshot = await tickets.nth(ticket).screenshot(omit_background=True)
-                        bulk_images.append(Image.open(BytesIO(screenshot)))
+                        bulk_images.append(
+                            Image.open(BytesIO(screenshot)))
                 await browser.close()
-                return await self.convert_to_doc(bulk_images)   
+                return await self.convert_to_doc(bulk_images)
         except PlaywrightTimeoutError as e:
             print(e, "timeout")
             raise HTTPException(
@@ -108,7 +126,6 @@ class GetTicketServices:
             print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    
 
     async def convert_to_doc(self, images: list):
         """_summary_
@@ -128,31 +145,28 @@ class GetTicketServices:
         section.bottom_margin = Inches(0.5)
         section.left_margin = Inches(0.5)
         section.right_margin = Inches(0.5)
-        
-        
+
         for i in range(0, len(images), 4):
             page_images = images[i:i+4]
-            
+
             table = document.add_table(rows=2, cols=2)
             table.alignment = WD_TABLE_ALIGNMENT.CENTER
-            
-            for index, image in  enumerate(page_images):
+
+            for index, image in enumerate(page_images):
                 row = index // 2
                 col = index % 2
-                
-                
+
                 ceil = table.cell(row, col)
                 para = ceil.paragraphs[0]
                 para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                
+
                 buffer = BytesIO()
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
-                            
-                
+
                 run = para.add_run()
                 run.add_picture(buffer, width=Inches(3.5))
-                
+
             if i + 4 < len(images):
                 document.add_page_break()
         document.core_properties.title = "Agma Tickets"

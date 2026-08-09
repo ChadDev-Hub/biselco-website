@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-
-import {  GetAgmaFilters} from "../../../../lib/agma";
-import { GetAgmaTicketAll } from "@/lib/private-api/server-side/agma";
+import { GetAgmaTicketAll, GetAgmaFilters } from "@/lib/private-api/server-side/agma";
 import MembersTable from "./MembersTicket";
 import Pagination from "../../technical/change-meter/components/pagination";
 import MembersTicketSkeleton from "./MembersTicketSkeleton";

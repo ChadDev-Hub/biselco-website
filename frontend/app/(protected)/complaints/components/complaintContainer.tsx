@@ -10,7 +10,7 @@ import DeletConfirmation from "./deleteComplaintsConfirmation";
 import ConcernCard from "./modernConcernCard";
 import ComplaintsTimeLine from "./complaintsTimeLine";
 import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
-import { Complaints, UserComplaintsResponseType, ComplaintMessage} from "@/types/complaints";
+import { Complaints, UserComplaintsResponseType, ComplaintMessage, ComplaintsStatuName} from "@/types/complaints";
 
 
 type PromiseType = {
@@ -18,10 +18,7 @@ type PromiseType = {
   status: number;
 };
 
-type ComplaintStatusType = {
-  status?: number;
-  data: [];
-};
+type ComplaintStatusType = ComplaintsStatuName[];
 
 type Props = {
   complaintsData: Promise<PromiseType>;
@@ -47,7 +44,7 @@ const ComplaintsContainer = ({
   const complaintsInitialData = use(complaintsData);
   const complaintsStatusNameInitialData = use(complaintsStatusName);
   const [complaints, setComplaints] = useState<Complaints[] | []>([]);
-  const [statusName, setStatusName] = useState([]);
+  const [statusName, setStatusName] = useState<ComplaintStatusType | []>([]);
   const { user } = useAuth();
   const [isMessagingModalOpen, setIsMessagingModalOpen] = useState(false);
   const [complaintsMessage, setComplaintsMessage] = useState<
@@ -73,7 +70,7 @@ const ComplaintsContainer = ({
   useEffect(() => {
     const getInitialData = async () => {
       try {
-        setStatusName(complaintsStatusNameInitialData.data);
+        setStatusName(complaintsStatusNameInitialData);
       } catch {
         router.replace("/");
       }

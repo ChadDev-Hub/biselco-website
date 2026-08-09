@@ -2,7 +2,6 @@ import { Suspense, use } from "react";
 import Stats from "./components/status";
 import {
   GetComplaintStats,
-  ComplaintStatusName,
 } from "@/lib/serverFetch";
 import ComplaintsContainer from "./components/complaintsDashboardContainer";
 import ComplaintDashBoardHeader from "./components/header";
@@ -13,6 +12,7 @@ import PageNationLoading from '../../technical/change-meter/components/pageNatio
 import SearchComponent from "../../agma-dashboard/components/Search"
 import SearchSkeleton from '../../../common/SearchSkeleton';
 import {GetAllComplaints} from "@/lib/private-api/server-side/complaints";
+import {GetComplaintStatusName} from "@/lib/private-api/server-side/complaints";
 const DashBoardPage = ({
   searchParams,
 }: {
@@ -21,7 +21,7 @@ const DashBoardPage = ({
   const params = use(searchParams);
   const complaintsData = GetAllComplaints(params.page, params.search);
   const statsData = GetComplaintStats();
-  const statusName = ComplaintStatusName();
+  const statusName = GetComplaintStatusName();
   return (
     <div className=" min-h-screen w-full  ">
       {/* HEADER */}
@@ -76,8 +76,6 @@ const DashBoardPage = ({
           <Suspense fallback={<PageNationLoading />}>
             <Pagination data={complaintsData}/>
           </Suspense>
-          
-
         </section>
       </main>
     </div>

@@ -2,7 +2,7 @@ import React, { Suspense} from 'react'
 import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
 import CreateComplaints from './components/CreateComplaintsModal'
 import FabIcon from '@/app/common/Fab'
-import {  ComplaintStatusName } from '@/lib/serverFetch'
+import  { GetComplaintStatusName} from "@/lib/private-api/server-side/complaints"
 import {UserComplaints} from "@/lib/private-api/server-side/complaints"
 import ComplaintsContainer from './components/complaintContainer'
 import ComplaintHeader from './components/header'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 const ComplaintsPage = () => {
   const data = UserComplaints()
-  const statusName = ComplaintStatusName()
+  const statusName = GetComplaintStatusName()
   return (
     <div className="min-h-screen w-full ">
       {/* Header */}

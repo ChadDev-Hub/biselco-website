@@ -8,6 +8,7 @@ from ...user.schema.response_model import Token
 from ....core.security import create_access_token,  verify_token
 from dotenv import load_dotenv
 from datetime import datetime, timedelta ,timezone
+from ..schema.response import AccessToken
 import os
 
 
@@ -29,7 +30,9 @@ class GetServices(GetUserServices):
         self.session = session
         self.access_token = access_token
         self.refresh_token = refresh_token
-        print(self.refresh_access_token, "refreshtoken")
+    
+        
+    
     async def refresh_access_token(self):
         unauthorization_transaction = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -47,7 +50,7 @@ class GetServices(GetUserServices):
         
         
         
-        new_access_token = await create_access_token(
+        token = await create_access_token(
             Token(
                 sub="access_token",
                 email=user.email,
@@ -55,15 +58,22 @@ class GetServices(GetUserServices):
                 role=[r.name for r in user.roles]
             )
         )
+        
+        new_access_token = AccessToken(
+            key="access_token",
+            value=token,
+            expires=datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE)),
+            http_only=True,
+            secure=True
+        )
+        
         # RESPONSE THAT INCLUDES ACCESS TOKEN
-        response = JSONResponse({
-                    "detail": "Refresh Completed"
-                })
+        response = JSONResponse(new_access_token.model_dump(mode="json"))
         response.set_cookie(
             key="access_token",
-            value=new_access_token,
+            value=token,
             expires=datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE)),
             httponly=True,
             secure=True
-        ) 
+        )
         return  response

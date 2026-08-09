@@ -81,7 +81,7 @@ class AgmaRegistrationPatchService():
             
             admins = await self.get_user.get_users_by_roles(roles="admin")
             updated_registration = await self.get_services.get_registered(id=id)
-            # print(updated_registration)
+        
             data = {
                 "id": str(updated_registration['id']),
                 "is_verified": updated_registration['is_verified'],

@@ -1,5 +1,4 @@
 import AgmaDashboardContainer from "./components/AgmaDashboardContainer";
-import { GetAgmaStats } from "@/lib/serverFetch";
 import StatsGrid from "./components/StatsGrid";
 import Headers from "../technical/new-connection/components/header";
 import { Suspense } from "react";
@@ -7,21 +6,16 @@ import StatsSkeleton from "@/app/common/statsSkeleton";
 import StatsContainer from "@/app/common/Stats";
 import OverViewSection from "./components/OverViewSection";
 import SetupSection from "./components/SetupSection";
-import { GetAgmaSetup, GetAgmaSchedules } from "../../../lib/serverFetch";
 import Schedules from "./components/Schedules";
 import SetupSkeleton from "./components/SetupSkeleton";
 import StatisticsCharts from "./components/StatisticsCharts";
-import {
-  GetAgmaCountRegistered,
-  GetAgmaRegisterByMunicipality,
-} from "../../../lib/agma";
 import CountRegistered from "./components/CountRegistered";
 import ChartSkeleton from "../../common/charts/ChartSkeleton";
 import SpinNavigation from "../agma-spin-wheel/components/spin-navigation";
 import { redirect } from "next/navigation";
 import PulltoRefresh from "../../common/PulltoRefresh";
 import RadarChartSimple from "@/app/common/charts/Radar";
-
+import {GetAgmaCountRegistered, GetAgmaRegisterByMunicipality, GetAgmaStats, GetAgmaSetup, GetAgmaSchedules } from "@/lib/private-api/server-side/agma"
 
 const AgmaDashboard = async ({
   searchParams,

@@ -18,10 +18,10 @@ const Drawer = ({ children }: Props) => {
     "/agma-registration",
     "/agma-registration/registered",
     "/about",
-    "/distribution-map"
+    "/distribution-map",
   ];
   const isActive =
-    currentRoute === "/"
+    currentRoute === "/home"
       ? "home"
       : currentRoute === "/complaints"
         ? "complaints"
@@ -30,6 +30,15 @@ const Drawer = ({ children }: Props) => {
           : currentRoute === "/about"
             ? "about"
             : "";
+  const closeDrawer = () => {
+    const drawer = document.getElementById(
+      "my-drawer-4",
+    ) as HTMLInputElement | null;
+
+    if (drawer) {
+      drawer.checked = false;
+    }
+  };
 
   return (
     <div className="drawer min-h-screen  lg:drawer-open">
@@ -38,7 +47,7 @@ const Drawer = ({ children }: Props) => {
         {/* Navbar */}
         <NavBar />
         {/* Page content here */}
-        <div >{children}</div>
+        <div>{children}</div>
       </div>
       <div
         className={`drawer-side z-60 backdrop-blur-xs is-drawer-close:overflow-visible ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"}`}
@@ -60,10 +69,12 @@ const Drawer = ({ children }: Props) => {
             {/* List item */}
             <li className="hidden md:block lg:block">
               {/* HOME ROUTE BUTTON */}
-              <HomeRouteButton isActive={isActive === "home"} />
+                <HomeRouteButton onClick={closeDrawer} isActive={isActive === "home"} />
             </li>
             <li>
-              <About is_active={isActive === "about"} />
+              
+                <About onClick={closeDrawer} is_active={isActive === "about"} />
+            
             </li>
           </ul>
         </div>

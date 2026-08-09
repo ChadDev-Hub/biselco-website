@@ -15,7 +15,7 @@ from ..modules.user.schema.response_model import UserModel
 from sqlalchemy.orm import selectinload
 import httpx
 from ..modules.user.schema.response_model import GoogleUser
-
+from typing import Optional
 load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
@@ -28,12 +28,13 @@ G_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 BISCOLLECT_REDIRECT_URI = os.getenv("BISCOLLECT_REDIRECT_URI")
 
+
 # CREATE ACCESS TOKEN
-async def create_access_token(data: Token):
+async def create_access_token(data: Token, expires:Optional[int]=ACCESS_TOKEN_EXPIRE_MINUTES):
     if not SECRET_KEY:
         raise ValueError("No secret key")
     to_encode = data.model_dump()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + timedelta(minutes=float(expires))
     to_encode.update({"exp": expire, "type": "access_token"})
     encoded_jwt = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

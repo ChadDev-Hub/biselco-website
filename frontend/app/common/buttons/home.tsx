@@ -6,15 +6,17 @@ import Link from 'next/link'
 type Props = {
     isActive: boolean;
     orientation?: string
+    onClick?: () => void
 }
 
-const HomeRouteButton = ({isActive, orientation}: Props) => {
+const HomeRouteButton = ({isActive, orientation, onClick}: Props) => {
+
     return (
 
-        <Link href="/" type="button" className={`is-drawer-close:tooltip is-drawer-close:tooltip-right items-center w-full ${orientation}`} data-tip="Homepage">
+        <Link href="/home" type="button" onClick={onClick} className={`is-drawer-close:tooltip is-drawer-close:tooltip-right items-center w-full ${isActive ? "bg-base-300" : ""} ${orientation}`} data-tip="Homepage">
             {/* Home icon */}
             <Home className={`size-5 ${isActive ? "text-blue-500 drop-shadow-lg drop-shadow-blue-300" : ""}`}/>
-            <span className={`is-drawer-close:hidden dock-label ${isActive ? "text-blue-500 " : ""}`}>Homepage</span>
+            <span className={`is-drawer-close:hidden dock-label ${isActive ? "text-blue-500 dock-active" : ""}`}>Homepage</span>
         
         </Link>
 

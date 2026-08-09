@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, status, Cookie
 from typing import Optional
 from ..schema.response_model import UserModel
 from typing import Optional
-from ....core.security import verify_token, create_access_token, create_refresh_token
+from ....core.security import verify_token
 
 
 class GetUserServices:
@@ -39,10 +39,9 @@ class GetUserServices:
         
         if not self.access_token:
             raise self.credential_exception
-        print(self.access_token, "access_token")
         try:
             payload = await verify_token(self.access_token)
-            print("payload: ", payload)
+            print("user is active: ", payload.email)
             if not payload:
                 raise self.credential_exception
             if payload.sub != "access_token":

@@ -6,10 +6,6 @@ import { cookies } from "next/headers"
 const baseUrl = process.env.BASESERVERURL
 
 
-
-
-
-
 // GET NEWS PAGE DATA
 export async function getNewsPage() {
     const cookie = await cookies()
@@ -34,38 +30,6 @@ export async function getNewsPage() {
         data: data
     }
 }
-
-
-
-
-
-
-
-
-
-// GET COMPLAINT STATUS NAME
-export async function ComplaintStatusName() {
-    const res = await fetch(
-        `${baseUrl}/v1/complaints/status/name`,
-        {
-            method: "GET",
-            cache: "no-cache"
-        }
-    )
-    const data = await res.json()
-    if (!res.ok) {
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-    
-    return {
-        status: res.status,
-        data: data
-    }
-}
-
 
 
 
@@ -205,80 +169,10 @@ export const GetAgmaRegistered = async (id: string) => {
 
 
 
-export const GetAgmaStats= async() => {
-    const cookie = await cookies()
-    const accessToken = cookie.get("access_token")?.value
-    const res = await fetch(`${baseUrl}/v1/agma/stats`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`
-        }
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            error: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
 
 
 
 
 
-export const GetAgmaSetup = async() => {
-    const cookie = await cookies()
-    const accessToken = cookie.get("access_token")?.value
-    const res = await fetch(`${baseUrl}/v1/agma/setup`, {
-        method: "GET",
-        cache:"no-store",
-        headers: {
 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`
-        }
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            error: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
-
-export const GetAgmaSchedules = async() => {
-    const cookie = await cookies()
-    const accessToken = cookie.get("access_token")?.value
-    const res = await fetch(`${baseUrl}/v1/events/agma/schedules`,{
-        method: "GET",
-        cache: "no-store",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`
-        }
-
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            error: data.detail
-        }
-    }
-    return {
-        status: res.status,
-        data: data
-    }
-}
 

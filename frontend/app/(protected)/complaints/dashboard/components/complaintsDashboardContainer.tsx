@@ -13,6 +13,7 @@
   import ConcernCard from '../../components/modernConcernCard';
   import ComplaintsTimeLine from '../../components/complaintsTimeLine';
   import {Complaints, ComplaintMessage, UserComplaintsResponseType} from "@/types/complaints";
+  import { ComplaintsStatuName } from "@/types/complaints";
 
   type PromiseType = {
     data: UserComplaintsResponseType;
@@ -20,10 +21,7 @@
   }
 
 
-  type ComplaintStatusType = {
-    status?: number;
-    data: []
-}
+  type ComplaintStatusType = ComplaintsStatuName[]
   type Props = {
     data: Promise<PromiseType>;
     complaintsStatusName: Promise<ComplaintStatusType>;
@@ -55,7 +53,7 @@
       setactiveComplaintsId(complaintsId);
     };
     
-    const [statusName, setStatusName] = useState([]);
+    const [statusName, setStatusName] = useState<ComplaintStatusType | []>([]);
     const { showAlert } = useAlert();
 
     // SET INITIAL DATA ON MOUNT
@@ -66,7 +64,7 @@
     
     useEffect(() => {
         queueMicrotask(() =>
-            setStatusName(complaintStatusNameInitialData.data)
+            setStatusName(complaintStatusNameInitialData)
         );
     }, [complaintStatusNameInitialData])
 

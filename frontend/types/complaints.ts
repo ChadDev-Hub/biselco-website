@@ -87,3 +87,11 @@ export type ComplaintMessage = {
 export type ComplaintResponse  = {
     detail: string 
 }
+
+
+
+export type ComplaintsStatuName = {
+    id: number;
+    status_name: string;
+    description: string;
+}
