@@ -4,17 +4,18 @@ import { useEffect, use } from "react";
 import { useMap } from "../MapProvider";
 import { PromiseType } from "../../../../../types/promise";
 import { Transformers } from "@/types/transformer";
-
+import { Zap } from "lucide-react";
+import { renderToStaticMarkup } from "react-dom/server";
 type Props = {
   promise: Promise<PromiseType<Transformers>>;
 };
 
 const TransformerLayer = ({ promise }: Props) => {
   const data = use(promise);
-  const {mapRef, isMapReady }= useMap();
+  const { mapRef, isMapReady } = useMap();
 
   useEffect(() => {
-    if(!isMapReady) return;
+    if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !data?.data) return;
 
@@ -23,12 +24,62 @@ const TransformerLayer = ({ promise }: Props) => {
     const unclusteredId = "transformers-unclustered";
     const clusterCountId = "transformers-cluster-count";
 
-    const setup =  async () => {
+    const setup = async () => {
       if (!map) return;
       if (!data.data) return;
       if (!map.hasImage("custom-marker")) {
-        const image = await map.loadImage("/icons/transformer.png");
-        map.addImage("custom-marker", image.data);
+        const transformerSvg = `
+ 
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          
+        >
+                <!-- White circular background -->
+          <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="white"
+          stroke="#f59e0b"
+          stroke-width="2"
+          />
+          <g 
+          transform="translate(5 5) scale(1)"
+          fill="#FFF9D2"
+          stroke="#f59e0b"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+
+            <rect x="2" y="7" width="20" height="12" rx="2" />
+            <path d="M14 13h4" stroke="blue"/>
+            <path d="M16 15v-4" stroke="blue"/>
+            <path d="M6 13h4" stroke="red"/>
+            <path d="M18 5v2" />
+            
+            <path d="M6 5v2"/>
+          </g>
+          
+        </svg>
+   
+        `;
+
+        const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(transformerSvg)}`;
+        // const svgUrl = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error("Failed to decode SVG"));
+          img.src = svgUrl;
+        });
+
+        map.addImage("custom-marker", img);
       }
 
       if (!map.getSource(sourceId)) {
@@ -43,6 +94,7 @@ const TransformerLayer = ({ promise }: Props) => {
           id: layerId,
           type: "circle",
           source: sourceId,
+          filter: ["has", "point_count"],
           paint: {
             "circle-color": [
               "step",
@@ -89,39 +141,35 @@ const TransformerLayer = ({ promise }: Props) => {
           filter: ["!", ["has", "point_count"]],
           layout: {
             "icon-image": "custom-marker",
-            "icon-allow-overlap": false,
-            "icon-size": 0.05,
+            "icon-allow-overlap": true,
+            "icon-size": 1,
           },
         });
       }
     };
 
-
-
     const attachEvents = () => {
-    if(!map.getLayer(layerId)) return;
-    const handleMouseEnter = () => {
-      map.getCanvas().style.cursor = "pointer";
-    };
-    const handleMouseLeave = () => {
-      map.getCanvas().style.cursor = "";
-    };
+      if (!map.getLayer(layerId)) return;
+      const handleMouseEnter = () => {
+        map.getCanvas().style.cursor = "pointer";
+      };
+      const handleMouseLeave = () => {
+        map.getCanvas().style.cursor = "";
+      };
 
-    map.on("mouseenter", layerId, handleMouseEnter);
-    map.on("mouseleave", layerId, handleMouseLeave);
-
-    }
-    const run = async() => {
+      map.on("mouseenter", layerId, handleMouseEnter);
+      map.on("mouseleave", layerId, handleMouseLeave);
+    };
+    const run = async () => {
       await setup();
       attachEvents();
-    }
+    };
 
-    if (map.isStyleLoaded()){
+    if (map.isStyleLoaded()) {
       run();
-    }else{
+    } else {
       map.once("load", run);
     }
-    
 
     return () => {
       if (map && map.getStyle()) {

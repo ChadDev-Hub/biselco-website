@@ -2,7 +2,7 @@
 import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import CardComponent from "@/app/common/card";
 import ImageViewer from './imageViewr';
-
+import {CircleGauge} from "lucide-react"
 
 type Props = {
   selectedRow: Set<number>;
@@ -131,6 +131,10 @@ const ChangeMeteCards = ({
                   longitude: lon,
                   srid: srid,
                 }}
+                marker={
+                  <CircleGauge  className="text-2xl fill-orange-500 font-bold shadow  text-blue-500 size-5 animate-bounce"/>
+                }
+                markerLabel={consumer_name}
               />
               <span>{location}</span>
             </h1>

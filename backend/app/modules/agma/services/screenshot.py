@@ -22,7 +22,6 @@ load_dotenv()
 class GetTicketServices:
     def __init__(self):
         self.FRONTEND = os.getenv("PLAYWRIGHTFRONTEND")
-        self.ACCESS_TOKEN_EXPIRE = os.getenv("ACCESS_TOKEN_EXPIRE")
         self.REFRESH_TOKEN_EXPIRE = os.getenv("REFRESH_TOKEN_EXPIRE")
         self.PLAYWRIGHT_ACCESS_TOKEN_EXPIRE = os.getenv(
             "PLAYWRIGHT_ACCESS_TOKEN_EXPIRE")

@@ -2,7 +2,7 @@
 import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import CardComponent from "@/app/common/card";
 import ImageViewer from "../../change-meter/components/imageViewr";
-
+import { CircleGauge } from "lucide-react";
 
 type Props = {
   selectedRow: Set<number>;
@@ -51,8 +51,7 @@ const NewConnectionCard = ({
         />
         <div className="flex  gap-3 w-full h-18">
           <figure className="relative w-1/3">
-          <ImageViewer image={image}/>
-          
+            <ImageViewer image={image} />
           </figure>
           <div className="w-full">
             <h2 className="text-sm">CONSUMER NAME:</h2>
@@ -80,12 +79,16 @@ const NewConnectionCard = ({
           <div className="">
             <h1 className="flex items-center text-sm font-bold">
               <Mapbutton
-                title="Change Meter Location"
+                title="New Connection Location"
                 location={{
                   latitude: lat,
                   longitude: lon,
                   srid: srid,
                 }}
+                marker={
+                  <CircleGauge className="text-2xl fill-orange-500 animate-bounce font-bold shadow  text-blue-500 size-5" />
+                }
+                markerLabel={consumer_name}
               />
               <span>{location}</span>
             </h1>

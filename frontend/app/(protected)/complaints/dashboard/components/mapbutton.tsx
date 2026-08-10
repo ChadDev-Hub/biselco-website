@@ -2,13 +2,16 @@
 
 import { useRef, memo } from "react";
 import {MapIcon} from "lucide-react"
-import ComplaintMap from "./complaintsMap";
+import BiselcoMap from '../../../../common/Map';
+
 
 type Props = {
   title: string;
   location: location;
   municipality?: string;
   village?: string;
+  marker?: React.ReactElement;
+  markerLabel?: string;
 };
 type location = {
   latitude: number;
@@ -16,7 +19,7 @@ type location = {
   srid: number;
 };
 
-const MapButton = ({ location, municipality, village, title }: Props) => {
+const MapButton = ({ location, municipality, village, title, marker, markerLabel }: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const handleOpenModal = () => {
     modalRef.current?.showModal();
@@ -141,11 +144,13 @@ const MapButton = ({ location, municipality, village, title }: Props) => {
                 Village: <span className="font-bold text-xs">{village}</span>
               </h4>
             </div>}
-            <ComplaintMap
+            <BiselcoMap 
+            consumermeters={[location.longitude, location.latitude]} disableClick={true} markerSvg={marker} markerLabel={markerLabel}/>
+            {/* <ComplaintMap
               latitude={location.latitude}
               longitude={location.longitude}
               srid={location.srid}
-            />
+            /> */}
           </div>
         </div>
       </dialog>
