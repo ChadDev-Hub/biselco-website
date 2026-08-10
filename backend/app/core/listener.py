@@ -31,8 +31,7 @@ async def process_incoming_payload(message, manager):
                         print(f"!!! Failed broadcasting to websocket user {uid}: {socket_err}")
 
                 await asyncio.gather(*(safe_send(uid) for uid in user_ids))
-                
-                
+            
             case _:
                 print(f"--> Unknown message type: {data.get('type')}")
 

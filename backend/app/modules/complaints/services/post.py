@@ -21,7 +21,6 @@ class PostServices:
     # GET RECEIVE STATUS NAME
     async def get_status_name(self):
         self.received = await self.get_services.get_seleted_status_name(status_id=1)
-        print(self.received)
         if not self.received:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Complaints Status Not Found")

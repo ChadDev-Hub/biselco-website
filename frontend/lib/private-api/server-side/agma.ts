@@ -248,3 +248,63 @@ export const GetAgmaSchedules = async () => {
     throw error;
   }
 };
+
+
+// AGMA RAFFLE -------------------------------------------------------------
+
+// GET AGMA RAFFLE ENTRY
+export const GetRaffleInitialEntries = async () => {
+  try {
+    const serverApi = await getServerApi();
+    const { data, status } = await serverApi.get(
+      "/v1/agma/raffle/initial_entries",
+    );
+    return {
+      status: status,
+      data: data as string[],
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      switch (error.response?.status) {
+        case 401:
+          redirect("/");
+        default:
+          throw new ApiError(
+            error.response?.data.detail,
+            error.response?.status || 500,
+          );
+      }
+    }
+    throw error;
+  }
+};
+
+
+
+export const GetRaffleStatsData = async () => {
+
+  try {
+    const serverApi = await getServerApi();
+    const { data, status } = await serverApi.get(
+      "/v1/agma/raffle/stats",
+    );
+    return {
+      status: status,
+      data: data,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      switch (error.response?.status) {
+        case 401:
+          redirect("/");
+        default:
+          throw new ApiError(
+            error.response?.data.detail,
+            error.response?.status || 500,
+          );
+      }
+    }
+    throw error;
+  }
+};
+ 

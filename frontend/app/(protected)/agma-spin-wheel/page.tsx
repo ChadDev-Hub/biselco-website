@@ -1,5 +1,4 @@
-import Roulette from "./components/roullete";
-import { GetRaffleInitialEntries,GetRaffleStatsData } from "../../../lib/agma";
+import Roulette from "./components/roullete"; 
 import RouletteSound from "./components/rouletSound";
 import Header from "./components/header";
 import Tools from "./components/toolsFab";
@@ -10,6 +9,7 @@ import { Suspense } from "react";
 import LoadingIndicator from "../../(public)/distribution-map/components/LoadingIndicator";
 import StatsModal from "./components/statsModal";
 import PullToRefresh from "../../common/PulltoRefresh";
+import { GetRaffleInitialEntries, GetRaffleStatsData } from "@/lib/private-api/server-side/agma";
 const Page = () => {
   const initialRaffleEntries = GetRaffleInitialEntries();
   const initialRaffleStats = GetRaffleStatsData();

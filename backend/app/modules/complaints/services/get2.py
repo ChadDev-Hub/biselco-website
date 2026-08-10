@@ -12,17 +12,14 @@ from ..model.complaints_history import ComplaintsStatusHistory
 from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus, ComplaintsImages
 from ....modules.websocket.schema.response_model import Message
 from ...user.schema.response_model import UserModel
-from ....core.security import get_current_user
 from shapely.geometry import Point
 from geoalchemy2.shape import to_shape
-from datetime import datetime
-from uuid import UUID
 from typing import Optional
 from ...user.schema.response_model import UserModel, Roles
 from ....common.total_page import get_total_page
 import pytz
-from pprint import pprint
-from ...user.service.get_user import GetUserServices
+
+
 
 
 def format_timedelta(td):
@@ -498,6 +495,7 @@ class GetDashboardServices:
         )
 
         data = (await self.session.execute(stats_data)).scalar()
+        
         return data
 
 

@@ -188,11 +188,13 @@ async def get_total_per_mun(
     return await get_services.get_total_by_mun()
 
 
+# -------------------------------- AGMA RAFFLE ---------------------------------
 
 @router.get("/raffle/initial_entries", status_code=status.HTTP_200_OK, response_model=List[str])
 async def get_initial_raffle_entries(
-        user: UserModel = Depends(get_current_user),
+        get_user_services: GetUserServices = Depends(GetUserServices),
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
+    user = await get_user_services.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")
@@ -251,10 +253,12 @@ async def dismissed_winner(
 
 @router.get("/raffle/stats", status_code=status.HTTP_200_OK, response_model=RaffleStats)
 async def get_raffle_stats(
-    user: UserModel = Depends(get_current_user),
+    get_user_services: GetUserServices = Depends(GetUserServices),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
+    # VERIFY USER
+    user = await get_user_services.get_current_user()
     if "admin" not in [role.name.lower() for role in user.roles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Admin Only Transaction Allowed")

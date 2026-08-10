@@ -117,8 +117,9 @@ async def create_complaints(
         'user_ids': admins,
         'data': results
     }
+    
     dumped_payload = json.dumps(payload)
-
+    
     await redis_client.publish(CHANNEL, dumped_payload)
 
     return {

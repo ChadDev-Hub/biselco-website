@@ -8,7 +8,10 @@ from ..services.complaint_message_handler import add_message, update_message_sta
 from ...user.model.roles import Roles
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from ....core.redis import CHANNEL, redis_client
+import json
 router = APIRouter(prefix="/socket", tags=['Socket'])
+
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depends(get_session)):
@@ -18,25 +21,24 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
         return
     await manager.connect(websocket=websocket, user_id=str(user.user_id))
     user_id = str(user.user_id)
-    admins =(await session.execute(select(Roles)
-                             .options(selectinload(Roles.users))
-                             .where(Roles.name == "admin")
-                             )).scalars().all()
+    admins = (await session.execute(select(Roles)
+                                    .options(selectinload(Roles.users))
+                                    .where(Roles.name == "admin")
+                                    )).scalars().all()
     adm = set([str(user.id) for role in admins for user in role.users])
     try:
         while True:
-            json = await websocket.receive_json()
-            if json.get("detail") == "complaint_message":
-                data = json.get("data")
+            json_data = await websocket.receive_json()
+            if json_data.get("detail") == "complaint_message":
+                data = json_data.get("data")
                 data['sender_id'] = str(user_id)
                 result = await add_message(session=session, data=data)
-                
+
                 users = set()
-                
+
                 if result['new_message']['receiver'] is not None:
                     users.add(result['new_message']["receiver"]["id"])
-                
-                
+
                 if result['new_message']['sender'] is not None:
                     users.add(result['new_message']["sender"]["id"])
                 users = users.union(adm)
@@ -44,33 +46,40 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                     "detail": "sent_message",
                     "data": result
                 }
-                for user in users: 
-                    if user is not None:
-                        await manager.broad_cast_personal_json(user, data=to_send)
-            elif json.get("detail") == "seen_message":
-                data = json.get("data")
+                payload = {
+                    "type": "admins",
+                    "user_ids": list(users),
+                    "data": to_send
+                }
+                await redis_client.publish(CHANNEL, json.dumps(payload))
+
+            elif json_data.get("detail") == "seen_message":
+                data = json_data.get("data")
                 message_id = data.get("message_ids")
-                
+
                 results = await update_message_status(session=session, data={
                     'ids': message_id,
                     'complaints_id': data.get('complaints_id'),
                     'receiver_status': "Seen",
                     "sender_id": str(user_id)
                 })
-                
-            
+
+                users = set()
+                for result in results["seen"]:
+                    if result["receiver_id"] is not None:
+                        users.add(result["receiver_id"])
+                    users = users.union(adm)
+
                 seen_message = {
                     "detail": "seen_message",
                     "data": results
                 }
-                users = set()
-                for result in results["seen"]   :
-                    if result["receiver_id"] is not None:
-                        users.add(result["receiver_id"])
-                    users = users.union(adm)
-                for user in users:
-                    await manager.broad_cast_personal_json(user, data=seen_message)
+                
+                payload = {
+                    "type": "admins",
+                    "user_ids": list(users),
+                    "data": seen_message
+                }
+                await redis_client.publish(CHANNEL, json.dumps(payload))
     except WebSocketDisconnect:
         manager.disconnect(user_id=str(user_id), websocket=websocket)
-    
-    
