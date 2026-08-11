@@ -10,5 +10,7 @@ export type Consumer = {
 
 export type Location = {
   type: string;
-  coordinates: [number, number];
+  coordinates: Coordinates;
 };
+
+export type Coordinates  = [number, number];

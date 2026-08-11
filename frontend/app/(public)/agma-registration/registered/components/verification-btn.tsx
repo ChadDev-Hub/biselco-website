@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { AgmaVerificationType } from "@/types/agma";
 import { CircleCheck, CircleX, Loader } from "lucide-react";
-import { VerifyRegistered } from "@/app/actions/agma";
+import { VerifyRegistered } from "@/lib/private-api/actions/agma";
 
 type Props = {
   verification: AgmaVerificationType;

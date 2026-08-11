@@ -3,25 +3,13 @@
 import { useEffect, useState} from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import { queryConsumer } from "../../../../lib/consumer-meter";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/lib/private-api/actions/complaint";
 import ImageViewer from "../..//technical/change-meter/components/imageViewr";
 import { useAlert } from "@/app/context/alert";
+import {queryConsumer} from "@/lib/private-api/actions/consumer-meter";
+import { Consumer, Coordinates } from '../../../../types/consumer-meter';
 
-type ConsumerData = {
-  account_no: string;
-  account_name: string;
-  meter_brand: string;
-  meter_no: string;
-  village: string;
-  municipality: string;
-  geolocation: {
-    type: string;
-    coordinates: coordinates;
-  };
-};
-type coordinates = number[];
 // Define the type for form data
 type ComplaintFormData = {
   accountNumber: string;
@@ -41,7 +29,7 @@ type Props = {
 
 const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
   // DEFINE STATE VARIABLES------------------------------------------------------
-  const [consumer, setConsumer] = useState<ConsumerData[]>([]);
+  const [consumer, setConsumer] = useState<Consumer[] | []>([]);
   const [selectedConsumer, setSelectedConsumer] = useState<string>("");
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -109,7 +97,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
   }, [debounced, selectedConsumer, resetField]);
 
   // HANDLE SELECTED CONSUMER
-  const selectConsumer = (account: string, geolocation: coordinates) => {
+  const selectConsumer = (account: string, geolocation: Coordinates) => {
     setSelectedConsumer(account);
     setValue("accountNumber", account);
     setValue("lon", geolocation[0]);

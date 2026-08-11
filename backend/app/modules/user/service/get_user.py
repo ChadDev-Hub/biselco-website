@@ -19,6 +19,10 @@ class GetUserServices:
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         detail="Invalid Credential",
                     )
+        self.admin_transaction_only = HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden Transaction",
+        )
     async def get_users_by_roles(self, roles:str):
         data =  (await self.session.execute(select(Users).where(Users.roles.any(Roles.name == roles)))).scalars().all()
         return [str(i.id) for i in data ]
@@ -35,7 +39,7 @@ class GetUserServices:
         return user
         
     
-    async def get_current_user(self):
+    async def get_current_user(self, is_admin_transaction:Optional[bool] = False):
         
         if not self.access_token:
             raise self.credential_exception
@@ -50,7 +54,8 @@ class GetUserServices:
             user = await self.check_user(payload.user_id)
             if not user:
                 raise self.credential_exception
-    
+            if is_admin_transaction and "admin" not in [role.name.lower() for role in user.roles]:
+                raise self.admin_transaction_only
             return UserModel.model_validate(user)
         except Exception as e: 
             print(e)

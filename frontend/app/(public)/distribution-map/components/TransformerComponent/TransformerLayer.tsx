@@ -4,8 +4,8 @@ import { useEffect, use } from "react";
 import { useMap } from "../MapProvider";
 import { PromiseType } from "../../../../../types/promise";
 import { Transformers } from "@/types/transformer";
-import { Zap } from "lucide-react";
-import { renderToStaticMarkup } from "react-dom/server";
+
+
 type Props = {
   promise: Promise<PromiseType<Transformers>>;
 };
@@ -35,21 +35,21 @@ const TransformerLayer = ({ promise }: Props) => {
           xmlns="http://www.w3.org/2000/svg"
           width="32"
           height="32"
-          viewBox="0 0 24 24"
+          viewBox="0 0 32 32"
           
         >
                 <!-- White circular background -->
           <circle
-          cx="12"
-          cy="12"
-          r="10"
+          cx="15"
+          cy="15"
+          r="15"
           fill="white"
-          stroke="#f59e0b"
+          stroke="#0D47A1"
           stroke-width="2"
           />
           <g 
-          transform="translate(5 5) scale(1)"
-          fill="#FFF9D2"
+          transform="translate(3 3) scale(1)"
+          fill="#FFDDB0"
           stroke="#f59e0b"
           stroke-width="2"
           stroke-linecap="round"
@@ -148,8 +148,10 @@ const TransformerLayer = ({ promise }: Props) => {
       }
     };
 
-    const attachEvents = () => {
+    const attachEvents = async() => {
       if (!map.getLayer(layerId)) return;
+
+      
       const handleMouseEnter = () => {
         map.getCanvas().style.cursor = "pointer";
       };
@@ -157,12 +159,14 @@ const TransformerLayer = ({ promise }: Props) => {
         map.getCanvas().style.cursor = "";
       };
 
-      map.on("mouseenter", layerId, handleMouseEnter);
-      map.on("mouseleave", layerId, handleMouseLeave);
+      map.on("mouseenter", unclusteredId, handleMouseEnter);
+      map.on("mouseleave", unclusteredId, handleMouseLeave);
+      
+
     };
     const run = async () => {
       await setup();
-      attachEvents();
+      await attachEvents();
     };
 
     if (map.isStyleLoaded()) {

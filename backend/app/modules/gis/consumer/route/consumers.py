@@ -5,10 +5,14 @@ from sqlalchemy import select
 from typing import Optional
 from ..services.query_consumer import get_consumer
 from ..schema.response_model import Consumer
+from ....user.service.get_user import GetUserServices
 router = APIRouter(prefix="/consumers", tags=["Consumers"])
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=list[Consumer])
-async def query_consumer(session:AsyncSession = Depends(get_session), consumer:Optional[str] = Query(None)):
-    result = await get_consumer(session=session, query=consumer)
+async def query_consumer(session:AsyncSession = Depends(get_session), q:Optional[str] = Query(None), get_user:GetUserServices = Depends(GetUserServices.get_current_user)):
+    user = await get_user.get_current_user()
+    if "admin" not in user.roles:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin Transaction Only")
+    result = await get_consumer(session=session, query=q)
     return result

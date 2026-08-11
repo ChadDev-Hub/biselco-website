@@ -3,7 +3,7 @@ import BiselcoMap from "@/app/common/Map";
 import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import { queryConsumer } from "@/lib/consumer-meter";
+import { queryConsumer } from "@/lib/private-api/actions/consumer-meter";
 import { CirclePlus } from "lucide-react"
 import { SubmitChangeMeter } from "@/app/actions/changeMeter";
 import { useLoading } from "@/app/common/loadingIndication";

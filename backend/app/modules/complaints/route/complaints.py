@@ -38,13 +38,15 @@ router = APIRouter(prefix="/complaints", tags=["Complaints"])
 
 # GET ALL COMPLAINTS FOR SPECIFIC USER
 @router.get("/", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
-async def get_user_complaints(get_user_services:GetUserServices = Depends(GetUserServices),
+async def get_user_complaints(get_user_services: GetUserServices = Depends(GetUserServices),
                               get_service: GetServices = Depends(GetServices)):
     user = await get_user_services.get_current_user()
     complaint = await get_service.get_all_complaints(get_all=False, user_id=user.id)
     return complaint
 
 # GET ALL COMPLAINTS
+
+
 @router.get("/all", status_code=status.HTTP_200_OK, response_model=ComplaintsModelLists)
 async def get_all_complaint(
         search: Optional[str] = Query(None),
@@ -52,14 +54,7 @@ async def get_all_complaint(
         get_services: GetServices = Depends(GetServices),
         get_user_service: GetUserServices = Depends(GetUserServices)):
     # GET CURRENT USER
-    user = await get_user_service.get_current_user()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found")
-    # RAISE EXCEPTION IF USER IS NOT ADMIN THIS IS A PROTECTED ROUTE FOR ADMIN ONLY 
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Admin Only Transaction Allowed")
+    user = await get_user_service.get_current_user(is_admin_transaction=True)
     data = await get_services.get_all_complaints(query=search, page=page, user_id=user.id)
     return data
 
@@ -88,8 +83,8 @@ async def create_complaints(
 
 ):
     # GET CURRENT USER
-    user  = await get_user_service.get_current_user()
-    
+    user = await get_user_service.get_current_user()
+
     data = CreateComplaints(
         account_no=accountNumber,
         subject=issue,
@@ -117,9 +112,9 @@ async def create_complaints(
         'user_ids': admins,
         'data': results
     }
-    
+
     dumped_payload = json.dumps(payload)
-    
+
     await redis_client.publish(CHANNEL, dumped_payload)
 
     return {
@@ -165,8 +160,7 @@ async def delete_complaint(
             "detail": "deleted_complaints",
             "data": deleted_complaint,
         }
-        
-        
+
         admins = await get_user_service.get_users_by_roles(roles="admin")
         if str(user.id) not in admins:
             admins.append(str(user.id))
@@ -198,10 +192,7 @@ async def update_complaint_status(
             GetDashboardServices)
 ):
     # GET CURRENT USER
-    user = await get_user.get_current_user()
-    if "admin" not in [role.name for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Admin Only Transaction Allowed")
+    user = await get_user.get_current_user(is_admin_transaction=True)
     try:
         is_status_added, selected_status, selected_complaint = (await put_services.add_new_status(complaints_id=complaint_id,
                                                                                                   stats=data.status_id,
@@ -259,10 +250,7 @@ async def delete_complaint_status(
     data: ComplaintsStatus = Body(...)
 ):
     # GET CURRENT USER
-    user = await get_user.get_current_user()
-    if "admin" not in [role.name for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Admin Only Transaction Allowed")
+    user = await get_user.get_current_user(is_admin_transaction=True)
     try:
         new_complaints_status, selected_complaints = await delete_services.delete_complaint_status(
             user_id=str(user.id),

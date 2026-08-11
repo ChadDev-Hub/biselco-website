@@ -46,6 +46,8 @@ export const GetAgmaTicketAll = async ({
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -80,6 +82,8 @@ export const GetAgmaFilters = async (
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -114,6 +118,8 @@ export const GetAgmaCountRegistered = async (
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -141,6 +147,8 @@ export const GetAgmaRegisterByMunicipality = async () => {
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -168,6 +176,8 @@ export const GetAgmaRegistrationSchedules = async () => {
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -193,6 +203,8 @@ export const GetAgmaStats = async () => {
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,
@@ -218,6 +230,8 @@ export const GetAgmaSetup = async () => {
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,

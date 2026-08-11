@@ -55,7 +55,7 @@ async def download_tickets_pdf(
     refresh_token: str = Cookie(None),
     get_ticket_services: GetTicketServices = Depends(GetTicketServices),
     get_user_service:GetUserServices = Depends(GetUserServices)):
-    await get_user_service.get_current_user()
+    await get_user_service.get_current_user(is_admin_transaction=True)
     
     file = await get_ticket_services.screenshot_tickets(
         start_page=data.start_page,
@@ -82,10 +82,7 @@ async def complaints_stats(
         GetAgmaRegistrationService),
     get_user_services: GetUserServices = Depends(GetUserServices),
 ):
-    user = await get_user_services.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     return await get_agma_registration_service.get_stats()
 
 
@@ -100,24 +97,19 @@ async def get_all(
         municipality: Optional[str] = Query(None),
         is_verified: Optional[bool] = Query(None),
         search: Optional[str] = Query(None)):
-    user = await get_user_service.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_service.get_current_user(is_admin_transaction=True)
     data = await get_agma_registration_service.get_all_registered(page=page if page else 1, year=year, barangay=barangay, search=search, municipality=municipality, is_verified=is_verified)
     return data
 
-
+# AGMA VERIFICATION
 @router.patch("/registered/verify", status_code=status.HTTP_200_OK)
 async def verify_reg(
-    user: UserModel = Depends(get_current_user),
+    get_user_service:GetUserServices = Depends(GetUserServices),
     data: VerificationRequest = Body(...),
     patch_agma_registration_service: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService),
 ):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    user = await get_user_service.get_current_user(is_admin_transaction=True)
     return await patch_agma_registration_service.verify_registered(id=data.id, is_verified=data.is_verified, user_id=user.id)
 
 @router.get("/registered/all/filters", status_code=status.HTTP_200_OK)
@@ -126,10 +118,7 @@ async def get_agma_filter(
             GetAgmaRegistrationService),
         get_user_service:GetUserServices = Depends(GetUserServices),
         municipality: Optional[str] = Query(None)):
-    user = await get_user_service.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_service.get_current_user(is_admin_transaction=True)
     return await get_agma_registration_service.get_filters(municipality=municipality)
 
 
@@ -166,21 +155,10 @@ async def get_graph(
     get_user_service:GetUserServices = Depends(GetUserServices),
     municipality: Optional[str] = Query(None)
 ):
-    user = await get_user_service.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_service.get_current_user(is_admin_transaction=True)
     return await get_services.get_graph_data(municipality=municipality)
 
 
-@router.get("/statistic/registered_overtime", status_code=status.HTTP_200_OK, response_model=List[RegisteredOvertime])
-async def get_registered_overtime(
-        get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService),
-        user: UserModel = Depends(get_current_user)):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
-    return await get_services.get_registered_overtime()
 
 @router.get("/statistic/total_per_mun")
 async def get_total_per_mun(
@@ -194,10 +172,7 @@ async def get_total_per_mun(
 async def get_initial_raffle_entries(
         get_user_services: GetUserServices = Depends(GetUserServices),
         get_services: GetAgmaRegistrationService = Depends(GetAgmaRegistrationService)):
-    user = await get_user_services.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     return await get_services.get_initial_raffle_entries()
 
 
@@ -258,9 +233,6 @@ async def get_raffle_stats(
         GetAgmaRegistrationService),
 ):
     # VERIFY USER
-    user = await get_user_services.get_current_user()
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    user = await get_user_services.get_current_user(is_admin_transaction=True)
     return await get_services.raffle_stats()
 
