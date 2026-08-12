@@ -3,8 +3,9 @@ import React, { useState } from "react";
 
 import { DownloadCloud } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { DownloadAgmaTicket } from "@/app/actions/agma";
+
 import { useAlert } from "@/app/context/alert";
+import { DownloadAgmaTicket } from '../../../../../lib/private-api/actions/agma';
 
 type props = {
   elementId: string;
@@ -16,14 +17,16 @@ const DownloadTicket = ({ elementId }: props) => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    const res = await DownloadAgmaTicket(elementId, currentPath);
-    if (res.status === 200) {
-      const url = URL.createObjectURL(res.data ?? new Blob());
+    try {
+      const res = await DownloadAgmaTicket(elementId, currentPath);
+      const url = URL.createObjectURL(res ?? new Blob());
       const link = document.createElement("a");
       link.href = url;
       link.download = "agma_ticket.png";
       link.click();
       showAlert("success", "Ticket Downloaded Successfully");
+      setIsDownloading(false); 
+    } catch {
       setIsDownloading(false);
     }
   };

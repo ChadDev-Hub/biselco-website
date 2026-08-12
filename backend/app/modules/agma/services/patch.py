@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, insert
+from sqlalchemy import select, update, insert, func
 from ....dependencies.db_session import get_session
 from ..model.agma_registration import AgmaRegistration, AgmaVerificationMonitoring
 from sqlalchemy.exc import DBAPIError, DataError
@@ -23,7 +23,7 @@ class AgmaRegistrationPatchService():
             await self.session.execute(
                 update(AgmaRegistration)
                 .where(AgmaRegistration.id == id)
-                .values(is_winner=True)
+                .values(is_winner=True, win_timestamp=func.now())
             )
             await self.session.commit()
             new_stats = await self.get_services.raffle_stats()
@@ -51,7 +51,7 @@ class AgmaRegistrationPatchService():
             await self.session.execute(
                 update(AgmaRegistration)
                 .where(AgmaRegistration.id == id)
-                .values(is_dismissed=True)
+                .values(is_dismissed=True, dismiss_timestamp=func.now())
             )
             await self.session.commit()
         except DBAPIError  as e:

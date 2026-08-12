@@ -3,13 +3,15 @@ import { useCallback, useRef } from "react";
 import SignatureCanvas from "./signatureCanvas";
 import SignaturePad from "signature_pad";
 import { useForm, useWatch, SubmitHandler } from "react-hook-form";
-import { RegisterAgma } from "@/app/actions/agma";
-import { redirect, useRouter } from "next/navigation";
+import { RegisterAgma } from "@/lib/private-api/actions/agma"
+import {  useRouter } from "next/navigation";
 import { useAlert } from "@/app/context/alert";
 import Image from "next/image";
 import SearchResults from "./searchResults";
 import { Contact, Phone, Zap, Camera, ReceiptText, FileText} from "lucide-react";
 import { FormType } from "@/types/agma";
+import { ApiError } from '../../../../types/api-error';
+
 
 const labelClassName =
   "label font-bold text-xs text-shadow-white text-shadow-md";
@@ -112,34 +114,33 @@ const RegistrationForm = () => {
       if(data.sample_bill?.[0]) formData.append("sample_bill", data.sample_bill[0]);
       formData.append("signature", signature);
       if(data.authorization_letter?.[0]) formData.append("authorization_letter", data.authorization_letter[0]);
-     
-      const res = await RegisterAgma(formData);
-      switch (res.status) {
-        case 400:
-          reset();
-          handleError(res.error);
-          redirect("/");
-          break;
-        case 401:
-          handleError(res.error);
-          break;
-        case 404:
-          handleError(res.error);
-          break;
-        case 201:
-          reset();
-          showAlert(
-            "success",
-            "Registration Successfull Please Wait Preparing Your Ticket",
-          );
-          signaturePadRef.current?.clear();
-          const newParams = new URLSearchParams();
-          newParams.set("id", res.data.id);
-          router.push(`/agma-registration/registered?${newParams.toString()}`);
-          break;
-        default:
-          break;
-      }
+      try {
+        const res = await RegisterAgma(formData);
+        showAlert("success", res.data.message);
+        reset();
+        signaturePadRef.current?.clear();
+        const newParams = new URLSearchParams();
+        newParams.set("id", res.data.id);
+        router.push(`/agma-registration/registered?${newParams.toString()}`);  
+      } catch (error) {
+        if (error instanceof ApiError) {
+          switch (error.status) {
+            case 400:
+              reset()
+              handleError(error.message);
+              router.replace("/");
+              break;
+            case 401:
+              handleError(error.message);
+              break;
+            case 404:
+              handleError(error.message);
+              break;
+            default:
+              break;
+          };
+        };
+      };
     },
     [setError, reset, router, handleError, showAlert],
   );

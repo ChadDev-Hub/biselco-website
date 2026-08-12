@@ -1,3 +1,4 @@
+
 import {Stats} from "./stats";
 
 
@@ -79,3 +80,17 @@ export type CountPerMunicipality = {
     name: string;
     value?: number
 }
+
+
+export type RegistrationResponse = {
+    message: string;
+    id: string;
+}
+
+
+export type SpinResponse = {
+    entries: string[]
+    pending_winner: string,
+    pending_winner_idx: number
+}
+

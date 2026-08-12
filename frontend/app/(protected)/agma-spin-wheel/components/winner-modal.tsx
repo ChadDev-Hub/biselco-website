@@ -2,10 +2,13 @@
 import { X, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
-import { GetWinnerInfo, DismissedWinner, UpdateWinnerStatus } from '../../../actions/agma';
+
 import { WinnerInfoType } from "../../../../types/agma";
 import InfoCard from "./infoCard";
 import { useAlert } from '../../../context/alert';
+import { GetWinnerInfo, UpdateWinnerStatus, DismissedWinner} from '../../../../lib/private-api/actions/agma';
+
+
 type Props = {
   winner_account: string;
   showModal: (bolean: boolean) => void;
@@ -24,7 +27,7 @@ const WinnerModal = ({
   useEffect(() => {
     const getInfo = async () => {
       const res = await GetWinnerInfo(winner_account);
-      setWinnerInfo(res?.data);
+      setWinnerInfo(res);
     };
     getInfo();
   }, [winner_account]);
@@ -33,13 +36,18 @@ const WinnerModal = ({
     setWinnerInfo(null);
   };
   const handleSaveWinner = async () => {
+    // INITIAL CLICK
     if (!winnerInfo) return;
     setIsUpdating(true);
-    const res = await UpdateWinnerStatus(winnerInfo.id);
-    if (res?.status === 200) {
+    // UPDATE WINNER
+    try {
+      const res = await UpdateWinnerStatus(winnerInfo.id);
       setIsUpdating(false);
       removeWinerEntry(winnerInfo.account_no);
-      showAlert("success", "Winner Save Successfully");
+      showAlert("success", res);
+      showModal(false);
+    } catch {
+      setIsUpdating(false);
     }
     showModal(false);
   };
@@ -47,11 +55,13 @@ const WinnerModal = ({
   const handleDismissedWinner = async () => {
     if (!winnerInfo) return;
     setIsDismissing(true);
-    const res = await DismissedWinner(winnerInfo.id);
-    if (res?.status === 200) {
+    try {
+      const res = await DismissedWinner(winnerInfo.id);
       setIsDismissing(false);
       removeWinerEntry(winnerInfo.account_no);
-      showAlert("success", "Winner Dismissed Successfully");
+      showAlert("success", res);
+    } catch {
+      setIsDismissing(false);
     }
     showModal(false);
   }

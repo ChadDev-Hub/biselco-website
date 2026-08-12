@@ -282,6 +282,8 @@ export const GetRaffleInitialEntries = async () => {
       switch (error.response?.status) {
         case 401:
           redirect("/");
+        case 403:
+          redirect("/home");
         default:
           throw new ApiError(
             error.response?.data.detail,

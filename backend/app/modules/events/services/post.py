@@ -56,9 +56,8 @@ class PostEventServices:
                 "data": data,
             }
             await redis_client.publish(CHANNEL, json.dumps(payload))
-            return {
-                "message": "You have successfully updated the Agma Schedule",
-            }
+            return "You have successfully updated the Agma Schedule"
+            
         except NoResultFound:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Setup Agma Event First")  
         except Exception as e:

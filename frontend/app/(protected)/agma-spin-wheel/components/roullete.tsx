@@ -2,12 +2,13 @@
 
 import { useMemo, useRef, useState, use } from "react";
 import { Lightbulb } from "lucide-react";
-import { AgmaSpinRoulette } from "../../../actions/agma";
+import { AgmaSpinRoulette } from "@/lib/private-api/actions/agma";
 import { useRouletteSound } from "./rouletSound";
 import { useSearchParams } from "next/navigation";
 import WinnerModal from "./winner-modal";
 import { useAlert } from "../../../context/alert";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
+import { ApiError } from "../../../../types/api-error";
 
 const SIZE = 500;
 const RADIUS = 240;
@@ -24,6 +25,10 @@ const COLORS = [
   "#059669",
 ];
 
+function round(value: number, decimals = 6) {
+  return Number(value.toFixed(decimals));
+}
+
 function polarToCartesian(
   cx: number,
   cy: number,
@@ -32,8 +37,8 @@ function polarToCartesian(
 ) {
   const rad = ((angle - 90) * Math.PI) / 180;
   return {
-    x: cx + radius * Math.cos(rad),
-    y: cy + radius * Math.sin(rad),
+    x: round(cx + radius * Math.cos(rad)),
+    y: round(cy + radius * Math.sin(rad)),
   };
 }
 
@@ -57,7 +62,6 @@ function describeArc(
 }
 type PromiseType = {
   status: number;
-  error?: string;
   data?: string[];
 };
 
@@ -67,9 +71,7 @@ type Props = {
 
 export default function WheelPage({ promise }: Props) {
   const InitialEntries = use(promise);
-
   const router = useRouter();
-  if (InitialEntries.status === 401) router.replace("/");
   const searchParams = useSearchParams();
   const spinTimer = searchParams.get("spin_time");
   const [entries, setEntries] = useState<string[]>(InitialEntries.data || []);
@@ -110,33 +112,47 @@ export default function WheelPage({ promise }: Props) {
     stop_sound();
     setShowWinnerModal(false);
     setPreparing(true);
-    const data = await AgmaSpinRoulette();
-    if (data?.status === 404) {
-      showAlert("warning", data.data);
-      stop_sound();
-      setShowWinnerModal(false);
-      setIsSpinning(false);
-      return;
+    try {
+      const res = await AgmaSpinRoulette();
+      setPreparing(false);
+      setIsSpinning(true);
+      play_sound(Number(spinTimer));
+      setEntries(res.entries);
+      const winnerIndex = res.pending_winner_idx;
+
+      // Calculate precise target angle so selected index lands perfectly at the top pointer (0 deg offsets)
+      const targetAngle = 360 - (winnerIndex * sliceAngle + sliceAngle / 2);
+
+      // Smooth multi-spin accumulation
+      const totalRotation =
+        currentRotationRef.current +
+        360 * 8 +
+        targetAngle -
+        (currentRotationRef.current % 360);
+      currentRotationRef.current = totalRotation;
+
+      setPendingWinner(res.pending_winner);
+      setRotation(totalRotation);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            stop_sound();
+            setShowWinnerModal(false);
+            setIsSpinning(false);
+            router.replace("/");
+            break;
+          case 404:
+            showAlert("warning", error.message);
+            stop_sound();
+            setShowWinnerModal(false);
+            setIsSpinning(false);
+            break;
+          default:
+            break;
+        }
+      }
     }
-    setPreparing(false);
-    setIsSpinning(true);
-    play_sound(Number(spinTimer));
-    setEntries(data?.data.entries);
-    const winnerIndex = data?.data.pending_winner_idx;
-
-    // Calculate precise target angle so selected index lands perfectly at the top pointer (0 deg offsets)
-    const targetAngle = 360 - (winnerIndex * sliceAngle + sliceAngle / 2);
-
-    // Smooth multi-spin accumulation
-    const totalRotation =
-      currentRotationRef.current +
-      360 * 8 +
-      targetAngle -
-      (currentRotationRef.current % 360);
-    currentRotationRef.current = totalRotation;
-
-    setPendingWinner(data?.data.pending_winner);
-    setRotation(totalRotation);
 
     // Sync modal appearance timing exactly with the CSS transition length (5000ms)
     setTimeout(
@@ -229,7 +245,7 @@ export default function WheelPage({ promise }: Props) {
                 fill="url(#wheelOverlay)"
                 pointerEvents="none"
               />
-            
+
               {/* Polished Core Hub */}
               <circle
                 r="45"
@@ -239,7 +255,7 @@ export default function WheelPage({ promise }: Props) {
                 className="shadow-xl"
               />
               <circle r="38" fill="#1e293b" />
-              
+
               <circle r="12" fill="#6366f1" className="animate-pulse" />
             </svg>
           </div>

@@ -32,7 +32,8 @@ class AgmaRegistration(BaseModel):
     authorization_letter: Mapped[str]  = mapped_column(type_=Text, nullable=True)
     is_verified: Mapped[bool]  = mapped_column(type_=Boolean, nullable=True, default=False)
     consumer: Mapped[ConsumerMeter] = relationship("ConsumerMeter", back_populates="agma")
-    
+    win_timestamp: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
+    dismiss_timestamp: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     monitoring: Mapped[List["AgmaVerificationMonitoring"]] = relationship(back_populates="registration", cascade="all, delete-orphan", order_by="desc(AgmaVerificationMonitoring.timestamped)")
     
 class AgmaVerificationMonitoring(BaseModel):

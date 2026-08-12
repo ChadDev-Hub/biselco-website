@@ -2,10 +2,9 @@
 
 import { use, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { SetupAgmaEvent } from "../../../actions/events";
+import { SetupAgmaEvent } from "../../../../lib/private-api/actions/events";
 import { useAlert } from "../../../context/alert";
 import { useWebsocket } from "@/app/context/websocketprovider";
-
 
 // Define the shape of your event configuration data
 type FormType = {
@@ -27,14 +26,15 @@ type Props = {
   initialData: Promise<PromiseType>;
 };
 
-const labelClassName = "label text-sm font-medium mb-2"
-const inputClassName = "input bg-base-100 w-full rounded-box focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+const labelClassName = "label text-sm font-medium mb-2";
+const inputClassName =
+  "input bg-base-100 w-full rounded-box focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent";
 
 const SetupSection = ({ initialData }: Props) => {
   const AgmaEventData = use(initialData);
   const { message } = useWebsocket();
   const { showAlert } = useAlert();
-  const [processedEvent, setProcessedEvent] = useState<string[]>(()=>{
+  const [processedEvent, setProcessedEvent] = useState<string[]>(() => {
     if (typeof window === "undefined") return []; // SSR safety guard
     try {
       const stored = localStorage.getItem("processed_events");
@@ -43,7 +43,7 @@ const SetupSection = ({ initialData }: Props) => {
       return [];
     }
   });
-  
+
   const {
     getValues,
     setValue,
@@ -68,12 +68,12 @@ const SetupSection = ({ initialData }: Props) => {
       if (processedEvent.includes(message.event_id)) return;
       queueMicrotask(() => {
         setProcessedEvent((prev) => {
-          const update = [...prev, message.event_id]
-          localStorage.setItem("processed_events", JSON.stringify(update))
-          return update
+          const update = [...prev, message.event_id];
+          localStorage.setItem("processed_events", JSON.stringify(update));
+          return update;
         });
       });
-      
+
       setValue("title", message.data.title);
       setValue("description", message.data.description);
       setValue("start_date", message.data.start_date);
@@ -85,24 +85,15 @@ const SetupSection = ({ initialData }: Props) => {
     }
   }, [message, setValue, showAlert, processedEvent]);
 
-
   const onSubmit: SubmitHandler<FormType> = async (data) => {
     const formData = new FormData();
 
     for (const [key, value] of Object.entries(data)) {
       if (value !== "") formData.append(key, String(value));
     }
+
     const res = await SetupAgmaEvent(formData);
-    switch (res?.status) {
-      case 201:
-        showAlert("success", res.data.message);
-        break;
-      case 403:
-        showAlert("error", res.data.message);
-        break;
-      default:
-        break;
-    }
+    showAlert("success", res);
   };
   // Toggle active status helper
 
@@ -134,22 +125,15 @@ const SetupSection = ({ initialData }: Props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Event Name - Full Width */}
           <div className="md:col-span-2">
-            <label className={labelClassName}>
-              Event Title
-            </label>
-            <div
-              title="Event Name"
-              className={inputClassName}
-            >
+            <label className={labelClassName}>Event Title</label>
+            <div title="Event Name" className={inputClassName}>
               {getValues("description")}
             </div>
           </div>
 
           {/* Start Date */}
           <div>
-            <label className={labelClassName}>
-              Start Date
-            </label>
+            <label className={labelClassName}>Start Date</label>
             <input
               title="Start Date"
               type="date"
@@ -160,9 +144,7 @@ const SetupSection = ({ initialData }: Props) => {
 
           {/* End Date */}
           <div>
-            <label className={labelClassName}>
-              End Date
-            </label>
+            <label className={labelClassName}>End Date</label>
             <input
               title="End Date"
               type="date"
@@ -173,9 +155,7 @@ const SetupSection = ({ initialData }: Props) => {
 
           {/* Registration Opening Time */}
           <div>
-            <label className={labelClassName}>
-              Registration Opening Time
-            </label>
+            <label className={labelClassName}>Registration Opening Time</label>
             <input
               title="Registration Opening Time"
               type="time"
@@ -186,9 +166,7 @@ const SetupSection = ({ initialData }: Props) => {
 
           {/* Assembly Formal Call Time */}
           <div>
-            <label className={labelClassName}>
-              Registration Closing Time
-            </label>
+            <label className={labelClassName}>Registration Closing Time</label>
             <input
               title="Assembly Call Time"
               type="time"

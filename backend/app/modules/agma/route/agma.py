@@ -124,13 +124,12 @@ async def get_agma_filter(
 
 @router.post("/setup", status_code=status.HTTP_201_CREATED)
 async def setup(
+    get_user_services:GetUserServices = Depends(GetUserServices),
     data: AgmaEventSetup = Form(...),
     post_services=Depends(PostAgmaRegistrationService),
-    user: UserModel = Depends(get_current_user),
-):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    
+):  
+    await get_user_services.get_current_user(is_admin_transaction=True)
     res = await post_services.setup_agma_event(data=data)
     return res
 
@@ -178,51 +177,43 @@ async def get_initial_raffle_entries(
 
 @router.post("/raffle/spin", status_code=status.HTTP_200_OK, response_model=AgmaSpin)
 async def spin(
-    user: UserModel = Depends(get_current_user),
+    get_user_services: GetUserServices = Depends(GetUserServices),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     return await get_services.raffle_spin()
 
 
 @router.post("/raffle/winner/info", status_code=status.HTTP_200_OK, response_model=WinnerInfo)
 async def get_winner_info(
-    user: UserModel = Depends(get_current_user),
+    get_user_services: GetUserServices = Depends(GetUserServices),
     data: AccountNumberRequest = Body(...),
     get_services: GetAgmaRegistrationService = Depends(
         GetAgmaRegistrationService),
 ):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     data = await get_services.winner_info(account_no=data.account_no)
     return data
 
 
 @router.patch("/raffle/winner/status", status_code=status.HTTP_200_OK)
 async def update_winner_status(
+    get_user_services: GetUserServices = Depends(GetUserServices),
     data: Registeredid = Body(...),
-    user: UserModel = Depends(get_current_user),
     patch_services: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService)):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     await patch_services.update_winner_status(id=data.id)
     return "Winner Saved Successfully"
 
 @router.patch("/raffle/winner/dismissed", status_code=status.HTTP_200_OK)
 async def dismissed_winner(
-    user: UserModel = Depends(get_current_user),
+    get_user_services: GetUserServices = Depends(GetUserServices),
     data: Registeredid = Body(...),
     patch_services: AgmaRegistrationPatchService = Depends(
         AgmaRegistrationPatchService)):
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
     await patch_services.dismissed_winner(id=data.id)
     return "Winner Dismissed Successfully"
 

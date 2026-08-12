@@ -142,7 +142,7 @@ class PostAgmaRegistrationService:
             }
             await redis_client.publish(CHANNEL, json.dumps(payload))
             
-            return {"message": "You have successfully updated the Agma Setup"}
+            return "You have successfully updated the Agma Setup"
         except Exception as e:
             print(e)
             raise HTTPException(

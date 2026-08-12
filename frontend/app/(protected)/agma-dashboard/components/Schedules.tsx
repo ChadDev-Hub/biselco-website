@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
-import { AgmaEventSchedules } from "../../../actions/events";
+import { AgmaEventSchedules } from "../../../../lib/private-api/actions/events";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import { useAlert } from "../../../context/alert";
 import { event } from "next/dist/build/output/log";
@@ -109,17 +109,7 @@ const Schedules = ({ promiseData }: Props) => {
       event_date: sched.event_date ? new Date(sched.event_date).toISOString() : null
     }))
     const res = await AgmaEventSchedules(payload);
-   
-    switch (res?.status) {
-      case 404:
-        showAlert("warning", res.data);
-        break;
-      case 201:
-        showAlert("success", res.data.message);
-        break;
-      default:
-        break;
-    }
+    showAlert("success", res);
   };
   return (
     <div className="w-full max-w-4xl mx-auto bg-base-100 border border-base-200 shadow-md rounded-2xl overflow-hidden">
