@@ -16,3 +16,16 @@ class Feature(BaseModel):
 class FeatureCollection(BaseModel):
     type: str
     features: List[Feature]
+
+
+class PointCoordinates(BaseModel):
+    latitude: float
+    longitude: float 
+    srid: int
+
+
+class Stats(BaseModel):
+    id: Optional[int]
+    name: str
+    value: int
+    description: str

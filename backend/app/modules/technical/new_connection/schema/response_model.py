@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional, List
+from .....common.schema.response import PointCoordinates
 class NewConnectionReportResponse(BaseModel):
     date_accomplished: date
     account_no: Optional[str] = None 
@@ -17,11 +18,6 @@ class NewConnectionReportResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class GeometryType (BaseModel):
-    type: str
-    coordinates: List[float]
-    srid: int
-    model_config = ConfigDict(from_attributes=True)
 
 class NewConnectionData(BaseModel):
     id: int
@@ -37,7 +33,7 @@ class NewConnectionData(BaseModel):
     accomplished_by: str
     remarks: Optional[str] = None
     images: Optional[List[str]] = None
-    geom: GeometryType
+    geom: PointCoordinates
     
     model_config = ConfigDict(from_attributes=True)
 class NewConnectionInitialData(BaseModel):

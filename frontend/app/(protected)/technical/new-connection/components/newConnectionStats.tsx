@@ -5,24 +5,21 @@ import { use, useState, useEffect } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"
 import StatsContainer from "@/app/common/Stats";
+import {Stats} from "@/types/stats";
 type PromiseType = {
     status: number;
-    data: StatsType[];
+    data: Stats[];
 }
 
 type Props = {
     data: Promise<PromiseType>
 }
 
-type StatsType = {
-    label: string
-    value: number;
-    description: string;
-}
-const Stats = ({ data }: Props) => {
+
+const NewConnectionStats = ({ data }: Props) => {
     // INITIAL DATA FETCHING
     const statsData = use(data);
-    const [stats, setStats] = useState<StatsType[]>([])
+    const [stats, setStats] = useState<Stats[]>([])
 
     useEffect(() => {
         if (statsData.data) {
@@ -75,13 +72,13 @@ const Stats = ({ data }: Props) => {
             {stats.map((stat, index) => (
                 <StatsCard
                     key={index}
-                    label={stat.label}
+                    label={stat.name}
                     value={stat.value}
                     description={stat.description}
-                    svg={svg(stat.label)} />
+                    svg={svg(stat.name)} />
             ))}
         </StatsContainer>
     )
 }
 
-export default Stats;
+export default NewConnectionStats;

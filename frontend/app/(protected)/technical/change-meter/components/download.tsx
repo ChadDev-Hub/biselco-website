@@ -66,7 +66,7 @@ const DownloadReport = ({ show, download, isactive }: Props) => {
 
     return (
         <>
-            <button disabled={isactive? false : true} onClick={handleOpen} title='Download Report' type='button' className={`btn ${isactive? "btn-active" : "btn-disabled"} place-items-center shadow sticky left-14 btn-circle btn-sm ${show ? "" : "hidden"}`}>
+            <button disabled={isactive? false : true} onClick={handleOpen} title='Download Report' type='button' data-tip="Download Report" className={`btn ${isactive? "btn-active" : "btn-disabled"} place-items-center z-50 shadow sticky tooltip tooltip-info tooltip-top left-14 btn-circle btn-sm ${show ? "" : "hidden"}`}>
                 <FileDown width={20} height={20} />
             </button>
             <dialog ref={modalRef} className="modal backdrop-blur-xl">

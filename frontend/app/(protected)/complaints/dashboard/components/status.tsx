@@ -5,22 +5,19 @@ import { useWebsocket } from "@/app/context/websocketprovider";
 import StatsCard from "./statsCard";
 import { CalendarDays, CheckCircle2, LayersPlus } from "lucide-react";
 import StatsContainer from "@/app/common/Stats";
+import { Stats }from "@/types/stats";
 type PromiseType = {
   status: number;
-  data: ComplaintStatsType[];
+  data: Stats[];
 };
 type Props = {
   data: Promise<PromiseType>;
 };
-type ComplaintStatsType = {
-  label: string;
-  value: number;
-  description: string;
-};
 
-const Stats = ({ data }: Props) => {
+
+const ComplaintStats = ({ data }: Props) => {
   const stats = use(data);
-  const [statsData, setStatsData] = useState<ComplaintStatsType[]>([]);
+  const [statsData, setStatsData] = useState<Stats[]>([]);
   useEffect(() => {
     queueMicrotask(() => setStatsData(stats.data));
   }, [stats]);
@@ -58,9 +55,9 @@ const Stats = ({ data }: Props) => {
       {statsData.map((m, index) => (
         <StatsCard
           key={index}
-          label={m.label}
+          label={m.name}
           value={m.value}
-          svg={SpecificSvg(m.label)}
+          svg={SpecificSvg(m.name)}
           description={m.description}
         />
       ))}
@@ -68,4 +65,4 @@ const Stats = ({ data }: Props) => {
   );
 };
 
-export default Stats;
+export default ComplaintStats;

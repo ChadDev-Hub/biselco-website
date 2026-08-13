@@ -76,14 +76,16 @@ async def get_new_connection(session: AsyncSession, page: Optional[int] = None, 
             "remarks": nc.remarks,
             "images": [img.image for img in nc.images],
             "geom": {
-                "type": "Point",
-                "coordinates": Point(to_shape(nc.geom).coords).coords[0],
-                "srid": nc.geom.srid}
+                "latitude": Point(to_shape(nc.geom)).y,
+                "longitude": Point(to_shape(nc.geom)).x,
+                "srid": nc.geom.srid
+            }
         }
         for nc in data
     ]
-    return {"data": results,
-            "total_page": total_page}
+    return {
+        "data": results,
+        "total_page": total_page}
 
 
 # GE NEW CONNECTION STATS

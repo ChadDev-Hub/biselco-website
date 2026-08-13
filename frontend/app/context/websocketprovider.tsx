@@ -3,7 +3,9 @@ import React, { createContext, useRef, useContext, useEffect, useState } from 'r
 import { useAuth } from './authProvider'
 import { AgmaStatsType, AgmaVerificationType, TicketInfoType, CountPerMunicipality } from '../../types/agma';
 import {Complaints, ComplaintStatusData, ComplaintMessage} from "@/types/complaints"
-
+import {  ChangeMeterCreatedType } from '../../types/change-meter';
+import { NewConnectionCreatedType} from '../../types/new-connection';
+import {Stats} from "@/types/stats";
 type Props = {
   children: React.ReactNode;
 }
@@ -47,7 +49,8 @@ type WSMessage = {
   data: ChangeMeterCreatedType;
 } | {
   detail: "deleted_change_meter";
-  success: boolean;
+  message: string;
+  stats:  Stats[]
 }
   |
 {
@@ -114,24 +117,6 @@ type AgmaStats = {
   is_percentage: boolean
 }
 
-// type NewAgmaRegistered = {
-//   id:string;
-//   account_no: string;
-//   name: string;
-//   phone: string;
-//   image: string;
-//   signature: string;
-//   account_name: string;
-//   village: string;
-//   municipality: string;
-//   meter_no: string;
-//   meter_brand: string;
-//   date_registered: string;
-//   time_registered: string;
-
-//   year: string;
-// }
-
 type EventSchedules = {
   id?: string | null;
   area?: string;
@@ -151,62 +136,13 @@ type AgmaSetup = {
   end_time: string;
 }
 
-type ChangeMeterCreatedType = {
-  change_meter_data: ChangeMeter;
-  change_meter_stats: Stats[]
 
-}
 
-type ChangeMeter = {
-  id: number;
-  date_accomplished: string;
-  account_no: string;
-  consumer_name: string;
-  location: string;
-  pull_out_meter: string;
-  pull_out_meter_reading: number
-  new_meter_serial_no: string
-  new_meter_brand: string
-  initial_reading: number
-  remarks?: string
-  accomplished_by: string
-  images: string[]
-  geom: Geometry
 
-}
 
-type Geometry = {
-  type: string;
-  coordinates: number[];
-  srid: number;
-}
 
-type NewConnectionCreatedType = {
-  new_connection: NewConnection;
-  new_connection_stats: Stats[]
-}
 
-type Stats = {
-  label: string;
-  value: number;
-  description: string;
-}
 
-type NewConnection = {
-  id: number;
-  date_accomplished: string;
-  consumer_name: string;
-  location: string;
-  meter_serial_no: string;
-  meter_brand: string;
-  meter_sealed: string;
-  initial_reading: number;
-  multiplier: number;
-  accomplished_by: string;
-  remarks: string;
-  images: string[];
-  geom: Geometry;
-}
 
 // COMPLAINT STATSD TYPE
 type ComplaintStatsType = {
@@ -270,6 +206,7 @@ type NewsData = {
 type WSContextType = {
   message: WSMessage | null;
   sendMessage: (data: unknown) => void
+  clearMessage: () => void
 }
 
 const WebsocketContext = createContext<WSContextType | undefined>(undefined)
@@ -335,9 +272,12 @@ const WebsocketProvider = ({ children }: Props) => {
     }
   }
 
+  const clearMessage = () => {
+    setMessage(null)
+  }
 
   return (
-    <WebsocketContext.Provider value={{ message, sendMessage }}>
+    <WebsocketContext.Provider value={{ message, sendMessage, clearMessage }}>
       {children}
     </WebsocketContext.Provider>
   )

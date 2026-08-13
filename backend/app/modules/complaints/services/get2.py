@@ -9,7 +9,7 @@ from .. import *
 from ...user import Users
 from ...complaints import ComplaintsStatusUpdates, ComplaintsStatusName
 from ..model.complaints_history import ComplaintsStatusHistory
-from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, Location, NewComplaintStatus, SelectecComplaintStatus, Lateststatus, ComplaintsImages
+from ..schema.response_model import ComplaintStatus, StatusHistory, ComplaintsModel, PointCoordinates, NewComplaintStatus, SelectecComplaintStatus, Lateststatus, ComplaintsImages
 from ....modules.websocket.schema.response_model import Message
 from ...user.schema.response_model import UserModel
 from shapely.geometry import Point
@@ -216,7 +216,7 @@ class GetServices():
                 reference_pole=complaints.reference_pole,
                 village=complaints.village,
                 municipality=complaints.municipality,
-                location=Location(
+                location=PointCoordinates(
                     latitude=loc.y,
                     longitude=loc.x,
                     srid=complaints.location.srid
@@ -277,7 +277,7 @@ class GetServices():
                 reference_pole=new_complaints.reference_pole,
                 village=new_complaints.village,
                 municipality=new_complaints.municipality,
-                location=Location(
+                location=PointCoordinates(
                     latitude=loc.y,
                     longitude=loc.x,
                     srid=new_complaints.location.srid
@@ -419,7 +419,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 1,
-                    'label', 'Total Complaints',
+                    'name', 'Total Complaints',
                     'value', func.count(Complaints.id),
                     'description', 'Includes Deleted'
                 ).label("data"))
@@ -444,7 +444,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 2,
-                    'label', 'Completion',
+                    'name', 'Completion',
                     'value', complaints_subquery.c.completed,
                     'description',
 
@@ -470,7 +470,7 @@ class GetDashboardServices:
             select(
                 func.jsonb_build_object(
                     'id', 3,
-                    'label', 'Daily Complaints',
+                    'name', 'Daily Complaints',
                     'value', func.count(Complaints.id),
                     'description', 'Today'
                 ).label("data"))

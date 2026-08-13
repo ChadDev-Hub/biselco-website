@@ -1,9 +1,8 @@
-from pydantic import BaseModel, ConfigDict, computed_field
-from uuid import UUID
+from pydantic import BaseModel, ConfigDict
+from ....common.schema.response import PointCoordinates
 from typing import List, Optional
 from datetime import datetime
-import pytz
-from geoalchemy2.elements import WKBElement
+
 class ComplaintStatus(BaseModel):
     id: int
     complaint_id: int
@@ -25,10 +24,7 @@ class StatusHistory(BaseModel):
     timestamped: str 
     user_photo:str
 
-class Location(BaseModel):
-    latitude: float
-    longitude: float
-    srid: int
+
     
 class Lateststatus(BaseModel):
     id: int
@@ -47,7 +43,7 @@ class ComplaintsModel(BaseModel):
     reference_pole: Optional[str]
     village: str
     municipality: str
-    location: Location
+    location: PointCoordinates
     date_time_submitted: str
     status: List[ComplaintStatus]
     latest_status: Optional[Lateststatus] = None

@@ -1,11 +1,11 @@
 import NewConnectionDataContainer from "./components/newConnectionData";
-import { GetNewConnection } from "@/lib/new-connection";
+import { GetNewConnection } from "@/lib/private-api/server-side/new-connection";
 import ChangeMeterCardSkeleton from "../change-meter/components/chageMeterCardsSkeleton";
 import Pagination from "../change-meter/components/pagination";
 import PageNationLoading from "../change-meter/components/pageNationSkeleton";
 import { Suspense } from "react";
 import { GetNewConnectionStats } from "@/lib/serverFetch";
-import Stats from "./components/newConnectionStats";
+import NewConnectionStats from "./components/newConnectionStats";
 import StatsSkeleton from "@/app/common/statsSkeleton";
 import Headers from "./components/header";
 import SearchComponent from "../../agma-dashboard/components/Search";
@@ -28,7 +28,7 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
       <main className="max-w-6xl mx-auto px-4 flex flex-col gap-3">
         <section className="flex justify-center">
           <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
-            <Stats data={stats} />
+            <NewConnectionStats data={stats} />
           </Suspense>
         </section>
 

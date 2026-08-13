@@ -212,7 +212,7 @@ const ChangeMeterForm = () => {
         data-tip="Add Change Meter"
         title="Change Meter Form"
         onClick={handleOpen}
-        className="btn btn-active btn-circle btn-sm tooltip tooltip-right tooltip-xs"
+        className="btn z-50 tooltip-top btn-active btn-circle btn-sm tooltip tooltip-info"
       >
         <CirclePlus />
       </button>

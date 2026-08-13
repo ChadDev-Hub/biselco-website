@@ -10,35 +10,12 @@ import { DownloadNewConnectionReport } from "@/app/actions/newConnectionMeter";
 import Delete from "../../change-meter/components/deleteChangeMeter";
 import DownloadReport from "../../change-meter/components/download";
 import NewConnectionForm from "./NewConnectionForm";
+import {NewConnectionInitialType, NewConnectionType} from "@/types/new-connection";
 type PromiseType = {
     status: number;
-    data: data
+    data: NewConnectionInitialType
 }
 
-type data = {
-    data: NewConnectionData[]
-}
-
-
-type NewConnectionData = {
-    id: number;
-    date_accomplished: string;
-    consumer_name: string;
-    location: string;
-    meter_serial_no: string;
-    meter_brand: string;
-    meter_sealed: string;
-    initial_reading: number;
-    multiplier: number;
-    accomplished_by: string;
-    remarks: string;
-    images: string[];
-    geom: {
-        type: string;
-        coordinates: number[];
-        srid: number;
-    }
-}
 
 type Props = {
     data: Promise<PromiseType>
@@ -47,7 +24,7 @@ type Props = {
 
 const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
     const newConnection = use(data)
-    const [newConnectionData, setNewConnectionData] = useState<NewConnectionData[] | []>([])
+    const [newConnectionData, setNewConnectionData] = useState<NewConnectionType[] | []>([])
     const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set())
     const searchParams = useSearchParams()
     const [isActive, setisActive] = useState(false)
@@ -186,15 +163,15 @@ const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
             {/* NEW CONNECTION CARD */}
             <div className="flex justify-center">
                 <div className="grid w-full max-w-6xl grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 place-items-center">
-                    {newConnectionData.map((item: NewConnectionData, index) => (
+                    {newConnectionData.map((item: NewConnectionType, index) => (
                         <NewConnectionCard
                             key={index}
                             consumer_name={item.consumer_name}
                             newmeter_brand={item.meter_brand}
                             newmeter_serial={item.meter_serial_no}
                             location={item.location}
-                            lat={item.geom.coordinates[1]}
-                            lon={item.geom.coordinates[0]}
+                            lat={item.geom.latitude}
+                            lon={item.geom.longitude}
                             srid={item.geom.srid}
                             date_accomplished={item.date_accomplished}
                             selectedRow={selectedRow}

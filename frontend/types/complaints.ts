@@ -1,6 +1,6 @@
 import {TotalPage} from "@/types/total-page";
-import {Location} from "@/types/location"
 import {User} from "@/types/user";
+import {PointCoordinates} from "@/types/location";
 export type UserComplaintsResponseType = {
     data : Complaints[];
     total_page: TotalPage
@@ -17,7 +17,7 @@ export type Complaints = {
     reference_pole: string;
     village: string;
     municipality: string;
-    location: Location;
+    location: PointCoordinates;
     date_time_submitted: string;
     status: ComplaintsStatus[];
     latest_status?: Lateststatus;

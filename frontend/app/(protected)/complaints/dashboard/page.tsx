@@ -1,5 +1,5 @@
 import { Suspense, use } from "react";
-import Stats from "./components/status";
+import ComplaintStats from "./components/status";
 import {
   GetComplaintStats,
 } from "@/lib/serverFetch";
@@ -52,7 +52,7 @@ const DashBoardPage = ({
               </div>
             }
           >
-            <Stats data={statsData} />
+            <ComplaintStats data={statsData} />
           </Suspense>
         </section>
 

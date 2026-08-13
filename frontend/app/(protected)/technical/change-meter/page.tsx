@@ -1,4 +1,4 @@
-  import Stats from "./components/stats";
+import ChangeMeterStats from "./components/stats";
 import { Suspense } from "react";
 import StatsSkeleton from "@/app/common/statsSkeleton";
 import ChangeMeterCardSkeleton from "./components/chageMeterCardsSkeleton";
@@ -24,7 +24,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
       <main className="max-w-6xl mx-auto px-4 flex flex-col gap-3">
         <section className=" w-full justify-center flex ">
           <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
-            <Stats data={data} />
+            <ChangeMeterStats data={data} />
           </Suspense>
         </section>
 

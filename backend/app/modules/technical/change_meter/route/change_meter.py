@@ -129,14 +129,14 @@ async def delete_change_meter(
     admins = await get_user_services.get_users_by_roles(roles="admin")
     new_data = DeletedChangeMeterResponse.model_validate(
         data).model_dump(mode="json")
-    new_data['detail'] = "deleted_change_meter"
+    
     payload = {
         "type" : "admins",
         "user_ids" : admins,
         "data" : new_data
     }
     await redis_client.publish(CHANNEL, json.dumps(payload))
-    return items
+    return data.message
 
 
 @router.post("/excel/report", status_code=status.HTTP_200_OK)

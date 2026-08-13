@@ -5,12 +5,7 @@ import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCa
 import { CopyPlus, CalendarDays, CirclePlus } from "lucide-react";
 import StatsContainer from "@/app/common/Stats";
 import {ChangeMeterResponseLists} from '../../../../../types/change-meter';
-
-type stats = {
-  label: string;
-  value: number;
-  description: string;
-};
+import {Stats} from "@/types/stats";
 
 type PromiseType = {
   status: number;
@@ -21,9 +16,9 @@ type Props = {
   data: Promise<PromiseType>;
 };
 
-const Stats = ({ data }: Props) => {
+const ChangeMeterStats = ({ data }: Props) => {
   const stats = use(data);
-  const [statistics, setStatistics] = useState<stats[]>([]);
+  const [statistics, setStatistics] = useState<Stats[]>([]);
   const { message } = useWebsocket();
   useEffect(() => {
     switch (stats?.status) {
@@ -45,11 +40,14 @@ const Stats = ({ data }: Props) => {
         });
 
         break;
-
+      case "deleted_change_meter":
+        queueMicrotask(() => {
+          setStatistics(message.stats);
+      })
       default:
         break;
     }
-  });
+  },[message]);
   const svg = (label: string) => {
     switch (label) {
       case "Total":
@@ -69,13 +67,13 @@ const Stats = ({ data }: Props) => {
       {statistics.map((stat, index) => (
         <StatsCard
           key={index}
-          label={stat.label}
+          label={stat.name}
           value={stat.value}
           description={stat.description}
-          svg={svg(stat.label)}
+          svg={svg(stat.name)}
         />
       ))}
     </StatsContainer>
   );
 };
-export default Stats;
+export default ChangeMeterStats;

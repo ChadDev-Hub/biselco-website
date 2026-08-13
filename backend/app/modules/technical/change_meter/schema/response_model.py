@@ -1,14 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import date
-
-class Geometry(BaseModel):
-    type:str
-    coordinates:List[float]
-    srid: int
-
-    
-
+from .....common.schema.response import PointCoordinates, Stats
     
 class ChangeMeterResponse(BaseModel):
     id:int
@@ -24,14 +17,10 @@ class ChangeMeterResponse(BaseModel):
     remarks: Optional[str] = None
     accomplished_by:str
     images: Optional[List[str]] = None
-    geom: Geometry
+    geom: PointCoordinates
 
     model_config = ConfigDict(from_attributes=True)
-    
-class Stats(BaseModel):
-    label: str
-    value: int
-    description: str
+
     
 class ChangeMeterResponseList(BaseModel):
     data:List[ChangeMeterResponse]
@@ -52,7 +41,9 @@ class NewChangeMeterResponse(BaseModel):
     
     
 class DeletedChangeMeterResponse(BaseModel):
-    success:bool
+    detail: str
+    message: str
+    stats: List[Stats]
 
 class ChangeMeterReportResponse(BaseModel):
     date_accomplished: date

@@ -53,7 +53,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
     }
   }, [changeMeter]);
 
-  const { message } = useWebsocket();
+  const { message, clearMessage } = useWebsocket();
   useEffect(() => {
     switch (message?.detail) {
       case "post_change_meter":
@@ -75,12 +75,13 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
         break;
       case "deleted_change_meter":
         router.refresh();
-        showAlert("success", message.success ? "Deleted Successfully" : "Failed");
+        showAlert("success", message.message);
+        clearMessage();
         break;
       default:
         break;
     }
-  }, [message, router, showAlert, page]);
+  }, [message, router, showAlert, page, clearMessage]);
 
   useEffect(() => {
     if (selectedRow.size > 0) {
@@ -213,8 +214,8 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
               newmeter_brand={item.new_meter_brand}
               newmeter_serial={item.new_meter_serial_no}
               location={item.location}
-              lat={item.geom.coordinates[1]}
-              lon={item.geom.coordinates[0]}
+              lat={item.geom.latitude}
+              lon={item.geom.longitude}
               accomplished_by={item.accomplished_by}
               date_accomplished={item.date_accomplished}
               srid={item.geom.srid}

@@ -18,7 +18,7 @@ from typing import Optional
 from ...gis.franchise_area.services.get_location import verifyLocation
 from ...gis.franchise_area.schema.response_model import VerifiedLocation
 from ...websocket.schema.response_model import Message
-from ..schema.response_model import Stat
+from ....common.schema.response import Stats
 from asyncio import gather
 from typing import List
 from ..services.get2 import GetServices, GetDashboardServices, GetMessageServices
@@ -295,7 +295,7 @@ async def get_complaints_message(get_message_services: GetMessageServices = Depe
 # Complaints Stats
 
 
-@router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[Stat])
+@router.get("/stats", status_code=status.HTTP_200_OK, response_model=List[Stats])
 async def complaints_stats(get_dashboardservices: GetDashboardServices = Depends(GetDashboardServices)):
     return await get_dashboardservices.get_complaints_stats()
 
