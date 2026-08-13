@@ -37,6 +37,7 @@ async def get_change_meter_stats(session: AsyncSession):
                daily_total.c.daily_total,
                monthly_count.c.m_count)
         .select_from(total_count)
+        .where(ChangeMeter.is_deleted == False)
         .join(daily_total, true())
         .join(monthly_count, true()))).mappings().one()
     new_data = []
@@ -134,19 +135,7 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
     
 
 
-async def deleteChangeMeter(session: AsyncSession, items: set, page: Optional[int] = None):
-    try:
-        await session.execute(delete(ChangeMeter).where(ChangeMeter.id.in_(items)))
-        await session.commit()
-        return {
-            "data": "Change Meter Deleted Successfully"
-        }
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    finally:
-        await session.close()
+
 
 
 # CHANGE METER REPORT

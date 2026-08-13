@@ -1,5 +1,4 @@
   import Stats from "./components/stats";
-import { GetChangeMeter } from "@/lib/serverFetch";
 import { Suspense } from "react";
 import StatsSkeleton from "@/app/common/statsSkeleton";
 import ChangeMeterCardSkeleton from "./components/chageMeterCardsSkeleton";
@@ -9,6 +8,7 @@ import Pagination from "./components/pagination";
 import Headers from "../new-connection/components/header";
 import SearchComponent from "../../agma-dashboard/components/Search";
 import SearchSkeleton from "../../../common/SearchSkeleton";
+import {GetChangeMeter} from "@/lib/private-api/server-side/change-meter";
 type Props = {
   searchParams: Promise<{
     page: number;

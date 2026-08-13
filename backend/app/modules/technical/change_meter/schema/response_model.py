@@ -52,7 +52,7 @@ class NewChangeMeterResponse(BaseModel):
     
     
 class DeletedChangeMeterResponse(BaseModel):
-    data: str
+    success:bool
 
 class ChangeMeterReportResponse(BaseModel):
     date_accomplished: date

@@ -2,48 +2,26 @@
 import { use, useState, useEffect } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import Delete from "./deleteChangeMeter";
-import { DeleteChangeMeter } from "@/app/actions/changeMeter";
+import { DeleteChangeMeter } from "@/lib/private-api/actions/change-meter";
 import DownloadReport from "./download";
-import { DownloadChangeMeterReport } from "@/app/actions/changeMeter";
+import { DownloadChangeMeterReport } from "@/lib/private-api/actions/change-meter";
 import { useRouter } from "next/navigation";
 import { useAlert } from "@/app/context/alert";
-
+import {ApiError} from "@/types/api-error";
 import { useSearchParams } from "next/navigation";
 import ChangeMeteCards from "./changeMeterCards";
 import ChangeMeterForm from "./changeMeterForm";
+import {ChangeMeterResponseLists, ChangeMeterType} from "@/types/change-meter";
+
+
 
 type PromiseType =
-  | {
+  {
     status: number;
-    data: Data;
+    data: ChangeMeterResponseLists
   }
-  | undefined;
 
-type Data = {
-  data: ChangeMeter[];
-  total_page: number;
-};
 
-type ChangeMeter = {
-  id: number;
-  date_accomplished: string;
-  account_no: string;
-  consumer_name: string;
-  location: string;
-  pull_out_meter: string;
-  pull_out_meter_reading: number;
-  new_meter_serial_no: string;
-  new_meter_brand: string;
-  initial_reading: number;
-  remarks?: string;
-  accomplished_by: string;
-  images: string[];
-  geom: {
-    type: string;
-    coordinates: number[];
-    srid: number;
-  };
-};
 type Props = {
   data: Promise<PromiseType>;
   searchComponent: React.ReactNode;
@@ -51,7 +29,7 @@ type Props = {
 
 const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
   const changeMeter = use(data);
-  const [changeMeterData, setChangeMeterData] = useState<ChangeMeter[] | []>(
+  const [changeMeterData, setChangeMeterData] = useState<ChangeMeterType[] | []>(
     [],
   );
   const [selectedRow, setSelectedRow] = useState<Set<number>>(new Set());
@@ -97,7 +75,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
         break;
       case "deleted_change_meter":
         router.refresh();
-        showAlert("success", message.data);
+        showAlert("success", message.success ? "Deleted Successfully" : "Failed");
         break;
       default:
         break;
@@ -123,28 +101,62 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
   };
 
   const handleDelete = async () => {
-    const res = await DeleteChangeMeter(selectedRow);
-    if (res?.status === 200) {
+    try {
+      const res = await DeleteChangeMeter(selectedRow);
+      
       setSelectedRow(new Set());
-      setChangeMeterData((prev) => prev.filter((item) => item.id !== res.data));
-    }
-  };
+      setChangeMeterData((prev) => prev.filter((item) => !res.has(item.id)));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            router.replace("/");
+            showAlert("error", error.message);
+            break;
+          case 403:
+            router.replace("/home");
+            showAlert("error", error.message);
+            break;
+          default:
+            showAlert("error", error.message);
+            break;
+        }
+      }
+    }}
+
 
   const handleDownload = async (formData: object) => {
     const data = {
       ...formData,
       items: Array.from(selectedRow),
     };
-    const res = await DownloadChangeMeterReport(data);
-    if (res?.status === 200) {
-      const blob = res.data;
+    try {
+      const blob = await DownloadChangeMeterReport(data);
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      a.href = url
       a.download = "change_meter_report.xlsx";
       document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setSelectedRow(new Set());
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      setSelectedRow(new Set())
+    } catch (error) {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            router.replace("/");
+            showAlert("error", error.message);
+            break;
+          case 403:
+            router.replace("/home");
+            showAlert("error", error.message);
+            break;
+          default:
+            showAlert("error", error.message);
+            break;
+        }
+      }
     }
   };
   return (
@@ -188,7 +200,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
       {/* Chage Meter Card */}
       <div className="flex justify-center">
         <div className="grid grid-cols-1 w-full max-w-7xl  sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
-          {changeMeterData.map((item: ChangeMeter, index) => (
+          {changeMeterData.map((item: ChangeMeterType, index) => (
             <ChangeMeteCards
               key={index}
               id={item.id}

@@ -4,16 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import { queryConsumer } from "@/lib/private-api/actions/consumer-meter";
-import { CirclePlus } from "lucide-react"
-import { SubmitChangeMeter } from "@/app/actions/changeMeter";
+import { CirclePlus } from "lucide-react";
+import { SubmitChangeMeter } from "@/lib/private-api/actions/change-meter";
 import { useLoading } from "@/app/common/loadingIndication";
 import { useSearchParams } from "next/navigation";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useCallback } from "react";
 import { useAlert } from "@/app/context/alert";
 import ImageViewer from "./imageViewr";
-import { Camera } from "lucide-react"
-import {Consumer} from "@/types/consumer-meter";
+import { Camera } from "lucide-react";
+import { Consumer } from "@/types/consumer-meter";
+import { ApiError } from "../../../../../types/api-error";
 
 type FormField = {
   dateAccomplished: string;
@@ -34,8 +35,6 @@ type FormField = {
   realtimeImage?: File;
 };
 
-
-
 const ChangeMeterForm = () => {
   const {
     register,
@@ -46,6 +45,7 @@ const ChangeMeterForm = () => {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<FormField>();
+
   const [consumer, setConsumer] = useState<Consumer[]>([]);
   const [selectedConsumer, setSelectedConsumer] = useState<string>("");
   const { showLoading } = useLoading();
@@ -91,33 +91,29 @@ const ChangeMeterForm = () => {
   const realtime_image = useWatch({
     control: control,
     name: "realtimeImage",
-  })
+  });
 
-  
-
-  useEffect(()=>{
-    if(attachment){
-      setValue("realtimeImage", undefined)
-      queueMicrotask(()=> setImagePreview(attachment))
+  useEffect(() => {
+    if (attachment) {
+      setValue("realtimeImage", undefined);
+      queueMicrotask(() => setImagePreview(attachment));
       return;
     }
-  },[attachment,setValue])
+  }, [attachment, setValue]);
 
-  useEffect(()=>{
-    if (!realtime_image) return
-    if(realtime_image){
-      setValue("attachment", undefined)
-      queueMicrotask(()=> setImagePreview(realtime_image))
+  useEffect(() => {
+    if (!realtime_image) return;
+    if (realtime_image) {
+      setValue("attachment", undefined);
+      queueMicrotask(() => setImagePreview(realtime_image));
 
-      navigator.geolocation.getCurrentPosition((position)=>{
-        setValue("lat", position.coords.latitude)
-        setValue("lon", position.coords.longitude)
-      })
+      navigator.geolocation.getCurrentPosition((position) => {
+        setValue("lat", position.coords.latitude);
+        setValue("lon", position.coords.longitude);
+      });
       return;
     }
-  },[realtime_image,setValue])
-
-  
+  }, [realtime_image, setValue]);
 
   useEffect(() => {
     if (consumerSearch === "") {
@@ -141,6 +137,8 @@ const ChangeMeterForm = () => {
       queueMicrotask(() => setConsumer([]));
       return;
     }
+    console.log("INPUT SEARCH:", consumerSearch);
+    console.log("DEBOUNCED:", debounceSearch);
     const fetchConsumer = async () => {
       const res = await queryConsumer(debounceSearch);
       if (res.status === 200) {
@@ -148,7 +146,7 @@ const ChangeMeterForm = () => {
       }
     };
     fetchConsumer();
-  }, [debounceSearch, selectedConsumer]);
+  }, [debounceSearch, selectedConsumer, consumerSearch]);
 
   // HANDLE SELECTED CONSUMER
   const selectConsumer = (account: Consumer) => {
@@ -157,8 +155,8 @@ const ChangeMeterForm = () => {
     setValue("consumerName", account.account_name);
     setValue("pullOutMeterNumber", account.meter_no);
     setValue("pullOutMeterBrand", account.meter_brand);
-    setValue("lat", account.geolocation.coordinates[1]);
-    setValue("lon", account.geolocation.coordinates[0]);
+    setValue("lat", account.geolocation?.coordinates?.[1] ?? "");
+    setValue("lon", account.geolocation?.coordinates?.[0] ?? "");
     setConsumer([]);
   };
   // HANDLE SUBMIT
@@ -188,28 +186,20 @@ const ChangeMeterForm = () => {
       }
       NewData.append("accomplishedBy", data.accomplishedBy);
       if (data.attachment?.[0]) {
-        NewData.append("attachment",imagePreview?.[0]);
+        NewData.append("attachment", imagePreview?.[0]);
       }
       showLoading(true, "Submitting Change Meter...");
       const page = useParams.get("page") as unknown as number;
-
-      const res = await SubmitChangeMeter(NewData, page ? page : 1);
-      switch (res?.status) {
-        case 201:
-          reset();
-          showLoading(false);
-          showAlert("success", "Successfully submitted change meter");
-          break;
-        case 403:
-          showLoading(false);
-          setError("lat", { message: res.data });
-          break;
-        case 404:
-          showLoading(false);
-          setError("lon", { message: res.data });
-          break;
-        default:
-          break;
+      try {
+        const res = await SubmitChangeMeter(NewData, page ? page : 1);
+        reset();
+        showLoading(false);
+        showAlert("success", res);
+      } catch (error) {
+        showLoading(false);
+        if (error instanceof ApiError) {
+          setError("lat", { message: error.message });
+        }
       }
     },
     [reset, setError, showLoading, useParams, showAlert, imagePreview],
@@ -228,9 +218,7 @@ const ChangeMeterForm = () => {
       </button>
       <dialog ref={modalRef} className="modal modal-bottom">
         <div className='px-2 w-full mx-auto  modal-box max-w-3xl border drop-shadow-md z-10 bg-base-100 rounded-box  border"'>
-          <div
-            className={`sticky top-0 z-100`}
-          >
+          <div className={`sticky top-0 z-100`}>
             <button
               type="button"
               onClick={handleClose}
@@ -442,8 +430,6 @@ const ChangeMeterForm = () => {
                       })}
                     />
 
-
-
                     {/* IMAGE */}
                     <div className="flex flex-col self-center items-center justify-center ">
                       <label className="label font-bold text-xs">
@@ -455,25 +441,26 @@ const ChangeMeterForm = () => {
                           type="file"
                           accept="image/*"
                           {...register("attachment", {
-                            required: "Please Upload Image of the Electric Meter",
+                            required:
+                              "Please Upload Image of the Electric Meter",
                           })}
                         />
                         <span className="text-xs"> OR</span>
-                        <label title="Capture  Realtime Image" data-tip="Take Picture" className="btn btn-active btn-circle cursor-pointer tooltip-left tooltip">
+                        <label
+                          title="Capture  Realtime Image"
+                          data-tip="Take Picture"
+                          className="btn btn-active btn-circle cursor-pointer tooltip-left tooltip"
+                        >
                           <input
                             type="file"
                             accept="image/*"
                             capture="environment"
                             className="hidden"
-                            {...register("realtimeImage", {
-                            })}
+                            {...register("realtimeImage", {})}
                           />
-                          <Camera  className=" text-emerald-500 t" />
+                          <Camera className=" text-emerald-500 t" />
                         </label>
-
                       </div>
-
-
 
                       {errors.attachment && (
                         <span className="text-red-500 talic text-xs">
@@ -483,10 +470,13 @@ const ChangeMeterForm = () => {
                       {imagePreview?.[0] && (
                         <div className="mt-2">
                           <ImageViewer
-                            image={imagePreview ? URL.createObjectURL(imagePreview?.[0]) : ""}
+                            image={
+                              imagePreview
+                                ? URL.createObjectURL(imagePreview?.[0])
+                                : ""
+                            }
                           />
                         </div>
-
                       )}
                     </div>
 

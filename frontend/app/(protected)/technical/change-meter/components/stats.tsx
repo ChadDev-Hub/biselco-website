@@ -4,6 +4,8 @@ import { useWebsocket } from "@/app/context/websocketprovider";
 import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCard";
 import { CopyPlus, CalendarDays, CirclePlus } from "lucide-react";
 import StatsContainer from "@/app/common/Stats";
+import {ChangeMeterResponseLists} from '../../../../../types/change-meter';
+
 type stats = {
   label: string;
   value: number;
@@ -12,11 +14,7 @@ type stats = {
 
 type PromiseType = {
   status: number;
-  data: {
-    data: number;
-    stats: stats[];
-    total_page: number;
-  };
+  data: ChangeMeterResponseLists
 };
 
 type Props = {

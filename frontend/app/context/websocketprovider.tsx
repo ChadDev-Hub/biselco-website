@@ -47,7 +47,7 @@ type WSMessage = {
   data: ChangeMeterCreatedType;
 } | {
   detail: "deleted_change_meter";
-  data: string;
+  success: boolean;
 }
   |
 {

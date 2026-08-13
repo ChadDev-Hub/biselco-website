@@ -115,6 +115,7 @@ class GetTicketServices:
                         screenshot = await tickets.nth(ticket).screenshot(omit_background=True)
                         bulk_images.append(
                             Image.open(BytesIO(screenshot)))
+                        
                 await browser.close()
                 return await self.convert_to_doc(bulk_images)
         except PlaywrightTimeoutError as e:

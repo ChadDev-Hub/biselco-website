@@ -61,9 +61,8 @@ async def post_change_meter(session:AsyncSession, data:dict, image:UploadFile):
                 
             }
         }
-            
-        
     except Exception as e:
         await session.rollback()
+        print(e, e.with_traceback())
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

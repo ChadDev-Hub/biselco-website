@@ -17,7 +17,8 @@ from ..schema.response_model import ChangeMeterResponseList, NewChangeMeterRespo
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
 import datetime
-from ..services.get import get_change_meter, deleteChangeMeter, changeMeterReport
+from ..services.get import get_change_meter, changeMeterReport
+from ..services.delete import DeleteServices
 from ..services.post import post_change_meter
 from sqlalchemy import select, func
 from .....dependencies.bucket3 import upload_image
@@ -42,7 +43,6 @@ async def create_change_meter(
     NewMeterSealed: Annotated[str, Form()],
     InitialMeterReading: Annotated[str, Form()],
     accomplishedBy: Annotated[str, Form()],
-    user: UserModel = Depends(get_current_user),
     remarks: Annotated[Optional[str], Form()] = None,
     attachment: UploadFile = File(),
     verified_location: VerifiedLocation = Depends(verifyLocation),
@@ -51,13 +51,8 @@ async def create_change_meter(
     get_user_services: GetUserServices = Depends(GetUserServices)
 ):
     # UPLOAD IMAGE TO S3 BUCKET
-
-    
-
-    # CHECK IF THE USER IS ADMIN IF NOT RAISE AN ERROR
-    if "admin" not in [role.name.lower() for role in user.roles]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Admin Only Transaction Allowed")
+    await get_user_services.get_current_user(is_admin_transaction=True)
+   
 
     # CHECK AND VERIFY IF THE IMAGE HAS GEOLOCATION IF NOT THEN USE THE VERIFIED LOCATION FROM MAP PIN
     location = None
@@ -96,7 +91,6 @@ async def create_change_meter(
 
         # GET ADMIN USER
         admin_user = await get_user_services.get_users_by_roles(roles="admin")
-
         data = NewChangeMeterResponse.model_validate(
             change_meter_data).model_dump(mode="json")
         payload = {
@@ -109,7 +103,7 @@ async def create_change_meter(
         print(e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    return {"detail": "Change Meter Created Successfully"}
+    return "Change Meter Created Successfully"
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=ChangeMeterResponseList)
@@ -123,12 +117,15 @@ async def fetch_change_meter(
 
 @router.delete("/", status_code=status.HTTP_200_OK)
 async def delete_change_meter(
-        session: AsyncSession = Depends(get_session),
         items: set = Body(...),
         page: Optional[int] = Query(None),
-        get_user_services: GetUserServices = Depends(GetUserServices)
+        get_user_services: GetUserServices = Depends(GetUserServices),
+        delelete_services: DeleteServices = Depends(DeleteServices)
         ):
-    data = await deleteChangeMeter(session=session, items=items, page=page)
+    # CHECK USER
+    await get_user_services.get_current_user(is_admin_transaction=True)
+    # CONTINUE TRANSACTION
+    data = await delelete_services.deleteChangeMeter(items=items, page=page)
     admins = await get_user_services.get_users_by_roles(roles="admin")
     new_data = DeletedChangeMeterResponse.model_validate(
         data).model_dump(mode="json")
@@ -139,12 +136,15 @@ async def delete_change_meter(
         "data" : new_data
     }
     await redis_client.publish(CHANNEL, json.dumps(payload))
-    return {
-        "detail": "Change Meter Deleted Successfully"}
+    return items
 
 
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
-async def change_meter_stats(data: ChangeMeterReport, session: AsyncSession = Depends(get_session)):
+async def change_meter_stats(
+    data: ChangeMeterReport, 
+    session: AsyncSession = Depends(get_session),
+    get_user_services: GetUserServices = Depends(GetUserServices)):
+    await get_user_services.get_current_user(is_admin_transaction=True)
     file_stream = await changeMeterReport(
         session=session,
         items=data.items,
@@ -167,6 +167,5 @@ async def change_meter_stats(data: ChangeMeterReport, session: AsyncSession = De
 @router.put("/sync", status_code=status.HTTP_200_OK)
 async def change_meter_sync(
     data: ChangeMeterSyncRequests = Form(...), 
-    put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)
-                              ):
+    put_services: ChangeMeterPutServices = Depends(ChangeMeterPutServices)):
     return await put_services.sync_change_meter(data=data)

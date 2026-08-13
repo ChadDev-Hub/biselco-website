@@ -22,7 +22,7 @@ async def get_consumer(session: AsyncSession, query: Optional[Any] = None):
         Municipality.name.label("municipality"))
         .select_from(ConsumerMeter)
         .join(Village).join(Municipality))
-    if query:
+    if query and len(query) > 1:
         query_str = str(query)
         stmt = stmt.where(or_(
             ConsumerMeter.account_no.cast(String).ilike(f"%{query_str}%"),
@@ -31,7 +31,7 @@ async def get_consumer(session: AsyncSession, query: Optional[Any] = None):
             ConsumerMeter.meter_no.ilike(f"%{query_str}%"),
             Village.name.ilike(f"%{query_str}%"),
             Municipality.name.ilike(f"%{query_str}%")
-        ), ConsumerMeter.is_agma).limit(60)
+        ), ConsumerMeter.is_agma.is_(True)).limit(60)
     else:
         return []
     results = (await session.execute(stmt)).mappings().all()

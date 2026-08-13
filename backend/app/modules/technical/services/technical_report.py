@@ -2,8 +2,11 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.page import PrintPageSetup
+from openpyxl.drawing.image import Image
 from fastapi import HTTPException, status
 from typing import Optional
+from pathlib import Path
+from openpyxl.utils import get_column_letter
 import io
 def create_technical_report(
     columns:list,
@@ -24,7 +27,14 @@ def create_technical_report(
     if ws is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No data available for report")
     ws.title = title if title else "No Title"
+    image_path = Path(__file__).resolve().parent.parent / "static" / "biselco-header.png"
+    img = Image(image_path)
+    img.width =720
+    img.height = 70
 
+    
+
+    
      # -----------------------------
     # Styles
     # -----------------------------
@@ -39,21 +49,30 @@ def create_technical_report(
         top=Side(style="thin"),
         bottom=Side(style="thin"),
     )
-
+    center_column = ((len(columns)) // 2) -1
+    # Give the image enough vertical space
+    ws.row_dimensions[1].height = 55
+    ws.row_dimensions[2].height = 20
+    
+    # HEADER
+    ws.merge_cells(start_row=1, start_column=1,
+                   end_row=1, end_column=len(columns))
+    ws.add_image(img, f"{get_column_letter(center_column)}1")
+    
     # -----------------------------
     # Title
     # -----------------------------
-    ws.merge_cells(start_row=1, start_column=1,
-                   end_row=1, end_column=len(columns))
-    ws["A1"] = title
-    ws["A1"].font = title_font
-    ws["A1"].alignment = center_align
+    ws.merge_cells(start_row=3, start_column=1,
+                   end_row=3, end_column=len(columns))
+    ws["A3"] = title
+    ws["A3"].font = title_font
+    ws["A3"].alignment = center_align
 
     # -----------------------------
     # Header Row
     # -----------------------------
     for col_idx, col_name in enumerate(columns, start=1):
-        cell = ws.cell(row=3, column=col_idx, value=col_name)
+        cell = ws.cell(row=5, column=col_idx, value=col_name)
         cell.font = header_font
         cell.alignment = center_align
         cell.border = thin_border
@@ -61,68 +80,68 @@ def create_technical_report(
     # -----------------------------
     # Data Rows
     # -----------------------------
-    for row_idx, row in enumerate(rows, start=4):
+    for row_idx, row in enumerate(rows, start=6):
         for col_idx, value in enumerate(row, start=1):
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
-            center_align_col = [i for i in range(4, len(columns))]
+            center_align_col = [i for i in range(6, len(columns))]
             cell.alignment = center_align if col_idx in center_align_col else left_align
             cell.border = thin_border
             cell.font = data_font   
 
     # PREPARED BY
-    ws.merge_cells(start_row=len(rows) + 2 + 4, start_column=1,
-                   end_row=len(rows) + 2 + 4 , end_column=2)
-    prepared_by = ws.cell(row=len(rows) + 4 + 2, column=1, value="Prepared by:")
+    ws.merge_cells(start_row=len(rows) + 2 + 6, start_column=1,
+                   end_row=len(rows) + 2 + 6 , end_column=2)
+    prepared_by = ws.cell(row=len(rows) + 6 + 2, column=1, value="Prepared by:")
     prepared_by.alignment = left_align
     
     # PREPARED NAME
-    ws.merge_cells(start_row=len(rows) + 2 + 4 +2, start_column=1,
-                   end_row=len(rows) + 2 + 4 + 2, end_column=2)
-    prepared_name = ws.cell(row=len(rows) + 4 + 2 + 2, column=1, value=prepare_name)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 +2, start_column=1,
+                   end_row=len(rows) + 2 + 6 + 2, end_column=2)
+    prepared_name = ws.cell(row=len(rows) + 6 + 2 + 2, column=1, value=prepare_name)
     prepared_name.alignment = center_align
     prepared_name.font = Font(size=12, bold=True, underline="single")
     
     # PREPARED POSITION
-    ws.merge_cells(start_row=len(rows) + 2 + 4 + 3, start_column=1,
-                   end_row=len(rows) + 2 + 4 + 3, end_column=2)
-    prepared_position = ws.cell(row=len(rows) + 4 + 2 + 3, column=1, value=prepare_position)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 + 3, start_column=1,
+                   end_row=len(rows) + 2 + 6 + 3, end_column=2)
+    prepared_position = ws.cell(row=len(rows) + 6 + 2 + 3, column=1, value=prepare_position)
     prepared_position.alignment = center_align
     
     
     # CHECKED BY
-    ws.merge_cells(start_row=len(rows) + 2 + 4, start_column=6,
-                   end_row=len(rows) + 2 + 4, end_column=7)
-    ws.cell(row=len(rows) + 4 + 2, column=6, value="Checked by:")
+    ws.merge_cells(start_row=len(rows) + 2 + 6, start_column=6,
+                   end_row=len(rows) + 2 + 6, end_column=7)
+    ws.cell(row=len(rows) + 6 + 2, column=6, value="Checked by:")
     
     # CHECKED BY NAME
-    ws.merge_cells(start_row=len(rows) + 2 + 4 + 2, start_column=6,
-                   end_row=len(rows) + 2 + 4 + 2, end_column=7)
-    checked_name = ws.cell(row=len(rows) + 4 + 2 + 2, column=6, value=check_name)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 + 2, start_column=6,
+                   end_row=len(rows) + 2 + 6 + 2, end_column=7)
+    checked_name = ws.cell(row=len(rows) + 6 + 2 + 2, column=6, value=check_name)
     checked_name.alignment = center_align
     checked_name.font = Font(size=12, bold=True, underline="single")
     
     # CHECKED BY POSITION
-    ws.merge_cells(start_row=len(rows) + 2 + 4 + 3, start_column=6,
-                   end_row=len(rows) + 2 + 4 + 3, end_column=7)
-    checked_position = ws.cell(row=len(rows) + 4 + 2 + 3, column=6, value=check_position)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 + 3, start_column=6,
+                   end_row=len(rows) + 2 + 6 + 3, end_column=7)
+    checked_position = ws.cell(row=len(rows) + 6 + 2 + 3, column=6, value=check_position)
     checked_position.alignment = center_align
     
     # Approved BY
-    ws.merge_cells(start_row=len(rows) + 2 + 4, start_column=10,
-                   end_row=len(rows) + 2 + 4, end_column=11)
-    ws.cell(row=len(rows) + 4 + 2, column=10, value="Approved by:")
+    ws.merge_cells(start_row=len(rows) + 2 + 6, start_column=10,
+                   end_row=len(rows) + 2 + 6, end_column=11)
+    ws.cell(row=len(rows) + 6 + 2, column=10, value="Approved by:")
     
     # APPROVED BY NAME
-    ws.merge_cells(start_row=len(rows) + 2 + 4 + 2, start_column=10,
-                   end_row=len(rows) + 2 + 4 + 2, end_column=11)
-    approved_name  = ws.cell(row=len(rows) + 4 + 2 + 2, column=10, value=approve_name)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 + 2, start_column=10,
+                   end_row=len(rows) + 2 + 6 + 2, end_column=11)
+    approved_name  = ws.cell(row=len(rows) + 6 + 2 + 2, column=10, value=approve_name)
     approved_name.alignment = center_align
     approved_name.font = Font(size=12, bold=True, underline="single")
     
     # APPROVED BY POSITION
-    ws.merge_cells(start_row=len(rows) + 2 + 4 + 3, start_column=10,
-                   end_row=len(rows) + 2 + 4 + 3, end_column=11)
-    approved_position = ws.cell(row=len(rows) + 4 + 2 + 3, column=10, value=approve_position)
+    ws.merge_cells(start_row=len(rows) + 2 + 6 + 3, start_column=10,
+                   end_row=len(rows) + 2 + 6 + 3, end_column=11)
+    approved_position = ws.cell(row=len(rows) + 6 + 2 + 3, column=10, value=approve_position)
     approved_position.alignment = center_align
     
     # -----------------------------

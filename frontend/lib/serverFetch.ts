@@ -33,36 +33,6 @@ export async function getNewsPage() {
 
 
 
-//  GET CHANGE METER DATA
-export const GetChangeMeter = async (page?:number,search?:string) => {
-    const cookie = await cookies()
-    const access_token = cookie.get("access_token")?.value
-    const params = new URLSearchParams();
-    if (page) params.set("page", page.toString());
-    if (search) params.set("search", search.toString());
-    const url = `${baseUrl}/v1/change_meter/?${params.toString()}`;
-    
-    const res = await fetch(url, {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${access_token}`
-        }
-    })
-    const data = await res.json()
-    if (!res.ok){
-        return {
-            status: res.status,
-            data: data.detail
-        }
-    }
-   
-    return {
-        status: res.status,
-        data: data
-    }
-};
 
 
 // GET STATS FOR COMPLAINTS DASHBOARD
