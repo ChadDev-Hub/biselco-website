@@ -42,16 +42,24 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
     else return false;
   });
   useEffect(() => {
-    switch (changeMeter?.status) {
-      case 200:
-        queueMicrotask(() => {
-          setChangeMeterData(changeMeter.data.data);
-        });
-        break;
-      default:
-        break;
+    try {
+      const res = changeMeter?.data.data
+      queueMicrotask(() => setChangeMeterData(res))
+    } catch (error) {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            router.push("/");
+            break;
+          case 403:
+            router.push("/home");
+            break;
+          default:
+            break;
+        }
+      }
     }
-  }, [changeMeter]);
+  }, [changeMeter, router]);
 
   const { message, clearMessage } = useWebsocket();
   useEffect(() => {

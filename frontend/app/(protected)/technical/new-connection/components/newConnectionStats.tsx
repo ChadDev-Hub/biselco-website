@@ -6,9 +6,12 @@ import { useWebsocket } from "@/app/context/websocketprovider";
 import {CopyPlus, CalendarDays, CirclePlus} from "lucide-react"
 import StatsContainer from "@/app/common/Stats";
 import {Stats} from "@/types/stats";
+
 type PromiseType = {
     status: number;
-    data: Stats[];
+    data: {
+        stats: Stats[]
+    };
 }
 
 type Props = {
@@ -24,7 +27,7 @@ const NewConnectionStats = ({ data }: Props) => {
     useEffect(() => {
         if (statsData.data) {
             queueMicrotask(() => {
-                setStats(statsData.data)
+                setStats(statsData.data.stats)
             })
 
         }
@@ -60,7 +63,7 @@ const NewConnectionStats = ({ data }: Props) => {
         switch (message?.detail) {
             case "new_connection_created":
                 queueMicrotask(() => {
-                    setStats(message.data.new_connection_stats)
+                    setStats(message.data.data.new_connection_stats)
                 })
                 break;
             default:

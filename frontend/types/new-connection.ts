@@ -19,12 +19,22 @@ export type NewConnectionType = {
 
 
 export type NewConnectionCreatedType = {
-  new_connection: NewConnectionType;
-  new_connection_stats: Stats[];
+  detail: string;
+  total_page: number;
+  message: string;
+  data: CreatedType
+}
+
+
+export type CreatedType = {
+    new_connection: NewConnectionType;
+    new_connection_stats: Stats[]
 }
 
 export type NewConnectionInitialType = {
     data: NewConnectionType[];
     total_page: number;
+    stats: Stats[]
     
 }
+

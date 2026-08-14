@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..model.new_connection import NewConnection, NewConnectionImage
 from fastapi import HTTPException, status, Depends, Body
 from .....dependencies.db_session import get_session
-from .get import get_new_connection
 from pprint import pprint
 from typing import List, Set
 from ..schema.requests_model import NewConnectionDelete

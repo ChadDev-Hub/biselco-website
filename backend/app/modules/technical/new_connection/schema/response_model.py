@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional, List
-from .....common.schema.response import PointCoordinates
+from .....common.schema.response import PointCoordinates, Stats
 class NewConnectionReportResponse(BaseModel):
     date_accomplished: date
     account_no: Optional[str] = None 
@@ -39,19 +39,13 @@ class NewConnectionData(BaseModel):
 class NewConnectionInitialData(BaseModel):
     data: List[NewConnectionData]
     total_page: int
-    model_config = ConfigDict(from_attributes=True)
-
-class NewConnectionStatsResponse(BaseModel):
-    label: str
-    value: int
-    description: str
-    
+    stats: List[Stats]
     model_config = ConfigDict(from_attributes=True)
 
 
 class CreatedData(BaseModel):
     new_connection: NewConnectionData
-    new_connection_stats: List[NewConnectionStatsResponse]
+    new_connection_stats: List[Stats]
     model_config = ConfigDict(from_attributes=True)
 
 class NewConnectionCreatedResponse(BaseModel):

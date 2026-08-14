@@ -47,7 +47,5 @@ async def redis_listener(manager):
 
     async for message in pubsub.listen():
         
-        
-        # CRITICAL FIX: Offload the work to an isolated background worker task immediately.
         # This instantly releases the Redis listener stream loop so it never freezes up!
         asyncio.create_task(process_incoming_payload(message, manager))

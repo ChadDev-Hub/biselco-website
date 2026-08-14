@@ -25,7 +25,7 @@ class PointCoordinates(BaseModel):
 
 
 class Stats(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = None
     name: str
     value: int
     description: str

@@ -7,8 +7,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile,
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests_model import NewConnectionRequest
-from ..services.post import create_new_connection, download_new_connection_report
-from ..services.get import get_new_connection, get_new_connection_stats
+from ..services.get import GetServices
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
 from .....common.geo import extract_address_from_image
@@ -17,14 +16,13 @@ from .....dependencies.bucket3 import upload_image
 from ..services.delete import delete_new_connection
 from typing import Optional
 from datetime import datetime
-from geoalchemy2.functions import ST_X, ST_Y
-from ....websocket.websocket_manager import manager
+from ..services.post import PostServices
 from ..schema.response_model import NewConnectionInitialData
 router = APIRouter(prefix="/new_connection", tags=["New Connection"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def new_connection(session: AsyncSession = Depends(get_session),
+async def new_connection(post_new_connection_services: PostServices = Depends(PostServices),
                          date: str = Form(...),
                          consumer_name: str = Form(...),
                          meter_serial_number: str = Form(...),
@@ -54,7 +52,7 @@ async def new_connection(session: AsyncSession = Depends(get_session),
         "geom": loc.geom,
         "remarks": remarks
     }
-    response = await create_new_connection(session=session, new_connection=data, image=attachment)
+    response = await post_new_connection_services.create_new_connection( new_connection=data, image=attachment)
     admins = await get_user_services.get_users_by_roles(roles="admin")
     payload = {
         "type": "admins",
@@ -82,9 +80,9 @@ async def check_image(image_location: VerifiedLocation = Depends(extract_address
 @router.get("", status_code=status.HTTP_200_OK, response_model=NewConnectionInitialData)
 async def get_nconnection(session: AsyncSession = Depends(get_session),
                           page: Optional[int] = Query(None),
-                          search: Optional[str] = Query(None)):
-    data = await get_new_connection(session=session, page=page if page else 1, search=search)
-    return data
+                          search: Optional[str] = Query(None),
+                          change_meter_get_services: GetServices = Depends(GetServices)):
+    return await change_meter_get_services.get_new_connection(page=page if page else 1, search=search)
 
 
 @router.delete("/", status_code=status.HTTP_200_OK)
@@ -102,13 +100,9 @@ async def del_n_connection(deleted=Depends(delete_new_connection), get_user_serv
 
 
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
-async def download_report(data=Depends(download_new_connection_report)):
-    return data
+async def download_report(new_connection_post_services: PostServices = Depends(PostServices), data: NewConnectionRequest = Body(...)):
+    return await new_connection_post_services.download_new_connection_report(data=data)
 
-
-@router.get("/stats")
-async def new_connection_stats(session: AsyncSession = Depends(get_session)):
-    return await get_new_connection_stats(session=session)
 
 
 @router.put("/sync", status_code=status.HTTP_200_OK)

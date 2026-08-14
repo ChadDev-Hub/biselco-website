@@ -2,11 +2,11 @@
 import { use, useState, useEffect } from "react"
 import NewConnectionCard from "./newConnectionCard";
 import { useWebsocket } from "@/app/context/websocketprovider";
-import { deleteNewConnection } from "@/app/actions/newConnectionMeter"
+import { deleteNewConnection } from "@/lib/private-api/actions/new-connection"
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useAlert } from "@/app/context/alert";
-import { DownloadNewConnectionReport } from "@/app/actions/newConnectionMeter";
+import { DownloadNewConnectionReport } from "@/lib/private-api/actions/new-connection";
 import Delete from "../../change-meter/components/deleteChangeMeter";
 import DownloadReport from "../../change-meter/components/download";
 import NewConnectionForm from "./NewConnectionForm";
@@ -60,8 +60,8 @@ const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
                 if (Number(page) === 1 || page === null) {
                     queueMicrotask(() => {
                         setNewConnectionData((prev) => {
-                            const existingData = prev.filter((item) => item.id !== message.data.new_connection.id);
-                            const newData = [message.data.new_connection, ...existingData].slice(0, 9);
+                            const existingData = prev.filter((item) => item.id !== message.data.data.new_connection.id);
+                            const newData = [message.data.data.new_connection, ...existingData].slice(0, 9);
                             return newData
                         })
                     })

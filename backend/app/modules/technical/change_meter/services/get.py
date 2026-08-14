@@ -46,6 +46,7 @@ async def get_change_meter_stats(session: AsyncSession):
     for key, value in data.items():
         if key == "total":
             total = {
+                "id": 1,
                 "name": "Total",
                 "value": value,
                 "description": "CM"
@@ -53,6 +54,7 @@ async def get_change_meter_stats(session: AsyncSession):
             new_data.append(total)
         elif key == "daily_total":
             daily = {
+                "id": 2,
                 "name": "Daily",
                 "value": value,
                 "description": "Today"
@@ -60,6 +62,7 @@ async def get_change_meter_stats(session: AsyncSession):
             new_data.append(daily)
         elif key == "m_count":
             average = {
+                "id": 3,
                 "name": "Last Month",
                 "value": value,
                 "description": (date.today() - relativedelta(months=1)).strftime("%B")

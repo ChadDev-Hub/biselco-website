@@ -38,7 +38,7 @@ async def verifyLocation(lon:float = Form(...),
             .where(ST_Intersects(Boundary.geom, geometry)))
     data = (await session.execute(stmt)).scalar_one_or_none()
     if not data:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Selected Location Exceeds Franchise Area")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Selected Location Exceeds Franchise Area")
     
     return VerifiedLocation(
         village=data.villages.name,

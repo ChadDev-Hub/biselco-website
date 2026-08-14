@@ -1,8 +1,20 @@
 "use client";
-import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import CardComponent from "@/app/common/card";
-import ImageViewer from './imageViewr';
-import {CircleGauge} from "lucide-react"
+import { CircleGauge, Loader } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const Mapbutton = dynamic(
+  () => import("@/app/(protected)/complaints/dashboard/components/mapbutton"),
+  {
+    ssr: false,
+    loading: () => <Loader className="animate-spin text-primary" />,
+  },
+);
+
+const ImageViewer = dynamic(() => import("./imageViewr"), {
+  ssr: false,
+  loading: () => <Loader className="animate-spin text-primary" />,
+});
 
 type Props = {
   selectedRow: Set<number>;
@@ -57,8 +69,7 @@ const ChangeMeteCards = ({
         />
         <div className="flex  gap-3 w-full h-18">
           <figure className="relative w-1/3">
-          <ImageViewer image={image}/>
-          
+            <ImageViewer image={image} />
           </figure>
           <div className="w-full">
             <h2 className="text-sm">ACCOUNT NO:</h2>
@@ -132,7 +143,7 @@ const ChangeMeteCards = ({
                   srid: srid,
                 }}
                 marker={
-                  <CircleGauge  className="text-2xl fill-orange-500 font-bold shadow  text-blue-500 size-5 animate-bounce"/>
+                  <CircleGauge className="text-2xl fill-orange-500 font-bold shadow  text-blue-500 size-5 animate-bounce" />
                 }
                 markerLabel={consumer_name}
               />

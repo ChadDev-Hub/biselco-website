@@ -13,97 +13,101 @@ from ..schema.requests_model import NewConnectionReportRequests
 from .....dependencies.db_session import get_session
 from ...services.technical_report import create_technical_report
 from ..schema.response_model import NewConnectionReportResponse, NewConnectionCreatedResponse
-from ..services.get import get_new_connection_stats
 from .....common.total_page import get_total_page
 from .....dependencies.bucket3 import upload_image
+from .get import GetServices
 
 PAGESIZE = 12
-async def create_new_connection(session: AsyncSession, new_connection: dict, image: UploadFile):
-    stmt = NewConnection(**new_connection)
-    try:
-        session.add(stmt)
-        await session.flush()
-        if image:
-            image_url = await upload_image(file=image, folder="new_connection")
-            session.add(NewConnectionImage(
-                new_connection_id=stmt.id,
-                image=image_url))
-        await session.commit()
-        results = (await session.execute(
-            select(NewConnection)
-            .options(selectinload(NewConnection.images))
-            .where(NewConnection.id == stmt.id))).scalar_one()
-        
-    
+
+class PostServices(GetServices):
+    def __init__(self):
+        super().__init__()
+    async def create_new_connection(self, new_connection: dict, image: UploadFile):
+        stmt = NewConnection(**new_connection)
         try:
-            coordinates = Point(to_shape(results.geom).coords)
-            new_connection_data = {
-                "id": results.id,
-                "date_accomplished": results.date_accomplished,
-                "consumer_name": results.consumer_name,
-                "location": results.location,
-                "meter_serial_no": results.meter_serial_no,
-                "meter_brand": results.meter_brand,
-                "meter_sealed": results.meter_sealed,
-                "initial_reading": results.initial_reading,
-                "multiplier": results.multiplier,
-                "accomplished_by": results.accomplished_by,
-                "remarks": results.remarks,
-                "images": [image.image for image in results.images],
-                "geom": {
-                    "type": "Point",
-                    "coordinates": [coordinates.x, coordinates.y],
-                    "srid": results.geom.srid
+            self.session.add(stmt)
+            await self.session.flush()
+            if image:
+                image_url = await upload_image(file=image, folder="new_connection")
+                self.session.add(NewConnectionImage(
+                    new_connection_id=stmt.id,
+                    image=image_url))
+            await self.session.commit()
+            results = (await self.session.execute(
+                select(NewConnection)
+                .options(selectinload(NewConnection.images))
+                .where(NewConnection.id == stmt.id))).scalar_one()
+            
+        
+            try:
+                coordinates = Point(to_shape(results.geom).coords)
+                new_connection_data = {
+                    "id": results.id,
+                    "date_accomplished": results.date_accomplished,
+                    "consumer_name": results.consumer_name,
+                    "location": results.location,
+                    "meter_serial_no": results.meter_serial_no,
+                    "meter_brand": results.meter_brand,
+                    "meter_sealed": results.meter_sealed,
+                    "initial_reading": results.initial_reading,
+                    "multiplier": results.multiplier,
+                    "accomplished_by": results.accomplished_by,
+                    "remarks": results.remarks,
+                    "images": [image.image for image in results.images],
+                    "geom": {
+                        "type": "Point",
+                        "coordinates": [coordinates.x, coordinates.y],
+                        "srid": results.geom.srid
+                    }
                 }
-            }
-            new_connection_stats = await get_new_connection_stats(session=session)
-            total_page = await get_total_page(session=session, model=NewConnection, pagesize=PAGESIZE)
-            created_data = {
-                "detail": "new_connection_created",
-                "message": "New Connection Created",
-                "total_page": total_page,
-                "data": {
-                    "new_connection": new_connection_data,
-                    "new_connection_stats": new_connection_stats
+                new_connection_stats = await self.get_new_connection_stats(session=self.session)
+                total_page = await get_total_page(session=self.session, model=NewConnection, pagesize=PAGESIZE)
+                created_data = {
+                    "detail": "new_connection_created",
+                    "message": "New Connection Created",
+                    "total_page": total_page,
+                    "data": {
+                        "new_connection": new_connection_data,
+                        "new_connection_stats": new_connection_stats
+                    }
                 }
-            }
-            data = NewConnectionCreatedResponse.model_validate(
-                created_data).model_dump(mode="json")
-            return data
+                data = NewConnectionCreatedResponse.model_validate(
+                    created_data).model_dump(mode="json")
+                return data
+            except Exception as e:
+                print(e)
+            return new_connection
         except Exception as e:
-            print(e)
-        return new_connection
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 # GET NEW CONNECTION REPORT
 
-async def download_new_connection_report(session: AsyncSession = Depends(get_session), data: NewConnectionReportRequests = Body(...)):
-    try:
-        # GET NEW CONNECTION DATA
-        stmt = (await session.execute(select(NewConnection).where(NewConnection.id.in_(data.items)))).scalars().all()
-        results = [NewConnectionReportResponse.model_validate(
-            d).model_dump(mode="python") for d in stmt]
-        columns = [col.replace("_", " ").upper() for col in results[0].keys()]
-        rows = [list(d.values()) for d in results]
-        report = create_technical_report(
-            columns=columns,
-            rows=rows,
-            title="NEW CONNECTION REPORT",
-            prepare_name=data.prepared_by,
-            prepare_position=data.prepared_position,
-            check_name=data.checked_by,
-            check_position=data.checked_position,
-            approve_name=data.approved_by,
-            approve_position=data.approved_position)
-        return StreamingResponse(
-            report,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment; filename=report.xlsx"})
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    async def download_new_connection_report(self, data: NewConnectionReportRequests):
+        try:
+            # GET NEW CONNECTION DATA
+            stmt = (await self.session.execute(select(NewConnection).where(NewConnection.id.in_(data.items)))).scalars().all()
+            results = [NewConnectionReportResponse.model_validate(
+                d).model_dump(mode="python") for d in stmt]
+            columns = [col.replace("_", " ").upper() for col in results[0].keys()]
+            rows = [list(d.values()) for d in results]
+            report = create_technical_report(
+                columns=columns,
+                rows=rows,
+                title="NEW CONNECTION REPORT",
+                prepare_name=data.prepared_by,
+                prepare_position=data.prepared_position,
+                check_name=data.checked_by,
+                check_position=data.checked_position,
+                approve_name=data.approved_by,
+                approve_position=data.approved_position)
+            return StreamingResponse(
+                report,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": "attachment; filename=report.xlsx"})
+        except Exception as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

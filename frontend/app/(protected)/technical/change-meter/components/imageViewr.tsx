@@ -55,6 +55,7 @@ const ImageViewer = ({ image, className, showImagePreview = true, customPreview,
             width={137}
             height={60}
             quality={75}
+            fetchPriority="high"
             loading="lazy"
             sizes="(max-width: 768px) 100vw, 329px"
             className="object-contain  hover:scale-110 transition-all duration-200"

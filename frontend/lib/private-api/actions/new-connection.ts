@@ -1,17 +1,17 @@
-"use server";
-
-import { serverFetchAutoRefresh } from "./actionWraper";
-
-const baseUrl = process.env.BASESERVERURL;
-
+import clientApi from "./clientApi";
+import {NewConnectionCreatedType} from "@/types/new-connection";
+import {ApiError} from "@/types/api-error";
+import axios from "axios";
 // POST NEW CONNECTION
-export const newConnectionMeter = async (data: FormData) => {
-  const res = serverFetchAutoRefresh(
-    `${baseUrl}/v1/new_connection/`,
-    "POST",
-    data,
-  );
-  return res;
+export const newConnectionMeter = async (formData: FormData) => {
+  try {
+    const {data} = await clientApi.post("/v1/new_connection/", formData);
+    return data as NewConnectionCreatedType}
+  catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new ApiError(error.response?.data.detail, error.response?.status || 500);
+    }
+  }
 };
 
 //  DELETE NEW CONNECTION DATA

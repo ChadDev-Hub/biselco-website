@@ -1,9 +1,9 @@
 "use client";
-import Mapbutton from "@/app/(protected)/complaints/dashboard/components/mapbutton";
 import CardComponent from "@/app/common/card";
-import ImageViewer from "../../change-meter/components/imageViewr";
-import { CircleGauge } from "lucide-react";
-
+import { CircleGauge, Loader } from "lucide-react";
+import dynamic from "next/dynamic";
+const Mapbutton = dynamic(() => import("@/app/(protected)/complaints/dashboard/components/mapbutton"), { ssr: false, loading: ()=> <Loader className="animate-spin text-primary" /> });
+const ImageViewer = dynamic(() => import("../../change-meter/components/imageViewr"), { ssr: false, loading: () => <Loader className="animate-spin text-primary" /> });
 type Props = {
   selectedRow: Set<number>;
   id: number;

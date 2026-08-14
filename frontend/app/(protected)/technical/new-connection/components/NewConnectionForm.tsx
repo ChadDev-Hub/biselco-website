@@ -2,12 +2,14 @@
 
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import BiselcoMap from "@/app/common/Map";
-import { newConnectionMeter } from "@/app/actions/newConnectionMeter";
+import { newConnectionMeter } from "@/lib/private-api/actions/new-connection";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useEffect, useRef, useState } from "react";
 import { GetImageLocation } from "../../../../actions/imageGeolocation";
 import { CirclePlus, Camera } from "lucide-react";
 import ImageViewer from "../../change-meter/components/imageViewr";
+import {useAlert} from "@/app/context/alert";
+import {ApiError} from "@/types/api-error";
 
 type FormField = {
   date: string;
@@ -39,7 +41,7 @@ const NewConnectionForm = () => {
   } = useForm<FormField>();
   const modalRef = useRef<HTMLDialogElement | null>(null);
   const [imageLocationVerifying, setImageLocationVerifying] = useState(false);
-
+  const {showAlert} = useAlert();
   const handleClose = () => modalRef?.current?.close();
   const handleOpen = () => modalRef?.current?.showModal();
   const labelStyle = "label font-bold text-xs";
@@ -121,16 +123,19 @@ const NewConnectionForm = () => {
       setError("attachment", { message: "Image is required" });
 
     form.append("attachment", imageAttachment!);
-    const res = await newConnectionMeter(form);
-    switch (res?.status) {
-      case 201:
-        reset();
-        break;
-      case 403:
-        setError("lat", { message: res.data });
-      default:
-        break;
-    }
+    try {
+       const res = await newConnectionMeter(form);
+       if (res) {
+         showAlert("success", res.message);
+       }
+       reset();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) {
+          showAlert("error", error.message);
+          setError("lat", {message: error.message});
+        };
+    }};
   };
   return (
     <>
