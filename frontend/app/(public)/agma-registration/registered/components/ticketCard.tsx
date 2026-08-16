@@ -2,13 +2,20 @@
 
 import Image from "next/image";
 import { TicketInfoType } from "@/types/agma";
-import ImageViewer from "@/app/(protected)/technical/change-meter/components/imageViewr";
 import { useAuth } from "@/app/context/authProvider";
 import { usePathname } from "next/navigation";
 import VerificationButton from "./verification-btn";
 import VerficationAuditTrail from "./verification-audit-trail";
 import Tools from "./tools";
-import { MailCheck, ReceiptText } from "lucide-react";
+import { MailCheck, ReceiptText, Loader } from "lucide-react";
+import dynamic from "next/dynamic";
+
+
+const ImageViewer = dynamic(() => import("@/app/(protected)/technical/change-meter/components/imageViewr"), {
+  ssr: false,
+  loading: () => <Loader className="animate-spin text-primary" size={20} />
+});
+
 type Props = {
   data: TicketInfoType;
 };

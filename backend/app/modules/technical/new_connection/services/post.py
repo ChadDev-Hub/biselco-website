@@ -17,11 +17,12 @@ from .....common.total_page import get_total_page
 from .....dependencies.bucket3 import upload_image
 from .get import GetServices
 
-PAGESIZE = 12
+
 
 class PostServices(GetServices):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, session: AsyncSession = Depends(get_session)):
+        super().__init__(session)
+       
     async def create_new_connection(self, new_connection: dict, image: UploadFile):
         stmt = NewConnection(**new_connection)
         try:
@@ -39,45 +40,45 @@ class PostServices(GetServices):
                 .where(NewConnection.id == stmt.id))).scalar_one()
             
         
-            try:
-                coordinates = Point(to_shape(results.geom).coords)
-                new_connection_data = {
-                    "id": results.id,
-                    "date_accomplished": results.date_accomplished,
-                    "consumer_name": results.consumer_name,
-                    "location": results.location,
-                    "meter_serial_no": results.meter_serial_no,
-                    "meter_brand": results.meter_brand,
-                    "meter_sealed": results.meter_sealed,
-                    "initial_reading": results.initial_reading,
-                    "multiplier": results.multiplier,
-                    "accomplished_by": results.accomplished_by,
-                    "remarks": results.remarks,
-                    "images": [image.image for image in results.images],
-                    "geom": {
-                        "type": "Point",
-                        "coordinates": [coordinates.x, coordinates.y],
-                        "srid": results.geom.srid
-                    }
+        
+            coordinates = Point(to_shape(results.geom).coords)
+            new_connection_data = {
+                "id": results.id,
+                "date_accomplished": results.date_accomplished,
+                "consumer_name": results.consumer_name,
+                "location": results.location,
+                "meter_serial_no": results.meter_serial_no,
+                "meter_brand": results.meter_brand,
+                "meter_sealed": results.meter_sealed,
+                "initial_reading": results.initial_reading,
+                "multiplier": results.multiplier,
+                "accomplished_by": results.accomplished_by,
+                "remarks": results.remarks,
+                "images": [image.image for image in results.images],
+                "geom": {
+                    "latitude": coordinates.y,
+                    "longitude": coordinates.x,
+                    "srid": results.geom.srid
                 }
-                new_connection_stats = await self.get_new_connection_stats(session=self.session)
-                total_page = await get_total_page(session=self.session, model=NewConnection, pagesize=PAGESIZE)
-                created_data = {
-                    "detail": "new_connection_created",
-                    "message": "New Connection Created",
-                    "total_page": total_page,
-                    "data": {
-                        "new_connection": new_connection_data,
-                        "new_connection_stats": new_connection_stats
-                    }
+            }
+            new_connection_stats = await self.get_new_connection_stats()
+            nc = select(NewConnection).where(NewConnection.is_deleted == False)
+            total_page = await get_total_page(session=self.session, stmt=nc, pagesize=self.PAGESIZE)
+            created_data = {
+                "detail": "new_connection_created",
+                "message": "New Connection Created",
+                "total_page": total_page,
+                "number_of_features": self.PAGESIZE,
+                "data": {
+                    "new_connection": new_connection_data,
+                    "new_connection_stats": new_connection_stats
                 }
-                data = NewConnectionCreatedResponse.model_validate(
-                    created_data).model_dump(mode="json")
-                return data
-            except Exception as e:
-                print(e)
-            return new_connection
+            }
+            data = NewConnectionCreatedResponse.model_validate(
+                created_data).model_dump(mode="json")
+            return data
         except Exception as e:
+            print(e)
             await self.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

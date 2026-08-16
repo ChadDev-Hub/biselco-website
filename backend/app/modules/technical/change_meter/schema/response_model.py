@@ -36,6 +36,7 @@ class ChangeMeterData(BaseModel):
 class NewChangeMeterResponse(BaseModel):
     detail: str
     message: str
+    number_of_features: int
     total_page: int
     data: ChangeMeterData
     

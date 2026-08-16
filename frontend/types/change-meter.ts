@@ -1,6 +1,6 @@
-import {TotalPage} from "./total-page";
-import {PointCoordinates} from "@/types/location";
-import {Stats} from "@/types/stats";
+import { TotalPage } from "./total-page";
+import { PointCoordinates } from "@/types/location";
+import { Stats } from "@/types/stats";
 export type ChangeMeterType = {
   id: number;
   date_accomplished: string;
@@ -15,20 +15,22 @@ export type ChangeMeterType = {
   remarks?: string;
   accomplished_by: string;
   images: string[];
-  geom: PointCoordinates
+  geom: PointCoordinates;
 };
 
-
-
-
-
 export type ChangeMeterResponseLists = {
-    data: ChangeMeterType[];
-    total_page: TotalPage;
-    stats: Stats[]
-}
+  data: ChangeMeterType[];
+  total_page: TotalPage;
+  stats: Stats[];
+};
 
 export type ChangeMeterCreatedType = {
-  change_meter_data: ChangeMeterType;
-  change_meter_stats: Stats[]
-}
+  detail: "post_change_meter";
+  message: string;
+  total_page: number;
+  number_of_features: number;
+  data: {
+    change_meter_data: ChangeMeterType;
+    change_meter_stats: Stats[];
+  };
+};

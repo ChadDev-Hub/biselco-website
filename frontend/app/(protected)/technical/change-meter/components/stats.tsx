@@ -2,7 +2,7 @@
 import { use, useEffect, useState } from "react";
 import { useWebsocket } from "@/app/context/websocketprovider";
 import StatsCard from "@/app/(protected)/complaints/dashboard/components/statsCard";
-import { CopyPlus, CalendarDays, CirclePlus } from "lucide-react";
+import { CopyPlus, CalendarDays, CalendarFold, CalendarCheck } from "lucide-react";
 import StatsContainer from "@/app/common/Stats";
 import {ChangeMeterResponseLists} from '../../../../../types/change-meter';
 import {Stats} from "@/types/stats";
@@ -55,8 +55,11 @@ const ChangeMeterStats = ({ data }: Props) => {
 
       case "Daily":
         return <CalendarDays className="text-emerald-500" />;
-      case "Monthly":
-        return <CirclePlus className="text-blue-500" />;
+      case "Last Month":
+        return <CalendarFold className="text-blue-500" />;
+
+      case "Current Month":
+        return <CalendarCheck className="text-purple-500" />;
       default:
         break;
     }

@@ -73,7 +73,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
               );
               return [message.data.change_meter_data, ...existingData].slice(
                 0,
-                9,
+                message.number_of_features,
               );
             });
           });
@@ -112,7 +112,6 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
   const handleDelete = async () => {
     try {
       const res = await DeleteChangeMeter(selectedRow);
-      
       setSelectedRow(new Set());
       setChangeMeterData((prev) => prev.filter((item) => !res.has(item.id)));
     } catch (error) {

@@ -43,18 +43,20 @@ async def post_change_meter(session:AsyncSession, data:dict, image:UploadFile):
             "accomplished_by": results.accomplished_by,
             "images": [im.image for im in results.images],
             "geom": {
-                "type": "Point",
-                "coordinates": [geometry.x, geometry.y],
+                "latitude": geometry.y,
+                "longitude": geometry.x,
                 "srid": results.geom.srid
             }
         }
         change_meter_stats = await get_change_meter_stats(session=session)
-        total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=PAGESIZE)
+        cm = select(ChangeMeter).where(ChangeMeter.is_deleted == False)
+        total_page = await get_total_page(session=session, stmt=cm, pagesize=PAGESIZE)
         
         return {
             "detail": "post_change_meter",
             "message": "Change Meter Created",
             "total_page": total_page,
+            "number_of_features": PAGESIZE,
             "data": {
                 "change_meter_data" : change_meter_data,
                 "change_meter_stats": change_meter_stats,
@@ -63,6 +65,6 @@ async def post_change_meter(session:AsyncSession, data:dict, image:UploadFile):
         }
     except Exception as e:
         await session.rollback()
-        print(e, e.with_traceback())
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

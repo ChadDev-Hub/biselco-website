@@ -73,11 +73,7 @@ class NewComplaintsModel(BaseModel):
     data: ComplaintsModel
     total_page:int
     
-class Stat(BaseModel):
-    id: int
-    label: str
-    value: int
-    description: str
+
     
 class SelectecComplaintStatus(BaseModel):
     id: int

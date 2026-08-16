@@ -1,18 +1,13 @@
 from ..model.new_connection import NewConnection
 from sqlalchemy import select, func, or_, cast, Text, and_, text
 from sqlalchemy.orm import selectinload, load_only
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status, Depends
+from fastapi import Depends
 from .....dependencies.db_session import get_session
-from geoalchemy2.functions import ST_AsGeoJSON
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point
-from pprint import pprint
 from typing import Optional
 from sqlalchemy import true
-from ..schema.response_model import NewConnectionData
-from typing import Type
 from .....common.total_page import get_total_page
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -22,6 +17,8 @@ PAGESIZE = 12
 class GetServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
+        self.PAGESIZE = PAGESIZE
+
     async def get_new_connection(self, page: Optional[int] = None, search: Optional[str] = None):
         if page is None:
             page = 1
@@ -42,30 +39,32 @@ class GetServices:
                     NewConnection.geom
                 ))
                 .where(NewConnection.is_deleted == False)
-                .order_by(NewConnection.times_tamped.desc())
-                .offset((PAGESIZE * (page - 1)))
-                .limit(PAGESIZE))
+                .order_by(NewConnection.times_tamped.desc()))
         if search:
             page = 1
             stmt = stmt.where(
                 or_(
-                    cast(NewConnection.times_tamped, Text).ilike(f"%{search}%"),
+                    cast(NewConnection.times_tamped,
+                         Text).ilike(f"%{search}%"),
                     cast(NewConnection.date_accomplished,
-                        Text).ilike(f"%{search}%"),
+                         Text).ilike(f"%{search}%"),
                     NewConnection.consumer_name.ilike(f"%{search}%"),
                     NewConnection.location.ilike(f"%{search}%"),
                     NewConnection.meter_serial_no.ilike(f"%{search}%"),
                     NewConnection.meter_brand.ilike(f"%{search}%"),
-                    cast(NewConnection.meter_sealed, Text).ilike(f"%{search}%"),
-                    cast(NewConnection.initial_reading, Text).ilike(f"%{search}%"),
+                    cast(NewConnection.meter_sealed,
+                         Text).ilike(f"%{search}%"),
+                    cast(NewConnection.initial_reading,
+                         Text).ilike(f"%{search}%"),
                     cast(NewConnection.multiplier, Text).ilike(f"%{search}%"),
                     NewConnection.accomplished_by.ilike(f"%{search}%"),
                     NewConnection.remarks.ilike(f"%{search}%"),
                 )
-            ).offset((PAGESIZE * (page - 1))).limit(PAGESIZE)
-        total_page = await get_total_page(session=self.session, model=NewConnection, pagesize=PAGESIZE)
-        data = (await self.session.execute(stmt)).scalars().all()
+            )
+        total_page = await get_total_page(session=self.session, pagesize=self.PAGESIZE, stmt=stmt)
+        data = (await self.session.execute(stmt.offset((self.PAGESIZE * (page - 1))).limit(self.PAGESIZE))).scalars().all()
         new_connection_stats = await self.get_new_connection_stats()
+
         results = [
             {
                 "id": nc.id,
@@ -94,17 +93,18 @@ class GetServices:
             "stats": new_connection_stats
         }
 
-
     # GE NEW CONNECTION STATS
+
     async def get_new_connection_stats(self):
         total_count = (
             select(func.coalesce(func.count(), 0).label("total"))
             .select_from(NewConnection)
+            .where(NewConnection.is_deleted == False)
         ).cte("total_count")
 
         daily_total = (
             select(func.count().label("daily_total"))
-            .where(NewConnection.date_accomplished == func.current_date())
+            .where(NewConnection.date_accomplished == func.current_date(), NewConnection.is_deleted == False)
         ).cte("daily_total")
 
         monthly_count = (
@@ -112,29 +112,46 @@ class GetServices:
                 func.coalesce(func.count(), 0).label("monthly_count")
             )
             .where(and_(NewConnection.date_accomplished >= func.current_date() - text("INTERVAL '1 month'"),
-                        NewConnection.date_accomplished < func.current_date()))
+                        NewConnection.date_accomplished < func.current_date(),
+                        NewConnection.is_deleted == False))
 
         ).cte("monthly_count")
 
+        current_month = (
+            select(
+                func.coalesce(func.count(), 0).label("current_month")
+
+            ).where(func.extract('Month', NewConnection.date_accomplished) == func.extract('Month', func.current_date()),
+                    NewConnection.is_deleted == False)
+        ).cte("current_month")
         data = (await self.session.execute(
-            select(total_count.c.total, daily_total.c.daily_total,
-                monthly_count.c.monthly_count)
+            select(total_count.c.total,
+                   daily_total.c.daily_total,
+                   monthly_count.c.monthly_count,
+                   current_month.c.current_month)
             .select_from(total_count)
             .join(daily_total, true())
-            .join(monthly_count, true()))).mappings().one()
+            .join(monthly_count, true())
+            .join(current_month, true())
+        )).mappings().one()
         return [{
-            "id" : 1,
+            "id": 1,
             "name": "Total",
             "value": data["total"],
             "description": "NC"
         }, {
-            "id" : 2,
+            "id": 2,
             "name": "Daily Total",
             "value": data["daily_total"],
             "description": "Today"
         }, {
-            "id" : 3,
+            "id": 3,
             "name": "Last Month",
             "value": data["monthly_count"],
             "description": (date.today() - relativedelta(months=1)).strftime("%B")
+        },{
+            "id": 4,
+            "name": "Current Month",
+            "value": data["current_month"],
+            "description": date.today().strftime("%B")
         }]

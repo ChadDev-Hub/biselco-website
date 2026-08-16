@@ -4,8 +4,9 @@ import { useAuth } from './authProvider'
 import { AgmaStatsType, AgmaVerificationType, TicketInfoType, CountPerMunicipality } from '../../types/agma';
 import {Complaints, ComplaintStatusData, ComplaintMessage} from "@/types/complaints"
 import {  ChangeMeterCreatedType } from '../../types/change-meter';
-import { NewConnectionCreatedType} from '../../types/new-connection';
+
 import {Stats} from "@/types/stats";
+import {NewConnectionDeleteResponse, NewConnectionCreatedType} from "@/types/new-connection";
 type Props = {
   children: React.ReactNode;
 }
@@ -42,12 +43,7 @@ type WSMessage = {
 } | {
   detail: "presence";
   data: UserPresence;
-} | {
-  detail: "post_change_meter"
-  message: string;
-  total_page: number;
-  data: ChangeMeterCreatedType;
-} | {
+} | ChangeMeterCreatedType | {
   detail: "deleted_change_meter";
   message: string;
   stats:  Stats[]
@@ -68,14 +64,9 @@ type WSMessage = {
     new_message: ComplaintMessage;
     unread: Unread;
   }
-} | {
-  detail: "new_connection_created";
-  total_page: number;
-  message: string;
-  data: NewConnectionCreatedType;
-} | {
-  detail: "new_connection_deleted"
-} | {
+} | NewConnectionCreatedType
+ | NewConnectionDeleteResponse | 
+{
   detail: "agma_setup";
   event_id: string;
   message: string;

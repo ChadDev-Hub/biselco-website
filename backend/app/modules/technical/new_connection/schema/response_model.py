@@ -52,9 +52,16 @@ class NewConnectionCreatedResponse(BaseModel):
     detail: str
     total_page: int
     message: str
+    number_of_features: int
     data: CreatedData
     
     model_config = ConfigDict(from_attributes=True)
+
+class NewConnectionDeleteResponse(BaseModel):
+    detail: str;
+    deleted_id: List[int];
+    stats: List[Stats];
+    message: str
     
 class NewConnectionSyncResponse(BaseModel):
     uuid: str

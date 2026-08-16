@@ -35,11 +35,18 @@ async def get_change_meter_stats(session: AsyncSession):
                ChangeMeter.is_deleted == False)
     ).cte("monthly_count")
 
+    current_month = (select(
+        func.coalesce(func.count(), 0).label("c_count"))
+        .where(func.extract('Month', ChangeMeter.date_accomplished) == func.extract('Month', func.current_date()),
+               ChangeMeter.is_deleted == False)).cte("current_month")
+
     data = (await session.execute(
         select(total_count.c.total,
                daily_total.c.daily_total,
-               monthly_count.c.m_count)
+               monthly_count.c.m_count,
+               current_month.c.c_count)
         .select_from(total_count)
+        .join(current_month, true())
         .join(daily_total, true())
         .join(monthly_count, true()))).mappings().one()
     new_data = []
@@ -68,6 +75,14 @@ async def get_change_meter_stats(session: AsyncSession):
                 "description": (date.today() - relativedelta(months=1)).strftime("%B")
             }
             new_data.append(average)
+        elif key == "c_count":
+            current = {
+                "id": 4,
+                "name": "Current Month",
+                "value": value,
+                "description": date.today().strftime("%B")
+            }
+            new_data.append(current)
     return new_data
 
 # GET CHANGE METER DATA BY search OR ALL
@@ -81,7 +96,7 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
         .order_by(ChangeMeter.timestamped.desc()))
 
     # GET TOTAL PAGE
-    total_page = await get_total_page(session=session, model=ChangeMeter, pagesize=PAGE_SIZE)
+    total_page = await get_total_page(session=session, stmt=change_meter, pagesize=PAGE_SIZE)
     if search:
         stmt = change_meter.where(
             or_(
@@ -130,6 +145,7 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
         }
         data.append(items)
     change_meter_stats = await get_change_meter_stats(session=session)
+    print(change_meter_stats)
     return {
         "data": data,
         "total_page": total_page,

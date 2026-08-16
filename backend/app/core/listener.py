@@ -46,6 +46,5 @@ async def redis_listener(manager):
     print("Redis listener started")
 
     async for message in pubsub.listen():
-        
         # This instantly releases the Redis listener stream loop so it never freezes up!
         asyncio.create_task(process_incoming_payload(message, manager))

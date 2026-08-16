@@ -11,7 +11,7 @@ export const GetChangeMeter = async (page?:number,search?:string) => {
         const serverApi = await getServerApi();
         const { data, status } = await serverApi.get(`/v1/change_meter/`, {
             params: {
-                search: search,
+                search: search,                                    
                 page: page,
             },
         })

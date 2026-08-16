@@ -198,7 +198,7 @@ const ChangeMeterForm = () => {
       } catch (error) {
         showLoading(false);
         if (error instanceof ApiError) {
-          setError("lat", { message: error.message });
+          if (error.status === 409) setError("lat", { message: error.message });
         }
       }
     },

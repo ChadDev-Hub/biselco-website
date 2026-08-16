@@ -5,7 +5,7 @@ import BiselcoMap from "@/app/common/Map";
 import { newConnectionMeter } from "@/lib/private-api/actions/new-connection";
 import ElectricMeter from "../../components/electricMeterSvg";
 import { useEffect, useRef, useState } from "react";
-import { GetImageLocation } from "../../../../actions/imageGeolocation";
+import { GetImageLocation } from "../../../../../lib/private-api/actions/imageGeolocation";
 import { CirclePlus, Camera } from "lucide-react";
 import ImageViewer from "../../change-meter/components/imageViewr";
 import {useAlert} from "@/app/context/alert";
@@ -38,7 +38,10 @@ const NewConnectionForm = () => {
     setValue,
     reset,
     getValues,
-  } = useForm<FormField>();
+  } = useForm<FormField>({
+    mode:"onChange",
+    
+  });
   const modalRef = useRef<HTMLDialogElement | null>(null);
   const [imageLocationVerifying, setImageLocationVerifying] = useState(false);
   const {showAlert} = useAlert();

@@ -19,17 +19,18 @@ export type NewConnectionType = {
 
 
 export type NewConnectionCreatedType = {
-  detail: string;
+  detail: "new_connection_created";
   total_page: number;
   message: string;
-  data: CreatedType
-}
-
-
-export type CreatedType = {
+  number_of_features: number;
+  data: {
     new_connection: NewConnectionType;
     new_connection_stats: Stats[]
+  }
 }
+
+
+
 
 export type NewConnectionInitialType = {
     data: NewConnectionType[];
@@ -38,3 +39,10 @@ export type NewConnectionInitialType = {
     
 }
 
+export type NewConnectionDeleteResponse = { 
+  detail: "new_connection_deleted";
+  deleted_id: number[];
+  total_page: number;
+  message: string;
+  stats: Stats[]
+}
