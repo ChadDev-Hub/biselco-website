@@ -23,7 +23,7 @@ class NewConnectionDelete(BaseModel):
     
     
 class NewConnectionReportRequests(BaseModel):
-    items: List[int]
+    items: set
     prepared_by: str
     prepared_position: str
     checked_by: str

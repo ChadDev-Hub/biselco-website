@@ -5,14 +5,15 @@ from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
 from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
-
+from ....technical.construction import LineConstruction
 if TYPE_CHECKING:
     from ...distribution_lines.models.primary_lines import PrimaryLines
     from ...distribution_transformer.model.transformer import TransformerLinebushing
     from ...distribution_lines.models.secondary_lines import SecondaryLines
     from ...consumer.model.service_drop import ServiceDrop
-    from ....technical.construction.model.construction import LineConstruction
-
+    
+    
+    
 class ConductorWires(BaseModel):
     __tablename__ = "conductor_wires"
     __table_args__ = {"schema": "gis"}
@@ -23,8 +24,11 @@ class ConductorWires(BaseModel):
     strand: Mapped[str] = mapped_column(Text, nullable=False)
     diameter_inch: Mapped[float] = mapped_column(Float, nullable=False)
     gmr_ft: Mapped[float] = mapped_column(Float, nullable=False)
+    r_ohms_miles: Mapped[float] = mapped_column(Float, nullable=False)
     x_ohms_miles: Mapped[float] = mapped_column(Float, nullable=False)
     ampacity: Mapped[float] = mapped_column(Float, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    remarks: Mapped[str] = mapped_column(Text, nullable=True)
 
     primary_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="conductor")
@@ -36,7 +40,7 @@ class ConductorWires(BaseModel):
     service_drops: Mapped[List["ServiceDrop"]] = relationship(
         "ServiceDrop", back_populates="conductor"
     )
-    line_constructions: Mapped[List["LineConstruction"]] = relationship(
+    line_constructions: Mapped[List[LineConstruction]] = relationship(
         "LineConstruction", back_populates="conductor_wire"
     )
 

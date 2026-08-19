@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from ...modules.auth.routes import auth
 from ...modules.landing.route import landing
-
+from ...modules.gis.wires.route import conductor
 from ...modules.gis.consumer.route import consumers
 from ...modules.biscollect.route import login as biscollect_login
 from ...modules.complaints.route import complaints
@@ -11,7 +11,7 @@ from ...modules.technical.change_meter.route import change_meter
 from ...modules.agma.route import agma
 from ...modules.websocket.route import websocket
 from ...modules.technical.new_connection.route import new_connection_route
-from .routes import  meter, news, signup, technical_form
+from .routes import  meter, signup, technical_form
 from ...modules.events.route import events_router
 from ...modules.gis.distribution_lines.route import distribution_lines
 from ...modules.user.route import user
@@ -22,7 +22,6 @@ router.include_router(complaints.router)
 router.include_router(landing.router)
 router.include_router(auth.router)
 router.include_router(meter.router)
-router.include_router(news.router)
 router.include_router(signup.router)
 router.include_router(websocket.router)
 router.include_router(user.router)
@@ -35,3 +34,4 @@ router.include_router(events_router.router)
 router.include_router(distribution_lines.router)
 router.include_router(distribution_transformer.router)
 router.include_router(biscollect_login.router)
+router.include_router(conductor.router)

@@ -6,7 +6,7 @@ from .....core.redis import CHANNEL, redis_client
 from fastapi import APIRouter, HTTPException, status, Depends, File, UploadFile, Form, Query, Body
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..schema.requests_model import NewConnectionRequest
+from ..schema.requests_model import NewConnectionRequest, NewConnectionReportRequests
 from ..services.get import GetServices
 from ....gis.franchise_area.services.get_location import verifyLocation
 from ....gis.franchise_area.schema.response_model import VerifiedLocation
@@ -90,7 +90,8 @@ async def del_n_connection(delete_services: DeleteServices = Depends(DeleteServi
 
 
 @router.post("/excel/report", status_code=status.HTTP_200_OK)
-async def download_report(new_connection_post_services: PostServices = Depends(PostServices), data: NewConnectionRequest = Body(...)):
+async def download_report(new_connection_post_services: PostServices = Depends(PostServices), 
+                          data: NewConnectionReportRequests = Body(...)):
     return await new_connection_post_services.download_new_connection_report(data=data)
 
 

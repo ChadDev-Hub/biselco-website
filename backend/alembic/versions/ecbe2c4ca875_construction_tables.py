@@ -30,69 +30,86 @@ def upgrade() -> None:
     op.create_table(
         "construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-        sa.Column("form_id",sa.Integer(),sa.ForeignKey("form.id", ondelete="CASCADE", onupdate="CASCADE"),nullable=True, server_default="2"),
+        sa.Column("form_id", sa.Integer(), sa.ForeignKey(
+            "form.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True, server_default="2"),
         sa.Column("activity", sa.Text(), nullable=False),
-        sa.Column("timestamped", sa.DateTime(timezone=True), nullable=True, server_default=sa.func.now()),
-    
+        sa.Column("timestamped", sa.DateTime(timezone=True),
+                  nullable=True, server_default=sa.func.now()),
+
         # SCHEMA
         schema="technical_dep",
     )
-    
-    # LINE CONSTRUCTION 
+
+    # LINE CONSTRUCTION
     op.create_table(
         "line_construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-        sa.Column("construction_id", sa.Integer(), 
+        sa.Column("construction_id", sa.Integer(),
                   sa.ForeignKey("technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
-        sa.Column("line_type", sa.Enum("primary", "secondary", "underbuilt", name='line_type', create_type=False), nullable=False),
+        sa.Column("line_type", sa.Enum("Primary", "Secondary", "Underbuilt",
+                  name='line_type', create_type=False), nullable=False),
         sa.Column("phasing", sa.Text(), nullable=False),
         sa.Column("pole_assembly", sa.Text(), nullable=False),
-        sa.Column("conductor", sa.Integer(), sa.ForeignKey("gis.conductor_wires.id"), nullable=False),
-        sa.Column("neutral", sa.Integer(), sa.ForeignKey("gis.neutral_concentric_cable.id"),nullable=True),
+        sa.Column("conductor", sa.Integer(), sa.ForeignKey(
+            "gis.conductor_wires.id"), nullable=False),
+        sa.Column("neutral", sa.Integer(), sa.ForeignKey(
+            "gis.neutral_concentric_cable.id"), nullable=True),
         sa.Column("image", sa.Text(), nullable=True),
-        sa.Column("geometry", Geometry(geometry_type="POINT", srid=4326, spatial_index=True), nullable=False),
-        
+        sa.Column("geometry", Geometry(geometry_type="POINT",
+                  srid=4326, spatial_index=True), nullable=False),
+
         schema="technical_dep"
     )
-    
+
     # TRANSFORMER INSTALLATION
     op.create_table(
         "transformer_installation",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-        sa.Column("construction_id", sa.Integer(),sa.ForeignKey("technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+        sa.Column("construction_id", sa.Integer(), sa.ForeignKey(
+            "technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
-        sa.Column("use_type", sa.Enum("sole", "distribution", name="use_type", create_type=False), nullable=False),
+        sa.Column("use_type", sa.Enum("Sole", "Distribution",
+                  name="use_type", create_type=False), nullable=False),
         sa.Column("phasing", sa.Text(), nullable=False),
-        sa.Column("kva_rating", sa.Numeric(precision=10, scale=2), nullable=False),
+        sa.Column("kva_rating", sa.Numeric(
+            precision=10, scale=2), nullable=False),
         sa.Column("image", sa.Text(), nullable=True),
-        sa.Column("geometry", Geometry(geometry_type="POINT", srid=4326, spatial_index=True), nullable=False),
-        
+        sa.Column("geometry", Geometry(geometry_type="POINT",
+                  srid=4326, spatial_index=True), nullable=False),
+
         schema="technical_dep"
     )
     # ADD COLUMN FOR CONDUCTOR AND NEUTRAL WIRE
-    op.add_column("conductor_wires", sa.Column("name", sa.Text(), nullable=False), schema="gis", if_not_exists=True)
-    op.add_column("conductor_wires", sa.Column("remarks", sa.Text(), nullable=True), schema="gis", if_not_exists=True)
-    op.add_column("neutral_concentric_cable", sa.Column("name", sa.Text(), nullable=False), schema="gis", if_not_exists=True)
-    op.add_column("neutral_concentric_cable", sa.Column("remarks", sa.Text(), nullable=True), schema="gis", if_not_exists=True)
-    
+    op.add_column("conductor_wires", sa.Column("r_ohms_miles", sa.Numeric(
+        precision=10, scale=4), nullable=True), schema="gis", if_not_exists=True)
+    op.add_column("conductor_wires", sa.Column("name", sa.Text(), sa.Computed(sa.text(
+        "type || ' ' || size || ' ' || unit || ' ' || strand")),
+        nullable=False), schema="gis", if_not_exists=True)
+    op.add_column("conductor_wires", sa.Column(
+        "remarks", sa.Text(),  nullable=True), schema="gis", if_not_exists=True)
+    op.add_column("neutral_concentric_cable", sa.Column("name", sa.Text(), sa.Computed(sa.text(
+        "type || ' ' || size || ' ' || unit || ' ' || strand")),nullable=False),  schema="gis", if_not_exists=True)
+    op.add_column("neutral_concentric_cable", sa.Column(
+        "remarks", sa.Text(), nullable=True), schema="gis", if_not_exists=True)
+
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_table("transformer_installation", schema="technical_dep", if_exists=True)
+    op.drop_table("transformer_installation",
+                  schema="technical_dep", if_exists=True)
     op.drop_table("line_construction", schema="technical_dep", if_exists=True)
     op.drop_table("construction", schema="technical_dep", if_exists=True)
-    
-    
-    
+
     op.execute("DROP TYPE IF EXISTS use_type")
     op.execute("DROP TYPE IF EXISTS line_type")
-    
-    
+
     # addition column
+    op.drop_column("conductor_wires", "r_ohms_miles",
+                   schema="gis", if_exists=True)
     op.drop_column("conductor_wires", "name", schema="gis", if_exists=True)
     op.drop_column("conductor_wires", "remarks", schema="gis", if_exists=True)
-    op.drop_column("neutral_concentric_cable", "name", schema="gis", if_exists=True)
-    op.drop_column("neutral_concentric_cable", "remarks", schema="gis", if_exists=True)
-    
-    
+    op.drop_column("neutral_concentric_cable", "name",
+                   schema="gis", if_exists=True)
+    op.drop_column("neutral_concentric_cable", "remarks",
+                   schema="gis", if_exists=True)

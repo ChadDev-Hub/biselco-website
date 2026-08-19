@@ -4,13 +4,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Integer, Text, Boolean
 from ....db.base import BaseModel
 from typing import List, TYPE_CHECKING
+from ...news.model.news import News
 import uuid
 
 if TYPE_CHECKING:
     from ...complaints.model.complaints import Complaints
     from ...meters.model.meters import MeterAccount
     from .roles import Roles
-    from ...news.model.news import News
+    
     from ...complaints.model.complaints_history import ComplaintsStatusHistory
     from ...complaints.model.complaints_message import ComplaintsMessage
     from ...agma.model.agma_registration import AgmaVerificationMonitoring
