@@ -145,7 +145,6 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
         }
         data.append(items)
     change_meter_stats = await get_change_meter_stats(session=session)
-    print(change_meter_stats)
     return {
         "data": data,
         "total_page": total_page,

@@ -2,6 +2,6 @@ from pydantic import BaseModel
 
 
 
-class ConductorWires(BaseModel):
+class Wires(BaseModel):
     id: int
     name: str

@@ -12,6 +12,8 @@ type Props = {
   consumer_name: string;
   newmeter_brand: string;
   newmeter_serial: string;
+  meter_sealed?: string;
+  remarks?: string;
   location: string;
   lat: number;
   lon: number;
@@ -36,6 +38,8 @@ const NewConnectionCard = ({
   date_accomplished,
   accomplished_by,
   initial_reading,
+  remarks,
+  meter_sealed,
 }: Props) => {
   return (
     <CardComponent
@@ -65,16 +69,21 @@ const NewConnectionCard = ({
               NC
             </div>
             <h2 className="card-title text-sm">Meter Information</h2>
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-              <div>
-                <label className="text-xs label">New Meter</label>
-                <h2 className="text-xs font-bold">{newmeter_brand}</h2>
-                <label className="text-xs label">Serial Number</label>
-                <h2 className="text-xs font-bold">{newmeter_serial}</h2>
-                <label className="label text-xs">Initial Reading</label>
-                <h2 className="font-bold text-xs">{initial_reading}</h2>
+            
+              <div >
+                <label className="label text-[10px]">New Meter</label>
+                <h2 className="font-bold text-[9px]">{newmeter_brand}</h2>
+                <label className="label text-[10px]">Serial Number</label>
+                <h2 className="font-bold text-[9px]">{newmeter_serial}</h2>
+                <label className="label text-[10px]">Initial Reading</label>
+                <h2 className="font-bold text-[9px]">{initial_reading}</h2>
+                <label className="label text-[10px]">Meter Seal</label>
+                <h2 className="font-bold text-[9px]">{meter_sealed}</h2>
               </div>
-            </div>
+              <div className="bg-base-300 p-2 rounded-box flex flex-col">
+                <label className="label text-[10px]">Remarks</label>
+                <h2 className="font-bold text-[9px] self-center">{remarks}</h2>
+              </div>
           </div>
           <div className="">
             <h1 className="flex items-center text-sm font-bold">

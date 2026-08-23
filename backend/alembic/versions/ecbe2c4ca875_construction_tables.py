@@ -30,11 +30,13 @@ def upgrade() -> None:
     op.create_table(
         "construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+
         sa.Column("form_id", sa.Integer(), sa.ForeignKey(
             "form.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True, server_default="2"),
         sa.Column("activity", sa.Text(), nullable=False),
-        sa.Column("timestamped", sa.DateTime(timezone=True),
-                  nullable=True, server_default=sa.func.now()),
+        sa.Column("description", sa.Text(), nullable=True),
+        sa.Column("date_accomplished", sa.Date(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=False),
 
         # SCHEMA
         schema="technical_dep",
@@ -44,13 +46,14 @@ def upgrade() -> None:
     op.create_table(
         "line_construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("uuid", sa.UUID(), nullable=True),
         sa.Column("construction_id", sa.Integer(),
                   sa.ForeignKey("technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
         sa.Column("line_type", sa.Enum("Primary", "Secondary", "Underbuilt",
                   name='line_type', create_type=False), nullable=False),
         sa.Column("phasing", sa.Text(), nullable=False),
-        sa.Column("pole_assembly", sa.Text(), nullable=False),
+        sa.Column("pole_assembly", sa.Text(), nullable=True),
         sa.Column("conductor", sa.Integer(), sa.ForeignKey(
             "gis.conductor_wires.id"), nullable=False),
         sa.Column("neutral", sa.Integer(), sa.ForeignKey(
@@ -58,7 +61,14 @@ def upgrade() -> None:
         sa.Column("image", sa.Text(), nullable=True),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
-
+        sa.Column("is_synced", sa.Boolean(),
+                  nullable=False, server_default="False"),
+        sa.Column("datetime_synced", sa.DateTime(
+            timezone=True), nullable=True),
+        sa.Column("is_deleted", sa.Boolean(),
+                  nullable=False, server_default="False"),
+        sa.Column("datetime_deleted", sa.DateTime(
+            timezone=True), nullable=True),
         schema="technical_dep"
     )
 
@@ -66,6 +76,7 @@ def upgrade() -> None:
     op.create_table(
         "transformer_installation",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("uuid", sa.UUID(), nullable=True),
         sa.Column("construction_id", sa.Integer(), sa.ForeignKey(
             "technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
@@ -77,10 +88,19 @@ def upgrade() -> None:
         sa.Column("image", sa.Text(), nullable=True),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
+        sa.Column("is_synced", sa.Boolean(),
+                  nullable=False, server_default="False"),
+        sa.Column("datetime_synced", sa.DateTime(
+            timezone=True), nullable=True),
+        sa.Column("is_deleted", sa.Boolean(),
+                  nullable=False, server_default="False"),
+        sa.Column("datetime_deleted", sa.DateTime(
+            timezone=True), nullable=True),
 
         schema="technical_dep"
     )
     # ADD COLUMN FOR CONDUCTOR AND NEUTRAL WIRE
+
     op.add_column("conductor_wires", sa.Column("r_ohms_miles", sa.Numeric(
         precision=10, scale=4), nullable=True), schema="gis", if_not_exists=True)
     op.add_column("conductor_wires", sa.Column("name", sa.Text(), sa.Computed(sa.text(
@@ -89,7 +109,7 @@ def upgrade() -> None:
     op.add_column("conductor_wires", sa.Column(
         "remarks", sa.Text(),  nullable=True), schema="gis", if_not_exists=True)
     op.add_column("neutral_concentric_cable", sa.Column("name", sa.Text(), sa.Computed(sa.text(
-        "type || ' ' || size || ' ' || unit || ' ' || strand")),nullable=False),  schema="gis", if_not_exists=True)
+        "type || ' ' || size || ' ' || unit || ' ' || strand")), nullable=False),  schema="gis", if_not_exists=True)
     op.add_column("neutral_concentric_cable", sa.Column(
         "remarks", sa.Text(), nullable=True), schema="gis", if_not_exists=True)
 

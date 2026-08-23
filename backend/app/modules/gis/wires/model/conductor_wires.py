@@ -62,7 +62,9 @@ class NeutralConcentricCable(BaseModel):
     no_copper_neutral: Mapped[int] = mapped_column(Integer, nullable=False)
     size_copper_neutral: Mapped[int] = mapped_column(Integer, nullable=False)
     ampacity: Mapped[int] = mapped_column(Integer, nullable=False)
-
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    remarks: Mapped[str] = mapped_column(Text, nullable=True)
+    
     primary_lines: Mapped[List["PrimaryLines"]] = relationship(
         "PrimaryLines", back_populates="neutral")
     line_constructions: Mapped[List["LineConstruction"]] = relationship(

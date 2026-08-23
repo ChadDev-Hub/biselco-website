@@ -1,10 +1,11 @@
 from __future__ import annotations
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, ForeignKey, DateTime, func, Text, Boolean, Enum, Numeric
+from sqlalchemy import Integer, ForeignKey, DateTime, func, Text, Boolean, Enum, Numeric, Date
 from geoalchemy2 import Geometry,WKBElement
-
+from datetime import date, datetime
 from .....db.base import BaseModel
 from typing import Literal, List, TYPE_CHECKING
+
 
 if TYPE_CHECKING:
     from ....gis.wires.model.conductor_wires import ConductorWires, NeutralConcentricCable
@@ -15,7 +16,8 @@ class Construction(BaseModel):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, type_=Integer)
     form_id: Mapped[int] = mapped_column(ForeignKey("form.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     activity: Mapped[str] = mapped_column(type_=Text, nullable=False)
-    timestamped: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
+    date_accomplished: Mapped[date] = mapped_column(type_=Date, nullable=False)
+    timestamp: Mapped[int] = mapped_column(type_=DateTime(timezone=True), nullable=False, default=func.now())
     
     lines: Mapped[List["LineConstruction"]] = relationship(back_populates="construction_activity", cascade="all, delete-orphan")
     transformers: Mapped[List["TransformerInstallation"]] = relationship(back_populates="construction_activity", cascade="all, delete-orphan")
@@ -29,11 +31,15 @@ class LineConstruction(BaseModel):
     type: Mapped[str] = mapped_column(type_=Text, nullable=False)
     line_type: Mapped[Literal["Primary", "Secondary", "Underbuilt"]] = mapped_column(type_=Enum("primary", "secondary", "underbuilt", name="line_type"))
     phasing: Mapped[str] = mapped_column(type_=Text, nullable=False)
-    pole_assembly: Mapped[str] = mapped_column(type_=Text, nullable=False)
+    pole_assembly: Mapped[str] = mapped_column(type_=Text, nullable=True)
     conductor: Mapped[int] = mapped_column(ForeignKey("gis.conductor_wires.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=False)
     neutral: Mapped[int] = mapped_column(ForeignKey("gis.neutral_concentric_cable.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer , nullable=True)
     image: Mapped[str] = mapped_column(type_=Text, nullable=True)
     geometry: Mapped[WKBElement] = mapped_column(type_=Geometry(geometry_type="LINESTRING", srid=4326))
+    is_synced: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_synced: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_deleted: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     
     construction_activity: Mapped[Construction] = relationship(back_populates="lines")
     neutral_wire: Mapped[NeutralConcentricCable] = relationship(back_populates="line_constructions")

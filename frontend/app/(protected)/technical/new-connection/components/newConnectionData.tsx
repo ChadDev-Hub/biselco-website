@@ -187,6 +187,8 @@ const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
               accomplished_by={item.accomplished_by}
               initial_reading={item.initial_reading}
               image={item.images[0]}
+              remarks={item.remarks}
+              meter_sealed={item.meter_sealed}
             />
           ))}
         </div>

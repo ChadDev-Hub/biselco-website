@@ -167,6 +167,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
       }
     }
   };
+  
   return (
     <>
       <div className="w-full justify-center flex px-2 ">
@@ -208,7 +209,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
       {/* Chage Meter Card */}
       <div className="flex justify-center">
         <div className="grid grid-cols-1 w-full max-w-7xl  sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2  place-items-center">
-          {changeMeterData.map((item: ChangeMeterType, index) => (
+          {changeMeterData.map((item: ChangeMeterType, index:number) => (
             <ChangeMeteCards
               key={index}
               id={item.id}
@@ -228,6 +229,8 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
               srid={item.geom.srid}
               initial_reading={item.initial_reading}
               pullout_reading={item.pull_out_meter_reading}
+              meter_sealed={item.meter_sealed}
+              remarks={item.remarks}
             />
           ))}
         </div>
