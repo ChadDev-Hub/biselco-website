@@ -10,9 +10,9 @@ class SelectedLocation(BaseModel):
     
     
 class VerifiedLocation(BaseModel):
+    village_id:int
+    municipal_id: int
     village:str
     municipality:str
     geom: WKTElement
-    lat: Optional[float] = None
-    lon: Optional[float] = None
     model_config = ConfigDict(arbitrary_types_allowed=True)

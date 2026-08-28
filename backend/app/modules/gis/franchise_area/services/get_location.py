@@ -41,7 +41,9 @@ async def verifyLocation(lon:float = Form(...),
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Selected Location Exceeds Franchise Area")
     
     return VerifiedLocation(
+        village_id=data.villages.id,
         village=data.villages.name,
+        municipal_id=data.municipal.id,
         municipality=data.municipal.name,
         geom = WKTElement('POINT({} {})'.format(lon, lat), srid=4326)    
     )

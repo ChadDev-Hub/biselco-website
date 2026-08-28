@@ -9,11 +9,24 @@ from .....dependencies.hash_image import hash_image
 from .....dependencies.bucket3 import upload_image
 from sqlalchemy import select
 from datetime import datetime
+
 from pytz import timezone
 class ChangeMeterPutServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
+    
+    async def check_existing_image_hash(self, image_hash, current_change_meter_id):
+        existing_hash_image = (await self.session.execute(
+            select(ChangeMeterImage).where(
+                ChangeMeterImage.image_hash == image_hash,
+                ChangeMeterImage.change_meter_id != current_change_meter_id
+            )
+        )).scalar_one_or_none()
+        
+        if existing_hash_image: 
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Image already exists")
     async def sync_change_meter(self, data: ChangeMeterSyncRequests):
         try:
 
@@ -66,10 +79,14 @@ class ChangeMeterPutServices:
                     ChangeMeter.datetime_deleted: insrt_stmt.excluded.datetime_deleted
                 }
             ).returning(ChangeMeter.id)
+            
+            
             change_meter_id = (await self.session.execute(upsert_stms)).scalar_one()
             if data.image:
                 image_hash = hash_image(data.image.file)
-
+                
+            
+            await self.check_existing_image_hash(image_hash=image_hash, current_change_meter_id=change_meter_id)
             existing_image_hash = (await self.session.execute(select(ChangeMeterImage).where(ChangeMeterImage.change_meter_id == change_meter_id))).scalar_one_or_none()
             
             if existing_image_hash is None or existing_image_hash.image_hash != image_hash:
@@ -102,7 +119,5 @@ class ChangeMeterPutServices:
             }
             
         except Exception as e:
-            print(e)
             await self.session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            raise 

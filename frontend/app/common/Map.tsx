@@ -39,7 +39,7 @@ export default function BiselcoMap({
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
     const map = new maplibregl.Map({
-      container: mapContainer.current,
+      container: mapContainer.current!,
       attributionControl: false,
       style: "https://tiles.openfreemap.org/styles/bright",
       center: [120.2043, 11.9986],

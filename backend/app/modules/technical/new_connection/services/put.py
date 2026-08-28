@@ -15,6 +15,15 @@ class PutNewConnectionService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         
+    async def check_image_hash(self, image_hash, current_new_connection_id):
+        stmt = (await self.session.execute(
+            select(NewConnectionImage)
+            .where(NewConnectionImage.image_hash == image_hash, 
+                   NewConnectionImage.new_connection_id != current_new_connection_id)
+        )).scalar_one_or_none()
+        if stmt:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Image already exists")
+        
     async def sync_new_connection(self, data:NewConnectionSyncRequests):
         try:
             location = await verifyLocation(lon=data.lon, lat=data.lat, session=self.session)
@@ -67,6 +76,8 @@ class PutNewConnectionService:
             if data.image:
                 image_hash = hash_image(data.image.file)
             
+            await self.check_image_hash(image_hash=image_hash, current_new_connection_id=new_connection)
+            
             existing_img_hash = (await self.session.execute(select(NewConnectionImage).where(
                 NewConnectionImage.new_connection_id == new_connection))).scalar_one_or_none()
             
@@ -103,5 +114,4 @@ class PutNewConnectionService:
             return new_connection_data
         except Exception as e:
             await self.session.rollback()
-            print(e)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            raise

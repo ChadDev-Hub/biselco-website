@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from ...distribution_lines.models.secondary_lines import SecondaryLines
     from ...consumer.model.consumer import ConsumerMeter
     from ...consumer.model.service_drop import ServiceDrop
+    from ....technical.construction.model.construction import LineConstruction, TransformerInstallation
     
     
 class Village(BaseModel):
@@ -41,3 +42,5 @@ class Village(BaseModel):
     secondary_lines: Mapped[List["SecondaryLines"]] = relationship("SecondaryLines", back_populates="village")
     consumer_meters: Mapped[List["ConsumerMeter"]] = relationship("ConsumerMeter", back_populates="village")
     service_drops: Mapped[List["ServiceDrop"]] = relationship("ServiceDrop", back_populates="village")
+    transformer_installation:Mapped[List["TransformerInstallation"]] = relationship(back_populates="village")
+    line_constructions:Mapped[List["LineConstruction"]] = relationship(back_populates="village")

@@ -1,8 +1,8 @@
 from sqlalchemy import select, func, or_, cast, Text
 from ..schema.requests import NewPrimaryLine
-from fastapi import APIRouter, HTTPException, status, Body, Form
+from fastapi import APIRouter, HTTPException, status, Form, Depends
 from typing import List
-
+from ..services.post import PostServices
 
 router = APIRouter(prefix="/construction/primary_lines", tags=["Primary Lines"])
 
@@ -10,6 +10,8 @@ router = APIRouter(prefix="/construction/primary_lines", tags=["Primary Lines"])
 @router.post("/sync", status_code=status.HTTP_201_CREATED)
 async def construct_primary_lines(
     data: NewPrimaryLine = Form(...),
+    post_service:PostServices = Depends(PostServices), 
+    
 ):
     """
     It will get data from the request Body. 
@@ -27,6 +29,7 @@ async def construct_primary_lines(
             - lon: float
             - image: UploadFile
     """
-    print(data)
-    return None
     
+    res = await post_service.synced_line_construciton(data=data)
+    
+    return res

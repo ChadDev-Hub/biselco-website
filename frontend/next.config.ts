@@ -5,12 +5,6 @@ const nextConfig: NextConfig = {
 
   productionBrowserSourceMaps: true,
 
-  allowedDevOrigins: [
-    "http://localhost:3001",
-    "local-origin.dev",
-    "*.local-origin.dev",
-  ],
-
   experimental: {
     serverActions: {
       bodySizeLimit: "30mb",

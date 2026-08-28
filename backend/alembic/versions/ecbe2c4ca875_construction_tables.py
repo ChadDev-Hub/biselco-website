@@ -30,7 +30,7 @@ def upgrade() -> None:
     op.create_table(
         "construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-
+        sa.Column("uuid", sa.UUID(), nullable=True, unique=True),
         sa.Column("form_id", sa.Integer(), sa.ForeignKey(
             "form.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True, server_default="2"),
         sa.Column("activity", sa.Text(), nullable=False),
@@ -46,7 +46,7 @@ def upgrade() -> None:
     op.create_table(
         "line_construction",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-        sa.Column("uuid", sa.UUID(), nullable=True),
+        sa.Column("uuid", sa.UUID(), nullable=True, unique=True),
         sa.Column("construction_id", sa.Integer(),
                   sa.ForeignKey("technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
@@ -58,9 +58,13 @@ def upgrade() -> None:
             "gis.conductor_wires.id"), nullable=False),
         sa.Column("neutral", sa.Integer(), sa.ForeignKey(
             "gis.neutral_concentric_cable.id"), nullable=True),
-        sa.Column("image", sa.Text(), nullable=True),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
+        sa.Column("village_id",sa.Integer, sa.ForeignKey("gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+        sa.Column("municipality_id",sa.Integer, sa.ForeignKey("gis.municipality.id",
+                  onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
+
+
         sa.Column("is_synced", sa.Boolean(),
                   nullable=False, server_default="False"),
         sa.Column("datetime_synced", sa.DateTime(
@@ -72,11 +76,24 @@ def upgrade() -> None:
         schema="technical_dep"
     )
 
+    # CONSTRUCTION LINE IMAGE
+    op.create_table(
+        "line_construction_image",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("line_construction_id", sa.Integer, sa.ForeignKey(
+            "technical_dep.line_construction.id")),
+        sa.Column("image", sa.Text, nullable=False),
+        sa.Column("image_hash", sa.VARCHAR(64), nullable=True, unique=True),
+
+        if_not_exists=True,
+        schema="technical_dep"
+    )
+
     # TRANSFORMER INSTALLATION
     op.create_table(
         "transformer_installation",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
-        sa.Column("uuid", sa.UUID(), nullable=True),
+        sa.Column("uuid", sa.UUID(), nullable=True, unique=True),
         sa.Column("construction_id", sa.Integer(), sa.ForeignKey(
             "technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
         sa.Column("type", sa.Text(), nullable=True),
@@ -85,9 +102,11 @@ def upgrade() -> None:
         sa.Column("phasing", sa.Text(), nullable=False),
         sa.Column("kva_rating", sa.Numeric(
             precision=10, scale=2), nullable=False),
-        sa.Column("image", sa.Text(), nullable=True),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
+        sa.Column("village_id",sa.Integer, sa.ForeignKey("gis.villages.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
+        sa.Column("municipality_id",sa.Integer, sa.ForeignKey("gis.municipality.id",
+                  onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
         sa.Column("is_synced", sa.Boolean(),
                   nullable=False, server_default="False"),
         sa.Column("datetime_synced", sa.DateTime(
@@ -99,6 +118,20 @@ def upgrade() -> None:
 
         schema="technical_dep"
     )
+
+    # TRANSFORMER CONSTRUCTION IMAGE
+
+    op.create_table(
+        "transformer_installation_image",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("transformer_installation_id", sa.Integer, sa.ForeignKey(
+            "technical_dep.transformer_installation.id")),
+        sa.Column("image", sa.Text, nullable=False),
+        sa.Column("image_hash", sa.VARCHAR(64), nullable=True, unique=True),
+        if_not_exists=True,
+        schema="technical_dep"
+    )
+
     # ADD COLUMN FOR CONDUCTOR AND NEUTRAL WIRE
 
     op.add_column("conductor_wires", sa.Column("r_ohms_miles", sa.Numeric(
@@ -116,6 +149,10 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.drop_table("transformer_installation_image",
+                  schema="technical_dep", if_exists=True)
+    op.drop_table("line_construction_image",
+                  schema="technical_dep", if_exists=True)
     op.drop_table("transformer_installation",
                   schema="technical_dep", if_exists=True)
     op.drop_table("line_construction", schema="technical_dep", if_exists=True)
@@ -123,7 +160,7 @@ def downgrade() -> None:
 
     op.execute("DROP TYPE IF EXISTS use_type")
     op.execute("DROP TYPE IF EXISTS line_type")
-
+    
     # addition column
     op.drop_column("conductor_wires", "r_ohms_miles",
                    schema="gis", if_exists=True)
