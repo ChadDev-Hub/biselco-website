@@ -73,6 +73,8 @@ const PrimaryLineLayer = ({ promise }: Props) => {
 
       const popup = new Maplibregl.Popup({
         className: "custom-maplibre-popup",
+        closeButton: false,
+        closeOnClick: true,
         maxWidth: "none",
         anchor: "bottom",
         offset: [0, -10],

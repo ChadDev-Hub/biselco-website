@@ -1,6 +1,6 @@
 from __future__ import annotations
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import Text, Integer, ForeignKey, Boolean, Date
+from sqlalchemy import Text, Integer, ForeignKey, Boolean, Date, String
 from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
 from .....db.base import BaseModel
@@ -34,6 +34,7 @@ class ConsumerMeter(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=True)
     is_solar: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
     is_agma: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
+    hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     
     # RELATIONSHIPS
     village: Mapped["Village"] = relationship("Village", back_populates="consumer_meters")

@@ -60,8 +60,9 @@ def upgrade() -> None:
             "gis.neutral_concentric_cable.id"), nullable=True),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
-        sa.Column("village_id",sa.Integer, sa.ForeignKey("gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
-        sa.Column("municipality_id",sa.Integer, sa.ForeignKey("gis.municipality.id",
+        sa.Column("village_id", sa.Integer, sa.ForeignKey(
+            "gis.villages.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+        sa.Column("municipality_id", sa.Integer, sa.ForeignKey("gis.municipality.id",
                   onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
 
 
@@ -104,8 +105,9 @@ def upgrade() -> None:
             precision=10, scale=2), nullable=False),
         sa.Column("geometry", Geometry(geometry_type="POINT",
                   srid=4326, spatial_index=True), nullable=False),
-        sa.Column("village_id",sa.Integer, sa.ForeignKey("gis.villages.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
-        sa.Column("municipality_id",sa.Integer, sa.ForeignKey("gis.municipality.id",
+        sa.Column("village_id", sa.Integer, sa.ForeignKey(
+            "gis.villages.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
+        sa.Column("municipality_id", sa.Integer, sa.ForeignKey("gis.municipality.id",
                   onupdate="CASCADE", ondelete="CASCADE"), nullable=False),
         sa.Column("is_synced", sa.Boolean(),
                   nullable=False, server_default="False"),
@@ -146,9 +148,47 @@ def upgrade() -> None:
     op.add_column("neutral_concentric_cable", sa.Column(
         "remarks", sa.Text(), nullable=True), schema="gis", if_not_exists=True)
 
+    # ADD EXTENSION
+    op.execute("CREATE EXTENSION IF NOT EXISTS pgcrypto;")
+
+    # ADD COLUMN FOR CONSUMER METER
+    op.add_column(
+        "consumer_meter",
+        sa.Column(
+            "hash",
+            sa.String(64),
+            sa.Computed(
+                sa.text(
+                    """
+                   encode(
+                       digest(
+                            coalesce(account_no::text, '') || '|' ||
+                            coalesce(account_name::text, '') || '|' ||
+                            coalesce(account_type::text, '') || '|' ||
+                            coalesce(meter_no::text, '') || '|' ||
+                            coalesce(meter_brand::text, '') || '|' ||
+                            coalesce(village_id::text, '') || '|' ||
+                            coalesce(municipality_id::text, ''),
+                            'sha256'
+                        ),
+                        'hex'  
+                   )
+                   """
+                ),
+                persisted=True
+            ),
+            unique=True,
+            nullable=False
+        ),
+        schema="gis",
+        if_not_exists=True
+    )
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.drop_column("consumer_meter", "hash", schema="gis", if_exists=True)
+    op.execute("DROP EXTENSION IF EXISTS pgcrypto;")
     op.drop_table("transformer_installation_image",
                   schema="technical_dep", if_exists=True)
     op.drop_table("line_construction_image",
@@ -160,7 +200,7 @@ def downgrade() -> None:
 
     op.execute("DROP TYPE IF EXISTS use_type")
     op.execute("DROP TYPE IF EXISTS line_type")
-    
+
     # addition column
     op.drop_column("conductor_wires", "r_ohms_miles",
                    schema="gis", if_exists=True)

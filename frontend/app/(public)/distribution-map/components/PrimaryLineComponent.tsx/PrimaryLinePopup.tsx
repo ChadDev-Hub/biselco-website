@@ -30,7 +30,7 @@ const PrimaryLinePopup = ({  primaryLinePopup }: Props) => {
 
   return (
     
-    <div className="bg-base-100 w-64  flex flex-col rounded-box overflow-hidden" >
+    <div className="bg-base-100 w-64  flex flex-col rounded-box overflow-hidden m-0" >
       <header className="flex justify-between items-center bg-blue-700 px-4 py-3 text-white">
         <div className="flex items-center gap-2">
           <LineDotRightHorizontal className="w-5 h-5 text-white" />

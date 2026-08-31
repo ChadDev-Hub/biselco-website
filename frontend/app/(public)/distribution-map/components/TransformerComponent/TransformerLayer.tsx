@@ -161,9 +161,10 @@ const TransformerLayer = ({ promise }: Props) => {
 
       map.on("mouseenter", unclusteredId, handleMouseEnter);
       map.on("mouseleave", unclusteredId, handleMouseLeave);
-      
-
     };
+
+
+    
     const run = async () => {
       await setup();
       await attachEvents();
