@@ -8,6 +8,8 @@ from geojson_pydantic import Feature, Point
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point as PointShape
 from typing import Optional
+
+
 class ConsumerMeterGetService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
@@ -21,12 +23,12 @@ class ConsumerMeterGetService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Account not Found")
         return ConsumerVerification(account_no=data.account_no)
-    
-    
-    async def  get_consumer_meters(self):
+
+    async def get_consumer_meters(self, consumer_hash: Optional[list] = []):
         try:
             stmt = select(ConsumerMeter).where(
-                ConsumerMeter.geom.is_not(None))
+                ConsumerMeter.geom.is_not(None),
+                ConsumerMeter.hash.not_in(consumer_hash))
             data = (await self.session.execute(stmt)).scalars().all()
             feature = [
                 Feature(
@@ -37,7 +39,7 @@ class ConsumerMeterGetService:
                             to_shape(f.geom).x,
                             to_shape(f.geom).y
                         ),
-                        srid=4326
+
                     ),
                     properties={
                         "id":  f.id,
@@ -46,14 +48,12 @@ class ConsumerMeterGetService:
                         "account_name": f.account_name,
                         "meter_no": f.meter_no,
                         "meter_brand": f.meter_brand
-                    }
-                )
-                
+                    })
                 for f in data
             ]
-
-            
+         
             return feature
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

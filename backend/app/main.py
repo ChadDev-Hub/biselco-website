@@ -11,13 +11,13 @@ app = FastAPI(
 )
 FRONTENDBASEURL = os.getenv("FRONTEND_BASE_URL")
 BISECOLLECT = os.getenv("BISCOLLECT_BASE_URL")
-BISESCOLLECT_DEV=os.getenv("BISCOLLECT_BASE_URL_DEV")
+
 if not FRONTENDBASEURL:
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Frontend Base URL Not Found")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTENDBASEURL, BISECOLLECT, BISESCOLLECT_DEV],
+    allow_origins=[FRONTENDBASEURL, BISECOLLECT],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
