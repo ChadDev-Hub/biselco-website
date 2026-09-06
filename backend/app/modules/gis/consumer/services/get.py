@@ -7,7 +7,7 @@ from ..schema.response_model import ConsumerVerification
 from geojson_pydantic import Feature, Point
 from geoalchemy2.shape import to_shape
 from shapely.geometry import Point as PointShape
-
+from typing import Optional
 class ConsumerMeterGetService:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
@@ -23,9 +23,10 @@ class ConsumerMeterGetService:
         return ConsumerVerification(account_no=data.account_no)
     
     
-    async def  get_consumer_meters(self):
+    async def  get_consumer_meters(self, consumer_hash:Optional[list] = []):
         stmt = select(ConsumerMeter).where(
-            ConsumerMeter.geom.is_not(None))
+            ConsumerMeter.geom.is_not(None),
+            ConsumerMeter.hash.not_in(consumer_hash))
         data = (await self.session.execute(stmt)).scalars().all()
         feature = [
             Feature(

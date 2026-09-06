@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Query
+from fastapi import APIRouter, status, Depends, HTTPException, Query, Body
 from .....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy import select
@@ -7,8 +7,9 @@ from ..services.query_consumer import get_consumer
 from ..schema.response_model import Consumer
 from ....user.service.get_user import GetUserServices
 from geojson_pydantic import Feature, Point
+from ..schema.requests import ConsumerHashed
 from ..services.get import ConsumerMeterGetService
-    
+from typing import List, Optional
 router = APIRouter(prefix="/consumers", tags=["Consumers"])
 
 
@@ -20,8 +21,11 @@ async def query_consumer(session:AsyncSession = Depends(get_session), q:Optional
     return result
 
 
-@router.get("/all", status_code=status.HTTP_200_OK, response_model=list[Feature[Point, dict]])
+@router.post("/all", status_code=status.HTTP_200_OK, response_model=list[Feature[Point, dict]])
 async def get_all_consumers(
+    data: ConsumerHashed = Body(None), 
     get_services: ConsumerMeterGetService = Depends(ConsumerMeterGetService)
-):
-    return await get_services.get_consumer_meters()
+):  
+    data = await get_services.get_consumer_meters(consumer_hash=data.hashed)
+    print(data)
+    return data
