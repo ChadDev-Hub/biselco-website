@@ -5,11 +5,11 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 import os
 
-load_dotenv(dotenv_path="./.env.dev")
+load_dotenv(dotenv_path=".env")
 
 
 def clean_conductor_wire():
-    df = pd.read_excel(r"D:\Lookup_Tables.xls", engine="calamine", sheet_name="Conductor")
+    df = pd.read_excel(r"C:\Users\RICHARD ROJO\OneDrive\Desktop\2026 DSAS\Lookup_Tables.xls", engine="calamine", sheet_name="Conductor")
     df.dropna(subset=["Type"], inplace=True)
     df.rename(columns={
         "Unnamed: 9": "Remarks"
@@ -27,11 +27,12 @@ def clean_conductor_wire():
 df = clean_conductor_wire()
 
 def clean_concentric_neutral_wire():
-    df = pd.read_excel(r"D:\Lookup_Tables.xls", engine="calamine", sheet_name="Concentric-Neutral Cable")
+    df = pd.read_excel(r"C:\Users\RICHARD ROJO\OneDrive\Desktop\2026 DSAS\Lookup_Tables.xls", engine="calamine", sheet_name="Concentric-Neutral Cable")
     df.dropna(subset=["Type"], inplace=True)
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
     df.columns = df.columns.str.replace(r"\(|\)", "", regex=True)
     df.columns = df.columns.str.replace(r"\/|-", "_", regex=True)
+    df['strand'] = df['strand'].astype("int64")
     df.rename(columns={
         'diameter_over_insulation_in': 'diameter_over_insulation_inch',
         'diameter_over_screen_in': 'diameter_over_screen_inch',
@@ -40,11 +41,10 @@ def clean_concentric_neutral_wire():
         'size_of_copper_neutral_awg' : 'size_copper_neutral',
         'ampacity_a': 'ampacity',
     }, inplace=True)
-
     return df.to_dict(orient="records")
+n_df = clean_concentric_neutral_wire()
 
-
-DB_URL = os.getenv("LOCALHOST_DB_URL")
+DB_URL = os.getenv("WEBSITE_DATABASE_URL")
 
 def migrat(
     database_table: str,
