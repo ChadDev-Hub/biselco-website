@@ -3,26 +3,29 @@
 import { useEffect, use } from "react";
 import { useMap } from "../MapProvider";
 import { PromiseType } from "../../../../../types/promise";
-import { Transformers } from "@/types/transformer";
-
-
+import { Transformers, TransformerProperties } from "@/types/transformer";
+import {MapMouseEvent, MapGeoJSONFeature, Popup} from "maplibre-gl";
+import { createRoot } from "react-dom/client";
+import TransformerPopup from "./transformerPopup";
 type Props = {
   promise: Promise<PromiseType<Transformers>>;
 };
 
 const TransformerLayer = ({ promise }: Props) => {
   const data = use(promise);
+  
   const { mapRef, isMapReady } = useMap();
-
+  const sourceId = "transformers";
+    const layerId = "transformers-layer";
+    const unclusteredId = "transformers-unclustered";
+    const clusterCountId = "transformers-cluster-count";
+  
   useEffect(() => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !data?.data) return;
 
-    const sourceId = "transformers";
-    const layerId = "transformers-layer";
-    const unclusteredId = "transformers-unclustered";
-    const clusterCountId = "transformers-cluster-count";
+    
 
     const setup = async () => {
       if (!map) return;
@@ -33,22 +36,23 @@ const TransformerLayer = ({ promise }: Props) => {
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="32"
-          height="32"
+          width="25"
+          height="25"
           viewBox="0 0 32 32"
           
         >
                 <!-- White circular background -->
           <circle
-          cx="15"
-          cy="15"
-          r="15"
+          cx="12"
+          cy="12"
+          r="12"
           fill="white"
-          stroke="#0D47A1"
-          stroke-width="2"
+          drop-shadow="0 0 2px rgba(0, 0, 0, 0.3)"
+          stroke="black"
+          stroke-width="0.8"
           />
           <g 
-          transform="translate(3 3) scale(1)"
+          transform="translate(3 3) scale(0.7)"
           fill="#FFDDB0"
           stroke="#f59e0b"
           stroke-width="2"
@@ -143,7 +147,16 @@ const TransformerLayer = ({ promise }: Props) => {
             "icon-image": "custom-marker",
             "icon-allow-overlap": true,
             "icon-size": 1,
+            "text-field": ["get", "transformer_id"],
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 7,
+            "text-anchor": "top",
+            "text-offset": [0, 1],
           },
+          paint: {
+            "text-color": "black",
+          },
+          
         });
       }
     };
@@ -162,9 +175,6 @@ const TransformerLayer = ({ promise }: Props) => {
       map.on("mouseenter", unclusteredId, handleMouseEnter);
       map.on("mouseleave", unclusteredId, handleMouseLeave);
     };
-
-
-    
     const run = async () => {
       await setup();
       await attachEvents();
@@ -185,6 +195,49 @@ const TransformerLayer = ({ promise }: Props) => {
       }
     };
   }, [data, mapRef, isMapReady]);
+
+
+
+  // POPUP EFFECT ON MOUSE CLICK
+  useEffect(()=>{
+    if(!isMapReady) return;
+    const map = mapRef?.current;
+    if(!map) return;
+    const handleMapClick = (
+      e: MapMouseEvent & {
+        features?: MapGeoJSONFeature[]
+      }
+    ) => {
+
+      if (!e.features?.length) return;
+      const feature = e.features[0].properties as TransformerProperties;
+      const popupNode = document.createElement("div");
+      const root = createRoot(popupNode);
+      root.render(<TransformerPopup TransformerProperties={feature} />);
+
+
+      new Popup({
+        className: "custom-maplibre-popup",
+        closeButton: false,
+        closeOnClick: true,
+        maxWidth: "none",
+        anchor: "bottom",
+        offset: [0, -10],
+      })
+        .setLngLat(e.lngLat)
+        .setDOMContent(popupNode)
+        .addTo(map);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          popupNode.style.opacity = "1";
+        });
+      })
+    }
+
+    map.on("click", [unclusteredId], handleMapClick);
+  },[isMapReady, mapRef])
+
   return null;
 };
 

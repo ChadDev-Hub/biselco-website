@@ -39,15 +39,14 @@ const MapProvider = ({ children, className }: Props) => {
         zoom: 10,
       });
       
-      mapRef.current.addControl(
-        new Maplibregl.GeolocateControl({
-          positionOptions: {
+      const geolocation = new Maplibregl.GeolocateControl({
+        positionOptions: {
             enableHighAccuracy: true,
           },
           trackUserLocation: true,
-        }),
-        "top-left",
-      );
+          showAccuracyCircle: true,
+      })
+      mapRef.current.addControl(geolocation, "top-left");
       mapRef.current.addControl(new Maplibregl.NavigationControl(), "bottom-right");
       mapRef.current.on("load", () => {
         setMapReady(true);

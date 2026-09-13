@@ -21,6 +21,10 @@ class GetServicesDT:
                     DistributionTransformer.id,
                     DistributionTransformer.transformer_id,
                     ST_AsGeoJSON(DistributionTransformer.geom).label("geometry"),
+                    DistributionTransformer.description,
+                    DistributionTransformer.installation_type,
+                    DistributionTransformer.primary_phasing,
+                    DistributionTransformer.secondary_phasing,
                     DistributionTransformer.transformer_type,
                     DistributionTransformer.is_active,
                     Village.name.label("village"),
@@ -30,6 +34,7 @@ class GetServicesDT:
                 .join(DistributionTransformer.municipal)
             )
             data = (await self.session.execute(stmt)).mappings().all()
+            
             results ={"type": "FeatureCollection", "features":
                 [
                 {
@@ -39,10 +44,15 @@ class GetServicesDT:
                         "id": result["id"],
                         "transformer_id": result["transformer_id"],
                         "transformer_type": result["transformer_type"],
+                        "description": result["description"],
+                        "installation_type": result['installation_type'],
+                        "primary_phasing": result["primary_phasing"],
+                        "secondary_phasing": result["secondary_phasing"],
                         "is_active": result["is_active"],
                         "color": "#1c2986" if result["is_active"] else "#424242",
                         "village": result["village"],
                         "municipality": result["municipality"],
+                        
                     },
                 
                 }
