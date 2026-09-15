@@ -2,10 +2,7 @@
 
 import React from "react";
 import {
-  MapIcon,
   LineDotRightHorizontal,
-  RulerDimensionLine,
-  ChevronsLeftRightEllipsis,
   CircleDot,
 } from "lucide-react";
 
@@ -23,57 +20,67 @@ type Props = {
   primaryLinePopup: PrimaryLineProperties;
 };
 
-const PrimaryLinePopup = ({  primaryLinePopup }: Props) => {
-  const labelClass = "label text-xs font-semibold text-gray-500 block mt-2";
-  const infoClass = "text-sm text-base-content";
-  const infoContainerClass = "flex items-center gap-2 mt-0.5";
-
+const PrimaryLinePopup = ({ primaryLinePopup }: Props) => {
+  const labelClass = "label text-xs";
+  const infoClass = "text-xs text-base-content text-center w-full font-semibold";
+  const infoContainerClass = "flex items-center gap-2";
+  const containerClass = "bg-base-200 p-6 rounded-box";
   return (
-    
-    <div className="bg-base-100 w-64  flex flex-col rounded-box overflow-hidden m-0" >
-      <header className="flex justify-between items-center bg-blue-700 px-4 py-3 text-white">
-        <div className="flex items-center gap-2">
-          <LineDotRightHorizontal className="w-5 h-5 text-white" />
-          <h1 className="text-md text-white font-semibold truncate max-w-40">
+    <div className="bg-base-100 w-fit flex flex-col rounded-box overflow-hidden m-0 relative">
+      <header className="flex items-center bg-base-200 p-5 gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <LineDotRightHorizontal className="w-5 h-5" />
+        </div>
+        <div>
+          <label className="label text-xs">
+            PRIMARY LINE
+          </label>
+          <h1 className="text-xs text-base-content font-semibold truncate max-w-40">
             {primaryLinePopup?.primary_line_id}
           </h1>
         </div>
 
-        <div>
+        <div className="self-start">
           {primaryLinePopup?.is_active ? (
-            <CircleDot className="text-green-400 size-4 fill-green-400/20" />
+            <div className="badge absolute right-2 top-2 badge-xs badge-outline badge-soft badge-success">
+              <span>Active</span>
+            </div>
           ) : (
             <CircleDot className="text-red-400 size-4 fill-red-400/20" />
           )}
         </div>
       </header>
 
-      <main className="p-4 bg-base-100 flex flex-col gap-1 text-left">
-        {/* Phasing */}
-        <section>
-          <label className={labelClass}>Phasing:</label>
+      <main className="grid grid-cols-2 gap-3 p-4">
+        {/* Village */}
+        <section className={containerClass}>
+          <label className={labelClass}>Village</label>
           <div className={infoContainerClass}>
-            <ChevronsLeftRightEllipsis className="w-4 h-4 opacity-70" />
+            <p className={infoClass}>{primaryLinePopup.village} </p>
+          </div>
+        </section>
+        {/* MUNICIPALITY */}
+        <section className={containerClass}>
+          <label className={labelClass}>Municipality</label>
+          <div className={infoContainerClass}>
+            <p className={infoClass}>{primaryLinePopup.municipality}</p>
+          </div>
+        </section>
+
+        {/* Phasing */}
+        <section className={containerClass}>
+          <label className={labelClass}>Phasing</label>
+          <div className={infoContainerClass}>
             <p className={infoClass}>{primaryLinePopup.phasing}</p>
           </div>
         </section>
 
         {/* Length In Meters */}
-        <section>
-          <label className={labelClass}>Length (m):</label>
+        <section className={containerClass}>
+          <label className={labelClass}>Length (m)</label>
           <div className={infoContainerClass}>
-            <RulerDimensionLine className="w-4 h-4 opacity-70" />
-            <p className={infoClass}>{primaryLinePopup.length_meters.toLocaleString()} m</p>
-          </div>
-        </section>
-
-        {/* Location */}
-        <section>
-          <label className={labelClass}>Location:</label>
-          <div className={infoContainerClass}>
-            <MapIcon className="w-4 h-4 opacity-70" />
             <p className={infoClass}>
-              {primaryLinePopup.village} <span className="text-gray-400">|</span> {primaryLinePopup.municipality}
+              {primaryLinePopup.length_meters.toLocaleString()} m
             </p>
           </div>
         </section>

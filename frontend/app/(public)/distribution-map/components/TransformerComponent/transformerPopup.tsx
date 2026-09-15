@@ -1,15 +1,38 @@
 "use client";
 
-import { TransformerProperties } from "@/types/transformer";
+import { PromiseType } from "@/types/promise";
+import { TransformerProperties, Transformers } from "@/types/transformer";
+
 import {Zap} from "lucide-react"
-import {useState} from "react"
+import {useState, Dispatch, SetStateAction} from "react"
 type Props = {
   TransformerProperties: TransformerProperties;
+  setData: Dispatch<SetStateAction<PromiseType<Transformers > | undefined>>
 };
 
-const TransformerPopup = ({ TransformerProperties }: Props) => {
-    
+const TransformerPopup = ({ TransformerProperties, setData }: Props) => {
     const [currentStatus, setCurrentStatus] = useState(TransformerProperties?.is_active);
+    const handleSwitch = (
+        transformer: TransformerProperties
+    ) => {
+        setCurrentStatus((prev) => !prev);
+        setData((prev)=>{
+            if(!prev?.data) return prev;
+            const feature = prev.data.features.find((feature) => feature.properties.id === transformer.id);
+            if(!feature) return prev;
+            
+            feature.properties.is_active = !feature.properties.is_active
+            const newData = {
+              ...prev,
+              data: {
+                ...prev.data,
+                features: prev.data.features.map((f) => f.properties.id === transformer.id ? feature : f)
+              },
+            };
+
+            return newData
+        })
+    }
   return (
     <div className="w-80 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xl">
       {/* Header */}
@@ -45,21 +68,29 @@ const TransformerPopup = ({ TransformerProperties }: Props) => {
       <div className="grid grid-cols-2 gap-3 p-4">
         <div className="rounded-xl bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Village</p>
-          <p className="mt-1 font-semibol text-xs">
+          <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.village ?? "—"}
           </p>
         </div>
 
         <div className="rounded-xl bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Municipality</p>
-          <p className="mt-1 font-semibold text-xs">
+          <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.municipality ?? "—"}
+          </p>
+        </div>
+
+
+        <div className="rounded-xl col-span-2 bg-base-200/50 p-3">
+          <p className="text-xs text-base-content/50">Connected Consumers</p>
+          <p className="mt-1 font-semibold text-xs w-full text-center">
+            {TransformerProperties?.connected_consumer ?? "—"}
           </p>
         </div>
 
         <div className="col-span-2 rounded-xl bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Transformer Type</p>
-          <p className="mt-1 font-semibold text-xs">
+          <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.description}
           </p>
         </div>
@@ -70,9 +101,7 @@ const TransformerPopup = ({ TransformerProperties }: Props) => {
         <span className="text-xs text-base-content/50">Switch</span>
 
         <label className="toggle toggle-xs">
-            <input onClick={() => {
-                setCurrentStatus(!currentStatus)
-            }}  checked={currentStatus} type="checkbox"
+            <input onChange={() => handleSwitch(TransformerProperties)}  checked={currentStatus} type="checkbox"
             />
         </label>
       </div>

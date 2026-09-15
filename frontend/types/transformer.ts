@@ -16,4 +16,5 @@ export type TransformerProperties = {
   color: string | null;
   village: string | null;
   municipality: string | null;
+  connected_consumer: number; 
 }

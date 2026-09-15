@@ -8,6 +8,7 @@ from sqlalchemy import select, func
 from geoalchemy2.functions import ST_AsGeoJSON
 import json
 
+
 class DistributionLineGetServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session: AsyncSession = session
@@ -21,7 +22,8 @@ class DistributionLineGetServices:
                         Village.name.label("village"),
                         Municipality.name.label("municipality"),
                         PrimaryLines.is_active,
-                        func.round(PrimaryLines.length_meters, 2).label("length_meters"),
+                        func.round(PrimaryLines.length_meters,
+                                   2).label("length_meters"),
                         PrimaryLines.phasing,
                     ).join(PrimaryLines.village)
                     .join(PrimaryLines.municipal))
@@ -40,8 +42,10 @@ class DistributionLineGetServices:
                         "color": "#1c2986" if res["is_active"] else "#424242",
                         "length_meters": res["length_meters"],
                         "phasing": res["phasing"]},
-                        
-                    } for res in result]}
+                        "layer_name": "layer_name",
+
+                } for res in result]}
+
             return data
         except Exception as e:
             print(e)

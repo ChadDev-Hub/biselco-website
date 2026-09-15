@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 import Maplibregl from "maplibre-gl";
+import LayerFilterGroup from './layer-filter-group';
+
 
 
 
@@ -73,6 +75,7 @@ const MapProvider = ({ children, className }: Props) => {
         <div className="absolute  inset-0 pointer-events-none z-10">
           {children}
         </div>
+        <LayerFilterGroup />
       </div>
     </mapContext.Provider>
   );
