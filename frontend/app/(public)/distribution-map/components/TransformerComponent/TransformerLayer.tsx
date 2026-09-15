@@ -84,11 +84,7 @@ const TransformerLayer = ({ promise }: Props) => {
 
         const img = new Image();
 
-        await new Promise<void>((resolve, reject) => {
-          img.onload = () => resolve();
-          img.onerror = () => reject(new Error("Failed to decode SVG"));
-          img.src = svgUrl;
-        });
+        img.src = svgUrl;
 
         map.addImage("custom-marker", img);
       }
@@ -100,56 +96,50 @@ const TransformerLayer = ({ promise }: Props) => {
           data: data.data,
         });
       }
-      // if (!map.getLayer(layerId)) {
-      //   map.addLayer({
-      //     id: layerId,
-      //     type: "circle",
-      //     source: sourceId,
-      //     filter: ["has", "point_count"],
-      //     paint: {
-      //       "circle-color": [
-      //         "step",
-      //         ["get", "point_count"],
-      //         "#51bbd6",
-      //         100,
-      //         "#f1f075",
-      //         750,
-      //         "#f28cb1",
-      //       ],
-      //       "circle-radius": [
-      //         "step",
-      //         ["get", "point_count"],
-      //         20,
-      //         100,
-      //         30,
-      //         750,
-      //         40,
-      //       ],
-      //     },
-      //   });
-      // }
-      // if (!map.getLayer(clusterCountId)) {
-      //   map.addLayer({
-      //     id: clusterCountId,
-      //     type: "symbol",
-      //     source: sourceId,
-      //     layout: {
-      //       "text-field": "{point_count_abbreviated}",
-      //       "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-      //       "text-size": 12,
-      //     },
-      //     paint: {
-      //       "text-color": "#fff",
-      //     },
-      //   });
-      // }
+      if (!map.getLayer(layerId)) {
+        map.addLayer({
+          id: layerId,
+          type: "symbol",
+          source: sourceId,
+          filter: ["has", "point_count"],
+          layout: {
+            "icon-image": "custom-marker",
+            "icon-offset": [3, 2.5],
+            "icon-allow-overlap": true,
+            "icon-size": 1,
+            "text-field": ["get", "transformer_id"],
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 7,
+            "text-anchor": "top",
+            "text-offset": [0, 2],
+          },
+          paint: {
+            "text-color": "black",
+          },
+        });
+      }
+      if (!map.getLayer(clusterCountId)) {
+        map.addLayer({
+          id: clusterCountId,
+          type: "symbol",
+          source: sourceId,
+          layout: {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 12,
+          },
+          paint: {
+            "text-color": "black",
+          },
+        });
+      }
 
       if (!map.getLayer(pingLayerId)) {
         map.addLayer({
           id: pingLayerId,
           type: "circle",
           source: sourceId,
-          // filter: ["!", ["has", "point_count"]],
+          filter: ["!", ["has", "point_count"]],
 
           paint: {
             "circle-color": [
@@ -174,7 +164,7 @@ const TransformerLayer = ({ promise }: Props) => {
           id: unclusteredId,
           type: "symbol",
           source: sourceId,
-          // filter: ["!", ["has", "point_count"]],
+          filter: ["!", ["has", "point_count"]],
 
           layout: {
             "icon-image": "custom-marker",
@@ -221,9 +211,9 @@ const TransformerLayer = ({ promise }: Props) => {
 
     return () => {
       if (map && map.getStyle()) {
-        // map.removeLayer(layerId);
+        map.removeLayer(layerId);
         map.removeLayer(unclusteredId);
-        // map.removeLayer(clusterCountId);
+        map.removeLayer(clusterCountId);
         map.removeLayer(pingLayerId);
         map.removeSource(sourceId);
       }
@@ -258,21 +248,21 @@ const TransformerLayer = ({ promise }: Props) => {
     container.appendChild(label);
 
     input.addEventListener("change", () => {
-      // map.setLayoutProperty(
-      //   layerId,
-      //   "visibility",
-      //   input.checked ? "visible" : "none",
-      // );
+      map.setLayoutProperty(
+        layerId,
+        "visibility",
+        input.checked ? "visible" : "none",
+      );
       map.setLayoutProperty(
         unclusteredId,
         "visibility",
         input.checked ? "visible" : "none",
       );
-      // map.setLayoutProperty(
-      //   clusterCountId,
-      //   "visibility",
-      //   input.checked ? "visible" : "none",
-      // );
+      map.setLayoutProperty(
+        clusterCountId,
+        "visibility",
+        input.checked ? "visible" : "none",
+      );
       map.setLayoutProperty(
         pingLayerId,
         "visibility",

@@ -13,4 +13,6 @@ export type PrimaryLineProperties = {
   is_active: boolean;
   length_meters: number;
   phasing: string;
+  conductor_wire: string;
+  neutral_wire: string;
 };

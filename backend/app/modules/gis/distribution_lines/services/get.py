@@ -1,4 +1,5 @@
 from ..models.primary_lines import PrimaryLines
+from ...wires.model.conductor_wires import ConductorWires, NeutralConcentricCable
 from .....dependencies.db_session import get_session
 from ...franchise_area.model.municipality import Municipality
 from ...franchise_area.model.villages import Village
@@ -25,9 +26,15 @@ class DistributionLineGetServices:
                         func.round(PrimaryLines.length_meters,
                                    2).label("length_meters"),
                         PrimaryLines.phasing,
-                    ).join(PrimaryLines.village)
-                    .join(PrimaryLines.municipal))
+                        ConductorWires.name.label("conductor_wire"),
+                        NeutralConcentricCable.name.label("neutral_wire")
+                    )
+                    .join(PrimaryLines.village)
+                    .join(PrimaryLines.municipal)
+                    .join(PrimaryLines.conductor)
+                    .join(PrimaryLines.neutral))
             result = (await self.session.execute(stmt)).mappings().all()
+
             data = {
                 "type": "FeatureCollection",
                 "features":
@@ -41,11 +48,14 @@ class DistributionLineGetServices:
                         "is_active": res["is_active"],
                         "color": "#1c2986" if res["is_active"] else "#424242",
                         "length_meters": res["length_meters"],
-                        "phasing": res["phasing"]},
-                        "layer_name": "layer_name",
+                        "phasing": res["phasing"],
+                        "conductor_wire": res["conductor_wire"],
+                        "neutral_wire": res["neutral_wire"]},
 
                 } for res in result]}
 
             return data
         except Exception as e:
             print(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")

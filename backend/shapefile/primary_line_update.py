@@ -68,6 +68,10 @@ def update_primary_line_data():
 
 
 if __name__ == "__main__":
-    update_primary_line_data()
-    print("sucessfully updated primary lines")
+    try: 
+        
+        update_primary_line_data()
+        print("sucessfully updated primary lines")
+    except Exception as e:
+        print(e)
 

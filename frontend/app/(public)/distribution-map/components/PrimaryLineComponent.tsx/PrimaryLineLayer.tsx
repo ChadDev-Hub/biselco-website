@@ -13,7 +13,7 @@ type Props = {
 
 const PrimaryLineLayer = ({ promise }: Props) => {
   const initialData = use(promise);
-
+  console.log(initialData);
   const { mapRef, isMapReady } = useMap();
   const selectedFeatureId = useRef<string | null>(null);
   const sourceId = "primary-lines";

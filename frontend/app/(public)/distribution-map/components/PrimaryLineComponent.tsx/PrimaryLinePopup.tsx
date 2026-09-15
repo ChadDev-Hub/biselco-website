@@ -1,30 +1,22 @@
 "use client";
 
-import React from "react";
+import type {PrimaryLineProperties} from "@/types/primary-line";
 import {
   LineDotRightHorizontal,
   CircleDot,
 } from "lucide-react";
 
-export type PrimaryLineProperties = {
-  primary_line_id: string;
-  village: string;
-  municipality: string;
-  color: string;
-  is_active: boolean;
-  length_meters: number;
-  phasing: string;
-};
 
 type Props = {
   primaryLinePopup: PrimaryLineProperties;
 };
 
 const PrimaryLinePopup = ({ primaryLinePopup }: Props) => {
+  
   const labelClass = "label text-xs";
   const infoClass = "text-xs text-base-content text-center w-full font-semibold";
   const infoContainerClass = "flex items-center gap-2";
-  const containerClass = "bg-base-200 p-6 rounded-box";
+  const containerClass = "bg-base-200 p-4 rounded-box";
   return (
     <div className="bg-base-100 w-fit flex flex-col rounded-box overflow-hidden m-0 relative">
       <header className="flex items-center bg-base-200 p-5 gap-3">
@@ -81,6 +73,26 @@ const PrimaryLinePopup = ({ primaryLinePopup }: Props) => {
           <div className={infoContainerClass}>
             <p className={infoClass}>
               {primaryLinePopup.length_meters.toLocaleString()} m
+            </p>
+          </div>
+        </section>
+
+        {/* Conductor */}
+        <section className={`${containerClass} col-span-2`}>
+          <label className={labelClass}>Conductors</label>
+          <div className={infoContainerClass}>
+            <p className={infoClass}>
+              {primaryLinePopup.conductor_wire}
+            </p>
+          </div>
+        </section>
+
+        {/* Neutral */}
+        <section className={`${containerClass} col-span-2`}>
+          <label className={labelClass}>Neutral</label>
+          <div className={infoContainerClass}>
+            <p className={infoClass}>
+              {primaryLinePopup.neutral_wire}
             </p>
           </div>
         </section>
