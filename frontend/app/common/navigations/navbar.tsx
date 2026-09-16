@@ -16,6 +16,8 @@ export default function NavBar() {
     "/agma-registration",
     "/agma-registration/registered",
     "/about",
+    "/privacy-policy",
+    "/terms-service",
   ];
   const isInvisible = invisibleRoutes.includes(currentRouter);
   const isLandingPage = currentRouter === "/landing";
