@@ -5,8 +5,8 @@ from fastapi import (
     HTTPException,
     status,
     Response,
+    Request,
     Query,
-  
 )
 from fastapi.responses import RedirectResponse
 from fastapi.exceptions import ResponseValidationError
@@ -40,6 +40,7 @@ from typing import Optional
 import os
 from ...user.service.add_user import add_user
 from ..services.get import GetServices
+from authlib.integrations.starlette_client import OAuth
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 load_dotenv()
@@ -294,3 +295,28 @@ async def logout(response:Response):
         "success": True
     }
     
+
+# FACEBOOK AUTHENTICATION
+
+
+facebook_outh = OAuth()
+facebook_outh.register(
+    name="facebook",
+    client_id=os.getenv("FACEBOOKAPP_ID"),
+    client_secret=os.getenv("FACEBOOKAPP_SECRET"),
+    access_token_url="https://graph.facebook.com/oauth/access_token",
+    authorize_url="https://www.facebook.com/v26.0/dialog/oauth",
+    api_base_url="https://graph.facebook.com/v26.0/",
+)
+
+
+@router.post("/facebook", status_code=status.HTTP_200_OK)
+async def facebook_login(request: Request):
+    redirect_uri = request.url_for("facebook_callback")
+
+    return await facebook_outh.facebook.authorize_redirect(
+        request,
+        redirect_uri,
+    )
+
+
