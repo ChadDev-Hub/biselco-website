@@ -72,7 +72,7 @@ class TransformerType(BaseModel):
     __tablename__ = "transformer_type"
     __table_args__ = {'schema': 'gis'}
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(type_=Text, nullable=True,)
+    name: Mapped[str] = mapped_column(type_=Text, nullable=True)
     kva_rating: Mapped[str] = mapped_column(type_=Text, nullable=True)
     primary_voltage_rating: Mapped[float] = mapped_column(
         type_=Numeric(precision=10, scale=2), nullable=True)

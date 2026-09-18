@@ -21,7 +21,7 @@ const TransformerLayer = ({ promise }: Props) => {
   const [data, setData] = useState<PromiseType<Transformers>>();
   const { mapRef, isMapReady } = useMap();
   const sourceId = "transformers";
-  const {user} = useAuth()
+  const {user} = useAuth();
   // SET DATA STATE
   useEffect(() => {
     const setInitialData = async () => {
@@ -35,6 +35,7 @@ const TransformerLayer = ({ promise }: Props) => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !data?.data) return;
+    if (!map.isStyleLoaded()) return;
     const setup = async () => {
       if (!map) return;
       if (!data.data) return;
@@ -83,6 +84,113 @@ const TransformerLayer = ({ promise }: Props) => {
 
         const img = new Image();
 
+        img.onload = () => {
+          if (!map.hasImage("custom-marker")) {
+            map.addImage("custom-marker", img);
+          }
+        };
+
+
+        // ADD TRANSFORMER SOURCE
+        if (!map.getSource(sourceId)) {
+          map.addSource(sourceId, {
+            cluster: true,
+            type: "geojson",
+            data: data.data,
+          });
+        }
+
+        // ADD CLUSTER LAYER
+        if (!map.getLayer(layerId)) {
+          map.addLayer({
+            id: layerId,
+            type: "symbol",
+            source: sourceId,
+            filter: ["has", "point_count"],
+            layout: {
+              "icon-image": "custom-marker",
+              "icon-offset": [3, 2.5],
+              "icon-allow-overlap": true,
+              "icon-size": 1,
+              "text-field": ["get", "transformer_id"],
+              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+              "text-size": 7,
+              "text-anchor": "top",
+              "text-offset": [0, 2],
+            },
+            paint: {
+              "text-color": "black",
+            },
+          });
+        }
+
+        // ADD COUNT ON CLUSTER LAYER
+        if (!map.getLayer(clusterCountId)) {
+          map.addLayer({
+            id: clusterCountId,
+            type: "symbol",
+            source: sourceId,
+            layout: {
+              "text-field": "{point_count_abbreviated}",
+              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+              "text-size": 12,
+            },
+            paint: {
+              "text-color": "black",
+            },
+          });
+        }
+
+        // ADD PING UNCLUSTER LAYER 
+        if (!map.getLayer(pingLayerId)) {
+          map.addLayer({
+            id: pingLayerId,
+            type: "circle",
+            source: sourceId,
+            filter: ["!", ["has", "point_count"]],
+
+            paint: {
+              "circle-color": [
+                "case",
+                ["==", ["get", "is_active"], true],
+                "#2A7C13",
+                ["==", ["get", "is_active"], false],
+                "red",
+                "#2A7C13",
+              ],
+              "circle-radius": 11,
+              "circle-opacity": 0.8,
+              "circle-stroke-width": 0.5,
+              "circle-stroke-opacity": 1,
+            },
+          });
+        }
+
+        // ADD UNLUSTERED LAYER
+        if (!map.getLayer(unclusteredId)) {
+          map.addLayer({
+            id: unclusteredId,
+            type: "symbol",
+            source: sourceId,
+            filter: ["!", ["has", "point_count"]],
+
+            layout: {
+              "icon-image": "custom-marker",
+              "icon-offset": [3, 2.5],
+              "icon-allow-overlap": true,
+              "icon-size": 1,
+              "text-field": ["get", "transformer_id"],
+              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+              "text-size": 7,
+              "text-anchor": "top",
+              "text-offset": [0, 2],
+            },
+            paint: {
+              "text-color": "black",
+            },
+          });
+        }
+        map.moveLayer(pingLayerId, unclusteredId);
         img.src = svgUrl;
 
         img.onload = () => map.addImage("custom-marker", img);

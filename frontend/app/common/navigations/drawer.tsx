@@ -19,6 +19,8 @@ const Drawer = ({ children }: Props) => {
     "/agma-registration/registered",
     "/about",
     "/distribution-map",
+    "/privacy-policy",
+    "/terms-service",
   ];
   const isActive =
     currentRoute === "/home"

@@ -74,7 +74,7 @@ const TransformerPopup = ({ TransformerProperties, setData, user }: Props) => {
             {TransformerProperties?.village ?? "—"}
           </p>
         </div>
-
+        {/* Municipality */}
         <div className="rounded-xl bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Municipality</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
@@ -82,21 +82,47 @@ const TransformerPopup = ({ TransformerProperties, setData, user }: Props) => {
           </p>
         </div>
 
-
+          {/* CONNECTED CONSUMERS */}
         <div className="rounded-xl col-span-2 bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Connected Consumers</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.connected_consumer ?? "—"}
           </p>
         </div>
-
+          {/* TRANSFORMER TYPE */}
         <div className="col-span-2 rounded-xl bg-base-200/50 p-3">
           <p className="text-xs text-base-content/50">Transformer Type</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.description}
           </p>
         </div>
+
+
+            {/* KVA RATING */}
+        <div className="col-span-2 rounded-xl bg-base-200/50 p-3">
+          <p className="text-xs text-base-content/50">KVA Rating</p>
+          <p className="mt-1 font-semibold text-xs w-full text-center">
+            {TransformerProperties?.kva_rating ?? "—"}
+          </p>
+        </div>
+        {/* PRIMARY VOLTAGE RATING */}
+
+        <div className=" rounded-xl bg-base-200/50 p-3">
+          <p className="text-xs text-base-content/50">Primary Voltage Rating(Kv)</p>
+          <p className="mt-1 font-semibold text-xs w-full text-center">
+            {TransformerProperties?.primary_voltage_rating_kv ?? "—"}
+          </p>
+        </div>
+
+        {/* SECONDARY VOLTAGE RATING */}
+        <div className=" rounded-xl bg-base-200/50 p-3">
+          <p className="text-xs text-base-content/50">Secondary Voltage Rating(Kv)</p>
+          <p className="mt-1 font-semibold text-xs w-full text-center">
+            {TransformerProperties?.secondary_voltage_rating_kv ?? "—"}
+          </p>
+        </div>
       </div>
+
 
       {/* Footer */}
       {user && user?.roles.map((role) => role.name).includes("admin") && <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">

@@ -16,5 +16,8 @@ export type TransformerProperties = {
   color: string | null;
   village: string | null;
   municipality: string | null;
-  connected_consumer: number; 
+  connected_consumer: number | null;
+  primary_voltage_rating_kv: number | null;
+  secondary_voltage_rating_kv: number | null;
+  kva_rating: number | null;
 }

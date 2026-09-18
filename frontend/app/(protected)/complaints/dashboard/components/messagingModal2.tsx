@@ -105,7 +105,7 @@ const Messaging = ({
         className="btn tooltip w-20 relative indicator tooltip-top rounded-box flex flex-col items-center justify-center p-1 shadow-md border-gray-300"
         onClick={handleOpen}
       >
-        {numberOfUnseenMessages && numberOfUnseenMessages > 0 && (
+        { ( numberOfUnseenMessages ?? 0) > 0 && (
           <span className="indicator-item badge badge-secondary badge-xs">
             {numberOfUnseenMessages}
           </span>

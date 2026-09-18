@@ -14,7 +14,6 @@ type Props = {
 
 const PrimaryLineLayer = ({ promise }: Props) => {
   const initialData = use(promise);
-
   const { mapRef, isMapReady } = useMap();
   const selectedFeatureId = useRef<string | null>(null);
   const sourceId = "primary-lines";
@@ -24,7 +23,7 @@ const PrimaryLineLayer = ({ promise }: Props) => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !initialData?.data) return;
-
+    if (!map.isStyleLoaded()) return;
     const geojson = initialData.data;
     const setup = () => {
       if (!map) return;

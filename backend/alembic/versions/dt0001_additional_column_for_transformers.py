@@ -20,31 +20,78 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # ADD NEW COLUMN FOR GIS DISTRIBUTION TRANSFORMER
+    # ADD NEW COLUMN FOR GIS TRANSFORMER TYPE 
     
-    
-    # =================== PRIMARY VOLTAGE RATING KV =================== #
     op.add_column(
-        table_name="distribution_transformer",
+        table_name="transformer_type",
         column=sa.Column(
-            "primary_voltage_rating_kv", sa.Numeric(precision=10, scale=2), nullable=True
+            "phase",
+            sa.String(length=2),
+            nullable=True
         ),
-        schema="gis",
-        if_not_exists=True
+        schema="gis"
     )
     
-    # ========================= SECONDARY VOLTAGE RATING ============= #
+    op.add_column(
+        table_name="transformer_type",
+        column=sa.Column(
+            "%_z",
+            sa.NUMERIC(precision=10, scale=4),
+            nullable=True
+        ),
+        schema="gis"
+    )
+    
     
     op.add_column(
-        table_name = "distribution_transformer",
+        table_name="transformer_type",
         column=sa.Column(
-            "secondary_voltage_rating_kv",
-            sa.Numeric(precision=10, scale=2),
+            "x_r_ratio",
+            sa.NUMERIC(precision=10, scale=4),
+            nullable=True
+        ),
+        schema="gis"
+    )
+    
+    op.add_column(
+        table_name="transformer_type",
+        column=sa.Column(
+            "no_load_loss_kw",
+            sa.NUMERIC(precision=10, scale=4),
+            nullable=True
+        ),
+        schema="gis"
+    )
+    
+    op.add_column(
+        table_name="transformer_type",
+        column=sa.Column(
+            "exciting_current_%",
+            sa.Float(),
+            nullable=True
+        ),
+        schema="gis"
+    )
+    
+    # DROP OLD COLUMN
+    op.drop_column("transformer_type", "name", schema="gis", if_exists=True)
+    # CREATE NEW COLUMN
+    op.add_column(
+        table_name="transformer_type",
+        column=sa.Column(
+            "name",
+            sa.Text(),
+            sa.Computed(
+                sqltext="""phase || ' ' || kva_rating || ' ' || '/' || ' ' || primary_voltage_rating || 'Kv' || ' ' || secondary_voltage_rating || 'Kv' """,
+                persisted=True
+            ),
             nullable=True,
         ),
         schema="gis",
-        if_not_exists = True
     )
+    
+
+    # ============= ALTER TRANSpFORMER TYPE COLUMNS
 
 
 def downgrade() -> None:
@@ -52,3 +99,11 @@ def downgrade() -> None:
     #  REMOVE COLUMN FOR GIS DISTRIBUTION TRANSFORMER
     op.drop_column("distribution_transformer", "primary_voltage_rating_kv", schema="gis", if_exists=True)
     op.drop_column("distribution_transformer", "secondary_voltage_rating_kv", schema="gis", if_exists=True)
+
+    
+    op.drop_column("transformer_type", "phase", schema="gis", if_exists=True)
+    op.drop_column("transformer_type", "%_z", schema="gis", if_exists=True)
+    op.drop_column("transformer_type", "x_r_ratio", schema="gis", if_exists=True)
+    op.drop_column("transformer_type", "no_load_loss_kw", schema="gis", if_exists=True)
+    op.drop_column("transformer_type", "exciting_current_%", schema="gis", if_exists=True)
+    op.drop_column("transformer_type", "name", schema="gis", if_exists=True)

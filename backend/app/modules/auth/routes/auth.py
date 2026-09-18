@@ -41,7 +41,7 @@ import os
 from ...user.service.add_user import add_user
 from ..services.get import GetServices
 from authlib.integrations.starlette_client import OAuth
-
+import secrets
 router = APIRouter(prefix="/auth", tags=["Auth"])
 load_dotenv()
 
@@ -305,18 +305,30 @@ facebook_outh.register(
     client_id=os.getenv("FACEBOOKAPP_ID"),
     client_secret=os.getenv("FACEBOOKAPP_SECRET"),
     access_token_url="https://graph.facebook.com/oauth/access_token",
-    authorize_url="https://www.facebook.com/v26.0/dialog/oauth",
-    api_base_url="https://graph.facebook.com/v26.0/",
+    authorize_url=os.getenv("FACEBOOK_AUTH_ENDPOINT"),
+    api_base_url="https://graph.facebook.com",
+    
+    
 )
 
 
-@router.post("/facebook", status_code=status.HTTP_200_OK)
+@router.get("/facebook", status_code=status.HTTP_200_OK)
 async def facebook_login(request: Request):
-    redirect_uri = request.url_for("facebook_callback")
+    try:
+        redirect_uri = request.url_for("facebook_callback")
+        state = secrets.token_urlsafe(32)
+        print(state)
+        return await facebook_outh.facebook.authorize_redirect(
+            request,
+            redirect_uri=redirect_uri,
+            scope="email,public_profile")
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return await facebook_outh.facebook.authorize_redirect(
-        request,
-        redirect_uri,
-    )
 
-
+@router.get("/facebook/callback", status_code=status.HTTP_200_OK)
+async def facebook_callback(request: Request):
+    token = await facebook_outh.facebook.authorize_access_token(request)
+    user = await facebook_outh.facebook.parse_obj(token)
+    return user

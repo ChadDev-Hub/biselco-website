@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from.....dependencies.db_session import get_session
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func
-from ..model.transformer import DistributionTransformer
+from ..model.transformer import DistributionTransformer, TransformerType
 from ...distribution_lines.models.secondary_lines import SecondaryLines
 from ...consumer.model.service_drop import ServiceDrop
 from ....gis.franchise_area.model.villages import Village
@@ -45,12 +45,16 @@ class GetServicesDT:
                     Village.name.label("village"),
                     Municipality.name.label("municipality"),
                     func.coalesce(stmt_number_of_connected_consumer.c.number_of_connected_consumer, 0).label("number_of_connected_consumer"),
+                    TransformerType.kva_rating.label("kva_rating"),
+                    TransformerType.primary_voltage_rating.label("primary_voltage_rating_kv"),
+                    TransformerType.secondary_voltage_rating.label("secondary_voltage_rating_kv"),
                 )
                 .select_from(DistributionTransformer)
                 .join(DistributionTransformer.village)
                 .join(DistributionTransformer.municipal)
                 .join(stmt_number_of_connected_consumer,
                       onclause=stmt_number_of_connected_consumer.c.transformer_id == DistributionTransformer.transformer_id)
+                .join(TransformerType)
             ).cte("distribution_transformers")
             
             
@@ -59,9 +63,8 @@ class GetServicesDT:
             ))
             
             data = (await self.session.execute(cte_construct_stmt)).mappings().all()
-        
             results ={"type": "FeatureCollection", "features":
-                [
+                [ 
                 {
                     "type": "Feature",
                     "geometry": json.loads(result["geometry"]),
@@ -78,10 +81,14 @@ class GetServicesDT:
                         "village": result["village"],
                         "municipality": result["municipality"],
                         "connected_consumer": result["number_of_connected_consumer"],
+                        "primary_voltage_rating_kv": result["primary_voltage_rating_kv"],
+                        "secondary_voltage_rating_kv": result["secondary_voltage_rating_kv"],
+                        "kva_rating": result["kva_rating"],
                     },
                 
                 }
-                for result in data]}    
+                for result in data]}
+            print(results) 
             return results
         except Exception as e:
             print(e.__cause__ or e)
