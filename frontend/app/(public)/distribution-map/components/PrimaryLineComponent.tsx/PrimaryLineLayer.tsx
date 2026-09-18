@@ -7,13 +7,14 @@ import PrimaryLinePopup from "./PrimaryLinePopup";
 import { createRoot } from "react-dom/client";
 import Maplibregl from "maplibre-gl";
 import { PrimaryLineProperties } from "../../../../../types/primary-line";
+import { layerId as TransformerLayerId } from "../../components/TransformerComponent/TransformerLayer";
 type Props = {
   promise: Promise<PromiseType<PrimaryLines>>;
 };
 
 const PrimaryLineLayer = ({ promise }: Props) => {
   const initialData = use(promise);
-  console.log(initialData);
+
   const { mapRef, isMapReady } = useMap();
   const selectedFeatureId = useRef<string | null>(null);
   const sourceId = "primary-lines";
@@ -60,6 +61,7 @@ const PrimaryLineLayer = ({ promise }: Props) => {
           },
         });
       }
+      map.moveLayer(layerId, TransformerLayerId);
     };
 
     //  Visual Pointer Changes
@@ -135,7 +137,6 @@ const PrimaryLineLayer = ({ promise }: Props) => {
         layers: [layerId],
       });
       if (!features.length) {
-        console.log("no features");
         if (selectedFeatureId.current !== null) {
           map.setFeatureState(
             {

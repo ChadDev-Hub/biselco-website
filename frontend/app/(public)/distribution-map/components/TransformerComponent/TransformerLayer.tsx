@@ -7,21 +7,21 @@ import { Transformers, TransformerProperties } from "@/types/transformer";
 import { MapMouseEvent, MapGeoJSONFeature, Popup } from "maplibre-gl";
 import { createRoot } from "react-dom/client";
 import TransformerPopup from "./transformerPopup";
+import { useAuth } from '@/app/context/authProvider';
+
 type Props = {
   promise: Promise<PromiseType<Transformers>>;
 };
-
+export const layerId = "transformers-layer";
+export const unclusteredId = "transformers-unclustered";
+export const clusterCountId = "transformers-cluster-count";
+export const pingLayerId = `${unclusteredId}-ping`;
 const TransformerLayer = ({ promise }: Props) => {
   const initialdata = use(promise);
   const [data, setData] = useState<PromiseType<Transformers>>();
   const { mapRef, isMapReady } = useMap();
   const sourceId = "transformers";
-  const layerId = "transformers-layer";
-  const unclusteredId = "transformers-unclustered";
-  const clusterCountId = "transformers-cluster-count";
-  const pingLayerId = `${unclusteredId}-ping`;
-
- 
+  const {user} = useAuth()
   // SET DATA STATE
   useEffect(() => {
     const setInitialData = async () => {
@@ -30,7 +30,6 @@ const TransformerLayer = ({ promise }: Props) => {
     setInitialData();
   }, [initialdata]);
 
-  
   // INITIATE LAYER
   useEffect(() => {
     if (!isMapReady) return;
@@ -86,7 +85,7 @@ const TransformerLayer = ({ promise }: Props) => {
 
         img.src = svgUrl;
 
-        map.addImage("custom-marker", img);
+        img.onload = () => map.addImage("custom-marker", img);
       }
 
       if (!map.getSource(sourceId)) {
@@ -106,6 +105,7 @@ const TransformerLayer = ({ promise }: Props) => {
             "icon-image": "custom-marker",
             "icon-offset": [3, 2.5],
             "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
             "icon-size": 1,
             "text-field": ["get", "transformer_id"],
             "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
@@ -148,8 +148,7 @@ const TransformerLayer = ({ promise }: Props) => {
               "#2A7C13",
               ["==", ["get", "is_active"], false],
               "red",
-              "#2A7C13"
-              
+              "#2A7C13",
             ],
             "circle-radius": 11,
             "circle-opacity": 0.8,
@@ -218,7 +217,7 @@ const TransformerLayer = ({ promise }: Props) => {
         map.removeSource(sourceId);
       }
     };
-  }, [data, mapRef, isMapReady, pingLayerId]);
+  }, [data, mapRef, isMapReady]);
 
   // EFFECT FOR LAYER FILTERING
   useEffect(() => {
@@ -269,7 +268,7 @@ const TransformerLayer = ({ promise }: Props) => {
         input.checked ? "visible" : "none",
       );
     });
-  }, [mapRef, isMapReady, layerId, unclusteredId, clusterCountId, pingLayerId]);
+  }, [mapRef, isMapReady]);
 
   // ANIMATION EFFECT PING
 
@@ -310,7 +309,7 @@ const TransformerLayer = ({ promise }: Props) => {
     return () => {
       cancelAnimationFrame(animationFrame);
     };
-  }, [mapRef, isMapReady, pingLayerId]);
+  }, [mapRef, isMapReady]);
 
   // POPUP EFFECT ON MOUSE CLICK
   useEffect(() => {
@@ -326,7 +325,9 @@ const TransformerLayer = ({ promise }: Props) => {
       const feature = e.features[0].properties as TransformerProperties;
       const popupNode = document.createElement("div");
       const root = createRoot(popupNode);
-      root.render(<TransformerPopup TransformerProperties={feature} setData={setData} />);
+      root.render(
+        <TransformerPopup TransformerProperties={feature} setData={setData} user={user} />,
+      );
 
       new Popup({
         className: "custom-maplibre-popup",
@@ -348,7 +349,7 @@ const TransformerLayer = ({ promise }: Props) => {
     };
 
     map.on("click", [unclusteredId], handleMapClick);
-  }, [isMapReady, mapRef]);
+  }, [isMapReady, mapRef, user]);
 
   return null;
 };

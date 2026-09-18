@@ -1,16 +1,18 @@
 "use client";
 
+
 import { PromiseType } from "@/types/promise";
 import { TransformerProperties, Transformers } from "@/types/transformer";
-
-import {Zap} from "lucide-react"
-import {useState, Dispatch, SetStateAction} from "react"
+import { Zap } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
+import {User} from "@/types/user"; 
 type Props = {
   TransformerProperties: TransformerProperties;
   setData: Dispatch<SetStateAction<PromiseType<Transformers > | undefined>>
+  user?:User
 };
 
-const TransformerPopup = ({ TransformerProperties, setData }: Props) => {
+const TransformerPopup = ({ TransformerProperties, setData, user }: Props) => {
     const [currentStatus, setCurrentStatus] = useState(TransformerProperties?.is_active);
     const handleSwitch = (
         transformer: TransformerProperties
@@ -97,14 +99,14 @@ const TransformerPopup = ({ TransformerProperties, setData }: Props) => {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+      {user && user?.roles.map((role) => role.name).includes("admin") && <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
         <span className="text-xs text-base-content/50">Switch</span>
 
         <label className="toggle toggle-xs">
             <input onChange={() => handleSwitch(TransformerProperties)}  checked={currentStatus} type="checkbox"
             />
         </label>
-      </div>
+      </div>}
     </div>
   );
 };
