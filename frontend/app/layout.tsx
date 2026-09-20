@@ -13,7 +13,7 @@ import { NotificationProvider } from "./common/NotificationProvider";
 import type { Viewport } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
-
+import "@xyflow/react/dist/style.css"
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",

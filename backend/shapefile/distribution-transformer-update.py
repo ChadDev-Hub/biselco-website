@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from pprint import pprint
 from pydantic import BaseModel
-path = ".env.dev"
+path = ".env"
 load_dotenv(dotenv_path=path, override=True)
 DB_URL = os.getenv("BISELCO")
 NEW_DB_URL = os.getenv("BISELCOWEBSITE")
@@ -33,7 +33,7 @@ def old_distribution_transformer_type():
                     secondary_voltage_rating_kv
                     from 
                     gis.distribution_transformer
-                    where transformer_type is not null;
+                    where transformer_type is not null
                 """)
     df = pd.read_sql(stmt, old_db)
     df['kva_rating'] = df['transformer_type'].str.split(" ").str[-1]
@@ -57,12 +57,15 @@ def old_distribution_transformer() -> pd.DataFrame:
                     transformer_type,
                     primary_voltage_rating_kv,
                     secondary_voltage_rating_kv
-                from gis.distribution_transformer;
+                from gis.distribution_transformer
                 """)
     df = pd.read_sql(stmt, old_db)
     df['kva rating'] = df['transformer_type'].str.split(" ").str[-1]
+    df['primary_voltage_rating_kv'] = df['primary_voltage_rating_kv'].astype(float).map(lambda x: f"{x:.2f}")
+    df['secondary_voltage_rating_kv'] = df['secondary_voltage_rating_kv'].astype(float).map(lambda x: f"{x:.2f}")
     df['name'] = df['phase'] + " " + df['kva rating'] + " " + "/"  + " " + df['primary_voltage_rating_kv'].astype(str)+"Kv" + " " + df['secondary_voltage_rating_kv'].astype(str)+"Kv"
     df = df[['transformer_id', 'name']]
+   
     df.dropna(subset=['name'], inplace=True)
     return df.to_dict(orient="records")
 
@@ -77,6 +80,7 @@ def new_transformer_type():
 def update_new_transformer_type():
     old_df = old_distribution_transformer()
     new_df = new_transformer_type()
+   
     # CREATE NEW PARAMETER DATA FOR UPDATING TRANSFORMER TYPE IN DISTRIBUTION TRANSFORMER
     new_data = [
         {
@@ -84,6 +88,7 @@ def update_new_transformer_type():
             "transformer_type": i["id"]} for i in new_df  for j  in old_df
             if i['name'] == j['name']
     ]
+   
     # pprint([ i['transformer_type'] for i in new_data])
     stmt = text("""
                 UPDATE gis.distribution_transformer
@@ -109,7 +114,8 @@ def insert_trasnformer_type(data:List[TransformerType]):
     
 
 if __name__ == "__main__":
-    # old_transformer_type = old_distribution_transformer_type()
-    # insert = insert_trasnformer_type(old_transformer_type)
+    old_transformer_type = old_distribution_transformer_type()
+    insert = insert_trasnformer_type(old_transformer_type)
     update = update_new_transformer_type()
-    pprint(update)
+    print("sucessfully updated transformer type")
+   

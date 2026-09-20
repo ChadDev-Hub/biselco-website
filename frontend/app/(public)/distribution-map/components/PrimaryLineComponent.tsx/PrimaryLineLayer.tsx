@@ -23,10 +23,10 @@ const PrimaryLineLayer = ({ promise }: Props) => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !initialData?.data) return;
-    if (!map.isStyleLoaded()) return;
+    
     const geojson = initialData.data;
     const setup = () => {
-      if (!map) return;
+      if (!map.isStyleLoaded()) return;
       if (!geojson) {
         console.log("No Feature Data");
         return;

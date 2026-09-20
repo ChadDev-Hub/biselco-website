@@ -35,8 +35,9 @@ const TransformerLayer = ({ promise }: Props) => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map || !data?.data) return;
-    if (!map.isStyleLoaded()) return;
+    
     const setup = async () => {
+      if (!map.isStyleLoaded()) return;
       if (!map) return;
       if (!data.data) return;
       if (!map.hasImage("custom-marker")) {

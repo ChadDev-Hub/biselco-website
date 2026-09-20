@@ -1,5 +1,5 @@
 import {FeatureCollection,Geometry} from "geojson";
-
+import type {Node} from "@xyflow/react"
 export type Transformers = FeatureCollection<Geometry, TransformerProperties>;
 
 
@@ -21,3 +21,18 @@ export type TransformerProperties = {
   secondary_voltage_rating_kv: number | null;
   kva_rating: number | null;
 }
+
+export type TransformerNodeData = Node<{
+  label: string;
+},"transformer">
+
+
+export type ConsumerNodeData = Node<{
+  id: number;
+  account_no: string;
+  account_type: string;
+  account_name: string;
+  meter_brand: string;
+  meter_no: string;
+}, "consumer">
+

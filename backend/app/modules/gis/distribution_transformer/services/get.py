@@ -6,7 +6,9 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import func
 from ..model.transformer import DistributionTransformer, TransformerType
 from ...distribution_lines.models.secondary_lines import SecondaryLines
+from ...bus.model.bus import Bus
 from ...consumer.model.service_drop import ServiceDrop
+from ...consumer.model.consumer import ConsumerMeter
 from ....gis.franchise_area.model.villages import Village
 from ....gis.franchise_area.model.municipality import Municipality
 from geoalchemy2.functions import ST_AsGeoJSON
@@ -16,7 +18,7 @@ import json
 class GetServicesDT:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-
+    # GET ALL DISTRIBUTION TRANSFORMER
     async def get_distribution_transformer(self):
         try:
             
@@ -92,3 +94,106 @@ class GetServicesDT:
             return results
         except Exception as e:
             print(e.__cause__ or e)
+            
+            
+    # ===================== GET CONNECTED CONSUMERS =====================
+    async def get_connected_consumers(self, transformer_id: str):
+        try:
+            stmt = (
+                select(
+                    ConsumerMeter.id,
+                    ConsumerMeter.account_no,
+                    ConsumerMeter.account_type, 
+                    ConsumerMeter.account_name,
+                    ConsumerMeter.meter_brand,
+                    ConsumerMeter.meter_no,
+                    Village.name.label("village"),
+                    Municipality.name.label("municipality")
+                )
+                .select_from(ServiceDrop)
+                .join(ConsumerMeter)
+                .join(Village).join(Municipality)
+                .join(SecondaryLines, onclause=SecondaryLines.to_bus.has(ServiceDrop.from_bus))
+                .where(SecondaryLines.transformer_id == transformer_id)
+            )
+            data = (await self.session.execute(stmt)).mappings().all()
+            
+            parrent_x = 0
+            parrent_y = 0
+                        
+            # create a LIST OF NODES
+            node_id = 1
+            nodes = [{
+                "id": f"node-{node_id}",
+                "type": "transformer",
+                "position": {
+                    "x": parrent_x,
+                    "y": parrent_y
+                },
+                "data": {
+                    "label": transformer_id,
+                }
+            }]
+            
+            
+            row_size = 4
+            row_increment = 2
+            
+            node_width = 150
+            node_gap = 50
+            # CONSUMERS
+            for _,result in enumerate(data):
+                
+                row = 0
+                remaining = _
+                current_row_size = row_size
+                parrent_y = 200
+                while remaining >= current_row_size:
+                    remaining -= current_row_size
+                    row += 1
+                    current_row_size += row_increment
+            
+                node_id += 1
+                
+                position_in_row = remaining
+                
+                total_width = current_row_size * node_width + (current_row_size - 1) * node_gap
+                
+                start_x = parrent_x - (total_width / 2)
+                x = start_x + position_in_row * (node_width + node_gap)
+
+                y = parrent_y + (row * 200)
+                
+                consumer_nodes = {
+                    "id": f"node-{node_id}",
+                    "type": "consumer",
+                    "position": {
+                        "x": x,
+                        "y": y
+                    },
+                    "data": {
+                        "id": result["id"],
+                        "account_no": result["account_no"],
+                        "account_type": result["account_type"],
+                        "account_name": result["account_name"],
+                        "meter_brand": result["meter_brand"],
+                        "meter_no": result["meter_no"],
+                    }
+                }
+                nodes.append(consumer_nodes)
+            edges = [
+                {
+                    "id": f"edge-{_}",
+                    "source": f"node-1",
+                    "target": n['id']
+                }
+                for _,n in enumerate(nodes) if n['type'] == 'consumer'
+            ]
+            
+            return {
+                "nodes": nodes,
+                "edges": edges
+            }
+        except Exception as e:
+            print(e.__cause__ or e) 
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")
