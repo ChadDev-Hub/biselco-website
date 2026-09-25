@@ -93,7 +93,7 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
         ChangeMeter
     ).options(selectinload(ChangeMeter.images))
         .where(ChangeMeter.is_deleted == False)
-        .order_by(ChangeMeter.timestamped.desc()))
+        .order_by(ChangeMeter.date_accomplished.desc()))
 
     # GET TOTAL PAGE
     total_page = await get_total_page(session=session, stmt=change_meter, pagesize=PAGE_SIZE)

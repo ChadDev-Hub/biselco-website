@@ -90,7 +90,6 @@ class GetServicesDT:
                 
                 }
                 for result in data]}
-            print(results) 
             return results
         except Exception as e:
             print(e.__cause__ or e)
