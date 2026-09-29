@@ -32,7 +32,7 @@ const ContentNavigation = ({ sections }: Props) => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [sections]);
 
    const scrollToSection = (id: string) => {
     const element = document.getElementById(id);

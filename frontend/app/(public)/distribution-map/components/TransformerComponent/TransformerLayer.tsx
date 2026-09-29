@@ -4,297 +4,57 @@ import { useEffect, use, useState } from "react";
 import { useMap } from "../MapProvider";
 import { PromiseType } from "../../../../../types/promise";
 import { Transformers, TransformerProperties } from "@/types/transformer";
-import { MapMouseEvent, MapGeoJSONFeature, Popup } from "maplibre-gl";
+import {
+  MapMouseEvent,
+  MapGeoJSONFeature,
+  Popup,
+  GeoJSONSource,
+} from "maplibre-gl";
 import { createRoot } from "react-dom/client";
 import TransformerPopup from "./transformerPopup";
-import { useAuth } from '@/app/context/authProvider';
+import { useAuth } from "@/app/context/authProvider";
+import {
+  TransformerSourceId,
+  UnclusteredTransformer,
+  TransformerLayerId,
+  TransformerClusterCount,
+  TransformerPing,
+} from "../MapProvider";
 
 type Props = {
   promise: Promise<PromiseType<Transformers>>;
 };
-export const layerId = "transformers-layer";
-export const unclusteredId = "transformers-unclustered";
-export const clusterCountId = "transformers-cluster-count";
-export const pingLayerId = `${unclusteredId}-ping`;
+
 const TransformerLayer = ({ promise }: Props) => {
   const initialdata = use(promise);
   const [data, setData] = useState<PromiseType<Transformers>>();
   const { mapRef, isMapReady } = useMap();
-  const sourceId = "transformers";
-  const {user} = useAuth();
+
+  const { user } = useAuth();
   // SET DATA STATE
   useEffect(() => {
-    const setInitialData = async () => {
+    const setInitialData = () => {
       setData(initialdata);
     };
     setInitialData();
   }, [initialdata]);
 
-  // INITIATE LAYER
   useEffect(() => {
+    if (!mapRef?.current) return;
     if (!isMapReady) return;
-    const map = mapRef?.current;
-    if (!map || !data?.data) return;
-    
-    const setup = async () => {
-      if (!map.isStyleLoaded()) return;
-      if (!map) return;
-      if (!data.data) return;
-      if (!map.hasImage("custom-marker")) {
-        const transformerSvg = `
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          viewBox="0 0 32 32"
-          
-        >
-                <!-- White circular background -->
-          <circle
-          cx="12"
-          cy="12"
-          r="12"
-          fill="white"
-          drop-shadow="0 0 2px rgba(0, 0, 0, 0.3)"
-          stroke="black"
-          stroke-width="0.8"
-          />
-          <g 
-          transform="translate(3 3) scale(0.7)"
-          fill="#FFDDB0"
-          stroke="#f59e0b"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round">
+    if (!data?.data) return;
 
-            <rect x="2" y="7" width="20" height="12" rx="2" />
-            <path d="M14 13h4" stroke="blue"/>
-            <path d="M16 15v-4" stroke="blue"/>
-            <path d="M6 13h4" stroke="red"/>
-            <path d="M18 5v2" />
-            
-            <path d="M6 5v2"/>
-          </g>
-          
-        </svg>
-   
-        `;
+    const map = mapRef.current;
+    const geojson = data.data;
 
-        const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(transformerSvg)}`;
-        // const svgUrl = URL.createObjectURL(svgBlob);
-
-        const img = new Image();
-
-        img.onload = () => {
-          if (!map.hasImage("custom-marker")) {
-            map.addImage("custom-marker", img);
-          }
-        };
-
-
-        // ADD TRANSFORMER SOURCE
-        if (!map.getSource(sourceId)) {
-          map.addSource(sourceId, {
-            cluster: true,
-            type: "geojson",
-            data: data.data,
-          });
-        }
-
-        // ADD CLUSTER LAYER
-        if (!map.getLayer(layerId)) {
-          map.addLayer({
-            id: layerId,
-            type: "symbol",
-            source: sourceId,
-            filter: ["has", "point_count"],
-            layout: {
-              "icon-image": "custom-marker",
-              "icon-offset": [3, 2.5],
-              "icon-allow-overlap": true,
-              "icon-size": 1,
-              "text-field": ["get", "transformer_id"],
-              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 7,
-              "text-anchor": "top",
-              "text-offset": [0, 2],
-            },
-            paint: {
-              "text-color": "black",
-            },
-          });
-        }
-
-        // ADD COUNT ON CLUSTER LAYER
-        if (!map.getLayer(clusterCountId)) {
-          map.addLayer({
-            id: clusterCountId,
-            type: "symbol",
-            source: sourceId,
-            layout: {
-              "text-field": "{point_count_abbreviated}",
-              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 12,
-            },
-            paint: {
-              "text-color": "black",
-            },
-          });
-        }
-
-        // ADD PING UNCLUSTER LAYER 
-        if (!map.getLayer(pingLayerId)) {
-          map.addLayer({
-            id: pingLayerId,
-            type: "circle",
-            source: sourceId,
-            filter: ["!", ["has", "point_count"]],
-
-            paint: {
-              "circle-color": [
-                "case",
-                ["==", ["get", "is_active"], true],
-                "#2A7C13",
-                ["==", ["get", "is_active"], false],
-                "red",
-                "#2A7C13",
-              ],
-              "circle-radius": 11,
-              "circle-opacity": 0.8,
-              "circle-stroke-width": 0.5,
-              "circle-stroke-opacity": 1,
-            },
-          });
-        }
-
-        // ADD UNLUSTERED LAYER
-        if (!map.getLayer(unclusteredId)) {
-          map.addLayer({
-            id: unclusteredId,
-            type: "symbol",
-            source: sourceId,
-            filter: ["!", ["has", "point_count"]],
-
-            layout: {
-              "icon-image": "custom-marker",
-              "icon-offset": [3, 2.5],
-              "icon-allow-overlap": true,
-              "icon-size": 1,
-              "text-field": ["get", "transformer_id"],
-              "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 7,
-              "text-anchor": "top",
-              "text-offset": [0, 2],
-            },
-            paint: {
-              "text-color": "black",
-            },
-          });
-        }
-        map.moveLayer(pingLayerId, unclusteredId);
-        img.src = svgUrl;
-
-        img.onload = () => map.addImage("custom-marker", img);
+    const addTransformerData = () => {
+      const source = map.getSource(TransformerSourceId) as GeoJSONSource;
+      if (source) {
+        source.setData(geojson);
       }
-
-      if (!map.getSource(sourceId)) {
-        map.addSource(sourceId, {
-          cluster: true,
-          type: "geojson",
-          data: data.data,
-        });
-      }
-      if (!map.getLayer(layerId)) {
-        map.addLayer({
-          id: layerId,
-          type: "symbol",
-          source: sourceId,
-          filter: ["has", "point_count"],
-          layout: {
-            "icon-image": "custom-marker",
-            "icon-offset": [3, 2.5],
-            "icon-allow-overlap": true,
-            "icon-ignore-placement": true,
-            "icon-size": 1,
-            "text-field": ["get", "transformer_id"],
-            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 7,
-            "text-anchor": "top",
-            "text-offset": [0, 2],
-          },
-          paint: {
-            "text-color": "black",
-          },
-        });
-      }
-      if (!map.getLayer(clusterCountId)) {
-        map.addLayer({
-          id: clusterCountId,
-          type: "symbol",
-          source: sourceId,
-          layout: {
-            "text-field": "{point_count_abbreviated}",
-            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 12,
-          },
-          paint: {
-            "text-color": "black",
-          },
-        });
-      }
-
-      if (!map.getLayer(pingLayerId)) {
-        map.addLayer({
-          id: pingLayerId,
-          type: "circle",
-          source: sourceId,
-          filter: ["!", ["has", "point_count"]],
-
-          paint: {
-            "circle-color": [
-              "case",
-              ["==", ["get", "is_active"], true],
-              "#2A7C13",
-              ["==", ["get", "is_active"], false],
-              "red",
-              "#2A7C13",
-            ],
-            "circle-radius": 11,
-            "circle-opacity": 0.8,
-            "circle-stroke-width": 0.5,
-            "circle-stroke-opacity": 1,
-          },
-        });
-      }
-
-      if (!map.getLayer(unclusteredId)) {
-        map.addLayer({
-          id: unclusteredId,
-          type: "symbol",
-          source: sourceId,
-          filter: ["!", ["has", "point_count"]],
-
-          layout: {
-            "icon-image": "custom-marker",
-            "icon-offset": [3, 2.5],
-            "icon-allow-overlap": true,
-            "icon-size": 1,
-            "text-field": ["get", "transformer_id"],
-            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 7,
-            "text-anchor": "top",
-            "text-offset": [0, 2],
-          },
-          paint: {
-            "text-color": "black",
-          },
-        });
-      }
-      map.moveLayer(pingLayerId, unclusteredId);
     };
-
-    const attachEvents = async () => {
-      if (!map.getLayer(layerId)) return;
+    const attachEvents = () => {
+      if (!map.getLayer(UnclusteredTransformer)) return;
 
       const handleMouseEnter = () => {
         map.getCanvas().style.cursor = "pointer";
@@ -303,29 +63,13 @@ const TransformerLayer = ({ promise }: Props) => {
         map.getCanvas().style.cursor = "";
       };
 
-      map.on("mouseenter", unclusteredId, handleMouseEnter);
-      map.on("mouseleave", unclusteredId, handleMouseLeave);
-    };
-    const run = async () => {
-      await setup();
-      await attachEvents();
+      map.on("mouseenter", UnclusteredTransformer, handleMouseEnter);
+      map.on("mouseleave", UnclusteredTransformer, handleMouseLeave);
     };
 
-    if (map.isStyleLoaded()) {
-      run();
-    } else {
-      map.once("style.load", run);
-    }
+    addTransformerData();
+    attachEvents();
 
-    return () => {
-      if (map && map.getStyle()) {
-        map.removeLayer(layerId);
-        map.removeLayer(unclusteredId);
-        map.removeLayer(clusterCountId);
-        map.removeLayer(pingLayerId);
-        map.removeSource(sourceId);
-      }
-    };
   }, [data, mapRef, isMapReady]);
 
   // EFFECT FOR LAYER FILTERING
@@ -357,22 +101,22 @@ const TransformerLayer = ({ promise }: Props) => {
 
     input.addEventListener("change", () => {
       map.setLayoutProperty(
-        layerId,
+        TransformerLayerId,
         "visibility",
         input.checked ? "visible" : "none",
       );
       map.setLayoutProperty(
-        unclusteredId,
+        UnclusteredTransformer,
         "visibility",
         input.checked ? "visible" : "none",
       );
       map.setLayoutProperty(
-        clusterCountId,
+        TransformerClusterCount,
         "visibility",
         input.checked ? "visible" : "none",
       );
       map.setLayoutProperty(
-        pingLayerId,
+        TransformerPing,
         "visibility",
         input.checked ? "visible" : "none",
       );
@@ -402,12 +146,12 @@ const TransformerLayer = ({ promise }: Props) => {
       // Fade
       const opacity = 0.8 * (1 - progress);
 
-      if (map.getLayer(pingLayerId)) {
-        map.setPaintProperty(pingLayerId, "circle-radius", radius);
+      if (map.getLayer(TransformerPing)) {
+        map.setPaintProperty(TransformerPing, "circle-radius", radius);
 
-        map.setPaintProperty(pingLayerId, "circle-opacity", opacity);
+        map.setPaintProperty(TransformerPing, "circle-opacity", opacity);
 
-        map.setPaintProperty(pingLayerId, "circle-stroke-opacity", opacity);
+        map.setPaintProperty(TransformerPing, "circle-stroke-opacity", opacity);
       }
 
       animationFrame = requestAnimationFrame(animatePing);
@@ -435,7 +179,11 @@ const TransformerLayer = ({ promise }: Props) => {
       const popupNode = document.createElement("div");
       const root = createRoot(popupNode);
       root.render(
-        <TransformerPopup TransformerProperties={feature} setData={setData} user={user} />,
+        <TransformerPopup
+          TransformerProperties={feature}
+          setData={setData}
+          user={user}
+        />,
       );
 
       new Popup({
@@ -457,7 +205,7 @@ const TransformerLayer = ({ promise }: Props) => {
       });
     };
 
-    map.on("click", [unclusteredId], handleMapClick);
+    map.on("click", [UnclusteredTransformer], handleMapClick);
   }, [isMapReady, mapRef, user]);
 
   return null;

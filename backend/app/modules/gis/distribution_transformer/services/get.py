@@ -113,10 +113,11 @@ class GetServicesDT:
                 .join(ConsumerMeter)
                 .join(Village).join(Municipality)
                 .join(SecondaryLines, onclause=SecondaryLines.to_bus.has(ServiceDrop.from_bus))
-                .where(SecondaryLines.transformer_id == transformer_id)
+                .where(SecondaryLines.transformer_id == transformer_id, ConsumerMeter.account_no.not_ilike("%NA%"))
             )
             data = (await self.session.execute(stmt)).mappings().all()
-            
+            node_width = 300
+            node_gap = 75
             parrent_x = 0
             parrent_y = 0
                         
@@ -131,15 +132,21 @@ class GetServicesDT:
                 },
                 "data": {
                     "label": transformer_id,
-                }
+                },
+                "width": node_width,
+                "height": 100
             }]
             
             
             row_size = 4
             row_increment = 2
             
-            node_width = 150
-            node_gap = 50
+            # CHECK IF ROW SIZE IS GREATER THAN NUMBER OF NODES
+            if len(data) <= row_size:
+                row_size = len(data)
+              
+            
+            
             # CONSUMERS
             for _,result in enumerate(data):
                 
@@ -177,7 +184,7 @@ class GetServicesDT:
                         "account_name": result["account_name"],
                         "meter_brand": result["meter_brand"],
                         "meter_no": result["meter_no"],
-                    }
+                    },
                 }
                 nodes.append(consumer_nodes)
             edges = [
@@ -189,9 +196,11 @@ class GetServicesDT:
                 for _,n in enumerate(nodes) if n['type'] == 'consumer'
             ]
             
+            
             return {
                 "nodes": nodes,
-                "edges": edges
+                "edges": edges,
+                
             }
         except Exception as e:
             print(e.__cause__ or e) 

@@ -1,6 +1,8 @@
 "use client";
 
-import { NodeProps, Handle, Position } from "@xyflow/react";
+import { NodeProps } from "@xyflow/react";
+import TransformerNode from './transformerNode';
+import ConsumerNode from './consumerNode';
 import {
   TransformerData,
   ConsumerData,
@@ -12,20 +14,12 @@ const CustomNodes = ({ data, type }: NodeProps<ConnectedNodes>) => {
     case "transformer":
       const transformer = data as TransformerData;
       return (
-        <div className="w-full h-full bg-base-300 rounded-box p-4">
-          <div>{transformer.label}</div>
-
-          <Handle type="source" position={Position.Bottom} />
-          
-        </div>
+        <TransformerNode id={"node-1"}  data={ transformer}/>
       );
     default:
       const consumer = data as ConsumerData;
       return (
-        <div className="w-full h-full bg-base-300 rounded-box p-4">
-          <div>{consumer.account_no}</div>
-          <Handle type="target" position={Position.Top} />
-        </div>
+        <ConsumerNode data={consumer} />
       );
   }
 };

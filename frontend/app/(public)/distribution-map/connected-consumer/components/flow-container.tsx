@@ -1,5 +1,5 @@
 "use client";
-import { ReactFlow } from "@xyflow/react";
+import { ReactFlow, Controls} from "@xyflow/react";
 import type {
   ConnectedConsumerResponseType,
   ConnectedNodes,
@@ -20,11 +20,11 @@ type Props = {
 
 const FlowContainer = ({ promise }: Props) => {
   const initialData = use(promise);
-  
   const [nodes, setNodes] = useState<ConnectedNodes[] | []>([]);
   const [edges, setEdges] = useState<ConnectedEdges[] | []>([]);
-  
-  
+
+
+
   useEffect(() => {
     const setupData = async () => {
       if (initialData.data) {
@@ -34,14 +34,23 @@ const FlowContainer = ({ promise }: Props) => {
     };
     setupData();
   }, [initialData]);
+
+  
+
   return (
-    <div  className="w-full h-screen min-h-0">
-      <ReactFlow nodes={nodes} edges={edges} 
-      nodeTypes={{
-        consumer: CustomNodes,
-        transformer: CustomNodes
-      }} 
-      fitView />
+    <div className="w-full h-screen min-h-0">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={{
+          consumer: CustomNodes,
+          transformer: CustomNodes,
+        }}
+        
+      >
+        <Controls>
+        </Controls>
+      </ReactFlow>
     </div>
   );
 };

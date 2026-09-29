@@ -1,93 +1,83 @@
 "use client";
 import { useMap } from "../MapProvider";
 import { PromiseType } from "../../../../../types/promise";
-import { use, useEffect, useRef } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { PrimaryLines } from "@/types/primary-line";
 import PrimaryLinePopup from "./PrimaryLinePopup";
 import { createRoot } from "react-dom/client";
-import Maplibregl from "maplibre-gl";
+import { GeoJSONSource, MapMouseEvent, Popup} from "maplibre-gl";
 import { PrimaryLineProperties } from "../../../../../types/primary-line";
-import { layerId as TransformerLayerId } from "../../components/TransformerComponent/TransformerLayer";
+import {PrimaryLineLayerId, PrimaryLineSourceId} from "../../components/MapProvider"
 type Props = {
   promise: Promise<PromiseType<PrimaryLines>>;
 };
 
 const PrimaryLineLayer = ({ promise }: Props) => {
   const initialData = use(promise);
+  const [data, setData] = useState<PromiseType<PrimaryLines>>();
   const { mapRef, isMapReady } = useMap();
   const selectedFeatureId = useRef<string | null>(null);
-  const sourceId = "primary-lines";
-  const layerId = "primary-lines-layer";
+  
+
+  // SETUP INITIAL DATA
+  useEffect(() => {
+    const setInitialData = async () => {
+      setData(initialData);
+    };
+    setInitialData();
+  }, [initialData]);
 
   useEffect(() => {
     if (!isMapReady) return;
     const map = mapRef?.current;
-    if (!map || !initialData?.data) return;
+    if (!map) return;
+    if (!data?.data) return;
+
+    const geojson = data.data;
     
-    const geojson = initialData.data;
     const setup = () => {
-      if (!map.isStyleLoaded()) return;
+      if (!map.isStyleLoaded()) {
+        console.log("Map Style Not Loaded");
+        return;
+      }
       if (!geojson) {
         console.log("No Feature Data");
         return;
       }
-      if (!map.getSource(sourceId)) {
-        map.addSource(sourceId, {
-          type: "geojson",
-          data: geojson,
-          promoteId: "primary_line_id",
-        });
+      
+      const source = map.getSource(PrimaryLineSourceId) as GeoJSONSource;
+      if (source){
+        source.setData(geojson);
       }
-
-      if (!map.getLayer(layerId)) {
-        map.addLayer({
-          id: layerId,
-          type: "line",
-          source: sourceId,
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": [
-              "case",
-              ["boolean", ["feature-state", "selected"], false],
-
-              "#FFD51E",
-              ["get", "color"],
-            ],
-            "line-width": 2,
-          },
-        });
-      }
-      map.moveLayer(layerId, TransformerLayerId);
+      
     };
 
-    //  Visual Pointer Changes
-    const handleMouseEnter = () => {
-      map.getCanvas().style.cursor = "pointer";
-    };
-    const handleMouseLeave = () => {
-      map.getCanvas().style.cursor = "";
+    const attachEvent = () => {
+      if (!map.getLayer(PrimaryLineLayerId)) return;
+      const handleMouseEnter = () => {
+        map.getCanvas().style.cursor = "pointer";
+      };
+      const handleMouseLeave = () => {
+        map.getCanvas().style.cursor = "";
+      };
+      map.on("mouseenter", PrimaryLineLayerId, handleMouseEnter);
+      map.on("mouseleave", PrimaryLineLayerId, handleMouseLeave);
     };
 
-    map.on("mouseenter", layerId, handleMouseEnter);
-    map.on("mouseleave", layerId, handleMouseLeave);
+    
+    // RUN EACH EVEN IN ASYNC
+    const run = () => {
+      setup();
+      attachEvent();
+      
+    };
 
     if (map.isStyleLoaded()) {
-      setup();
+      run();
     } else {
-      map.once("style.load", setup);
+      map.once("style.load", run);
     }
-
-    return () => {
-      if (map && map.getStyle()) {
-        map.removeLayer(layerId);
-        map.removeSource(sourceId);
-      }
-    };
-    //
-  }, [initialData, mapRef, isMapReady]);
+  }, [data, mapRef, isMapReady]);
 
   // USE EFFECT FOR FILTERING LAYER
   useEffect(() => {
@@ -103,14 +93,14 @@ const PrimaryLineLayer = ({ promise }: Props) => {
     // ADD CHECK BOX FOR PRIMARY LINE LAYER
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.id = layerId;
+    input.id = PrimaryLineLayerId;
     input.checked = true;
     input.className = "checkbox checkbox-primary checkbox-xs";
     container.appendChild(input);
 
     // ADD LABEL FOR PRIMARY LINE LAYER
     const label = document.createElement("label");
-    label.htmlFor = layerId;
+    label.htmlFor = PrimaryLineLayerId;
     label.className = "w-full";
     label.textContent = "Primary Lines";
     filterLayer?.appendChild(label);
@@ -119,27 +109,28 @@ const PrimaryLineLayer = ({ promise }: Props) => {
     // EVENT LISTERNER TO MAKE THE LAYER VISIBLE
     input.addEventListener("change", () => {
       map.setLayoutProperty(
-        layerId,
+        PrimaryLineLayerId,
         "visibility",
         input.checked ? "visible" : "none",
       );
     });
-  }, [layerId, mapRef, isMapReady]);
+  }, [ mapRef, isMapReady]);
 
+  // EFFECT ON POPUP
   useEffect(() => {
     if (!isMapReady) return;
     const map = mapRef?.current;
     if (!map) return;
     // SHOW POPUP
-    const handleMapClick = (e: Maplibregl.MapMouseEvent) => {
+    const handleMapClick = (e: MapMouseEvent) => {
       const features = map.queryRenderedFeatures(e.point, {
-        layers: [layerId],
+        layers: [PrimaryLineLayerId],
       });
       if (!features.length) {
         if (selectedFeatureId.current !== null) {
           map.setFeatureState(
             {
-              source: sourceId,
+              source: PrimaryLineSourceId,
               id: selectedFeatureId.current,
             },
             {
@@ -160,7 +151,7 @@ const PrimaryLineLayer = ({ promise }: Props) => {
       const root = createRoot(popupNode);
       root.render(<PrimaryLinePopup primaryLinePopup={properties} />);
 
-      const popup = new Maplibregl.Popup({
+      const popup = new Popup({
         className: "custom-maplibre-popup",
         closeButton: false,
         closeOnClick: true,
@@ -182,10 +173,10 @@ const PrimaryLineLayer = ({ promise }: Props) => {
       if (selectedFeatureId.current !== null) {
         map.setFeatureState(
           {
-            source: sourceId,
+            source: PrimaryLineSourceId,
             id: selectedFeatureId.current,
           },
-          {
+          { 
             selected: false,
           },
         );
@@ -194,13 +185,14 @@ const PrimaryLineLayer = ({ promise }: Props) => {
       selectedFeatureId.current = properties.primary_line_id;
       map.setFeatureState(
         {
-          source: sourceId,
+          source: PrimaryLineSourceId,
           id: properties.primary_line_id,
         },
         {
           selected: true,
         },
       );
+      
     };
 
     map.on("click", handleMapClick);
