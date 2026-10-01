@@ -16,7 +16,7 @@ router = APIRouter(prefix="/consumers", tags=["Consumers"])
 @router.get("", status_code=status.HTTP_200_OK, response_model=list[Consumer])
 async def query_consumer(session:AsyncSession = Depends(get_session), q:Optional[str] = Query(None),
                          get_user:GetUserServices = Depends(GetUserServices)):
-    await get_user.get_current_user(is_admin_transaction=True)
+    await get_user.get_current_user(is_admin_transaction=False)
     result = await get_consumer(session=session, query=q)
     return result
 

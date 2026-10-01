@@ -22,8 +22,8 @@ const McoGoogleLogin = () => {
     }
   };
   return (
-    <div className="aura text-blue-500  aura-dual">
-      <button type="button" onClick={handleClick} className="btn shadow-sm">
+    <div className="aura text-blue-500  aura-dual w-full">
+      <button type="button" onClick={handleClick} className="btn shadow-sm w-full">
         <svg
           aria-label="Google logo"
           width="16"
@@ -54,7 +54,7 @@ const McoGoogleLogin = () => {
         {loading ? (
           <span className="skeleton text-skeleton">Logging in...</span>
         ) : (
-          <span>Login with Google</span>
+          <span>Google</span>
         )}
       </button>
     </div>

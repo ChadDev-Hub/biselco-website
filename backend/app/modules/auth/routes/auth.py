@@ -32,15 +32,19 @@ from ....core.security import (
     create_access_token,
     create_refresh_token,
 )
-from ...user.schema.requests_model import GoogleLogin
+
 from ...user.schema.requests_model import RefreshToken, AccessToken
 from ...user.schema.response_model import Token
 from urllib.parse import urlencode
 from typing import Optional
 import os
 from ...user.service.add_user import add_user
+from ...user.schema.requests_model import SignUpUser
 from ..services.get import GetServices
-from authlib.integrations.starlette_client import OAuth
+from hashlib import sha256
+from authlib.integrations.httpx_client import AsyncOAuth2Client
+
+
 import secrets
 router = APIRouter(prefix="/auth", tags=["Auth"])
 load_dotenv()
@@ -54,62 +58,8 @@ FRONTEND = os.getenv("FRONTEND_BASE_URL")
 BASESERVERURL=os.getenv("BASESERVERURL")
 REFRESH_TOKEN_EXPIRE=os.getenv("REFRESH_TOKEN_EXPIRE")
 ACCESS_TOKEN_EXPIRE=os.getenv("ACCESS_TOKEN_EXPIRE")
-@router.post("/token", status_code=status.HTTP_202_ACCEPTED)
-async def login_for_access_token(
-    response: Response,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    session: AsyncSession = Depends(get_session),
-):
-    user = await authenticate_user(
-        username=form_data.username, password=form_data.password, session=session
-    )
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Username or Password",
-        )
 
-    role = [role.name for role in user.roles]
-    if not role:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User Invalid Role"
-        )
-    access_token = await create_access_token(
-        data=Token(
-            sub="access_token",
-            email=user.email,
-            user_id=str(user.id),
-            role=[r.name for r in user.roles],
-        )
-    )
-    refresh_token = await create_refresh_token(
-        data=Token(
-            sub="refresh_token",
-            email=user.email,
-            user_id=str(user.id),
-            role=[r.name for r in user.roles],
-        )
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        expires=datetime.now(timezone.utc) + timedelta(days=7),
-        httponly=True,
-        secure=False,
-        samesite="lax",
-    )
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        max_age=60,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-    )
 
-    return {
-        "detail": "Login Success",
-    }
 
 
 @router.get("/token/refresh_access_token", status_code=status.HTTP_200_OK)
@@ -219,7 +169,9 @@ async def google_login_callback(
         )
     role = state
     token = await get_google_token(code)
+   
     id_token = token.get("id_token")
+    
     if not token:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Token"
@@ -299,36 +251,121 @@ async def logout(response:Response):
 # FACEBOOK AUTHENTICATION
 
 
-facebook_outh = OAuth()
-facebook_outh.register(
-    name="facebook",
-    client_id=os.getenv("FACEBOOKAPP_ID"),
-    client_secret=os.getenv("FACEBOOKAPP_SECRET"),
-    access_token_url="https://graph.facebook.com/oauth/access_token",
-    authorize_url=os.getenv("FACEBOOK_AUTH_ENDPOINT"),
-    api_base_url="https://graph.facebook.com",
-    
-    
-)
+FACEBOOK_ID = os.getenv("FACEBOOKAPP_ID")
+FACEBOOK_SECRET = os.getenv("FACEBOOKAPP_SECRET")
+FACEBOOK_ENDPOINT = os.getenv("FACEBOOK_AUTH_ENDPOINT")
+FACEBOOK_TOKEN_ENDPOINT = os.getenv("FACEBOOK_TOKEN_ENDPOINT")
+FACEBOOK_ME=os.getenv("FACEBOOK_ME")
+SCOPE = ["email","public_profile"]
 
+facebook_outh = AsyncOAuth2Client(
+        client_id=FACEBOOK_ID,
+        client_secret=FACEBOOK_SECRET,
+        scope=SCOPE)
+@router.get("/facebook/login", status_code=status.HTTP_200_OK)
+async def facebook_login(request: Request):
+    url = request.url_for("facebook")
+    return {
+        "url" : str(url)
+    }
 
 @router.get("/facebook", status_code=status.HTTP_200_OK)
-async def facebook_login(request: Request):
+async def facebook(request: Request):
     try:
-        redirect_uri = request.url_for("facebook_callback")
         state = secrets.token_urlsafe(32)
-        print(state)
-        return await facebook_outh.facebook.authorize_redirect(
-            request,
-            redirect_uri=redirect_uri,
-            scope="email,public_profile")
+        redirect_uri=request.url_for("facebook_callback")
+        facebook_outh.redirect_uri = str(redirect_uri)
+        uri, state = facebook_outh.create_authorization_url(FACEBOOK_ENDPOINT, state=state)
+        redirect = RedirectResponse(url=uri)
+        return redirect
     except Exception as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get("/facebook/callback", status_code=status.HTTP_200_OK)
-async def facebook_callback(request: Request):
-    token = await facebook_outh.facebook.authorize_access_token(request)
-    user = await facebook_outh.facebook.parse_obj(token)
-    return user
+async def facebook_callback(request: Request, session: AsyncSession = Depends(get_session)):
+    try:
+        params = request.query_params
+        provider = "facebook"
+        if params.get("error"):
+            redirect = RedirectResponse(url=FRONTEND)
+            return redirect
+        
+        redirect_uri = request.url_for("facebook_callback")
+        facebook_outh.redirect_uri = str(redirect_uri)
+        code = request.query_params.get("code")
+        
+        token = await facebook_outh.fetch_token(FACEBOOK_TOKEN_ENDPOINT, code=code, redirect_uri=str(redirect_uri))
+        
+        data = await facebook_outh.get(
+            FACEBOOK_ME,
+            params={
+                "fields": "id,name,email,first_name,last_name,picture.width(200).height(200)",
+                "access_token": token["access_token"],
+            },
+        )
+        res = data.json()
+        user = SignUpUser(
+            email=res.get("email"),
+            first_name=res.get("first_name"),
+            last_name=res.get("last_name"),
+            user_name=res.get("name"),
+            provider_id=res.get("id"),
+            photo=res.get("picture").get("data").get("url"),
+            provider_token=token["access_token"],
+            hash=sha256(f"{res.get('id')}|{provider}".encode("utf-8")).hexdigest(),
+            provider=provider,
+        )
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid User"
+            )
+        current_user = await add_user(session=session, role="mco", user=user)
+        
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid User"
+            )
+        
+        access_token = await create_access_token(
+            data=Token(
+                sub="access_token",
+                user_id=str(current_user.id),
+                email=current_user.email,
+                role=[r.name for r in current_user.roles],
+            )
+        )
+        refresh_token = await create_refresh_token(
+            data=Token(
+                sub="refresh_token",
+                user_id=str(current_user.id),
+                email=current_user.email,
+                role=[r.name for r in current_user.roles],
+            )
+        )
+        
+        redirect = RedirectResponse(url=FRONTEND)
+        redirect.set_cookie(
+            key="refresh_token",
+            path="/",
+            value=refresh_token,
+            expires=datetime.now(timezone.utc) + timedelta(days=float(REFRESH_TOKEN_EXPIRE)),
+            httponly=True,            
+            secure=True,
+            samesite="lax",
+        )
+        redirect.set_cookie(
+            key="access_token",
+            path="/",
+            value=access_token,
+            expires=datetime.now(timezone.utc) + timedelta(minutes=float(ACCESS_TOKEN_EXPIRE)),
+            httponly=True,
+            secure=True,
+            samesite="lax",
+        )
+        return redirect
+        
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
