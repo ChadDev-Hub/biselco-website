@@ -1,7 +1,7 @@
 from __future__ import annotations
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Integer, Text, Boolean
+from sqlalchemy import Integer, Text, Boolean, TIMESTAMP
 from ....db.base import BaseModel
 from typing import List, TYPE_CHECKING
 from ...news.model.news import News
@@ -38,11 +38,18 @@ class Users(BaseModel):
     id:Mapped[uuid.UUID] = mapped_column(type_=UUID(), primary_key=True, unique=True, default=uuid.uuid4)
     first_name:Mapped[str] = mapped_column(type_=Text)
     last_name:Mapped[str] = mapped_column(type_=Text)
-    email: Mapped[str] = mapped_column(type_=Text, unique=True)
-    user_name:Mapped[str] = mapped_column(type_=Text, unique=True, nullable=True)
+    email: Mapped[str] = mapped_column(type_=Text, unique=False, nullable=True)
+    user_name:Mapped[str] = mapped_column(type_=Text, unique=False, nullable=True)
     password: Mapped[str] = mapped_column(type_=Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(type_=Boolean, default=True)
     photo: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    provider_id: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    provider: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    provider_token: Mapped[str] = mapped_column(type_=Text, nullable=True)
+    hash:Mapped[str] = mapped_column(type_=Text, nullable=True, unique=True)
+    login_at: Mapped[str] = mapped_column(type_=TIMESTAMP(timezone=True), nullable=True)
+    
+    
     
     meters: Mapped[List['MeterAccount']] = relationship(back_populates="user", cascade="all, delete-orphan")
     complaints: Mapped[List['Complaints']] = relationship(back_populates="user", cascade="all, delete-orphan")

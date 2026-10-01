@@ -14,8 +14,9 @@ from ..modules.user import Users
 from ..modules.user.schema.response_model import UserModel
 from sqlalchemy.orm import selectinload
 import httpx
-from ..modules.user.schema.response_model import GoogleUser
+from ..modules.user.schema.requests_model import SignUpUser
 from typing import Optional
+from hashlib import sha256
 load_dotenv()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
@@ -159,10 +160,15 @@ async def verify_google_login(token: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Token Not Found"
         )
     idinfo = id_token.verify_oauth2_token(token, requests.Request(), G_CLIENT_ID)
-    return GoogleUser(
-        user_name=idinfo["sub"],
+   
+    return SignUpUser(
+        provider_id=idinfo["sub"],
+        provider="google",
+        user_name=idinfo["name"],
         email=idinfo["email"],
         first_name=idinfo["given_name"],
         last_name=idinfo["family_name"],
         photo=idinfo["picture"],
+        provider_token=token,
+        hash=sha256(f"{idinfo['sub']}|google".encode("utf-8")).hexdigest(),
     )
