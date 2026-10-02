@@ -95,3 +95,11 @@
   margin: 0 !important;
   border-radius: 20%;
 }
+
+#nprogress .bar {
+  @apply fixed left-0 top-0 z-[9999] h-[3px] bg-primary;
+}
+
+#nprogress .peg {
+  @apply absolute right-0 block h-full w-[100px] opacity-100;
+}

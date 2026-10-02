@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, } from "framer-motion";
-import {LandingPageInfoType} from "@/types/info";
-import {use} from "react"
+import { motion } from "framer-motion";
+import { LandingPageInfoType } from "@/types/info";
+import { use } from "react";
 import Image from "next/image";
 import Sponsor from "./sponsor";
 
@@ -30,7 +30,6 @@ const textTyping = {
       staggerChildren: 0.05,
     },
   },
-
 };
 
 const letterVariant = {
@@ -38,21 +37,19 @@ const letterVariant = {
   visible: { opacity: 1, y: 0 },
 };
 
-
-type Props =  {
-  promise:  Promise<LandingPageInfoType>
+type Props = {
+  promise: Promise<LandingPageInfoType>;
   children?: React.ReactNode;
-}
-
+};
 
 export default function Hero({ children, promise }: Props) {
-  const { subtitle, description, badge, qoute} = use(promise);
-  
-  
+  const { subtitle, description, badge, qoute } = use(promise);
+
   return (
     <div
       className="
           flex flex-col
+          items-center
           pt-25
           pb-16
           gap-4
@@ -61,26 +58,25 @@ export default function Hero({ children, promise }: Props) {
           overflow-x-clip
           "
     >
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{
-          once: true
-        }}
-        variants={fadeinSide}
-        className="flex justify-center w-full"
-      >
-        <motion.h1 className="text-2xl  sm:text-3xl md:text-4xl  lg:text-5xl text-center text-blue-700 font-bold text-shadow-lg">
-          {subtitle}
-        </motion.h1>
-      </motion.div>
-
-      <div className="grid gap-1   mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1  lg:grid-cols-2 ">
-        <motion.div   
+      <div className="grid gap-1 w-full max-w-7xl   mt-10 grid-cols-1 sm:grid-cols-1 md:grid-cols-1  lg:grid-cols-2 ">
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true
+            once: true,
+          }}
+          variants={fadeinSide}
+          className="flex justify-center w-full  lg:col-span-2 mb-8"
+        >
+          <motion.h1 className="text-3xl  sm:text-4xl md:text-5xl  lg:text-6xl text-center text-blue-700 font-bold text-shadow-lg">
+            {subtitle}
+          </motion.h1>
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{
+            once: true,
           }}
           variants={fadeLeftSide}
           className="flex flex-col shrink-0 w-full items-center gap-2 lg:items-start  order-2 lg:order-1"
@@ -89,11 +85,10 @@ export default function Hero({ children, promise }: Props) {
             {badge}
           </div>
           <div className=" flex w-full flex-col gap-2">
-
             {/* TITLE */}
             <motion.h1
               viewport={{
-                once: true
+                once: true,
               }}
               variants={textTyping}
               className="text-primary font-extrabold italic text-center sm:text-center md:text-center lg:text-start text-4xl sm:text-3xl md:text-3xl lg:text-4xl whitespace-normal wrap-break-word"
@@ -105,15 +100,15 @@ export default function Hero({ children, promise }: Props) {
               ))}
             </motion.h1>
 
-
             {/* DESCRIPTION */}
             <motion.p
-            viewport={{
-              once: true
-            }}
-            variants={textTyping} 
-            className="text-black text-base break-normal text-center sm:text-center my-4 md:text-center lg:text-start wrap-break-word whitespace-normal">
-              {description.split("").map((char, index)=> (
+              viewport={{
+                once: true,
+              }}
+              variants={textTyping}
+              className="text-black  text-xl break-normal text-center sm:text-center my-4 md:text-center lg:text-start wrap-break-word whitespace-normal"
+            >
+              {description.split("").map((char, index) => (
                 <motion.span key={index} variants={letterVariant}>
                   {char}
                 </motion.span>

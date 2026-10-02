@@ -155,8 +155,8 @@ const ChangeMeterForm = () => {
     setValue("consumerName", account.account_name);
     setValue("pullOutMeterNumber", account.meter_no);
     setValue("pullOutMeterBrand", account.meter_brand);
-    setValue("lat", account.geolocation?.coordinates?.[1] ?? "");
-    setValue("lon", account.geolocation?.coordinates?.[0] ?? "");
+    setValue("lat", account.geolocation?.coordinates?.[1]);
+    setValue("lon", account.geolocation?.coordinates?.[0]);
     setConsumer([]);
   };
   // HANDLE SUBMIT

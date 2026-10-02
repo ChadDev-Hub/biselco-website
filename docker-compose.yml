@@ -4,6 +4,7 @@ services:
       context: './database'
       dockerfile: Dockerfile
     container_name: postgres_db
+    image: chaddevhub/postgres_db
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRESUSER}
@@ -12,7 +13,8 @@ services:
     ports:
       - "${PORT}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+    
+      - postgres_data_18:/var/lib/postgresql
       
     command: 
       - "postgres"
@@ -130,4 +132,4 @@ services:
           path: ./frontend/package.json
 
 volumes:
-  postgres_data:
+  postgres_data_18:
