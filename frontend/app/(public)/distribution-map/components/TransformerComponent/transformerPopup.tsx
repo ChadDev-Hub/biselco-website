@@ -6,35 +6,36 @@ import { TransformerProperties, Transformers } from "@/types/transformer";
 import { Zap } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import {User} from "@/types/user"; 
+import Link from "next/link";
 type Props = {
   TransformerProperties: TransformerProperties;
   setData: Dispatch<SetStateAction<PromiseType<Transformers > | undefined>>
   user?:User
 };
 
-const TransformerPopup = ({ TransformerProperties, setData, user }: Props) => {
-    const [currentStatus, setCurrentStatus] = useState(TransformerProperties?.is_active);
-    const handleSwitch = (
-        transformer: TransformerProperties
-    ) => {
-        setCurrentStatus((prev) => !prev);
-        setData((prev)=>{
-            if(!prev?.data) return prev;
-            const feature = prev.data.features.find((feature) => feature.properties.id === transformer.id);
-            if(!feature) return prev;
+const TransformerPopup = ({ TransformerProperties,  user }: Props) => {
+    const [currentStatus] = useState(TransformerProperties?.is_active);
+    // const handleSwitch = (
+    //     transformer: TransformerProperties
+    // ) => {
+    //     setCurrentStatus((prev) => !prev);
+    //     setData((prev)=>{
+    //         if(!prev?.data) return prev;
+    //         const feature = prev.data.features.find((feature) => feature.properties.id === transformer.id);
+    //         if(!feature) return prev;
             
-            feature.properties.is_active = !feature.properties.is_active
-            const newData = {
-              ...prev,
-              data: {
-                ...prev.data,
-                features: prev.data.features.map((f) => f.properties.id === transformer.id ? feature : f)
-              },
-            };
+    //         feature.properties.is_active = !feature.properties.is_active
+    //         const newData = {
+    //           ...prev,
+    //           data: {
+    //             ...prev.data,
+    //             features: prev.data.features.map((f) => f.properties.id === transformer.id ? feature : f)
+    //           },
+    //         };
 
-            return newData
-        })
-    }
+    //         return newData
+    //     })
+    // }
   return (
     <div className="w-80 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xl">
       {/* Header */}
@@ -126,12 +127,9 @@ const TransformerPopup = ({ TransformerProperties, setData, user }: Props) => {
 
       {/* Footer */}
       {user && user?.roles.map((role) => role.name).includes("admin") && <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
-        <span className="text-xs text-base-content/50">Switch</span>
-
-        <label className="toggle toggle-xs">
-            <input onChange={() => handleSwitch(TransformerProperties)}  checked={currentStatus} type="checkbox"
-            />
-        </label>
+        <Link href={`distribution-map/connected-consumer?dt=${TransformerProperties.transformer_id}`} className="btn btn-primary btn-sm">
+          View Connected Consumers
+        </Link>
       </div>}
     </div>
   );

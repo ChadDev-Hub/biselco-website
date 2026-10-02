@@ -1,12 +1,21 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 # SIGN UP PYDANTIC MODEL
+
+
+
 class SignUpUser(BaseModel):
-    firstname:str
-    lastname:str
-    email: EmailStr
-    password: str
     
+    user_name: Optional[str] = None
+    first_name: str
+    last_name: str
+    email: Optional[EmailStr] = None
+    photo: Optional[str] = None
+    provider_token: Optional[str] = None
+    provider_id: str
+    hash: str
+    provider: str
+    model_config = ConfigDict(from_attributes=True) 
 
 # LOGIN MODEL
 class LoginUser(BaseModel):

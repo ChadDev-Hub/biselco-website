@@ -5,7 +5,7 @@ export type Consumer = {
   meter_no: string;
   municipality: string;
   village: string;
-  geolocation: Location;
+  geolocation?: Location;
 };
 
 export type Location = {

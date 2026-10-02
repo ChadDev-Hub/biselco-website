@@ -18,6 +18,7 @@ COPY . .
 RUN apt-get update && apt-get install -y tzdata
 ENV TZ=Asia/Manila
 
+ENV FORWARDED_ALLOW_IPS="*"
 
 CMD ["gunicorn", "app.main:app","-k","uvicorn.workers.UvicornWorker","-w","4", "--bind","0.0.0.0:8001","--timeout","3000","--graceful-timeout","3000","--log-level","info","--access-logfile","-","--error-logfile","-","--capture-output","--enable-stdio-inheritance"]
 

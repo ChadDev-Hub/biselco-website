@@ -39,7 +39,7 @@ class GetServices:
                     NewConnection.geom
                 ))
                 .where(NewConnection.is_deleted == False)
-                .order_by(NewConnection.times_tamped.desc()))
+                .order_by(NewConnection.date_accomplished.desc()))
         if search:
             page = 1
             stmt = stmt.where(

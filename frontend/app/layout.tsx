@@ -14,6 +14,8 @@ import type { Viewport } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
 import "@xyflow/react/dist/style.css"
+import ProgressBar from './common/progress/progress-bar';
+
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -149,6 +151,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
       >
+        <ProgressBar />
         <AuthProvider>
           <WebsocketProvider>
             <AlertComponent>

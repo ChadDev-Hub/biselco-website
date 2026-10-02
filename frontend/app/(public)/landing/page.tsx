@@ -1,6 +1,6 @@
 import { GetAgmaEvents } from "@/lib/public-api/events";
 import Hero from "./components/hero";
-import McoGoogleLogin from "../../common/auth-component/mcoGoogleLogin";
+
 import LandingStats from "./components/stats";
 import VisionMission from "./components/visionMision";
 import ServiceFeature from "./components/serviceFeature";
@@ -17,6 +17,7 @@ import { GetOffices } from "../../../lib/public-api/offices";
 import BiselcoOffices from "./components/biselcoOfficesLayer";
 import LoadingIndicator from "../distribution-map/components/LoadingIndicator";
 import { GetLandingPageData } from "@/lib/public-api/info";
+import LoginModal from '../../common/auth-component/login-modal';
 
 export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
@@ -29,7 +30,7 @@ export default function Landing() {
         <section className="w-full relative ">
           <Suspense fallback={<LoadingIndicator />}>
             <Hero promise={Info}>
-              <McoGoogleLogin />
+             <LoginModal/>
             </Hero>
           </Suspense>
         </section>

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/lib/private-api/actions/complaint";
 import ImageViewer from "../..//technical/change-meter/components/imageViewr";
 import { useAlert } from "@/app/context/alert";
-import {queryConsumer} from "@/lib/private-api/actions/consumer-meter";
-import { Consumer, Coordinates } from '../../../../types/consumer-meter';
+import { queryConsumer } from "@/lib/private-api/actions/consumer-meter";
+
+import { Consumer, Coordinates } from "../../../../types/consumer-meter";
 
 // Define the type for form data
 type ComplaintFormData = {
@@ -34,7 +35,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const { showAlert } = useAlert();
-  
+
   // CREATE FORM HOOK
   const {
     register,
@@ -97,11 +98,11 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
   }, [debounced, selectedConsumer, resetField]);
 
   // HANDLE SELECTED CONSUMER
-  const selectConsumer = (account: string, geolocation: Coordinates) => {
+  const selectConsumer = (account: string, geolocation?: Coordinates) => {
     setSelectedConsumer(account);
     setValue("accountNumber", account);
-    setValue("lon", geolocation[0]);
-    setValue("lat", geolocation[1]);
+    setValue("lon", geolocation?.[0] );
+    setValue("lat", geolocation?.[1] );
 
     setConsumer([]);
   };
@@ -146,7 +147,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
       }
     }
   };
-  
+
   return (
     <>
       {isSubmitSuccessful ? (
@@ -161,7 +162,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
           onSubmit={handleSubmit(onSubmit)}
         >
           {/* ACCOUNT NUMBER */}
-          <section className="flex flex-col dropdown dropdown-bottom">
+          <section className="flex flex-col dropdown dropdown-bottom relative">
             <label className={labelStyle}>Consumer Name</label>
             <input
               tabIndex={0}
@@ -172,35 +173,37 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
                 required: "Please Enter Account Number",
               })}
             />
-            
-              {
-                isSearching ? <div className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52">
-                  <span className="skeleton skeleton-text">
-                    Loading...
-                  </span>
-                  </div>
-              :
+
+            {isSearching ? (
+              <div className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52">
+                <span className="skeleton skeleton-text">Loading...</span>
+              </div>
+            ) : (
               consumer.length > 0 && (
                 <ul
                   tabIndex={-1}
-                  className="dropdown-content shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52"
+                  className="list absolute top-full z-10 shadow-md drop-shadow-md p-2 bg-base-200 w-full cursor-pointer  overflow-y-scroll max-h-52"
                 >
-                  {consumer.map((consumer) => (
+                  {consumer.map((consumer:Consumer) => (
                     <li
-                      className="hover:bg-base-300 text-md"
+                      className="hover:bg-base-300 text-xs  list-row w-full "
                       key={consumer.account_no}
                       onClick={() => {
                         selectConsumer(
                           consumer.account_no,
-                          consumer.geolocation.coordinates,
+                          consumer.geolocation?.coordinates ?? undefined,
                         );
-                      }}
+                      }
+
+                      }
+                     
                     >
                       {consumer.account_name}
                     </li>
                   ))}
                 </ul>
-              )}
+              )
+            )}
             {errors.accountNumber && (
               <p className={errorStyle}>{errors.accountNumber.message}</p>
             )}
@@ -213,7 +216,7 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
               <select
                 defaultValue=""
                 {...register("issue", { required: "Please Select Issue" })}
-                className="select select-sm w-full"
+                className="select select-sm w-full "
                 title="Select Issues"
               >
                 <option value="" disabled>

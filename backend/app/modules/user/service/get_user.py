@@ -52,6 +52,7 @@ class GetUserServices:
                 print("invalid token")
                 raise self.credential_exception
             user = await self.check_user(payload.user_id)
+           
             if not user:
                 raise self.credential_exception
             if is_admin_transaction and "admin" not in [role.name.lower() for role in user.roles]:

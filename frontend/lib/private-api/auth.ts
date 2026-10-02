@@ -50,5 +50,16 @@ export const GetUser = async () => {
   }
   
 
-  
+  // FACEBOOK LOGIN
+  export const FacebookLoginRoute = async () =>{
+    try {
+      const {data} = await clientApi.get("/v1/auth/facebook/login")
+      return data
+    }catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new ApiError(error.response?.data.detail, error.response?.status || 500)
+      }
+      throw error
+    }
+  }
 

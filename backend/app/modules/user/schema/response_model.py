@@ -1,15 +1,8 @@
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
-from typing import List
+from typing import List, Optional
 
-class GoogleUser(BaseModel):
-    user_name: str
-    first_name: str
-    last_name: str
-    email: str
-    photo: str
-    
-    model_config = ConfigDict(from_attributes=True) 
+
 
 
 class Roles(BaseModel):
@@ -26,7 +19,7 @@ class UserModel(BaseModel):
     first_name:str
     last_name:str
     user_name:str
-    email:str
+    email:Optional[str] = None
     roles:List[Roles]
     photo:str
     
@@ -38,7 +31,7 @@ class UserModel(BaseModel):
 
 class Token(BaseModel):
     sub:str
-    email:str
+    email:Optional[str] = None
     user_id:str
     role:List[str]
     model_config = ConfigDict(from_attributes=True)
