@@ -4,9 +4,9 @@ from sqlalchemy import create_engine, text
 from pprint import pprint
 from hashlib import sha256
 load_dotenv(dotenv_path="../.env.dev", override=True)
-DB_URL = os.getenv("BISELCO")
+
 NEW_DB_URL = os.getenv("BISELCOWEBSITE")
-old_db = create_engine(DB_URL)
+
 new_db = create_engine(NEW_DB_URL)
 
 
