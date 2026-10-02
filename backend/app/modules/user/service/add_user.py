@@ -1,4 +1,4 @@
-from sqlalchemy import select, setattr
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from fastapi import HTTPException, status
 from ..model.users import Users
