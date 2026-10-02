@@ -21,6 +21,7 @@ const Drawer = ({ children }: Props) => {
     "/distribution-map",
     "/privacy-policy",
     "/terms-service",
+    "/data-deletion",
   ];
   const isActive =
     currentRoute === "/home"

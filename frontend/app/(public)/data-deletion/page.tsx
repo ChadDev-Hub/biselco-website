@@ -1,29 +1,44 @@
-import Header from "./components/header";
-import DeletiopModal from "./components/deletion-modal";
+import Header from "../privacy-policy/components/header";
+import Return from "../privacy-policy/components/return";
+import ContentNavigation from "../privacy-policy/components/content-navigation";
+import Content from "./components/content";
+
+const sections = [{ 
+  id: "intro", 
+  title: "Overview" },{
+    id: "info-collected",
+    title: "1. Information We Collect"
+  },{
+    id:"google-facebook-signin",
+    title: "2. Google Sign-In"
+  },{
+    id:"request-deletion",
+    title: "3. Request Deletion"
+  },{
+    id:"deletion-process",
+    title:"4. Deletion Process"
+  },{
+    id:"retention",
+    title: "5. Data Retention"
+  }
+  ];
 const DataDeletion = () => {
   return (
-    <div className="flex flex-col justify-center bg-base-300 w-full max-w-2xl mx-auto mt-12 rounded-box shadow-2xl border border-base-200 overflow-hidden">
-      <Header />
+    <main className="min-h-screen relative bg-base-200/60 font-sans antialiased">
+      <Return />
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <Header
+          title="Data Deletion"
+          description="Effective"
+          date="September 16, 2026"
+        />
 
-      <article className="p-6 md:p-8 space-y-4">
-        <section className="space-y-2">
-          <h1 className="text-2xl font-bold text-base-content">
-            Data Privacy & Account Deletion Notice
-          </h1>
-          <p className="text-base text-base-content/80 leading-relaxed">
-            We at{" "}
-            <strong className="font-semibold text-base-content">
-              Busuanga Island Electric Cooperative Inc. (BISELCO)
-            </strong>{" "}
-            respect your privacy and provide you with the ability to request
-            deletion of your personal data associated with our application.
-          </p>
-
-          <DeletiopModal />
-        </section>
-      </article>
-
-    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <ContentNavigation sections={sections} />
+          <Content />
+        </div>
+      </div>
+    </main>
   );
 };
 

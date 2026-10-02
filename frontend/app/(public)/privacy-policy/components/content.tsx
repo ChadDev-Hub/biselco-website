@@ -26,7 +26,7 @@ const Content = () => {
                   className="link link-primary font-medium"
                 >
                   biselco
-                </Link>
+                </Link>                               
                 .
               </p>
               <p className="text-base leading-relaxed text-base-content/80">

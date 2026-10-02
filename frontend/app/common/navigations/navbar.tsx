@@ -18,6 +18,7 @@ export default function NavBar() {
     "/about",
     "/privacy-policy",
     "/terms-service",
+    "/data-deletion",
   ];
   const isInvisible = invisibleRoutes.includes(currentRouter);
   const isLandingPage = currentRouter === "/landing";

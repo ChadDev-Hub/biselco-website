@@ -28,6 +28,9 @@ function AboutDropDown() {
         <li>
           <Link className="hover:text-blue-500 link link-hover" href="/terms-service">Terms of Service</Link>
         </li>
+        <li>
+          <Link className="hover:text-blue-500 link link-hover" href="/data-deletion">Data Deletion</Link>
+        </li>
       </ul>
     </div>
   );
