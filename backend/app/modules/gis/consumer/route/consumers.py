@@ -27,5 +27,4 @@ async def get_all_consumers(
     get_services: ConsumerMeterGetService = Depends(ConsumerMeterGetService)
 ):  
     data = await get_services.get_consumer_meters(consumer_hash=data.hashed)
-    print(data)
     return data
