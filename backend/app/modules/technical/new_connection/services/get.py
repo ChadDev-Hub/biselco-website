@@ -19,29 +19,10 @@ class GetServices:
         self.session = session
         self.PAGESIZE = PAGESIZE
 
-    async def get_new_connection(self, page: Optional[int] = None, search: Optional[str] = None):
-        if page is None:
-            page = 1
-        stmt = (select(NewConnection)
-                .options(selectinload(NewConnection.images))
-                .options(load_only(
-                    NewConnection.id,
-                    NewConnection.date_accomplished,
-                    NewConnection.consumer_name,
-                    NewConnection.location,
-                    NewConnection.meter_serial_no,
-                    NewConnection.meter_brand,
-                    NewConnection.meter_sealed,
-                    NewConnection.initial_reading,
-                    NewConnection.multiplier,
-                    NewConnection.accomplished_by,
-                    NewConnection.remarks,
-                    NewConnection.geom
-                ))
-                .where(NewConnection.is_deleted == False)
-                .order_by(NewConnection.date_accomplished.desc()))
+    async def get_new_connection(self, page: Optional[int] = 1, search: Optional[str] = None):
+        page = max(1, page)
+        stmt = (select(NewConnection).where(NewConnection.is_deleted == False))
         if search:
-            page = 1
             stmt = stmt.where(
                 or_(
                     cast(NewConnection.times_tamped,
@@ -62,9 +43,26 @@ class GetServices:
                 )
             )
         total_page = await get_total_page(session=self.session, pagesize=self.PAGESIZE, stmt=stmt)
-        data = (await self.session.execute(stmt.offset((self.PAGESIZE * (page - 1))).limit(self.PAGESIZE))).scalars().all()
+        paginated_stmt = (stmt
+                          .options(selectinload(NewConnection.images))
+                          .options(load_only(
+                              NewConnection.id,
+                              NewConnection.date_accomplished,
+                              NewConnection.consumer_name,
+                              NewConnection.location,
+                              NewConnection.meter_serial_no,
+                              NewConnection.meter_brand,
+                              NewConnection.meter_sealed,
+                              NewConnection.initial_reading,
+                              NewConnection.multiplier,
+                              NewConnection.accomplished_by,
+                              NewConnection.remarks,
+                              NewConnection.geom
+                          ))
+                          .order_by(NewConnection.date_accomplished.desc(), NewConnection.id.desc())
+                          .offset((self.PAGESIZE * (page - 1))).limit(self.PAGESIZE))
+        data = (await self.session.execute(paginated_stmt)).scalars().all()
         new_connection_stats = await self.get_new_connection_stats()
-
         results = [
             {
                 "id": nc.id,

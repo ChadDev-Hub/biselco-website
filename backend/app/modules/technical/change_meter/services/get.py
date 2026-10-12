@@ -89,16 +89,13 @@ async def get_change_meter_stats(session: AsyncSession):
 
 
 async def get_change_meter(session: AsyncSession, search: Optional[str] = None, page: Optional[int] = 1):
-    change_meter = (select(
+    page = max(1, page)
+    stmt = (select(
         ChangeMeter
-    ).options(selectinload(ChangeMeter.images))
-        .where(ChangeMeter.is_deleted == False)
-        .order_by(ChangeMeter.date_accomplished.desc()))
+    ).where(ChangeMeter.is_deleted == False))
 
-    # GET TOTAL PAGE
-    total_page = await get_total_page(session=session, stmt=change_meter, pagesize=PAGE_SIZE)
     if search:
-        stmt = change_meter.where(
+        stmt = stmt.where(
             or_(
                 cast(ChangeMeter.timestamped, Text).ilike(f"%{search}%"),
                 cast(ChangeMeter.date_accomplished, Text).ilike(f"%{search}%"),
@@ -115,10 +112,13 @@ async def get_change_meter(session: AsyncSession, search: Optional[str] = None, 
                 ChangeMeter.remarks.ilike(f"%{search}%"),
                 ChangeMeter.accomplished_by.ilike(f"%{search}%"),
             ))
-    else:
-        stmt = change_meter.offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE)
-    result = (await session.execute(stmt)).scalars().all()
-
+    # GET TOTAL PAGE
+    total_page = await get_total_page(session=session, stmt=stmt, pagesize=PAGE_SIZE)
+    paginated_stmt = (stmt
+                      .options(selectinload(ChangeMeter.images))
+                      .order_by(ChangeMeter.date_accomplished.desc(), ChangeMeter.id.desc())
+                      .offset((PAGE_SIZE * (page - 1))).limit(PAGE_SIZE))
+    result = (await session.execute(paginated_stmt)).scalars().all()
     data = []
     for row in result:
         coordinates = Point(to_shape(row.geom).coords)
