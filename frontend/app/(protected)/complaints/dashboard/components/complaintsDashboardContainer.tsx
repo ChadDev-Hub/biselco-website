@@ -260,7 +260,7 @@
       });
     }, [isMessaginModalOpen, complaintsMessage, user, sendMessage]);
     return (
-      <>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2 max-w-4xl">
       {allComplaints.map((item:Complaints)=>
       <ConcernCard
         key={item.id}
@@ -300,7 +300,7 @@
         }
         />
       )}
-      </>
+      </div>
       
       
     );

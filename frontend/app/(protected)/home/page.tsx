@@ -1,4 +1,4 @@
-import HomePageHeader from "./components/header";
+import PageHeader from "./components/header";
 import HomePageTools from "./components/tools";
 import InstallPrompt from "../../common/InstallPrompt";
 import Events from "../../(public)/landing/components/agmaeventContainer";
@@ -11,13 +11,18 @@ export default function CooperativeHome() {
   const agmaEvent = GetAgmaEvents();
   return (
     <PullToRefresh>
-      <div className="min-h-screen w-full bg-base-300 pb-20 z-60">
+      <div className="w-full px-2">
         <InstallPrompt />
         {/* Header */}
-        <HomePageHeader />
-        <main className="max-w-2xl mx-auto px-4 -mt-6">
+        <PageHeader title={{
+          title: "Welcome to",
+          subtitle: "Busuanga Island Electric Cooperative, Inc."}
+        } />
+        <main className="max-w-2xl  mx-auto px-4 -mt-6">
           {/* Tools Grid */}
-          <HomePageTools />
+          <Suspense fallback={<div>Loading...</div>}>
+            <HomePageTools />
+          </Suspense>
           {/* Events */}
           <section className="w-full space-y-3 mt-10">
             <Suspense fallback={<EventLoadingFallback />}>

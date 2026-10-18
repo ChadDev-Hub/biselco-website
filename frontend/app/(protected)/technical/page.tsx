@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 const TechnicalPage = () => {
   const technicalForms = GetTechnicalForm();
   return (
-    <div className="min-h-screen w-full space-y-2 bg-base-300 pb-20 z-60">
+    <div className="min-h-screen w-full space-y-2  pb-20 z-60">
       <Header title="Technical" />
       <main className="max-w-2xl mx-auto px-4 ">
         <Suspense fallback={<OptionListsSkeleton forms={4} />}>

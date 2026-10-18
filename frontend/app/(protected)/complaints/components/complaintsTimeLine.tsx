@@ -22,7 +22,7 @@ const ComplaintsTimeLine = ({ data, status }: Props) => {
   data.sort((a, b) => a.id - b.id);
 
   return (
-    <ul className="timeline card timeline-vertical bg-base-200 timeline-snap-icons">
+    <ul className="timeline card timeline-vertical  timeline-snap-icons">
       {data.map((item) => (
         <li key={item.id} className=" cursor-pointer">
           {item.id !== 1 && (

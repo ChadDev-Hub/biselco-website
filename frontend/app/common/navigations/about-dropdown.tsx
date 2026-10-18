@@ -1,11 +1,11 @@
 "use client";
-import Link from "next/link";
+import NavigationButton from "../buttons/navigation-button";
+import { Info } from "lucide-react";
 function AboutDropDown() {
   return (
     <div className="dropdown  dropdown-center   md:dropdown-bottom">
       <button
         tabIndex={0}
-        
         className=" label hover:text-blue-500 link link-hover w-full  font-semibold"
       >
         About Us
@@ -15,21 +15,46 @@ function AboutDropDown() {
         className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
       >
         <li>
-          <Link className="hover:text-blue-500 link link-hover" href="/about">History</Link>
+          <NavigationButton
+            label="About us"
+            is_active={false}
+            Icon={Info}
+            href="/about"
+          />
         </li>
 
         <li>
-          <Link className="hover:text-blue-500 link link-hover" href="/distribution-map">Franchise Area</Link>
+          <NavigationButton
+            label="Franchise Area"
+            is_active={false}
+            Icon={Info}
+            href="/distribution-map"
+          />
         </li>
 
         <li>
-          <Link className="hover:text-blue-500 link link-hover" href="/privacy-policy">Privacy Policy</Link>
+          <NavigationButton
+            label="Privacy Policy"
+            is_active={false}
+            Icon={Info}
+            href="/privacy-policy"
+          />
         </li>
         <li>
-          <Link className="hover:text-blue-500 link link-hover" href="/terms-service">Terms of Service</Link>
+          <NavigationButton
+            label="Terms of Service"
+            is_active={false}
+            Icon={Info}
+            href="/terms-service"
+          />
         </li>
         <li>
-          <Link className="hover:text-blue-500 link link-hover" href="/data-deletion">Data Deletion</Link>
+          <NavigationButton
+            label="Data Deletion"
+            is_active={false}
+            Icon={Info}
+            href="/data-deletion"
+          />
         </li>
       </ul>
     </div>

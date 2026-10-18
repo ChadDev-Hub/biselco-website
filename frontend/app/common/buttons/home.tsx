@@ -13,11 +13,10 @@ const HomeRouteButton = ({isActive, orientation, onClick}: Props) => {
 
     return (
 
-        <Link href="/home" type="button" onClick={onClick} className={`is-drawer-close:tooltip is-drawer-close:tooltip-right items-center w-full ${isActive ? "bg-base-300" : ""} ${orientation}`} data-tip="Homepage">
+        <Link href="/home" aria-label="close sidebar" type="button" onClick={onClick} className={`is-drawer-close:tooltip place-content-center md:btn md:btn-circle md:btn-ghost md:place-content-stretch  is-drawer-open:px-4 is-drawer-close:tooltip-right place-items-center rounded-full w-full ${isActive && "glass"} ${orientation}`} data-tip="Homepage">
             {/* Home icon */}
-            <Home className={`size-5 ${isActive ? "text-blue-500 drop-shadow-lg drop-shadow-blue-300" : ""}`}/>
-            <span className={`is-drawer-close:hidden dock-label ${isActive ? "text-blue-500 dock-active" : ""}`}>Homepage</span>
-        
+            <Home className={`size-5 ${isActive && "text-blue-500 drop-shadow-lg drop-shadow-blue-300" }`}/>
+            <span className={`is-drawer-close:hidden hidden md:block ${isActive && "text-blue-500 dock-active"}`}>Homepage</span>
         </Link>
 
     )

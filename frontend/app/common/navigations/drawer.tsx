@@ -3,7 +3,9 @@ import React from "react";
 import NavBar from "./navbar";
 import { usePathname } from "next/navigation";
 import { HomeRouteButton } from "../buttons/home";
-import About from "../buttons/about";
+import DocNavigation from "./doc";
+import NavigationButton from "../buttons/navigation-button";
+import {Info, ShieldUser, SquarePen, DatabaseMinus} from "lucide-react"
 type Props = {
   children: React.ReactNode;
   baseurl?: string;
@@ -23,19 +25,10 @@ const Drawer = ({ children }: Props) => {
     "/terms-service",
     "/data-deletion",
   ];
-  const isActive =
-    currentRoute === "/home"
-      ? "home"
-      : currentRoute === "/complaints"
-        ? "complaints"
-        : currentRoute === "/technical"
-          ? "technical"
-          : currentRoute === "/about"
-            ? "about"
-            : "";
+
   const closeDrawer = () => {
     const drawer = document.getElementById(
-      "my-drawer-4",
+      "my-drawer",
     ) as HTMLInputElement | null;
 
     if (drawer) {
@@ -44,40 +37,44 @@ const Drawer = ({ children }: Props) => {
   };
 
   return (
-    <div className="drawer min-h-screen  lg:drawer-open">
-      <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content ">
+    <div className="drawer lg:drawer-open">
+      <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content flex flex-col items-center">
         {/* Navbar */}
-        <NavBar />
+           <NavBar />
         {/* Page content here */}
-        <div>{children}</div>
+        <div className="w-full min-h-screen py-5">{children}</div>
+        <DocNavigation/>
       </div>
       <div
         className={`drawer-side z-60 backdrop-blur-xs is-drawer-close:overflow-visible ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"}`}
       >
         <label
-          htmlFor="my-drawer-4"
+          htmlFor="my-drawer"
           aria-label="close sidebar"
-          className="drawer-overlay"
+          className="drawer-overlay glass"
         ></label>
-        <div className="flex flex-col min-h-full items-start bg-base-100  is-drawer-close:w-14  is-drawer-open:w-64">
+        <div className="flex flex-col  min-h-full items-start glass is-drawer-close:w-14  is-drawer-open:w-64 py-4 ">
           {/* Sidebar content here */}
-          <div className="w-full is-drawer-close:hidden">
-            <div className="divider w-full   divider-warning text-blue-800">
-              Menu
-            </div>
-          </div>
+      
 
-          <ul className="menu w-full  grow">
+          <ul className="menu w-full list  grow  gap-4">
             {/* List item */}
-            <li className="hidden md:block lg:block">
+            <li className="hidden md:block is-drawer-open:list-row lg:block">
               {/* HOME ROUTE BUTTON */}
-                <HomeRouteButton onClick={closeDrawer} isActive={isActive === "home"} />
+                <HomeRouteButton onClick={closeDrawer} isActive={currentRoute === "/home"} />
             </li>
-            <li>
-              
-                <About onClick={closeDrawer} is_active={isActive === "about"} />
-            
+            <li className="hidden  is-drawer-open:list-row lg:block">
+                <NavigationButton onClick={closeDrawer}  label="About us" is_active={currentRoute === "/about"} Icon={Info} href="/about" />
+            </li>
+            <li className="block is-drawer-open:list-row lg:block">
+                <NavigationButton onClick={closeDrawer} showOnMobile label="Privacy Policy" is_active={currentRoute === "/privacy-policy"} Icon={ShieldUser} href="/privacy-policy" />
+            </li>
+            <li className="block is-drawer-open:list-row lg:block">
+                <NavigationButton onClick={closeDrawer} showOnMobile label="Terms of Service" is_active={currentRoute === "/terms-service"} Icon={SquarePen} href="/terms-service" />
+            </li>
+            <li className=" block is-drawer-open:list-row lg:block">
+                <NavigationButton onClick={closeDrawer} showOnMobile label="Data Deletion" is_active={currentRoute === "/data-deletion"} Icon={DatabaseMinus} href="/data-deletion" />
             </li>
           </ul>
         </div>

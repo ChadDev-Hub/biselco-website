@@ -19,7 +19,7 @@ const ChangeMeterFormPage = async ({ searchParams }: Props) => {
   const {page, search } = (await searchParams);
   const data = GetChangeMeter(page, search);
   return (
-    <div className="min-h-screen w-full space-y-2 bg-base-300 pb-20">
+    <div className="min-h-screen w-full space-y-2 pb-20">
       <Headers title="Change Meter" />
       <main className="max-w-6xl mx-auto px-4 flex flex-col gap-3">
         <section className=" w-full justify-center flex ">

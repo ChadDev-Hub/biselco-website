@@ -278,7 +278,7 @@ const MapProvider = ({ children, className }: Props) => {
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         ref={mapContainer}
-        className={`w-full  h-full relative ${className} ${isPointerDown ? "cursor-grabbing " : "cursor-grab"}`}
+        className={`w-full h-full relative ${className} ${isPointerDown ? "cursor-grabbing " : "cursor-grab"}`}
       >
         <div className="absolute  inset-0 pointer-events-none z-10">
           {children}

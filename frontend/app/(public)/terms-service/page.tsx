@@ -3,7 +3,7 @@
 import ContentNavigation from "../privacy-policy/components/content-navigation";
 import Content from "./components/content";
 import Header from "../privacy-policy/components/header";
-import Return from "../privacy-policy/components/return"
+
 const sections = [
   { id: "intro", title: "Overview" },
   { id: "acceptance", title: "1. Acceptance of Terms" },
@@ -25,7 +25,7 @@ const TermsOfServicePage = () => {
   
   return (
     <main className="min-h-screen bg-base-200/60 font-sans antialiased relative">
-      <Return />
+   
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
         {/* Header Banner */}

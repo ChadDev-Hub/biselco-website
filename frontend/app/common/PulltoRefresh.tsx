@@ -48,7 +48,6 @@ export default function PullToRefresh({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="min-h-screen"
     >
       <div
         className="flex justify-center items-center transition-all duration-200 overflow-hidden"

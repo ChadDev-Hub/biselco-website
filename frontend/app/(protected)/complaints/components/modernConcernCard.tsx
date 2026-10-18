@@ -17,7 +17,7 @@ type Props = {
 
 const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, deleteTool}: Props) => {
   return (
-    <div className="max-w-lg w-full border-t-2 border-t-blue-600 border-b-yellow-500 border-b-2 card relative mx-auto bg-base-100 rounded-2xl shadow-lg border border-gray-300 overflow-hidden font-sans">
+    <div className="max-w-lg w-full bg-base-100 border-t-2 border-t-blue-600 border-b-yellow-500 border-b-2 card relative mx-auto  rounded-2xl shadow-lg border border-gray-300 overflow-hidden font-sans">
         {deleteTool}        
       {/* Header Section */}
       <div className="bg-base-200  max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">
@@ -36,7 +36,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
         </div>
       </div>
       {/* Card Body */}
-      <div className="p-6 card-body card-border grid grid-cols-1 md:grid-cols-2 gap-2">
+      <div className="p-6  card-body card-border grid grid-cols-1 md:grid-cols-2 gap-2">
         {/* Left Column: Metadata */}
         <div className="space-y-4">
           <div className="flex flex-col">
@@ -79,9 +79,9 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
             </span>
           </div>
           
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="bg-base-100 shadow-xl p-4 rounded-xl border border-slate-100">
             <div className="flex items-center gap-2 mb-3">
-              <History size={16} className="text-slate-400" />
+              <History size={16} className="text-slate-400 " />
               <span className="text-xs font-bold text-slate-500 uppercase">Status History</span>
             </div>
             {timeLine}
@@ -91,7 +91,7 @@ const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, delete
 
       {/* Tabs & Details Section */}
       <div className="px-6 pb-6">
-        <div className="bg-slate-50 text-xs p-4 rounded-lg text-slate-600  italic border border-slate-100">
+        <div className="bg-base-100 text-xs p-4 rounded-lg text-slate-600  italic border border-slate-100">
           {userComplaint.description}
         </div>
       </div>

@@ -23,26 +23,15 @@ const DashBoardPage = ({
   const statsData = GetComplaintStats();
   const statusName = GetComplaintStatusName();
   return (
-    <div className=" min-h-screen w-full  ">
+    <div className="w-full px-2 flex flex-col items-center gap-2">
       {/* HEADER */}
 
-      <section className="w-full bg-blue-700 rounded-b-4xl   ">
+      <section className="w-full flex justify-center bg-blue-700 rounded-b-4xl   ">
         <ComplaintDashBoardHeader />
       </section>
-      <main
-        className="
-      flex
-      gap-4
-      py-2
-      mt-2
-      flex-col
-      justify-start
-      items-center
-      w-full 
-      pb-24"
-      >
+      
         {/* SECTION STATUS */}
-        <section className="w-full flex justify-center px-2">
+        
           <Suspense
             fallback={
               <div className="flex justify-center w-full h-full">
@@ -54,7 +43,7 @@ const DashBoardPage = ({
           >
             <ComplaintStats data={statsData} />
           </Suspense>
-        </section>
+        
 
         <section className="w-full max-w-5xl justify-end flex">
           <Suspense fallback={<SearchSkeleton />}>
@@ -63,21 +52,25 @@ const DashBoardPage = ({
           </Suspense>
         </section>
 
-        <section className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-2">
-          <Suspense fallback={<ModernConcernCardSkeleton />}>
+        {/* SECTION COMPLAINTS */}
+  
+
+            <Suspense fallback={<ModernConcernCardSkeleton />}>
             <ComplaintsContainer
               complaintsStatusName={statusName}
               data={complaintsData}
             />
           </Suspense>
-        </section>
+   
+          
+        
 
         <section className="flex justify-center w-full ">
           <Suspense fallback={<PageNationLoading />}>
             <Pagination data={complaintsData}/>
           </Suspense>
         </section>
-      </main>
+      
     </div>
   );
 };

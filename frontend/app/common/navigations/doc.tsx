@@ -2,7 +2,9 @@
 import { usePathname } from "next/navigation";
 import { ComplaintsRouteButton } from "../buttons/complaints";
 import { HomeRouteButton } from "../buttons/home";
-import { PanelLeftOpen } from "lucide-react"
+import MenuButton from '../buttons/menu-button';
+import NavigationButton from "../buttons/navigation-button";
+import { Info } from "lucide-react";
 const DocNavigation = () => {
   const currentRoute = usePathname();
   const invisibleRoutes = ["/","/landing","/biselco-admin-login","/agma-registration","/agma-registration/registered","/distribution-map", "/about", "/privacy-policy", "/terms-service", "/data-deletion"];
@@ -11,33 +13,32 @@ const DocNavigation = () => {
       ? "home"
       : currentRoute === "/complaints"
         ? "complaints"
+        : currentRoute === "/about"
+          ? "about"
         : "logout";
   return (
-    <div
-      className={`dock text-xs dock-xs z-50   bg-base-100  lg:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}
-    >
-      <div className={`${isActive === "home" ? "dock-active" : ""} `}>
+    <nav
+      className={`dock justify-between glass max-w-[92%]  sticky bottom-4 rounded-full w-full text-xs dock-sm z-50    md:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}
+    >   
+    {/* BUTTONS */}
+        {/* Home */}
         <HomeRouteButton
           isActive={isActive === "home"}
           orientation="flex flex-col"
         />
-      </div>
+        
+        
 
-      <div className={`${isActive === "complaints" ? "dock-active" : ""} `}>
+        {/* Complaints */}
         <ComplaintsRouteButton isActive={isActive === "complaints"} />
-      </div>
+        
+        {/* About */}
+        <NavigationButton label="About us" Icon={Info} href="/about" is_active={isActive === "about"} />
 
-      <div>
-        <label
-          htmlFor="my-drawer-4"
-          aria-label="open sidebar"
-          className={`flex flex-col items-center justify-center cursor-pointer`}
-        >
-          <PanelLeftOpen className="size-6" />
-          <span className="dock-label">Menu</span>
-        </label>
-      </div>
-    </div>
+        {/* Menu */}
+        <MenuButton isInvisible={false} />
+
+    </nav>
   );
 };
 

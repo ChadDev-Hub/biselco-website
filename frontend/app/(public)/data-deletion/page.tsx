@@ -1,5 +1,5 @@
 import Header from "../privacy-policy/components/header";
-import Return from "../privacy-policy/components/return";
+
 import ContentNavigation from "../privacy-policy/components/content-navigation";
 import Content from "./components/content";
 
@@ -25,7 +25,7 @@ const sections = [{
 const DataDeletion = () => {
   return (
     <main className="min-h-screen relative bg-base-200/60 font-sans antialiased">
-      <Return />
+     
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <Header
           title="Data Deletion"

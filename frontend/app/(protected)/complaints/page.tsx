@@ -1,58 +1,45 @@
-import React, { Suspense} from 'react'
-import { ComplaintsDashboardRouteButton } from '@/app/common/buttons/complaints'
-import CreateComplaints from './components/CreateComplaintsModal'
-import FabIcon from '@/app/common/Fab'
-import  { GetComplaintStatusName} from "@/lib/private-api/server-side/complaints"
-import {UserComplaints} from "@/lib/private-api/server-side/complaints"
-import ComplaintsContainer from './components/complaintContainer'
-import ComplaintHeader from './components/header'
-import ModernConcernCardSkeleton from './components/modernConcernCardSkeleton';
-
-export const dynamic = 'force-dynamic';
+import React, { Suspense } from "react";
+import { ComplaintsDashboardRouteButton } from "@/app/common/buttons/complaints";
+import CreateComplaints from "./components/CreateComplaintsModal";
+import FabIcon from "@/app/common/Fab";
+import { GetComplaintStatusName } from "@/lib/private-api/server-side/complaints";
+import { UserComplaints } from "@/lib/private-api/server-side/complaints";
+import ComplaintsContainer from "./components/complaintContainer";
+import ModernConcernCardSkeleton from "./components/modernConcernCardSkeleton";
+import PageHeader from "../home/components/header";
+export const dynamic = "force-dynamic";
 
 const ComplaintsPage = () => {
-  const data = UserComplaints()
-  const statusName = GetComplaintStatusName()
+  const data = UserComplaints();
+  const statusName = GetComplaintStatusName();
   return (
-    <div className="min-h-screen w-full ">
-      {/* Header */}
-        <section className="bg-blue-700 rounded-b-4xl">
-          <ComplaintHeader />
-        </section>
-      <main className="
-      w-full
-      py-2
-      flex
-      gap-4 
-      flex-col
-      justify-center 
-      lg:items-center 
-      pb-24">
+      <div
+        className="flex flex-col gap-2 px-2 items-center w-full h-full "
+      >
         
-
+        <PageHeader title={{ title: "Welcome to", subtitle: "Complaints Portal!, Need Assistance?" }} description="Contact us: 09176511859 | 09176396436 | 09107101909" />
+        
+ 
         {/* Feature Pills */}
-        <section className='w-full flex justify-center'>
-          <div data-tip="Submit Complaints" className='tooltip tooltip-bottom'>
-            <CreateComplaints/>
-          </div>
-        </section>
-
+       
+            <CreateComplaints />
+          
         <section className="grid grid-cols-1 gap-2">
           <Suspense fallback={<ModernConcernCardSkeleton />}>
-          <ComplaintsContainer complaintsData={data} complaintsStatusName={statusName} />
-        </Suspense>
-
+            <ComplaintsContainer
+              complaintsData={data}
+              complaintsStatusName={statusName}
+            />
+          </Suspense>
         </section>
-        
 
         <FabIcon>
-          <div data-tip="Navigate Dashboard" className='tooltip tooltip-left'>
+          <div data-tip="Navigate Dashboard" className="tooltip tooltip-left">
             <ComplaintsDashboardRouteButton />
           </div>
         </FabIcon>
-        
-      </main>
-    </div>
-  )
-}
+      </div>
+ 
+  );
+};
 export default ComplaintsPage;

@@ -72,7 +72,7 @@ const LandingPageNavigation = () => {
       </div>
       {/* MOBILE NAVIGATION */}
       <div className="relative md:hidden navbar-end ">
-        <button onClick={() => setOpen(!open)} className="btn btn-circle">
+        <button onClick={() => setOpen(!open)} className="btn btn-circle btn-ghost glass ">
           {open ? (
             <span className="swap swap-active swap-rotate">
               <Menu className="swap-off fill-current" />

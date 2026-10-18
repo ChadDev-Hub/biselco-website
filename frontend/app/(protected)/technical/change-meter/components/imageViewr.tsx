@@ -45,7 +45,7 @@ const ImageViewer = ({ image, className, showImagePreview = true, customPreview,
         type="button"
         title="View Image"
         onClick={handleOpen}
-        className={` ${className ?? "border-2 border-blue-600 border-dashed ring ring-secondary relative cursor-pointer overflow-hidden rounded-box flex items-center justify-center w-34.25 h-15"} `}
+        className={` ${className ?? "border-2 border-blue-600 border-dashed ring ring-secondary relative cursor-pointer overflow-hidden rounded-box flex items-center  btn btn-ghost justify-center w-34.25 h-15"} `}
       >
         
         {showImagePreview ? image ? (
@@ -75,7 +75,7 @@ const ImageViewer = ({ image, className, showImagePreview = true, customPreview,
         ref={dialogRef}
         className="modal modal-bottom  sm:px-4 md:px-[10%] lg:px-[20%] xl:px-[25%]"
       >
-        <div className="modal-box relative w-full  p-2 bg-base-100">
+        <div className="modal-box relative w-full  p-2 glass">
           {/* Controls */}
           <div className="absolute top-2  right-2 z-50 flex gap-2">
             <button type="button" onClick={zoomOut} className="btn btn-xs">

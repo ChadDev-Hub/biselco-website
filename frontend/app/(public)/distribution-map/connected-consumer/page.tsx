@@ -2,8 +2,8 @@ import FlowContainer from "./components/flow-container";
 import { use, Suspense } from "react";
 import { GetConnectedConsumers } from "@/lib/transformer";
 import { ReactFlowProvider } from "@xyflow/react";
-import Aside from "./components/aside";
-import Return from "../../privacy-policy/components/return";
+
+
 
 type Props = {
   searchParams: Promise<searchParamsType>;
@@ -19,7 +19,7 @@ const ConnectedConsumer = ({ searchParams }: Props) => {
   return (
     <ReactFlowProvider>
       <div className="flex w-full min-h-screen relative">
-        <Return />
+      
         {/* <Suspense fallback={<div>Loading...</div>}>
           <Aside promise={result} />
         </Suspense> */}

@@ -10,9 +10,8 @@ type Props = {
 
 const ComplaintsRouteButton = ({ isActive }: Props) => {
     return (
-        <Link href="/complaints" type='button'  aria-label='Complaint Button Route' className={`is-drawer-close:tooltip w-full is-drawer-close:tooltip-right flex flex-col  items-center lg:flex-row ${isActive ? "bg-base-300" : ""}`} data-tip="Complaints">
-            <BookMarked  className={`size-5 ${isActive ? "text-blue-500 drop-shadow-lg drop-shadow-blue-300" : ""}`}/>
-            <span className={`is-drawer-close:hidden dock-label ${isActive ? "text-blue-500 " : ""}`}>Concerns</span>
+        <Link href="/complaints" type='button'  aria-label='Complaint Button Route' className={`is-drawer-close:tooltip w-full is-drawer-close:tooltip-right flex flex-col md:btn md:btn-ghost md:btn-circle items-center rounded-full lg:flex-row ${isActive && "glass"}`} data-tip="Complaints">
+            <BookMarked  className={`size-5 ${isActive && "text-blue-500 drop-shadow-lg drop-shadow-blue-300" }`}/>
         </Link>
     )
 }
@@ -25,7 +24,7 @@ const ComplaintsDashboardRouteButton = () => {
         <Link 
         href="/complaints/dashboard" 
          type='button' 
-         className={`btn  btn-circle btn-lg ${user?.roles.map(role=>role.name).includes("admin") ? "visible": "hidden"}`}>
+         className={`btn btn-ghost glass  btn-circle btn-lg ${user?.roles.map(role=>role.name).includes("admin") ? "visible": "hidden"}`}>
             <svg
                 fill="currentColor"
                 height={25}

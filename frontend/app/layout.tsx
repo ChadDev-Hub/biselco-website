@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DocNavigation from "./common/navigations/doc";
+
 import Drawer from "./common/navigations/drawer";
 import ThemeController from "./common/themeController";
 import { WebsocketProvider } from "./context/websocketprovider";
@@ -149,7 +149,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="BISELCO" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased  `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-radial from-blue-200 via-blue-100 to-blue-200 `}
       >
         <ProgressBar />
         <AuthProvider>
@@ -160,7 +160,6 @@ export default async function RootLayout({
                 <NotificationProvider>
                   <Drawer baseurl={baseurl}>
                     {children}
-                    <DocNavigation />
                   </Drawer>
                 </NotificationProvider>
               </LoadingIndicator>

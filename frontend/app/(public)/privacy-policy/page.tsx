@@ -2,7 +2,6 @@
 import ContentNavigation from "./components/content-navigation";
 import Content from "./components/content";
 import Header from "./components/header";
-import Return from "./components/return"
 
 const sections = [
   { id: "intro", title: "Overview" },
@@ -29,7 +28,7 @@ const PrivacyPolicyPage = () => {
 
   return (
     <main className="min-h-screen relative bg-base-200/60 font-sans antialiased">
-      <Return />
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <Header title="Privacy Policy" description="Effective" date="September 16, 2026" />
