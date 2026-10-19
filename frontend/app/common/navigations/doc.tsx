@@ -5,6 +5,7 @@ import { HomeRouteButton } from "../buttons/home";
 import MenuButton from "../buttons/menu-button";
 import NavigationButton from "../buttons/navigation-button";
 import { Info } from "lucide-react";
+
 const DocNavigation = () => {
   const currentRoute = usePathname();
   const invisibleRoutes = [
@@ -28,22 +29,22 @@ const DocNavigation = () => {
           ? "about"
           : "logout";
   return (
-    <nav
-      className={`dock glass navbar-center  max-w-[92%] fixed bottom-4    rounded-full w-full text-xs z-50    md:hidden  shadow-lg  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `}
-    >
-      {/* BUTTONS */}
-      
+    
+      <div
+        className={`dock dock-xs items-center justify-evenly shadow-2xl glass  w-full text-xs z-50  md:hidden  s  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `} 
+      >
+        {/* BUTTONS */}
+    
+          <HomeRouteButton isActive={isActive === "home"} />
+       
         {/* Home */}
-        <HomeRouteButton isActive={isActive === "home"} />
+        
+   
+          {/* Complaints */}
+           <ComplaintsRouteButton isActive={isActive === "complaints"} />
       
-
-      
-        {/* Complaints */}
-        <ComplaintsRouteButton isActive={isActive === "complaints"} />
-      
-
-      
-        <NavigationButton
+    
+          <NavigationButton
           label="About us"
           Icon={Info}
           href="/about"
@@ -51,12 +52,16 @@ const DocNavigation = () => {
           is_active={isActive === "about"}
         />
       
-      {/* About */}
-      
+        
+
+        {/* About */}
+
         {/* Menu */}
         <MenuButton isInvisible={false} />
       
-    </nav>
+        
+      </div>
+   
   );
 };
 

@@ -29,11 +29,11 @@ export default function NavBar() {
     <nav className="sticky top-4  z-50 p-4 max-w-[92%] navbar  h-12 w-full glass rounded-full shadow-md transition-all">
       {/* LEFT SIDE: Sidebar Toggle + Logo */}
       <div className="navbar-start items-center gap-2">
-        <div className="hidden sm:block">
+        <div className="hidden sm:block w-fit rounded-full">
           <MenuButton isInvisible={isInvisible} />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex  items-center gap-2">
           {currentRouter === "/home" || currentRouter === "/landing" ? (
             <Image
               src="/biselco-icon.png"

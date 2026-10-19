@@ -43,7 +43,7 @@ const Drawer = ({ children }: Props) => {
         {/* Navbar */}
            <NavBar />
         {/* Page content here */}
-        <div className="w-full min-h-screen py-5">{children}</div>
+        <div className="w-full min-h-screen pt-5 pb-25">{children}</div>
         <DocNavigation/>
       </div>
       <div
@@ -65,16 +65,16 @@ const Drawer = ({ children }: Props) => {
                 <HomeRouteButton onClick={closeDrawer} isActive={currentRoute === "/home"} />
             </li>
             <li className="hidden  is-drawer-open:list-row lg:block">
-                <NavigationButton onClick={closeDrawer}  label="About us" is_active={currentRoute === "/about"} Icon={Info} href="/about" />
+                <NavigationButton onClick={closeDrawer} showLabel label="About us" is_active={currentRoute === "/about"} Icon={Info} href="/about" />
             </li>
             <li className="block is-drawer-open:list-row lg:block">
-                <NavigationButton onClick={closeDrawer} showOnMobile label="Privacy Policy" is_active={currentRoute === "/privacy-policy"} Icon={ShieldUser} href="/privacy-policy" />
+                <NavigationButton onClick={closeDrawer} showLabel showOnMobile label="Privacy Policy" is_active={currentRoute === "/privacy-policy"} Icon={ShieldUser} href="/privacy-policy" />
             </li>
             <li className="block is-drawer-open:list-row lg:block">
-                <NavigationButton onClick={closeDrawer} showOnMobile label="Terms of Service" is_active={currentRoute === "/terms-service"} Icon={SquarePen} href="/terms-service" />
+                <NavigationButton onClick={closeDrawer} showLabel showOnMobile label="Terms of Service" is_active={currentRoute === "/terms-service"} Icon={SquarePen} href="/terms-service" />
             </li>
             <li className=" block is-drawer-open:list-row lg:block">
-                <NavigationButton onClick={closeDrawer} showOnMobile label="Data Deletion" is_active={currentRoute === "/data-deletion"} Icon={DatabaseMinus} href="/data-deletion" />
+                <NavigationButton onClick={closeDrawer} showLabel showOnMobile label="Data Deletion" is_active={currentRoute === "/data-deletion"} Icon={DatabaseMinus} href="/data-deletion" />
             </li>
           </ul>
         </div>

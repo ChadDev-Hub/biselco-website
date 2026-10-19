@@ -10,8 +10,8 @@ type Props = {
 
 const ComplaintsRouteButton = ({ isActive }: Props) => {
     return (
-        <Link href="/complaints" type='button'  aria-label='Complaint Button Route' className={`is-drawer-close:tooltip w-full is-drawer-close:tooltip-right  md:btn md:btn-ghost md:btn-circle items-center rounded-full lg:flex-row ${isActive && "glass"}`} data-tip="Complaints">
-            <BookMarked  className={`size-5 ${isActive && "text-blue-500 drop-shadow-lg drop-shadow-blue-300" }`}/>
+        <Link href="/complaints" type='button'  aria-label='Complaint Button Route' className={`is-drawer-close:tooltip w-full is-drawer-close:tooltip-right  place-content-center flex   md:btn md:btn-ghost md:btn-circle items-center rounded-full ${isActive && "glass"}`} data-tip="Complaints">
+            <BookMarked  className={`size-6 ${isActive && "text-blue-500 drop-shadow-lg drop-shadow-blue-300" }`}/>
         </Link>
     )
 }

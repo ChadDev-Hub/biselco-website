@@ -15,7 +15,7 @@ const StrategySection = () => {
         <div className="border-l-4 border-amber-500 pl-4 space-y-1">
           <h4 className="font-semibold text-slate-950">Off-Grid Microgrids</h4>
           <p className="text-sm text-slate-600">
-            There are currently four (4) islands energized through micro-grid system, a program under NPC’S Village Electrification Program.
+            There are currently eight (8) islands energized through micro-grid system, a program under NPC’S Village Electrification Program.
           </p>
         </div>
         <div className="border-l-4 border-blue-500 pl-4 space-y-1">

@@ -16,44 +16,54 @@ function AboutDropDown() {
       >
         <li>
           <NavigationButton
+            showLabel
             label="About us"
             is_active={false}
             Icon={Info}
             href="/about"
+            showOnMobile
           />
         </li>
 
         <li>
           <NavigationButton
+            showLabel
             label="Franchise Area"
             is_active={false}
             Icon={Info}
             href="/distribution-map"
+            showOnMobile
           />
         </li>
 
         <li>
           <NavigationButton
+            showLabel
             label="Privacy Policy"
             is_active={false}
             Icon={Info}
             href="/privacy-policy"
+            showOnMobile
           />
         </li>
         <li>
           <NavigationButton
+            showLabel
             label="Terms of Service"
             is_active={false}
             Icon={Info}
             href="/terms-service"
+            showOnMobile
           />
         </li>
         <li>
           <NavigationButton
+            showLabel
             label="Data Deletion"
             is_active={false}
             Icon={Info}
             href="/data-deletion"
+            showOnMobile
           />
         </li>
       </ul>

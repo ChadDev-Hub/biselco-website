@@ -28,11 +28,11 @@ const MenuButton = ({ isInvisible }: Props) => {
       <label
         htmlFor="my-drawer"
         aria-label="open sidebar"
-        className={`swap swap-flip  md:btn md:btn-circle md:btn-ghost md:glass ${isInvisible ? "hidden" : ""}`}
+        className={`swap swap-flip w-full  md:btn md:btn-circle md:btn-ghost md:glass ${isInvisible ? "hidden" : ""}`}
       >
         <input ref={swapInput} type="checkbox" />
-        <PanelLeftClose className="swap-off" />
-        <PanelLeftOpen className="swap-on" />
+        <PanelLeftClose className="swap-off size-6" />
+        <PanelLeftOpen className="swap-on size-6" />
       </label>
   
   );
