@@ -26,7 +26,7 @@ export default function NavBar() {
   const { user } = useAuth();
 
   return (
-    <nav className="sticky top-4  z-50 p-4 max-w-[92%] navbar  h-12 w-full glass rounded-full shadow-md transition-all">
+    <nav id="main-navbar" className="sticky top-4 duration-300 ease-in-out  z-50 p-4 max-w-[92%] navbar  h-12 w-full glass rounded-full shadow-md transition-all">
       {/* LEFT SIDE: Sidebar Toggle + Logo */}
       <div className="navbar-start items-center gap-2">
         <div className="hidden sm:block w-fit rounded-full">

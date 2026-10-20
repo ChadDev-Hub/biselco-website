@@ -31,7 +31,8 @@ const DocNavigation = () => {
   return (
     
       <div
-        className={`dock dock-xs items-center justify-evenly shadow-2xl glass  w-full text-xs z-50  md:hidden  s  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `} 
+        id="main-doc"
+        className={`dock dock-xs items-center transition-all duration-300 ease-in-out justify-evenly shadow-2xl glass  w-full text-xs z-50  md:hidden  s  ${invisibleRoutes.includes(currentRoute) ? "hidden" : "visible"} `} 
       >
         {/* BUTTONS */}
     
