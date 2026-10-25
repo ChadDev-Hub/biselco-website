@@ -1,24 +1,21 @@
-import { GetPrimaryLines } from "../../../lib/distributionLine";
+
 import { Suspense } from "react";
 import LoadingIndicator from "./components/LoadingIndicator";
-import { GetTransformers } from "../../../lib/transformer";
 import MapProvider from "./components/MapProvider";
-import PrimaryLineLayer from "./components/PrimaryLineComponent.tsx/PrimaryLineLayer";
-import TransformerLayer from "./components/TransformerComponent/TransformerLayer";
-
+import TransformerLoader from "./components/TransformerComponent/TransformerLoader";
+import PrimaryLineLoader from "./components/PrimaryLineComponent/primaryLineLoader";
 export const dynamic = "force-dynamic";
 
 const Page = () => {
-  const primaryLines = GetPrimaryLines();
-  const transformers = GetTransformers();
+  
   return (
     <div className="h-full w-full">
       <MapProvider>
         <Suspense fallback={<LoadingIndicator />}>
-          <TransformerLayer promise={transformers} />
+          <PrimaryLineLoader />
         </Suspense>
         <Suspense fallback={<LoadingIndicator />}>
-          <PrimaryLineLayer promise={primaryLines} />
+         <TransformerLoader />
         </Suspense>
       </MapProvider>
     </div>

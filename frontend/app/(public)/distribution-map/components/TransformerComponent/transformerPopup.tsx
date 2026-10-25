@@ -1,19 +1,15 @@
 "use client";
 
 
-import { PromiseType } from "@/types/promise";
-import { TransformerProperties, Transformers } from "@/types/transformer";
+import { TransformerProperties} from "@/types/transformer";
 import { Zap } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
-import {User} from "@/types/user"; 
-import Link from "next/link";
+import { useState } from "react";
+
 type Props = {
   TransformerProperties: TransformerProperties;
-  setData: Dispatch<SetStateAction<PromiseType<Transformers > | undefined>>
-  user?:User
 };
 
-const TransformerPopup = ({ TransformerProperties,  user }: Props) => {
+const TransformerPopup = ({ TransformerProperties}: Props) => {
     const [currentStatus] = useState(TransformerProperties?.is_active);
     // const handleSwitch = (
     //     transformer: TransformerProperties
@@ -125,12 +121,7 @@ const TransformerPopup = ({ TransformerProperties,  user }: Props) => {
       </div>
 
 
-      {/* Footer */}
-      {user && user?.roles.map((role) => role.name).includes("admin") && <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
-        <Link href={`distribution-map/connected-consumer?dt=${TransformerProperties.transformer_id}`} className="btn btn-primary btn-sm">
-          View Connected Consumers
-        </Link>
-      </div>}
+    
     </div>
   );
 };

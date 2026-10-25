@@ -90,10 +90,9 @@
 }
 
 
-.custom-maplibre-popup .maplibregl-popup-content {
+.maplibregl-popup-content {
   padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 20%;
+  border-radius: 9999px !important;
 }
 
 #nprogress .bar {

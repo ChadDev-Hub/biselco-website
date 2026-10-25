@@ -1,7 +1,7 @@
 
-import { FeatureCollection, Geometry } from "geojson";
+import { Geometry, GeoJSON} from "geojson";
 
-export type PrimaryLines = FeatureCollection<Geometry, PrimaryLineProperties>;
+export type PrimaryLines = GeoJSON<Geometry, PrimaryLineProperties>;
 
 
 

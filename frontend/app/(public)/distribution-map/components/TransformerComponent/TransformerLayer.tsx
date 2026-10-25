@@ -1,214 +1,242 @@
 "use client";
 
-import { useEffect, use, useState } from "react";
-import { useMap } from "../MapProvider";
-import { PromiseType } from "../../../../../types/promise";
+import { useEffect,useState } from "react";
 import { Transformers, TransformerProperties } from "@/types/transformer";
-import {
-  MapMouseEvent,
-  MapGeoJSONFeature,
-  Popup,
-  GeoJSONSource,
-} from "maplibre-gl";
-import { createRoot } from "react-dom/client";
+import { Layer, Source, LayerProps, Popup} from "react-map-gl/maplibre";
+import { useMap } from "../MapProvider";
+import { Coordinates } from "../../../../../types/consumer-meter";
 import TransformerPopup from "./transformerPopup";
-import { useAuth } from "@/app/context/authProvider";
-import {
-  TransformerSourceId,
-  UnclusteredTransformer,
-  TransformerLayerId,
-  TransformerClusterCount,
-  TransformerPing,
-} from "../MapProvider";
+import type { PopupInfo } from "../MapProvider";
 
 type Props = {
-  promise: Promise<PromiseType<Transformers>>;
-};
+  initialData: Transformers
+}
 
-const TransformerLayer = ({ promise }: Props) => {
-  const initialdata = use(promise);
-  const [data, setData] = useState<PromiseType<Transformers>>();
-  const { mapRef, isMapReady } = useMap();
 
-  const { user } = useAuth();
+const TransformerLayer = ({ initialData }: Props) => {
+  const [popupInfo, setPopupInfo] = useState<PopupInfo<TransformerProperties> | null>(null);
+  const { setasInteractiveLayers, selectedFeature, mapRef } = useMap();
+  const transformerSourceId = "transformers";
+  const clusteredtransformerLayerId = "transformers-clustered";
+  const transformerClusterCountId = "transformers-cluster-count";
+  const unclusteredtransformerLayerId = "transformers-unclustered";
+  const unclusteredTransformerPing = `${unclusteredtransformerLayerId}-ping`; 
+  // ADD IMAGE WHEN MAP IS READY
+  useEffect(() => {
+    const map = mapRef?.current;
+    if (!map) return;
+    const transformerSvg = `
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="25"
+        height="25"
+        viewBox="0 0 32 32"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="12"
+          fill="white"
+          stroke="black"
+          stroke-width="0.8"
+        />
+
+        <g
+          transform="translate(3 3) scale(0.7)"
+          fill="#FFDDB0"
+          stroke="#f59e0b"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect
+            x="2"
+            y="7"
+            width="20"
+            height="12"
+            rx="2"
+          />
+
+          <path d="M14 13h4" stroke="blue"/>
+          <path d="M16 15v-4" stroke="blue"/>
+          <path d="M6 13h4" stroke="red"/>
+          <path d="M18 5v2"/>
+          <path d="M6 5v2"/>
+        </g>
+      </svg>
+    `;
+    const transformerImage = new Image();
+    const svgUrl =
+      `data:image/svg+xml;charset=utf-8,` + encodeURIComponent(transformerSvg);
+    transformerImage.onload = () => {
+      if (!map.hasImage("transformer")) {
+        map.addImage("transformer", transformerImage);
+      }
+    };
+
+    transformerImage.onerror = () => {
+      console.error("Failed to load transformer SVG icon.");
+    };
+
+    transformerImage.src = svgUrl;
+
+    return () => {
+      transformerImage.onload = null;
+      transformerImage.onerror = null;
+    };
+  }, [mapRef]);
+
+  // CLUSTERED TRANSFORMER LAYER
+  const clusterLayer: LayerProps = {
+    id: clusteredtransformerLayerId,
+    type: "symbol",
+    source: transformerSourceId,
+    filter: ["has", "point_count"],
+    layout: {
+      "icon-image": "transformer",
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+      "icon-offset": [3, 2.5],
+    }
+  };
+
+  const clusterCountLayer: LayerProps = {
+    id: transformerClusterCountId,
+    type: "symbol",
+    source: transformerSourceId,
+    filter: ["has", "point_count"],
+    layout: {
+      "text-field": "{point_count_abbreviated}",
+      "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+      "text-size": 12,
+    },
+  };
+
+  const unclusteredPingLayer: LayerProps = {
+    id:  unclusteredTransformerPing,
+    type: "circle",
+    source: transformerSourceId,
+    filter: ["!", ["has", "point_count"]],
+    paint: {
+            "circle-color": [
+              "case",
+              ["==", ["get", "is_active"], true],
+              "#2A7C13",
+              ["==", ["get", "is_active"], false],
+              "red",
+              "#2A7C13",
+            ],
+            "circle-radius": 11,
+            "circle-opacity": 0.8,
+            "circle-stroke-width": 0.5,
+            "circle-stroke-opacity": 1,
+          },
+  }
+
+  const unclusteredLayer: LayerProps = {
+    id: unclusteredtransformerLayerId,
+    type: "symbol",
+    source: transformerSourceId,
+    filter: ["!", ["has", "point_count"]],
+    layout: {
+      "icon-image": "transformer",
+      "icon-allow-overlap": true,
+      "icon-offset": [3, 2.5],
+    },
+  };
+
+  
+
   // SET DATA STATE
   useEffect(() => {
     const setInitialData = () => {
-      setData(initialdata);
+      setasInteractiveLayers((prev) => [
+        ...prev,
+        unclusteredtransformerLayerId,
+      ]);
     };
     setInitialData();
-  }, [initialdata]);
+  }, [setasInteractiveLayers]);
 
+  // POPUP EFFECT
   useEffect(() => {
-    if (!mapRef?.current) return;
-    if (!isMapReady) return;
-    if (!data?.data) return;
-
-    const map = mapRef.current;
-    const geojson = data.data;
-
-    const addTransformerData = () => {
-      const source = map.getSource(TransformerSourceId) as GeoJSONSource;
-      if (source) {
-        source.setData(geojson);
-      }
+    const ShowPopup = () => {
+      if (!selectedFeature) return;
+      if (selectedFeature.layer.id !== unclusteredtransformerLayerId) return;
+      const geometry = selectedFeature.geometry;
+      if (geometry.type !== "Point") return;
+      const coordinates = geometry.coordinates as Coordinates;
+      const info = selectedFeature.properties as TransformerProperties;
+      setPopupInfo({ coordinates, info });
     };
-    const attachEvents = () => {
-      if (!map.getLayer(UnclusteredTransformer)) return;
+    ShowPopup();
+  }, [selectedFeature]);
+  
 
-      const handleMouseEnter = () => {
-        map.getCanvas().style.cursor = "pointer";
-      };
-      const handleMouseLeave = () => {
-        map.getCanvas().style.cursor = "";
-      };
 
-      map.on("mouseenter", UnclusteredTransformer, handleMouseEnter);
-      map.on("mouseleave", UnclusteredTransformer, handleMouseLeave);
-    };
 
-    addTransformerData();
-    attachEvents();
+  // PING ANIMATION
 
-  }, [data, mapRef, isMapReady]);
-
-  // EFFECT FOR LAYER FILTERING
-  useEffect(() => {
-    if (!isMapReady) return;
-    const map = mapRef?.current;
-    if (!map) return;
-
-    const filterLayer = document.getElementById("layer-filter");
-    // FILTER CONTAINER
-    const container = document.createElement("div");
-    container.className = "flex gap-2 p-2 w-full items-center";
-    filterLayer?.appendChild(container);
-
-    // INPUT FIELD
-    const input = document.createElement("input");
-    input.id = "distribution-transformer-layer";
-    input.checked = true;
-    input.type = "checkbox";
-    input.className = "checkbox checkbox-primary checkbox-xs";
-    container.appendChild(input);
-
-    // LABEL FOR INPUT FIELD
-    const label = document.createElement("label");
-    label.className = "w-full";
-    label.htmlFor = "distribution-transformer-layer";
-    label.textContent = "Distribution Transformers";
-    container.appendChild(label);
-
-    input.addEventListener("change", () => {
-      map.setLayoutProperty(
-        TransformerLayerId,
-        "visibility",
-        input.checked ? "visible" : "none",
-      );
-      map.setLayoutProperty(
-        UnclusteredTransformer,
-        "visibility",
-        input.checked ? "visible" : "none",
-      );
-      map.setLayoutProperty(
-        TransformerClusterCount,
-        "visibility",
-        input.checked ? "visible" : "none",
-      );
-      map.setLayoutProperty(
-        TransformerPing,
-        "visibility",
-        input.checked ? "visible" : "none",
-      );
-    });
-  }, [mapRef, isMapReady]);
-
-  // ANIMATION EFFECT PING
-
-  useEffect(() => {
-    if (!isMapReady) return;
-    const map = mapRef?.current;
-    if (!map) return;
+  useEffect(()=>{
+    const map = mapRef?.current?.getMap();
+    if(!map) return;
     let animationFrame: number;
     let start: number | null = null;
-
-    const animatePing = (timestamp: number) => {
-      if (start === null) {
-        start = timestamp;
-      }
-
-      const duration = 1200;
+    const animation = (timestamp: number) => {
+      
+      if (start === null) start=timestamp;
+      const duration = 1000;
       const progress = ((timestamp - start) % duration) / duration;
-
-      // Expand
-      const radius = 8 + progress * 10;
-
-      // Fade
+      const radius = 8 + progress * 4;
       const opacity = 0.8 * (1 - progress);
-
-      if (map.getLayer(TransformerPing)) {
-        map.setPaintProperty(TransformerPing, "circle-radius", radius);
-
-        map.setPaintProperty(TransformerPing, "circle-opacity", opacity);
-
-        map.setPaintProperty(TransformerPing, "circle-stroke-opacity", opacity);
+      if (map.getLayer(unclusteredTransformerPing)){
+        map.setPaintProperty(unclusteredTransformerPing, "circle-radius", radius);
+        map.setPaintProperty(unclusteredTransformerPing, "circle-opacity", opacity);
       }
-
-      animationFrame = requestAnimationFrame(animatePing);
-    };
-
-    animationFrame = requestAnimationFrame(animatePing);
-
+      animationFrame = requestAnimationFrame(animation); 
+    }
+    animationFrame = requestAnimationFrame(animation);
     return () => {
       cancelAnimationFrame(animationFrame);
-    };
-  }, [mapRef, isMapReady]);
+    }
+  },[mapRef, unclusteredTransformerPing])
 
-  // POPUP EFFECT ON MOUSE CLICK
-  useEffect(() => {
-    if (!isMapReady) return;
-    const map = mapRef?.current;
-    if (!map) return;
-    const handleMapClick = (
-      e: MapMouseEvent & {
-        features?: MapGeoJSONFeature[];
-      },
-    ) => {
-      if (!e.features?.length) return;
-      const feature = e.features[0].properties as TransformerProperties;
-      const popupNode = document.createElement("div");
-      const root = createRoot(popupNode);
-      root.render(
-        <TransformerPopup
-          TransformerProperties={feature}
-          setData={setData}
-          user={user}
-        />,
-      );
 
-      new Popup({
-        className: "custom-maplibre-popup",
-        closeButton: false,
-        closeOnClick: true,
-        maxWidth: "none",
-        anchor: "bottom",
-        offset: [0, -10],
-      })
-        .setLngLat(e.lngLat)
-        .setDOMContent(popupNode)
-        .addTo(map);
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          popupNode.style.opacity = "1";
-        });
-      });
-    };
 
-    map.on("click", [UnclusteredTransformer], handleMapClick);
-  }, [isMapReady, mapRef, user]);
 
-  return null;
+  return (
+    <>
+      <Source
+        id={transformerSourceId}
+        cluster
+        type="geojson"
+        data={initialData}
+      >
+        <Layer {...clusterLayer} />
+        <Layer {...clusterCountLayer} />
+        <Layer  {...unclusteredPingLayer} />
+        <Layer {...unclusteredLayer} />
+        
+      </Source>
+      {popupInfo && (
+        <Popup
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: "9999px",
+          }}
+          closeButton={false}
+          latitude={popupInfo.coordinates[1]}
+          longitude={popupInfo.coordinates[0]}
+          onClose={() => setPopupInfo(null)}
+        >
+          <TransformerPopup TransformerProperties={popupInfo.info} />
+        </Popup>
+      )}
+    </>
+  );
 };
 
 export default TransformerLayer;

@@ -11,10 +11,15 @@ import LoadingIndicator from "./common/loadingIndication";
 import "react-datepicker/dist/react-datepicker.css";
 import { NotificationProvider } from "./common/NotificationProvider";
 import type { Viewport } from "next";
-import "maplibre-gl/dist/maplibre-gl.css";
+
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
 import "@xyflow/react/dist/style.css"
+import "maplibre-gl/dist/maplibre-gl.css";
 import ProgressBar from './common/progress/progress-bar';
+
+
+
+
 
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
