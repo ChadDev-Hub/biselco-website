@@ -104,7 +104,11 @@ const Drawer = ({ children }: Props) => {
         {/* Page content here */}
         <div className={`w-full min-h-screen pt-5 ${[
           "/distribution-map", 
-          "/about"].includes(currentRoute)  ? "pb-0" : "pb-25"}`}>{children}</div>
+          "/about",
+          "/terms-service",
+          "/privacy-policy",
+          "/data-deletion"
+          ].includes(currentRoute)  ? "pb-0" : "pb-25"}`}>{children}</div>
         <DocNavigation />
       </div>
       <div

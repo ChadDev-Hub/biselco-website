@@ -23,7 +23,6 @@ const PrimaryLineLayer = ({ initialData }: Props) => {
     id: primaryLineLayerId,
     type: "line",
     source: primaryLineSourceId,
-    
     layout: {
       "line-join": "round",
       "line-cap": "round",
@@ -37,6 +36,7 @@ const PrimaryLineLayer = ({ initialData }: Props) => {
       ],
       "line-width": 2,
     },
+    beforeId: "transformers-unclustered",
   };
   useEffect(() => {
     const setInteractivity = () => {
