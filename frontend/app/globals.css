@@ -91,8 +91,15 @@
 
 
 .maplibregl-popup-content {
-  padding: 0 !important;
-  border-radius: 9999px !important;
+  padding: 0px !important;
+  border-radius: 5% !important;
+  width: max-content !important;
+  max-width: none !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 #nprogress .bar {

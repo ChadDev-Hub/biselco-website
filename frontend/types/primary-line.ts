@@ -6,6 +6,7 @@ export type PrimaryLines = GeoJSON<Geometry, PrimaryLineProperties>;
 
 
 export type PrimaryLineProperties = {
+  id: number;
   primary_line_id: string;
   village: string;
   municipality: string;

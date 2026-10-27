@@ -17,7 +17,7 @@ type Props = {
 
 const ConcernCard = ({userComplaint, timeLine, toolsComponent, mapViewer, deleteTool}: Props) => {
   return (
-    <div className="max-w-lg w-full bg-base-100 border-t-2 border-t-blue-600 border-b-yellow-500 border-b-2 card relative mx-auto  rounded-2xl shadow-lg border border-gray-300 overflow-hidden font-sans">
+    <div className="max-w-lg w-full bg-base-100 border-t-2 border-t-blue-600 border-b-yellow-500 border-b-2 card relative   rounded-2xl shadow-lg border border-gray-300 overflow-hidden font-sans">
         {deleteTool}        
       {/* Header Section */}
       <div className="bg-base-200  max-h-15 p-6 border-b border-slate-100 flex items-center gap-4">

@@ -14,7 +14,7 @@ const ComplaintsPage = () => {
   const statusName = GetComplaintStatusName();
   return (
       <div
-        className="flex flex-col gap-2 px-2 items-center w-full h-full "
+        className="flex flex-col gap-2 items-center w-full h-full "
       >
         
         <PageHeader title={{ title: "Welcome to", subtitle: "Complaints Portal!, Need Assistance?" }} description="Contact us: 09176511859 | 09176396436 | 09107101909" />
@@ -24,7 +24,7 @@ const ComplaintsPage = () => {
        
             <CreateComplaints />
           
-        <section className="grid grid-cols-1 gap-2">
+        <section className="grid w-full p-2 grid-cols-1 gap-2">
           <Suspense fallback={<ModernConcernCardSkeleton />}>
             <ComplaintsContainer
               complaintsData={data}

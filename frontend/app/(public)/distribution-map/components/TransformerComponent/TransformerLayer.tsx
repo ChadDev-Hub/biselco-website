@@ -1,26 +1,26 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { Transformers, TransformerProperties } from "@/types/transformer";
-import { Layer, Source, LayerProps, Popup} from "react-map-gl/maplibre";
+import { Layer, Source, LayerProps, Popup } from "react-map-gl/maplibre";
 import { useMap } from "../MapProvider";
 import { Coordinates } from "../../../../../types/consumer-meter";
 import TransformerPopup from "./transformerPopup";
 import type { PopupInfo } from "../MapProvider";
 
 type Props = {
-  initialData: Transformers
-}
-
+  initialData: Transformers;
+};
 
 const TransformerLayer = ({ initialData }: Props) => {
-  const [popupInfo, setPopupInfo] = useState<PopupInfo<TransformerProperties> | null>(null);
+  const [popupInfo, setPopupInfo] =
+    useState<PopupInfo<TransformerProperties> | null>(null);
   const { setasInteractiveLayers, selectedFeature, mapRef } = useMap();
   const transformerSourceId = "transformers";
   const clusteredtransformerLayerId = "transformers-clustered";
   const transformerClusterCountId = "transformers-cluster-count";
   const unclusteredtransformerLayerId = "transformers-unclustered";
-  const unclusteredTransformerPing = `${unclusteredtransformerLayerId}-ping`; 
+  const unclusteredTransformerPing = `${unclusteredtransformerLayerId}-ping`;
   // ADD IMAGE WHEN MAP IS READY
   useEffect(() => {
     const map = mapRef?.current;
@@ -97,7 +97,7 @@ const TransformerLayer = ({ initialData }: Props) => {
       "icon-allow-overlap": true,
       "icon-ignore-placement": true,
       "icon-offset": [3, 2.5],
-    }
+    },
   };
 
   const clusterCountLayer: LayerProps = {
@@ -113,25 +113,25 @@ const TransformerLayer = ({ initialData }: Props) => {
   };
 
   const unclusteredPingLayer: LayerProps = {
-    id:  unclusteredTransformerPing,
+    id: unclusteredTransformerPing,
     type: "circle",
     source: transformerSourceId,
     filter: ["!", ["has", "point_count"]],
     paint: {
-            "circle-color": [
-              "case",
-              ["==", ["get", "is_active"], true],
-              "#2A7C13",
-              ["==", ["get", "is_active"], false],
-              "red",
-              "#2A7C13",
-            ],
-            "circle-radius": 11,
-            "circle-opacity": 0.8,
-            "circle-stroke-width": 0.5,
-            "circle-stroke-opacity": 1,
-          },
-  }
+      "circle-color": [
+        "case",
+        ["==", ["get", "is_active"], true],
+        "#2A7C13",
+        ["==", ["get", "is_active"], false],
+        "red",
+        "#2A7C13",
+      ],
+      "circle-radius": 12,
+      "circle-opacity": 0.8,
+      "circle-stroke-width": 0.5,
+      "circle-stroke-opacity": 1,
+    },
+  };
 
   const unclusteredLayer: LayerProps = {
     id: unclusteredtransformerLayerId,
@@ -145,17 +145,18 @@ const TransformerLayer = ({ initialData }: Props) => {
     },
   };
 
-  
-
-  // SET DATA STATE
+  // SET AS INTERACTIVE
   useEffect(() => {
-    const setInitialData = () => {
+    const setASInteractive = () => {
       setasInteractiveLayers((prev) => [
         ...prev,
         unclusteredtransformerLayerId,
       ]);
     };
-    setInitialData();
+    setASInteractive();
+    return () => {
+      setasInteractiveLayers((prev) => prev.filter((id) => id !== unclusteredtransformerLayerId));
+    };
   }, [setasInteractiveLayers]);
 
   // POPUP EFFECT
@@ -171,62 +172,56 @@ const TransformerLayer = ({ initialData }: Props) => {
     };
     ShowPopup();
   }, [selectedFeature]);
-  
-
-
 
   // PING ANIMATION
 
-  useEffect(()=>{
+  useEffect(() => {
     const map = mapRef?.current?.getMap();
-    if(!map) return;
+    if (!map) return;
     let animationFrame: number;
     let start: number | null = null;
     const animation = (timestamp: number) => {
-      
-      if (start === null) start=timestamp;
+      if (start === null) start = timestamp;
       const duration = 1000;
       const progress = ((timestamp - start) % duration) / duration;
       const radius = 8 + progress * 4;
       const opacity = 0.8 * (1 - progress);
-      if (map.getLayer(unclusteredTransformerPing)){
-        map.setPaintProperty(unclusteredTransformerPing, "circle-radius", radius);
-        map.setPaintProperty(unclusteredTransformerPing, "circle-opacity", opacity);
+      if (map.getLayer(unclusteredTransformerPing)) {
+        map.setPaintProperty(
+          unclusteredTransformerPing,
+          "circle-radius",
+          radius,
+        );
+        map.setPaintProperty(
+          unclusteredTransformerPing,
+          "circle-opacity",
+          opacity,
+        );
       }
-      animationFrame = requestAnimationFrame(animation); 
-    }
+      animationFrame = requestAnimationFrame(animation);
+    };
     animationFrame = requestAnimationFrame(animation);
     return () => {
       cancelAnimationFrame(animationFrame);
-    }
-  },[mapRef, unclusteredTransformerPing])
-
-
-
-
+    };
+  }, [mapRef, unclusteredTransformerPing]);
 
   return (
     <>
       <Source
         id={transformerSourceId}
+        promoteId="id"
         cluster
         type="geojson"
         data={initialData}
       >
         <Layer {...clusterLayer} />
         <Layer {...clusterCountLayer} />
-        <Layer  {...unclusteredPingLayer} />
+        <Layer {...unclusteredPingLayer} />
         <Layer {...unclusteredLayer} />
-        
       </Source>
       {popupInfo && (
         <Popup
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: "9999px",
-          }}
           closeButton={false}
           latitude={popupInfo.coordinates[1]}
           longitude={popupInfo.coordinates[0]}

@@ -7,13 +7,14 @@ import { useMap } from "../MapProvider";
 import type { PopupInfo } from "../MapProvider";
 import PrimaryLinePopup from "../PrimaryLineComponent/PrimaryLinePopup";
 
+
 type Props = {
   initialData: PrimaryLines;
 };
 
 const PrimaryLineLayer = ({ initialData }: Props) => {
   const primaryLineSourceId = "primary-lines";
-  const { setasInteractiveLayers, selectedFeature } = useMap();
+  const { setasInteractiveLayers, selectedFeature, setSelectedFeature} = useMap();
   const primaryLineLayerId = "primary-lines-layer";
   const [popUpInfo, setPopupInfo] = useState<PopupInfo<PrimaryLineProperties> | null>(
     null,
@@ -22,6 +23,7 @@ const PrimaryLineLayer = ({ initialData }: Props) => {
     id: primaryLineLayerId,
     type: "line",
     source: primaryLineSourceId,
+    
     layout: {
       "line-join": "round",
       "line-cap": "round",
@@ -37,7 +39,13 @@ const PrimaryLineLayer = ({ initialData }: Props) => {
     },
   };
   useEffect(() => {
-    setasInteractiveLayers((prev) => [...prev, primaryLineLayerId]);
+    const setInteractivity = () => {
+      setasInteractiveLayers((prev) => [...prev, primaryLineLayerId]);
+    }
+    setInteractivity();
+    return () => {
+      setasInteractiveLayers((prev) => prev.filter((id) => id !== primaryLineLayerId));
+    };
   }, [setasInteractiveLayers]);
 
   useEffect(() => {
@@ -55,19 +63,28 @@ const PrimaryLineLayer = ({ initialData }: Props) => {
         coordinates: midPoint,
         info: selectedFeature.properties as PrimaryLineProperties,
       });
+      
     };
     ShowPopup();
   }, [selectedFeature]);
+
+
+  const handleClosePopup = () => {
+    setPopupInfo(null);
+    setSelectedFeature(null);
+  }
+  
   return (
     <>
-      <Source id={primaryLineSourceId} type="geojson" data={initialData ?? ""}>
+      <Source id={primaryLineSourceId} promoteId="id" type="geojson" data={initialData ?? ""}>
         <Layer {...primaryLineLayer} />
       </Source>
       {popUpInfo && (
         <Popup
+          closeButton={false}
           longitude={popUpInfo.coordinates[0]}
           latitude={popUpInfo.coordinates[1]}
-          onClose={() => setPopupInfo(null)}
+          onClose={() => handleClosePopup()}
         >
           <PrimaryLinePopup primaryLinePopup={popUpInfo.info} />
         </Popup>

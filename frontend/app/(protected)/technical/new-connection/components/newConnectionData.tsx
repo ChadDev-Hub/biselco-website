@@ -9,7 +9,6 @@ import { useAlert } from "@/app/context/alert";
 import { DownloadNewConnectionReport } from "@/lib/private-api/actions/new-connection";
 import Delete from "../../change-meter/components/deleteChangeMeter";
 import DownloadReport from "../../change-meter/components/download";
-import NewConnectionForm from "./NewConnectionForm";
 import {
   NewConnectionInitialType,
   NewConnectionType,
@@ -153,9 +152,7 @@ const NewConnectionDataContainer = ({ data, searchComponent }: Props) => {
               />
             </div>
 
-            <div>
-              <NewConnectionForm />
-            </div>
+          
             {selectedRow.size > 0 && (
               <div className="badge badge-outline badge-secondary text-xs font-bold">
                 <span>Items: </span>

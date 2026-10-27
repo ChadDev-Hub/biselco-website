@@ -2,12 +2,12 @@
 
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 
-import BiselcoMap from "@/app/common/Map";
 import { PostComplaints } from "@/lib/private-api/actions/complaint";
 import ImageViewer from "../../technical/change-meter/components/imageViewr";
 import { useAlert } from "../../../context/alert";
 import { useState } from "react";
 import { ApiError } from "../../../../types/api-error";
+import MapProvider from "../../../(public)/distribution-map/components/MapProvider";
 
 // Define the type for form data
 type ComplaintFormData = {
@@ -86,7 +86,6 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
       setIsSubmitSuccessful(true);
       handleClose();
       showAlert("success", res.detail);
-      
     } catch (error) {
       if (error instanceof ApiError) {
         switch (error.status) {
@@ -111,7 +110,7 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
   return (
     <>
       {isSubmitSuccessful ? (
-        <div className="p-4 flex justify-center bg-base-200 shadow  text-success rounded">
+        <div className="p-4 flex  justify-center bg-base-200 shadow  text-success rounded">
           <h1 className="font-bold">
             Thank you! Your complaint has been submitted.
           </h1>
@@ -166,13 +165,16 @@ const GenericComplaintV1 = ({ choices, isother, handleClose }: Props) => {
               type="hidden"
               {...register("lat", { required: "Please Select Location" })}
             />
-            <BiselcoMap
-              consumermeters={lat && lon ? [lon, lat] : undefined}
-              onSelectLocation={(lat, lon) => {
-                setValue("lat", lat);
-                setValue("lon", lon);
-              }}
-            />
+
+            <div className="w-full h-75 relative">
+              <MapProvider
+                onPin={(lat, lon) => {
+                  setValue("lat", lat);
+                  setValue("lon", lon);
+                }}
+                pinLocation={lat && lon ? { lat, lon } : undefined}
+              />
+            </div>
             {errors.lat && <p className={errorStyle}>{errors.lat?.message}</p>}
           </section>
 

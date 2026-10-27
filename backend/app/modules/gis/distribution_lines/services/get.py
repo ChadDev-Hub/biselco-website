@@ -19,6 +19,7 @@ class DistributionLineGetServices:
             stmt = (select
                     (
                         ST_AsGeoJSON(PrimaryLines.geom).label("geometry"),
+                        PrimaryLines.id,
                         PrimaryLines.primary_line_id,
                         Village.name.label("village"),
                         Municipality.name.label("municipality"),
@@ -42,6 +43,7 @@ class DistributionLineGetServices:
                     "type": "Feature",
                     "geometry": json.loads(res["geometry"]),
                     "properties": {
+                        "id": res["id"],
                         "primary_line_id": res["primary_line_id"],
                         "village": res["village"],
                         "municipality": res["municipality"],
@@ -53,7 +55,6 @@ class DistributionLineGetServices:
                         "neutral_wire": res["neutral_wire"]},
 
                 } for res in result]}
-
             return data
         except Exception as e:
             print(e)

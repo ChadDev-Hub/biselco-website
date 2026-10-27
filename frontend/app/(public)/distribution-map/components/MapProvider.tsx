@@ -9,11 +9,13 @@ import {
   useCallback,
   Dispatch,
   SetStateAction,
+  useEffect,
 } from "react";
 import Map, {
   type MapRef,
   MapMouseEvent,
   MapGeoJSONFeature,
+  Marker,
 } from "react-map-gl/maplibre";
 
 export type PopupInfo<T> = {
@@ -21,25 +23,32 @@ export type PopupInfo<T> = {
   info: T;
 };
 
-
 type Props = {
-  children: ReactNode;
-  className?: string;
+  children?: ReactNode;
+  onPin?: (lat: number, lon: number) => void;
+  pinLocation?: {
+    lat?: number;
+    lon?: number;
+    defaultIcon?: React.ReactNode;
+  };
+
 };
 type MapContextType = {
   isMapReady: boolean;
   mapRef: React.RefObject<MapRef | null> | null;
   setasInteractiveLayers: Dispatch<SetStateAction<string[]>>;
   selectedFeature: MapGeoJSONFeature | null;
+  setSelectedFeature: Dispatch<SetStateAction<MapGeoJSONFeature | null>>;
 };
 const mapContext = createContext<MapContextType>({
   isMapReady: false,
   mapRef: null,
   setasInteractiveLayers: () => {},
   selectedFeature: null,
+  setSelectedFeature: () => {},
 });
 
-const MapProvider = ({ children }: Props) => {
+const MapProvider = ({ children, onPin, pinLocation }: Props) => {
   const [interactiveLayers, setasInteractiveLayers] = useState<string[]>([]);
   const [selectedFeature, setSelectedFeature] =
     useState<MapGeoJSONFeature | null>(null);
@@ -49,229 +58,120 @@ const MapProvider = ({ children }: Props) => {
 
   const onMouseEnter = useCallback(() => setCursor("pointer"), []);
   const onMouseLeave = useCallback(() => setCursor("auto"), []);
-  const onMouseClick = useCallback((e: MapMouseEvent) => {
+
+  const changeColoronClick = (
+    SourceId: string,
+    id: string | number | undefined,
+    selected: boolean,
+  ) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const source = map.getStyle().sources[SourceId];
+    if (source.type === "vector") return;
+
+    if (!SourceId || !id) return;
+    map.setFeatureState({ source: SourceId, id: id }, { selected: selected });
+  };
+
+  // CLICK EVENTS
+  const selectFeature = (e: MapMouseEvent) => {
     const features = mapRef.current?.queryRenderedFeatures(e.point);
     if (!features?.length) return;
     const feature = features[0];
     setSelectedFeature(feature);
-  }, []);
+  };
 
-  // useEffect(() => {
-  //   if (!mapContainer.current) return;
-  //   const map = new Maplibregl.Map({
-  //     container: mapContainer.current,
-  //     attributionControl: false,
-  //     style: "https://tiles.openfreemap.org/styles/bright",
-  //     center: [120.2043, 11.9986],
-  //     zoom: 10,
-  //   });
-  //   mapRef.current = map;
-  //   const geolocation = new Maplibregl.GeolocateControl({
-  //     positionOptions: {
-  //       enableHighAccuracy: true,
-  //     },
-  //     trackUserLocation: true,
-  //     showAccuracyCircle: true,
-  //   });
-  //   map.addControl(geolocation, "top-left");
-  //   map.addControl(new Maplibregl.NavigationControl(), "bottom-right");
+  const onMouseClick = useCallback(
+    (e: MapMouseEvent) => {
+      selectFeature(e);
+      if (!onPin) return;
+      const { lat, lng } = e.lngLat;
+      onPin(lat, lng);
+    },
+    [onPin],
+  );
 
-  //   map.on("load", () => {
-  //     // ADD PRIMARY LINE SOURCE
-  //     if (!map.getSource(PrimaryLineSourceId)) {
-  //       map.addSource(PrimaryLineSourceId, {
-  //         type: "geojson",
-  //         promoteId: "primary_line_id",
-  //         data: {
-  //           type: "FeatureCollection",
-  //           features: [],
-  //         },
-  //       });
-  //     }
+  // EFFECT THAT LISTEN IF THERE A DEFAULT PIN
+  useEffect(() => {
+    if (!isMapReady || !pinLocation) return;
 
-  //     // ADD PRIMARY LINE LAYER
-  //     if (!map.getLayer(PrimaryLineLayerId)) {
-  //       map.addLayer({
-  //         id: PrimaryLineLayerId,
-  //         type: "line",
-  //         source: PrimaryLineSourceId,
-  //         layout: {
-  //           "line-join": "round",
-  //           "line-cap": "round",
-  //         },
-  //         paint: {
-  //           "line-color": [
-  //             "case",
-  //             ["boolean", ["feature-state", "selected"], false],
-  //             "#70e000",
-  //             ["get", "color"],
-  //           ],
-  //           "line-width": 2,
-  //         },
-  //       });
-  //     }
+    const map = mapRef.current;
+    if (!map) return;
 
-  //
+    const { lat, lon } = pinLocation;
 
-  //     const svgUrl =
-  //       `data:image/svg+xml;charset=utf-8,` +
-  //       encodeURIComponent(transformerSvg);
+    if (lat == null || lon == null) return;
 
-  //     const img = new Image();
+    map.jumpTo(
+      {
+        center: [lon, lat],
+        zoom: 16,
+      },
+      {
+        duration: 1000,
+        easing: (t: number) => t,
+        
+      },
+    );
+  }, [pinLocation, isMapReady]);
 
-  //     img.onload = () => {
-  //       console.log("CUSTOM MARKER LOADED");
+  // EFFECT ON SELECTED FEATURE
+  useEffect(() => {
+    if (!selectedFeature) return;
+    // FOR PRIMARY LINE LAYER
+    changeColoronClick(selectedFeature?.source, selectedFeature?.id, true);
+    return () => {
+      changeColoronClick(selectedFeature?.source, selectedFeature?.id, false);
+    };
+  }, [selectedFeature]);
 
-  //       // Add image
-  //       if (!map.hasImage("custom-marker")) {
-  //         map.addImage("custom-marker", img);
-  //       }
-  //     };
-
-  //     // ADD TRANSFORMER SOURCE
-  //     if (!map.getSource(TransformerSourceId)) {
-  //       map.addSource(TransformerSourceId, {
-  //         cluster: true,
-  //         type: "geojson",
-  //         data: {
-  //           type: "FeatureCollection",
-  //           features: [],
-  //         },
-  //       });
-  //     }
-  //     // TRANSFORMER LAYER
-  //     if (!map.getLayer(TransformerLayerId)) {
-  //       map.addLayer({
-  //         id: TransformerLayerId,
-  //         type: "symbol",
-  //         source: TransformerSourceId,
-  //         filter: ["has", "point_count"],
-  //         layout: {
-  //           "icon-image": "custom-marker",
-  //           "icon-offset": [3, 2.5],
-  //           "icon-allow-overlap": true,
-  //           "icon-size": 1,
-  //           "text-field": ["get", "transformer_id"],
-  //           "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-  //           "text-size": 7,
-  //           "text-anchor": "top",
-  //           "text-offset": [0, 2],
-  //         },
-  //         paint: {
-  //           "text-color": "black",
-  //         },
-  //       });
-  //     }
-
-  //     // ADD CLUSTER COUNT LAYER
-  //     if (!map.getLayer(TransformerClusterCount)) {
-  //       map.addLayer({
-  //         id: TransformerClusterCount,
-  //         type: "symbol",
-  //         source: TransformerSourceId,
-  //         layout: {
-  //           "text-field": "{point_count_abbreviated}",
-  //           "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-  //           "text-size": 12,
-  //         },
-  //         paint: {
-  //           "text-color": "black",
-  //         },
-  //       });
-  //     }
-
-  //     //  PING LAYER
-  //     // ADD PING UNCLUSTER LAYER
-  //     if (!map.getLayer(TransformerPing)) {
-  //       map.addLayer({
-  //         id: TransformerPing,
-  //         type: "circle",
-  //         source: TransformerSourceId,
-  //         filter: ["!", ["has", "point_count"]],
-
-  //         paint: {
-  //           "circle-color": [
-  //             "case",
-  //             ["==", ["get", "is_active"], true],
-  //             "#2A7C13",
-  //             ["==", ["get", "is_active"], false],
-  //             "red",
-  //             "#2A7C13",
-  //           ],
-  //           "circle-radius": 11,
-  //           "circle-opacity": 0.8,
-  //           "circle-stroke-width": 0.5,
-  //           "circle-stroke-opacity": 1,
-  //         },
-  //       });
-  //     }
-
-  //     // TRANSFORMER LAYER
-
-  //     // ADD UNLUSTERED LAYER
-  //     if (!map.getLayer(UnclusteredTransformer)) {
-  //       map.addLayer({
-  //         id: UnclusteredTransformer,
-  //         type: "symbol",
-  //         source: TransformerSourceId,
-  //         filter: ["!", ["has", "point_count"]],
-
-  //         layout: {
-  //           "icon-image": "custom-marker",
-  //           "icon-offset": [3, 2.5],
-  //           "icon-allow-overlap": true,
-  //           "icon-size": 1,
-  //           "text-field": ["get", "transformer_id"],
-  //           "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-  //           "text-size": 7,
-  //           "text-anchor": "top",
-  //           "text-offset": [0, 2],
-  //         },
-  //         paint: {
-  //           "text-color": "black",
-  //         },
-  //       });
-  //     }
-
-  //     img.src = svgUrl;
-  //     setMapReady(true);
-  //   });
-
-  //   return () => {
-  //     if (mapRef.current) {
-  //       mapRef.current.remove();
-  //       mapRef.current = null;
-  //     }
-  //   };
-  // }, []);
-  // const handlePointerDown = () => setIsPointerDown(true);
-  // const handlePointerUp = () => setIsPointerDown(false);
   const handleReady = () => setIsMapReady(true);
 
   return (
     <mapContext.Provider
-      value={{ isMapReady, mapRef, setasInteractiveLayers, selectedFeature }}
-    >
-     
-        <Map
-          ref={mapRef}
-          initialViewState={{
-            longitude: 120.2043,
-            latitude: 11.9986,
-            zoom: 11,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          mapStyle="https://tiles.openfreemap.org/styles/bright"
-          onLoad={handleReady}
-          interactiveLayerIds={[...interactiveLayers]}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          cursor={cursor}
-          onClick={onMouseClick}
-        >
-          {children}
-        </Map>
-    
+      value={{
+        isMapReady,
+        mapRef,
+        setasInteractiveLayers,
+        selectedFeature,
+        setSelectedFeature,
+      }}
+    > 
+   
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          longitude: 120.2043,
+          latitude: 11.9986,
+          zoom: 11,
+        }}
+        style={{ width: "100%", height: "100%" }}
+        mapStyle="https://tiles.openfreemap.org/styles/bright"
+        onLoad={handleReady}
+        interactiveLayerIds={[...interactiveLayers]}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        cursor={cursor}
+        onClick={onMouseClick}
+        attributionControl={false}
+      >
+        {children}
+        {pinLocation && (
+          <Marker
+            key="pin"
+            style={{ cursor: "pointer", scale: 0.7 }}
+            longitude={pinLocation.lon ?? 0}
+            latitude={pinLocation.lat ?? 0}
+            anchor="bottom"
+            color="red"
+          >
+            {pinLocation.defaultIcon}
+          </Marker>
+        )}
+      </Map>
+
+   
+      
     </mapContext.Provider>
   );
 };

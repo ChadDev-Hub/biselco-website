@@ -1,17 +1,14 @@
 "use client";
 
 import { useRef, memo } from "react";
-import {MapIcon} from "lucide-react"
-import BiselcoMap from '../../../../common/Map';
-
+import { MapIcon } from "lucide-react";
+import MapProvider from "../../../../(public)/distribution-map/components/MapProvider";
 
 type Props = {
   title: string;
   location: location;
   municipality?: string;
   village?: string;
-  marker?: React.ReactElement;
-  markerLabel?: string;
 };
 type location = {
   latitude: number;
@@ -19,13 +16,17 @@ type location = {
   srid: number;
 };
 
-const MapButton = ({ location, municipality, village, title, marker, markerLabel }: Props) => {
+const MapButton = ({
+  location,
+  municipality,
+  village,
+  title,
+}: Props) => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const handleOpenModal = () => {
     modalRef.current?.showModal();
   };
   const handleCloseModal = () => modalRef.current?.close();
-
 
   return (
     <>
@@ -119,33 +120,40 @@ const MapButton = ({ location, municipality, village, title, marker, markerLabel
       </button>
       <dialog ref={modalRef} className="modal modal-bottom">
         <div className="modal-box max-w-3xl mx-auto relative">
-         
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="btn btn-circle btn-error btn-sm absolute right-2 top-2 drop-shadow-2xl "
-            >
-              X
-            </button>
-        
+          <button
+            type="button"
+            onClick={handleCloseModal}
+            className="btn btn-circle btn-error btn-sm absolute right-2 top-2 drop-shadow-2xl "
+          >
+            X
+          </button>
+
           <h3 className="font-bold text-sm flex gap-2 items-center">
             <span>
-              <MapIcon/>
+              <MapIcon />
             </span>
             {title}
           </h3>
-          
+
           <div className="flex flex-col gap-2">
-            {municipality && village && <div className="flex flex-col justify-start items-start">
-              <h4 className="text-xs">
-                Municipality: <span className="font-bold text-xs">{municipality}</span>
-              </h4>
-              <h4 className="text-xs">
-                Village: <span className="font-bold text-xs">{village}</span>
-              </h4>
-            </div>}
-            <BiselcoMap 
-            consumermeters={[location.longitude, location.latitude]} disableClick={true} markerSvg={marker} markerLabel={markerLabel}/>
+            {municipality && village && (
+              <div className="flex flex-col justify-start items-start">
+                <h4 className="text-xs">
+                  Municipality:{" "}
+                  <span className="font-bold text-xs">{municipality}</span>
+                </h4>
+                <h4 className="text-xs">
+                  Village: <span className="font-bold text-xs">{village}</span>
+                </h4>
+              </div>
+            )}
+            <div className="w-full h-75">
+              <MapProvider
+              pinLocation={{ lat: location.latitude, lon: location.longitude }}
+            />
+            </div>
+            
+
             {/* <ComplaintMap
               latitude={location.latitude}
               longitude={location.longitude}

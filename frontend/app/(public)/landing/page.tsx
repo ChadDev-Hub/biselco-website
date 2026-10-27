@@ -13,15 +13,16 @@ import EventsLoadingFallback from "./components/EventsLoadingFallback";
 import { Suspense } from "react";
 import Image from "next/image";
 import MapProvider from "../distribution-map/components/MapProvider";
-import { GetOffices } from "../../../lib/public-api/offices";
-import BiselcoOffices from "./components/biselcoOfficesLayer";
+
+
 import LoadingIndicator from "../distribution-map/components/LoadingIndicator";
 import { GetLandingPageData } from "@/lib/public-api/info";
 import LoginModal from '../../common/auth-component/login-modal';
+import OfficeLoader from './components/offices/office-loader';
 
 export default function Landing() {
   const AgmaEvents = GetAgmaEvents();
-  const Offices = GetOffices();
+
   const Info = GetLandingPageData();
   return (
     <div className="bg-linear-to-b  from-base-100 via-blue-50 to-base-100 text-base-content min-h-screen font-sans overflow-x-hidden">
@@ -91,9 +92,9 @@ export default function Landing() {
           className="w-full p-2 md:py-20 bg-conic-180 from-blue-100 via-blue-100 to-blue-100"
         >
           <div className="h-60 flex items-center justify-center ">
-            <MapProvider className="w-full max-w-7xl rounded-2xl shadow ring ring-blue-500 overflow-hidden">
+            <MapProvider>
               <Suspense fallback={<LoadingIndicator />}>
-                <BiselcoOffices promise={Offices} />
+                  <OfficeLoader/>
               </Suspense>
             </MapProvider>
           </div>

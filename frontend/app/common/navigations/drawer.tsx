@@ -102,7 +102,9 @@ const Drawer = ({ children }: Props) => {
         {/* Navbar */}
         <NavBar />
         {/* Page content here */}
-        <div className="w-full min-h-screen pt-5 pb-25">{children}</div>
+        <div className={`w-full min-h-screen pt-5 ${[
+          "/distribution-map", 
+          "/about"].includes(currentRoute)  ? "pb-0" : "pb-25"}`}>{children}</div>
         <DocNavigation />
       </div>
       <div

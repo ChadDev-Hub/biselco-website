@@ -10,7 +10,7 @@ import { useAlert } from "@/app/context/alert";
 import {ApiError} from "@/types/api-error";
 import { useSearchParams } from "next/navigation";
 import ChangeMeteCards from "./changeMeterCards";
-import ChangeMeterForm from "./changeMeterForm";
+
 import {ChangeMeterResponseLists, ChangeMeterType} from "@/types/change-meter";
 
 
@@ -189,9 +189,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
                 download={handleDownload}
               />
             </div>
-            <div>
-              <ChangeMeterForm />
-            </div>
+           =
 
             {selectedRow.size > 0 &&
               <div className="badge  badge-outline badge-info  text-xs font-bold">

@@ -32,10 +32,11 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
     //         return newData
     //     })
     // }
+    const containerClass = "bg-base-200 rounded-box p-4 w-full ";
   return (
-    <div className="w-80 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-xl">
+    <div className="w-80  gap-3  rounded-2xl ">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-base-300 bg-base-200/60 px-4 py-3">
+      <div className="flex w-full items-center justify-between border-b border-base-300 bg-base-200 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Zap className="h-5 w-5" />
@@ -64,15 +65,15 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
       </div>
 
       {/* Details */}
-      <div className="grid grid-cols-2 gap-3 p-4">
-        <div className="rounded-xl bg-base-200/50 p-3">
+      <div className="grid grid-cols-2 gap-3 p-4 w-full">
+        <div className={containerClass}>
           <p className="text-xs text-base-content/50">Village</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.village ?? "—"}
           </p>
         </div>
         {/* Municipality */}
-        <div className="rounded-xl bg-base-200/50 p-3">
+        <div className={containerClass}>
           <p className="text-xs text-base-content/50">Municipality</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.municipality ?? "—"}
@@ -80,14 +81,14 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
         </div>
 
           {/* CONNECTED CONSUMERS */}
-        <div className="rounded-xl col-span-2 bg-base-200/50 p-3">
+        <div className={containerClass}>
           <p className="text-xs text-base-content/50">Connected Consumers</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.connected_consumer ?? "—"}
           </p>
         </div>
           {/* TRANSFORMER TYPE */}
-        <div className="col-span-2 rounded-xl bg-base-200/50 p-3">
+        <div className={`${containerClass}`}>
           <p className="text-xs text-base-content/50">Transformer Type</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.description}
@@ -96,7 +97,7 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
 
 
             {/* KVA RATING */}
-        <div className="col-span-2 rounded-xl bg-base-200/50 p-3">
+        <div className={`col-span-2 ${containerClass}`}>
           <p className="text-xs text-base-content/50">KVA Rating</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.kva_rating ?? "—"}
@@ -104,16 +105,16 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
         </div>
         {/* PRIMARY VOLTAGE RATING */}
 
-        <div className=" rounded-xl bg-base-200/50 p-3">
-          <p className="text-xs text-base-content/50">Primary Voltage Rating(Kv)</p>
+        <div className={containerClass}>
+          <p className="text-xs text-base-content/50 w-full ">Primary Voltage Rating(Kv)</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.primary_voltage_rating_kv ?? "—"}
           </p>
         </div>
 
         {/* SECONDARY VOLTAGE RATING */}
-        <div className=" rounded-xl bg-base-200/50 p-3">
-          <p className="text-xs text-base-content/50">Secondary Voltage Rating(Kv)</p>
+        <div className={containerClass}>
+          <p className="text-xs text-base-content/50 w-full">Secondary Voltage Rating(Kv)</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.secondary_voltage_rating_kv ?? "—"}
           </p>

@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
-import BiselcoMap from "@/app/common/Map";
+
 import { PostComplaints } from "@/lib/private-api/actions/complaint";
 import ImageViewer from "../..//technical/change-meter/components/imageViewr";
 import { useAlert } from "@/app/context/alert";
 import { queryConsumer } from "@/lib/private-api/actions/consumer-meter";
-
+import MapProvider from "@/app/(public)/distribution-map/components/MapProvider";
 import { Consumer, Coordinates } from "../../../../types/consumer-meter";
 
 // Define the type for form data
@@ -254,13 +254,15 @@ const MeterComplaintsV1 = ({ choices, isother, handleClose }: Props) => {
               type="hidden"
               {...register("lat", { required: "Please Select Location" })}
             />
-            <BiselcoMap
-              consumermeters={lat && lon ? [lon, lat] : undefined}
-              onSelectLocation={(lat, lon) => {
-                setValue("lat", lat);
-                setValue("lon", lon);
-              }}
-            />
+            <div className="w-full h-75 relative">
+              <MapProvider
+                onPin={(lat, lon) => {
+                  setValue("lat", lat);
+                  setValue("lon", lon);
+                }}
+                pinLocation={lat && lon ? { lat, lon } : undefined}
+              />
+            </div>
             {errors.lat && <p className={errorStyle}>{errors.lat?.message}</p>}
           </section>
 
