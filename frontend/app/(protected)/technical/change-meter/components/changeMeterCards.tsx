@@ -1,6 +1,6 @@
 "use client";
 import CardComponent from "@/app/common/card";
-import { CircleGauge, Loader, ArrowBigRightDash } from "lucide-react";
+import {Loader, ArrowBigRightDash } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const Mapbutton = dynamic(
@@ -129,10 +129,6 @@ const ChangeMeteCards = ({
                   longitude: lon,
                   srid: srid,
                 }}
-                marker={
-                  <CircleGauge className="text-2xl fill-orange-500 font-bold shadow  text-blue-500 size-5 animate-bounce" />
-                }
-                markerLabel={consumer_name}
               />
               <span>{location}</span>
             </h1>

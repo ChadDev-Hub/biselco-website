@@ -1,6 +1,6 @@
 "use client";
 import CardComponent from "@/app/common/card";
-import { CircleGauge, Loader } from "lucide-react";
+import {  Loader } from "lucide-react";
 import dynamic from "next/dynamic";
 const Mapbutton = dynamic(() => import("@/app/(protected)/complaints/dashboard/components/mapbutton"), { ssr: false, loading: ()=> <Loader className="animate-spin text-primary" /> });
 const ImageViewer = dynamic(() => import("../../change-meter/components/imageViewr"), { ssr: false, loading: () => <Loader className="animate-spin text-primary" /> });
@@ -94,10 +94,6 @@ const NewConnectionCard = ({
                   longitude: lon,
                   srid: srid,
                 }}
-                marker={
-                  <CircleGauge className="text-2xl fill-orange-500 animate-bounce font-bold shadow  text-blue-500 size-5" />
-                }
-                markerLabel={consumer_name}
               />
               <span>{location}</span>
             </h1>
