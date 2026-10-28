@@ -2,9 +2,6 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.page import PrintPageSetup
-from openpyxl.worksheet.header_footer import HeaderFooter
-from openpyxl.worksheet.header_footer import HeaderFooterItem, _HeaderFooterPart
 from openpyxl.drawing.image import Image
 from fastapi import HTTPException, status
 from typing import Optional
@@ -14,19 +11,43 @@ import io
 import re
 
 
+# TITLES
+def change_meter_title():
+    return "CHANGE METER (METER DEFECT / BURNED METER/ ZERO READING / OLD METER)"
+
+
+def new_connection():
+    return "NEW CONNECTION (MAGNA CARTA / SEP-BLEP / Owned Meter)"
+
+
 def changemeter_column_header(
     ws: Worksheet,
     columns,
     header_font,
     center_align,
     thin_border,
-):  
-    # Group headers
-    ws.merge_cells("D4:E4")
-    ws.merge_cells("F4:I4")
+):
 
     ws["D4"] = "PULLOUT METER"
     ws["F4"] = "NEW METER"
+
+    top_col_merge = [[4, 5], [6, 7, 8, 9]]
+    for col_idx in top_col_merge:
+        ws.merge_cells(
+            start_row=4,
+            end_row=4,
+            start_column=col_idx[0],
+            end_column=col_idx[-1],
+        )
+
+        for col in col_idx:
+            cell = ws.cell(row=4, column=col)
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style=None),
+            )
 
     # Columns spanning rows 4 and 5
     merged_columns = [1, 2, 3, 10, 11, 12]
@@ -43,19 +64,22 @@ def changemeter_column_header(
             cell.border = Border(
                 left=Side(style="thin"),
                 right=Side(style="thin"),
-                top=thin_border if row_idx == 4 else Side(style=None),
-                bottom=thin_border if row_idx == 5 else Side(style=None),
+                top=Side(style="thin") if row_idx == 4 else Side(style=None),
+                bottom=Side(style="thin") if row_idx == 5 else Side(
+                    style=None),
             )
-        
-        
 
     # Style group headers
     for cell_ref in ("D4", "F4"):
         cell = ws[cell_ref]
         cell.font = header_font
         cell.alignment = center_align
-        cell.border = thin_border
-
+        cell.border = Border(
+            left=Side(style="thin"),
+            right=Side(style="thin"),
+            top=Side(style="thin"),
+            bottom=Side(style="thin"),
+        )
     # Write and style column headers
     for col_idx, col_name in enumerate(columns, start=1):
         if col_idx in merged_columns:
@@ -77,7 +101,59 @@ def new_connection_column_header(ws: Worksheet, columns, header_font, center_ali
         cell.font = header_font
         cell.alignment = center_align
         cell.border = thin_border
+    ws['E4'] = 'NEW METER'
+    
+    ws.merge_cells(
+       start_row=4,
+       end_row=4,
+       start_column=5,
+       end_column=9        
+    )
+    cell = ws["E4"]
+    cell.font = header_font
+    cell.alignment = center_align
 
+    
+    top_column = [4, 5, 6, 7, 8, 9]
+    for col_idx in top_column:
+        cell = ws.cell(row=4, column=col_idx)
+        cell.border = Border(
+            left=Side(style="thin"),
+            right=Side(style="thin"),
+            top=Side(style="thin"),
+            bottom=Side(style=None),
+        )
+        
+    # MERGE ROWS
+    merged_columns = [1,2,3,4,10]
+    for col_idx in merged_columns:
+        ws.merge_cells(
+            start_row=4,
+            end_row=5,
+            start_column=col_idx,
+            end_column=col_idx,
+        )
+        for row_idx in (4, 5):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin") if row_idx == 4 else Side(style=None),
+                bottom=Side(style="thin") if row_idx == 5 else Side(
+                    style=None),
+            )
+    for col_idx, col_name in enumerate(columns, start=1):
+            if col_idx in merged_columns:
+                # Write to the top-left cell of the merged range
+                cell = ws.cell(row=4, column=col_idx, value=col_name)
+                cell.font = header_font
+                cell.alignment = center_align
+                cell.border = thin_border
+            else:
+                cell = ws.cell(row=5, column=col_idx, value=col_name)
+                cell.font = header_font
+                cell.alignment = center_align
+                cell.border = thin_border
 
 def create_technical_report(
     columns: list,
@@ -100,7 +176,9 @@ def create_technical_report(
     if ws is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No data available for report")
-    ws.title = title if title else "No Title"
+
+    ws.title = title
+
     image_path = Path(__file__).resolve().parent.parent / \
         "static" / "biselco-header.png"
     img = Image(image_path)
@@ -110,7 +188,7 @@ def create_technical_report(
     # -----------------------------
     # Styles
     # -----------------------------
-    title_font = Font(size=14, bold=True)
+    title_font = Font(size=16, bold=True)
     header_font = Font(bold=True, size=12)
     center_align = Alignment(horizontal="center", vertical="center")
     left_align = Alignment(horizontal="left", vertical="center")
@@ -134,12 +212,15 @@ def create_technical_report(
     # -----------------------------
     # Title
     # -----------------------------
-    ws.merge_cells(start_row=3, start_column=1,
-                   end_row=3, end_column=len(columns))
-    ws["A3"] = title
-    ws["A3"].font = title_font
-    ws["A3"].alignment = center_align
 
+    if re.match("CHANGE METER", title):
+        ws["A2"] = change_meter_title()
+    elif re.match("NEW CONNECTION", title):
+        ws["A2"] = new_connection()
+    ws["A2"].font = title_font
+    ws["A2"].alignment = center_align
+    ws.merge_cells(start_row=2, start_column=1,
+                   end_row=3, end_column=len(columns))
     # -----------------------------
     # Header Row
     # -----------------------------
@@ -245,10 +326,8 @@ def create_technical_report(
     ws.page_margins.right = 0.5
     ws.page_margins.top = 0.75
     ws.page_margins.bottom = 0.75
-    
-    
-    
-    # Print area
+
+  # Print area
     ws.print_title_rows = "1:3"  # repeat header on every page
     # -----------------------------
     # Save
