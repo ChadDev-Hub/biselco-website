@@ -170,9 +170,9 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
   
   return (
     <>
-      <div className="w-full justify-center flex px-2 ">
+      <div className="w-full justify-center flex ">
         {/* NAV BAR */}
-        <div className="navbar max-w-2xl items-center   bg-base-100 border-gray-100 shadow-md w-full  px-2  flex justify-between glass mb-2 rounded-box">
+        <div className="navbar max-w-2xl items-center   bg-base-100 border-gray-100 shadow-md w-full    flex justify-between glass mb-2 rounded-box">
           {/* TOOLS */}
           <div className="flex items-center gap-2">
             <div>
@@ -189,8 +189,7 @@ const ChangeMeteContainer = ({ data, searchComponent }: Props) => {
                 download={handleDownload}
               />
             </div>
-           =
-
+           
             {selectedRow.size > 0 &&
               <div className="badge  badge-outline badge-info  text-xs font-bold">
                 <span>Items: </span><span>{selectedRow.size === 0 ? "" : selectedRow.size}</span>

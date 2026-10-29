@@ -20,16 +20,16 @@ const NewConnectionPage = async ({ searchParams }: Props) => {
   const search = (await searchParams).search;
   const newconData = GetNewConnection(Number(page), search);
   return (
-    <div className="min-h-screen w-full space-y-2  pb-20">
+    <div className="min-h-screen w-full px-2 space-y-2  pb-20">
       <Headers title="New Connection" />
-      <main className="max-w-6xl mx-auto px-4 flex flex-col gap-3">
-        <section className="flex justify-center">
+      <main className="max-w-6xl mx-auto w-full  flex flex-col gap-3">
+        <section className="flex justify-center w-full ">
           <Suspense fallback={<StatsSkeleton numberofStats={3} />}>
             <NewConnectionStats data={newconData} />
           </Suspense>
         </section>
 
-        <section>
+        <section >
           <Suspense fallback={<ChangeMeterCardSkeleton />}>
             <NewConnectionDataContainer
               data={newconData}

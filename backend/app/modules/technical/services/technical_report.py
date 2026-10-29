@@ -29,9 +29,9 @@ def changemeter_column_header(
 ):
 
     ws["D4"] = "PULLOUT METER"
-    ws["F4"] = "NEW METER"
+    ws["G4"] = "NEW METER"
 
-    top_col_merge = [[4, 5], [6, 7, 8, 9]]
+    top_col_merge = [[4, 5, 6], [ 7, 8, 9]]
     for col_idx in top_col_merge:
         ws.merge_cells(
             start_row=4,
@@ -70,7 +70,7 @@ def changemeter_column_header(
             )
 
     # Style group headers
-    for cell_ref in ("D4", "F4"):
+    for cell_ref in ("D4", "G4"):
         cell = ws[cell_ref]
         cell.font = header_font
         cell.alignment = center_align
@@ -86,13 +86,13 @@ def changemeter_column_header(
             # Write to the top-left cell of the merged range
             cell = ws.cell(row=4, column=col_idx, value=col_name)
             cell.font = header_font
-            cell.alignment = center_align
             cell.border = thin_border
+            cell.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center")
         else:
             cell = ws.cell(row=5, column=col_idx, value=col_name)
             cell.font = header_font
-            cell.alignment = center_align
             cell.border = thin_border
+            cell.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center")
 
 
 def new_connection_column_header(ws: Worksheet, columns, header_font, center_align, thin_border):
@@ -147,13 +147,14 @@ def new_connection_column_header(ws: Worksheet, columns, header_font, center_ali
                 # Write to the top-left cell of the merged range
                 cell = ws.cell(row=4, column=col_idx, value=col_name)
                 cell.font = header_font
-                cell.alignment = center_align
                 cell.border = thin_border
+                cell.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center")
             else:
                 cell = ws.cell(row=5, column=col_idx, value=col_name)
                 cell.font = header_font
                 cell.alignment = center_align
                 cell.border = thin_border
+                cell.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center")
 
 def create_technical_report(
     columns: list,
@@ -188,7 +189,7 @@ def create_technical_report(
     # -----------------------------
     # Styles
     # -----------------------------
-    title_font = Font(size=16, bold=True)
+    title_font = Font(size=16, bold=True, italic=True)
     header_font = Font(bold=True, size=12)
     center_align = Alignment(horizontal="center", vertical="center")
     left_align = Alignment(horizontal="left", vertical="center")
