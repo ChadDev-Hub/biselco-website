@@ -1,38 +1,20 @@
 "use client";
 
-
-import { TransformerProperties} from "@/types/transformer";
+import { TransformerProperties } from "@/types/transformer";
 import { Zap } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@/app/context/authProvider";
 
 type Props = {
   TransformerProperties: TransformerProperties;
 };
 
-const TransformerPopup = ({ TransformerProperties}: Props) => {
-    const [currentStatus] = useState(TransformerProperties?.is_active);
-    // const handleSwitch = (
-    //     transformer: TransformerProperties
-    // ) => {
-    //     setCurrentStatus((prev) => !prev);
-    //     setData((prev)=>{
-    //         if(!prev?.data) return prev;
-    //         const feature = prev.data.features.find((feature) => feature.properties.id === transformer.id);
-    //         if(!feature) return prev;
-            
-    //         feature.properties.is_active = !feature.properties.is_active
-    //         const newData = {
-    //           ...prev,
-    //           data: {
-    //             ...prev.data,
-    //             features: prev.data.features.map((f) => f.properties.id === transformer.id ? feature : f)
-    //           },
-    //         };
-
-    //         return newData
-    //     })
-    // }
-    const containerClass = "bg-base-200 rounded-box p-4 w-full ";
+const TransformerPopup = ({ TransformerProperties }: Props) => {
+  const [currentStatus] = useState(TransformerProperties?.is_active);
+  const containerClass = "bg-base-200 rounded-box p-4 w-full ";
+  const { user } = useAuth();
+  const connectedConsumerLink = `distribution-map/connected-consumer?dt=${TransformerProperties?.transformer_id}`;
   return (
     <div className="w-80  gap-3  rounded-2xl ">
       {/* Header */}
@@ -80,14 +62,14 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
           </p>
         </div>
 
-          {/* CONNECTED CONSUMERS */}
+        {/* CONNECTED CONSUMERS */}
         <div className={containerClass}>
           <p className="text-xs text-base-content/50">Connected Consumers</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.connected_consumer ?? "—"}
           </p>
         </div>
-          {/* TRANSFORMER TYPE */}
+        {/* TRANSFORMER TYPE */}
         <div className={`${containerClass}`}>
           <p className="text-xs text-base-content/50">Transformer Type</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
@@ -95,8 +77,7 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
           </p>
         </div>
 
-
-            {/* KVA RATING */}
+        {/* KVA RATING */}
         <div className={`col-span-2 ${containerClass}`}>
           <p className="text-xs text-base-content/50">KVA Rating</p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
@@ -106,7 +87,9 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
         {/* PRIMARY VOLTAGE RATING */}
 
         <div className={containerClass}>
-          <p className="text-xs text-base-content/50 w-full ">Primary Voltage Rating(Kv)</p>
+          <p className="text-xs text-base-content/50 w-full ">
+            Primary Voltage Rating(Kv)
+          </p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.primary_voltage_rating_kv ?? "—"}
           </p>
@@ -114,15 +97,23 @@ const TransformerPopup = ({ TransformerProperties}: Props) => {
 
         {/* SECONDARY VOLTAGE RATING */}
         <div className={containerClass}>
-          <p className="text-xs text-base-content/50 w-full">Secondary Voltage Rating(Kv)</p>
+          <p className="text-xs text-base-content/50 w-full">
+            Secondary Voltage Rating(Kv)
+          </p>
           <p className="mt-1 font-semibold text-xs w-full text-center">
             {TransformerProperties?.secondary_voltage_rating_kv ?? "—"}
           </p>
         </div>
       </div>
 
-
-    
+      {user?.roles.map((role) => role.name).includes("admin") && (
+        <Link
+          href={connectedConsumerLink}
+          className="btn btn-sm btn-primary w-full"
+        >
+          Connected Consumers
+        </Link>
+      )}
     </div>
   );
 };
