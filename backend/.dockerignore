@@ -1,3 +1,74 @@
-__pycache__
-*.pyc
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
+!.env.template
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+tests/
+test/
+.tox/
+.nox/
+
+# Documentation (optional)
+docs/
+*.md
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Local database files
+*.db
+*.sqlite3
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Node.js (if not needed in backend)
+node_modules/
+
+# Jupyter
+.ipynb_checkpoints/
