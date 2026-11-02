@@ -26,7 +26,7 @@ async def get_consumer(session: AsyncSession, query: Optional[Any] = None):
         query_str = str(query)
         stmt = stmt.where(or_(
             ConsumerMeter.account_no.cast(String).ilike(f"%{query_str}%"),
-            ConsumerMeter.account_name.ilike(f"%{query_str}%"),
+            ConsumerMeter.account_name.op("%")(query_str),
             ConsumerMeter.meter_brand.ilike(f"%{query_str}%"),
             ConsumerMeter.meter_no.ilike(f"%{query_str}%"),
             Village.name.ilike(f"%{query_str}%"),

@@ -29,7 +29,7 @@ class GetServices:
                          Text).ilike(f"%{search}%"),
                     cast(NewConnection.date_accomplished,
                          Text).ilike(f"%{search}%"),
-                    NewConnection.consumer_name.ilike(f"%{search}%"),
+                    NewConnection.consumer_name.op("%")(search),
                     NewConnection.location.ilike(f"%{search}%"),
                     NewConnection.meter_serial_no.ilike(f"%{search}%"),
                     NewConnection.meter_brand.ilike(f"%{search}%"),

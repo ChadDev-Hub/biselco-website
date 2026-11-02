@@ -40,7 +40,8 @@ class ChangeMeter(BaseModel):
     sitio: Mapped[str] = mapped_column(type_=Text, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
     datetime_deleted: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
-    
+    is_reported: Mapped[bool] = mapped_column(type_=Boolean, default=False)
+    datetime_reported: Mapped[datetime] = mapped_column(type_=DateTime(timezone=True), nullable=True)
     # Relationship
     form: Mapped["CompanyForm"] = relationship(back_populates="change_meters")
     images: Mapped[List["ChangeMeterImage"]] = relationship(back_populates="change_meter", cascade="all, delete-orphan")
