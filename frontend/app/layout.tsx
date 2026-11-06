@@ -13,13 +13,10 @@ import { NotificationProvider } from "./common/NotificationProvider";
 import type { Viewport } from "next";
 
 import "@geoman-io/maplibre-geoman-free/dist/maplibre-geoman.css";
-import "@xyflow/react/dist/style.css"
+import "@xyflow/react/dist/style.css";
 import "maplibre-gl/dist/maplibre-gl.css";
-import ProgressBar from './common/progress/progress-bar';
-
-
-
-
+import ProgressBar from "./common/progress/progress-bar";
+import Provider from "./provider";
 
 const baseurl = process.env.BASESERVERURL;
 const geistSans = Geist({
@@ -156,21 +153,21 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-radial from-blue-200 via-blue-100 to-blue-200 `}
       >
-        <ProgressBar />
-        <AuthProvider>
-          <WebsocketProvider>
-            <AlertComponent>
-              <LoadingIndicator>
-                <ThemeController />
-                <NotificationProvider>
-                  <Drawer baseurl={baseurl}>
-                    {children}
-                  </Drawer>
-                </NotificationProvider>
-              </LoadingIndicator>
-            </AlertComponent>
-          </WebsocketProvider>
-        </AuthProvider>
+        <Provider>
+          <ProgressBar />
+          <AuthProvider>
+            <WebsocketProvider>
+              <AlertComponent>
+                <LoadingIndicator>
+                  <ThemeController />
+                  <NotificationProvider>
+                    <Drawer baseurl={baseurl}>{children}</Drawer>
+                  </NotificationProvider>
+                </LoadingIndicator>
+              </AlertComponent>
+            </WebsocketProvider>
+          </AuthProvider>
+        </Provider>
       </body>
     </html>
   );

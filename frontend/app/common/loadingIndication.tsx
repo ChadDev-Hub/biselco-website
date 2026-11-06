@@ -30,7 +30,7 @@ const LoadingIndicator = ({children}: Props) => {
     <loadingContext.Provider value={{showLoading}}>
         {children}
         {isLoading.isLoading && 
-        <div className="alert alert-info z-100 absolute right-1/2 min-w-60 translate-x-1/2 top-20 text-sm md:text-md lg:text-md">
+        <div className="alert alert-info z-100 fixed right-1/2 min-w-60 translate-x-1/2 top-20 text-sm md:text-md lg:text-md">
             <span className='skeleton skeleton-text'>{isLoading.message}</span> <span className="loading loading-infinity loading-lg"></span>
         </div>}
     </loadingContext.Provider>

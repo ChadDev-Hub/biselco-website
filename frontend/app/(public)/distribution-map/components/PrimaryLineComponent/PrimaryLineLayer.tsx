@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import type { PrimaryLines, PrimaryLineProperties} from "@/types/primary-line";
 import { Layer, Source, LayerProps, Popup } from "react-map-gl/maplibre";
 
-import { useMap } from "../MapProvider";
-import type { PopupInfo } from "../MapProvider";
+import { useMap } from "../../../../context/MapProvider";
+import type { PopupInfo } from "../../../../context/MapProvider";
 import PrimaryLinePopup from "../PrimaryLineComponent/PrimaryLinePopup";
 
 

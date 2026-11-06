@@ -137,7 +137,7 @@ const MapProvider = ({ children, onPin, pinLocation }: Props) => {
         setSelectedFeature,
       }}
     > 
-   
+
       <Map
         ref={mapRef}
         initialViewState={{
@@ -145,7 +145,7 @@ const MapProvider = ({ children, onPin, pinLocation }: Props) => {
           latitude: 11.9986,
           zoom: 11,
         }}
-
+      
         style={{ width: "100%", height: "100%", position:"relative" }}
         mapStyle="https://tiles.openfreemap.org/styles/bright"
         onLoad={handleReady}

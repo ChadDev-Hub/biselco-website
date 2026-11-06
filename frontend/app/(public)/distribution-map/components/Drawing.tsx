@@ -1,7 +1,7 @@
 "use client";
 
 import { Geoman } from "@geoman-io/maplibre-geoman-free";
-import { useMap } from "./MapProvider";
+import { useMap } from "../../../context/MapProvider";
 import { useEffect, useRef } from "react";
 
 const Drawing = () => {

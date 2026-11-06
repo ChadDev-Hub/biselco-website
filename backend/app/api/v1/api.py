@@ -15,7 +15,7 @@ from .routes import  meter, signup, technical_form
 from ...modules.events.route import events_router
 from ...modules.gis.distribution_lines.route import distribution_lines
 from ...modules.user.route import user
-from ...modules.technical.construction.route import primary_lines
+from ...modules.construction.route import primary_lines
 
 router = APIRouter(prefix="/v1", tags=["V1"])
 router.include_router(complaints.router)

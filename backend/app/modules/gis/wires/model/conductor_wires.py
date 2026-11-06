@@ -5,7 +5,7 @@ from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
 from .....db.base import BaseModel
 from typing import TYPE_CHECKING, List
-from ....technical.construction import LineConstruction
+from ....construction import LineConstruction
 if TYPE_CHECKING:
     from ...distribution_lines.models.primary_lines import PrimaryLines
     from ...distribution_transformer.model.transformer import TransformerLinebushing

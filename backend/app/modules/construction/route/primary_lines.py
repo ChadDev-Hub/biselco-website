@@ -3,11 +3,19 @@ from ..schema.requests import NewPrimaryLine
 from fastapi import APIRouter, HTTPException, status, Form, Depends
 from typing import List
 from ..services.post import PostServices
+from ..services.get import GetServices
+from ..schema.constuction import LineConstruction
+router = APIRouter(prefix="/construction", tags=["Construction"])
 
-router = APIRouter(prefix="/construction/primary_lines", tags=["Primary Lines"])
 
+# GET ALL LINE CONSTRUCTION
+@router.get("/distribution_lines", status_code=status.HTTP_200_OK, response_model=List[LineConstruction])
+async def get_line_construction(
+    get_services: GetServices = Depends(GetServices)
+):
+    return await get_services.get_line_construction()
 
-@router.post("/sync", status_code=status.HTTP_201_CREATED)
+@router.post("/primary_lines/sync", status_code=status.HTTP_201_CREATED)
 async def construct_primary_lines(
     data: NewPrimaryLine = Form(...),
     post_service:PostServices = Depends(PostServices), 

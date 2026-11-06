@@ -8,7 +8,7 @@ import { PostComplaints } from "@/lib/private-api/actions/complaint";
 import ImageViewer from "../..//technical/change-meter/components/imageViewr";
 import { useAlert } from "@/app/context/alert";
 import { queryConsumer } from "@/lib/private-api/actions/consumer-meter";
-import MapProvider from "@/app/(public)/distribution-map/components/MapProvider";
+import MapProvider from "@/app/context/MapProvider";
 import { Consumer, Coordinates } from "../../../../types/consumer-meter";
 
 // Define the type for form data

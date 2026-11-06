@@ -3,11 +3,11 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, update
 from ..model.construction import LineConstruction, TransformerInstallation, Construction, LineConstructionImage, TransformerInstallationImage
-from .....dependencies.hash_image import hash_image
-from .....dependencies.bucket3 import upload_image
-from .....dependencies.db_session import get_session
+from ....dependencies.hash_image import hash_image
+from ....dependencies.bucket3 import upload_image
+from ....dependencies.db_session import get_session
 from datetime import datetime
-from ....gis.franchise_area.services.get_location import verifyLocation
+from ...gis.franchise_area.services.get_location import verifyLocation
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..schema.requests import NewPrimaryLine
 from geoalchemy2.functions import ST_Point

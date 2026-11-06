@@ -2,7 +2,7 @@
 
 import { useRef, memo } from "react";
 import { MapIcon } from "lucide-react";
-import MapProvider from "../../../../(public)/distribution-map/components/MapProvider";
+import MapProvider from "../../../../context/MapProvider";
 
 type Props = {
   title: string;

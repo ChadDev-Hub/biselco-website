@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from ...distribution_lines.models.secondary_lines import SecondaryLines
     from ...consumer.model.consumer import ConsumerMeter
     from ...consumer.model.service_drop import ServiceDrop
-    from ....technical.construction.model.construction import LineConstruction, TransformerInstallation
+    from ....construction.model.construction import LineConstruction, TransformerInstallation
     
     
 class Village(BaseModel):

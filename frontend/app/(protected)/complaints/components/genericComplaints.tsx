@@ -7,7 +7,7 @@ import ImageViewer from "../../technical/change-meter/components/imageViewr";
 import { useAlert } from "../../../context/alert";
 import { useState } from "react";
 import { ApiError } from "../../../../types/api-error";
-import MapProvider from "../../../(public)/distribution-map/components/MapProvider";
+import MapProvider from "../../../context/MapProvider";
 
 // Define the type for form data
 type ComplaintFormData = {

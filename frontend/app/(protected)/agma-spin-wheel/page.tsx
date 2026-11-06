@@ -6,7 +6,7 @@ import SpinTimer from "./components/spinTimer";
 import FullScreen from "./components/fullScreen";
 import RefreshButton from "./components/refresh";
 import { Suspense } from "react";
-import LoadingIndicator from "../../(public)/distribution-map/components/LoadingIndicator";
+import LoadingIndicator from "../../common/progress/LoadingIndicator";
 import StatsModal from "./components/statsModal";
 import PullToRefresh from "../../common/PulltoRefresh";
 import { GetRaffleInitialEntries, GetRaffleStatsData } from "@/lib/private-api/server-side/agma";

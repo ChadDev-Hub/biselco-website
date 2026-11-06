@@ -12,10 +12,10 @@ import AnimatedBackground from "./components/AnimatedBackground";
 import EventsLoadingFallback from "./components/EventsLoadingFallback";
 import { Suspense } from "react";
 import Image from "next/image";
-import MapProvider from "../distribution-map/components/MapProvider";
+import MapProvider from "../../context/MapProvider";
 
 
-import LoadingIndicator from "../distribution-map/components/LoadingIndicator";
+import LoadingIndicator from "../../common/progress/LoadingIndicator";
 import { GetLandingPageData } from "@/lib/public-api/info";
 import LoginModal from '../../common/auth-component/login-modal';
 import OfficeLoader from './components/offices/office-loader';

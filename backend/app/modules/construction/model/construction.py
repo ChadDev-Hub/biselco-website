@@ -1,20 +1,20 @@
 from __future__ import annotations
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, ForeignKey, DateTime, func, Text, Boolean, Enum, Numeric, Date, UUID
+from sqlalchemy import Integer, ForeignKey, DateTime, func, Text, Boolean, Enum, Numeric, Date, UUID, Float
 from geoalchemy2 import Geometry, WKBElement
 from datetime import date, datetime
-from .....db.base import BaseModel
+from ....db.base import BaseModel
 from typing import Literal, List, TYPE_CHECKING
-from ....gis.franchise_area import Village, Municipality
+from ...gis.franchise_area import Village, Municipality
 import uuid
 
 if TYPE_CHECKING:
-    from ....gis.wires.model.conductor_wires import ConductorWires, NeutralConcentricCable
+    from ...gis.wires.model.conductor_wires import ConductorWires, NeutralConcentricCable
     
 
 class Construction(BaseModel):
     __tablename__ = "construction"
-    __table_args__ = {"schema": "technical_dep"}
+    __table_args__ = {"schema": "construction"}
     id: Mapped[int] = mapped_column(
         primary_key=True, autoincrement=True, type_=Integer)
     uuid: Mapped[uuid.UUID] = mapped_column(
@@ -26,12 +26,72 @@ class Construction(BaseModel):
     date_accomplished: Mapped[date] = mapped_column(type_=Date, nullable=False)
     timestamp: Mapped[int] = mapped_column(type_=DateTime(
         timezone=True), nullable=False, default=func.now())
-
+    
+    
+    
+    
+    # RELATIONSHIP
+    
     lines: Mapped[List["LineConstruction"]] = relationship(
         back_populates="construction_activity", cascade="all, delete-orphan")
     transformers: Mapped[List["TransformerInstallation"]] = relationship(
         back_populates="construction_activity", cascade="all, delete-orphan")
+    manpower_status: Mapped[List["ManpowerStatus"]] = relationship(
+        back_populates="construction_activity", cascade="all, delete-orphan")
+    vehicle_report: Mapped[List["VehicleReport"]] = relationship(
+        back_populates="construction_activity", cascade="all, delete-orphan")
+    
+    
     # RELATIONSHIP
+# ATTENDANCE STATUS
+class AttendanceStatus(BaseModel):
+    __tablename__ = "attendance_status"
+    __table_args__ = {"schema": "construction"}
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True, type_=Integer)
+    status: Mapped[Literal['Present', 'Absent', 'On Leave', 'Trainings / Seminars', 'Other']]
+    
+    # RELATIONSHIP
+    
+    manpower_status: Mapped[List["ManpowerStatus"]] = relationship(
+        back_populates="attendance_status", cascade="all, delete-orphan")
+
+# MANPOWER STATUS
+class ManpowerStatus(BaseModel):
+    __tablename__ = "man_power_status"
+    __table_args__ = {"schema": "construction"}
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True, type_=Integer)
+    construction_id: Mapped[int] = mapped_column(ForeignKey(
+        "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+    assigned_personnel: Mapped[str]
+    attendance_status_id: Mapped[int] = mapped_column(ForeignKey("construction.attendance_status.id"), type_=Integer, nullable=False)
+    reason_of_absence: Mapped[str]
+    
+    # relationship
+    construction_activity: Mapped["Construction"] = relationship(
+        back_populates="manpower_status"
+    )
+    attendance_status: Mapped["AttendanceStatus"] = relationship(
+        back_populates="manpower_status"
+    )
+# VEHICLE REPORT
+class VehicleReport(BaseModel):
+    __tablename__ = "vehicle_report"
+    __table_args__ = {"schema": "construction"}
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True, type_=Integer)
+    construction_id: Mapped[int] = mapped_column(ForeignKey(
+        "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+    vehicle_name: Mapped[str]
+    mileage_start: Mapped[float]
+    mileage_end: Mapped[float]
+    
+    # relationship
+    construction_activity: Mapped["Construction"] = relationship(
+        back_populates="vehicle_report"
+    )
+    
 
 # LINE CONSTRUCTION
 class LineConstruction(BaseModel):
@@ -56,13 +116,13 @@ class LineConstruction(BaseModel):
        
     """
     __tablename__ = "line_construction"
-    __table_args__ = {"schema": "technical_dep"}
+    __table_args__ = {"schema": "construction"}
     id: Mapped[int] = mapped_column(
         primary_key=True, autoincrement=True, type_=Integer)
     uuid: Mapped[uuid.UUID] = mapped_column(
         type_=UUID(), unique=True, default=uuid.uuid4)
     construction_id: Mapped[int] = mapped_column(ForeignKey(
-        "technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=True)
+        "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=True)
     type: Mapped[str] = mapped_column(type_=Text, nullable=False)
     line_type: Mapped[Literal["Primary", "Secondary", "Underbuilt"]]
     phasing: Mapped[str] = mapped_column(type_=Text, nullable=False)
@@ -82,7 +142,14 @@ class LineConstruction(BaseModel):
     is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
     datetime_deleted: Mapped[datetime] = mapped_column(
         type_=DateTime(timezone=True), nullable=True)
-
+    date: Mapped[date] = mapped_column(type_=Date, nullable=True)
+    pct_acc: Mapped[float] = mapped_column(type_=Float, nullable=True)
+    
+    
+    # RELATIONSHIP
+    images: Mapped[List["LineConstructionImage"]] = relationship(
+        "LineConstructionImage", back_populates="line_construction", cascade="all, delete")
+    
     construction_activity: Mapped[Construction] = relationship(
         back_populates="lines")
     neutral_wire: Mapped[NeutralConcentricCable] = relationship(
@@ -101,23 +168,25 @@ class LineConstruction(BaseModel):
 class LineConstructionImage(BaseModel):
     __tablename__="line_construction_image"
     __table_args__={
-        "schema" : "technical_dep"
+        "schema" : "construction"
     }
     id:Mapped[int] = mapped_column(primary_key=True)
-    line_construction_id:Mapped[int]
+    line_construction_id:Mapped[int] = mapped_column(ForeignKey("construction.line_construction.id"), type_=Integer, nullable=False)
     image: Mapped[str]
     image_hash:Mapped[str]
+    
+    line_construction:Mapped["LineConstruction"] = relationship(back_populates="images")
     
     
 
 class TransformerInstallation(BaseModel):
     __tablename__ = 'transformer_installation'
-    __table_args__ = {"schema": "technical_dep"}
+    __table_args__ = {"schema": "construction"}
     id: Mapped[int] = mapped_column(
         primary_key=True, autoincrement=True, type_=Integer)
     uuid: Mapped[uuid.UUID] = mapped_column(type_=UUID(), unique=True)
     construction_id: Mapped[int] = mapped_column(ForeignKey(
-        "technical_dep.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
+        "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), type_=Integer, nullable=False)
     type: Mapped[str] = mapped_column(type_=Text, nullable=False)
     use_type: Mapped[Literal["Sole", "Distribution"]]
     phasing: Mapped[str] = mapped_column(type_=Text, nullable=False)
@@ -134,6 +203,8 @@ class TransformerInstallation(BaseModel):
     is_deleted: Mapped[bool] = mapped_column(type_=Boolean, default=False)
     datetime_deleted: Mapped[datetime] = mapped_column(
         type_=DateTime(timezone=True), nullable=True)
+    date: Mapped[date] = mapped_column(type_=Date, nullable=True)
+    pct_acc: Mapped[float] = mapped_column(type_=Float, nullable=True)
     
     # RELATIONSHIP
     construction_activity: Mapped["Construction"] = relationship(
@@ -150,10 +221,10 @@ class TransformerInstallation(BaseModel):
 class TransformerInstallationImage(BaseModel):
     __tablename__="transformer_installation_image"
     __table_args__={
-        "schema" : "technical_dep"
+        "schema" : "construction"
     }
     id:Mapped[int] = mapped_column(primary_key=True)
-    transformer_installation_id:Mapped[int]
+    transformer_installation_id:Mapped[int] = mapped_column(ForeignKey("construction.transformer_installation.id"), type_=Integer, nullable=False)
     image: Mapped[str]
     image_hash:Mapped[str]
     

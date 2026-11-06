@@ -1,7 +1,7 @@
 
 import { Suspense } from "react";
-import LoadingIndicator from "./components/LoadingIndicator";
-import MapProvider from "./components/MapProvider";
+import LoadingIndicator from "../../common/progress/LoadingIndicator";
+import MapProvider from "../../context/MapProvider";
 import TransformerLoader from "./components/TransformerComponent/TransformerLoader";
 import PrimaryLineLoader from "./components/PrimaryLineComponent/primaryLineLoader";
 export const dynamic = "force-dynamic";

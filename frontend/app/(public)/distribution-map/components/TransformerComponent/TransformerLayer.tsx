@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Transformers, TransformerProperties } from "@/types/transformer";
 import { Layer, Source, LayerProps, Popup } from "react-map-gl/maplibre";
-import { useMap } from "../MapProvider";
+import { useMap } from "../../../../context/MapProvider";
 import { Coordinates } from "../../../../../types/consumer-meter";
 import TransformerPopup from "./transformerPopup";
-import type { PopupInfo } from "../MapProvider";
+import type { PopupInfo } from "../../../../context/MapProvider";
 
 type Props = {
   initialData: Transformers;

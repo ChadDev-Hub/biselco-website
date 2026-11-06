@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Offices, OfficesProps } from "@/types/offices";
-import { useMap } from "../../../distribution-map/components/MapProvider";
+import { useMap } from "../../../../context/MapProvider";
 import { Building2} from "lucide-react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -11,7 +11,7 @@ import {
   SourceProps,
   Popup,
 } from "react-map-gl/maplibre";
-import { PopupInfo } from "../../../distribution-map/components/MapProvider";
+import { PopupInfo } from "../../../../context/MapProvider";
 import BiselcoOfficesPopup from "./biselcoOfficesPopup";
 
 type Props = {
