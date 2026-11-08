@@ -1,6 +1,6 @@
 
 export type LineConstruction = {
-    id: string
+    id: number
     line_type: string
     village: string
     phasing: string

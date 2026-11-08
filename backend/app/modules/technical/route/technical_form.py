@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from ....dependencies.db_session import get_session
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from ....modules.forms.service.get_technical_forms import get_technical_forms
-from ....modules.forms.schema.reponse_model import CompanyFormsResponse
+from ...forms.service.get_technical_forms import get_technical_forms
+from ...forms.schema.reponse_model import CompanyFormsResponse
 from typing import List
 router = APIRouter(prefix="/technical_form", tags=["Technical Department"])
 

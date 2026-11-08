@@ -5,6 +5,7 @@ export type ConstructionData<T> = {
     id: number
     activity: string
     description: string
+    centroid: Geometry
     date_accomplished: Date
     feature_collection: FeatureCollection<Geometry, T>
 }

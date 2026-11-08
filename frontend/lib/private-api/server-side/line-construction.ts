@@ -7,6 +7,7 @@ export const GetLineConstruction = async () => {
     try {
         const serverApi = await getServerApi();
         const { data, status} = await serverApi.get("/v1/construction/distribution_lines");
+        await new Promise((resolve) => setTimeout(resolve, 3000))
         return {
             status: status,
             data: data as LineConstructions[],

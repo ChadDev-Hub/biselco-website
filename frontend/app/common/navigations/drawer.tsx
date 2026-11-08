@@ -107,7 +107,8 @@ const Drawer = ({ children }: Props) => {
           "/about",
           "/terms-service",
           "/privacy-policy",
-          "/data-deletion"
+          "/data-deletion",
+          "/technical/construction",
           ].includes(currentRoute)  ? "pb-0" : "pb-25"}`}>{children}</div>
         <DocNavigation />
       </div>

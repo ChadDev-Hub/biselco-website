@@ -9,14 +9,22 @@ from ..model.construction import Construction, ManpowerStatus, LineConstruction,
 from ...gis.wires.model.conductor_wires import ConductorWires
 from ...gis.wires.model.conductor_wires import NeutralConcentricCable
 
-from geoalchemy2.functions import ST_AsGeoJSON
-
+from geoalchemy2.functions import ST_AsGeoJSON, ST_Collect, ST_Centroid
+from pprint import pprint 
 
 class GetServices:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
-
     async def get_line_construction(self):
+        centroid_subquery = (
+            select(
+                LineConstruction.construction_id,
+                ST_AsGeoJSON(ST_Centroid(ST_Collect(
+                    LineConstruction.geometry))).label("centroid")
+            )
+            .group_by(LineConstruction.construction_id)
+            .subquery()
+        )
         stmt = (
             select(
                 Construction
@@ -30,7 +38,7 @@ class GetServices:
                 selectinload(Construction.lines).options(
                     selectinload(LineConstruction.images).load_only(
                         LineConstructionImage.image
-                    ),  
+                    ),
                     load_only(
                         LineConstruction.id,
                         LineConstruction.line_type,
@@ -55,22 +63,14 @@ class GetServices:
                         NeutralConcentricCable.name
                     )
                 ),
-                selectinload(Construction.manpower_status).options(
-                    load_only(
-                      ManpowerStatus.id,
-                      ManpowerStatus.assigned_personnel,
-                      ManpowerStatus.reason_of_absence  
-                    ),
-                    joinedload(ManpowerStatus.attendance_status)
-                    .load_only(
-                        AttendanceStatus.id,
-                        AttendanceStatus.status
-                    )
-                )
             )
         )
-        result = (await self.session.execute(stmt)).scalars().all()
+        final_stmt = (stmt.add_columns(
+            centroid_subquery.c.centroid
+        ).join(centroid_subquery, Construction.id == centroid_subquery.c.construction_id))
+        result = (await self.session.execute(final_stmt)).unique().all()
         # CLEANING AND PROCESSING DATA
+        
         cleaned_result = [
             {
                 "construction": {
@@ -78,18 +78,7 @@ class GetServices:
                     'activity': r.activity,
                     'description': r.description,
                     'date_accomplished': r.date_accomplished,
-                    'manpower_status': [
-                        {
-                            'id': m.id,
-                            'assigned_personnel': m.assigned_personnel,
-                            'reason_of_absence': m.reason_of_absence,
-                            'attendance_status': {
-                                'id': m.attendance_status.id,
-                                'status': m.attendance_status.status
-                            }
-                        }
-                        for m in r.manpower_status
-                    ],
+                    'centroid': c,
                     'feature_collection': {
                         'type': 'FeatureCollection',
                         'features': [
@@ -104,7 +93,7 @@ class GetServices:
                                     'date': line.date,
                                     'pct_acc': line.pct_acc,
                                     'village': line.village.name,
-                                    'municipal':line.municipal.name,
+                                    'municipal': line.municipal.name,
                                     'conductor_wire': line.conductor_wire.name,
                                     'neutral_wire': line.neutral_wire.name,
                                     'image': [image.image for image in line.images][0]
@@ -115,7 +104,6 @@ class GetServices:
                     }
                 }
             }
-            for r in result]
-        
-        print(cleaned_result)
+            for r, c in result
+        ]  
         return cleaned_result

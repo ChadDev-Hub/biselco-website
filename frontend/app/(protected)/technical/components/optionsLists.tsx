@@ -17,7 +17,7 @@ const TechniclaFormLists = ({ initialData }: Props) => {
   useEffect(() => {
     queueMicrotask(() => setForms(formsData));
   }, [formsData]);
-  const commingsoontool = ["Maintenance Daily", "Construction Daily"];
+  const commingsoontool = ["Maintenance"];
   return (
     <div className="grid grid-cols-2 gap-4 w-full max-w-2xl px-2">
       {forms?.map((form: TechnicalFormsType) => (

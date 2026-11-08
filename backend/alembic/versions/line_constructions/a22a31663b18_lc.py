@@ -101,6 +101,35 @@ def upgrade() -> None:
         schema="construction",
     )
     
+    # DROP TIMESTAMPED COLUMN FOR CONSTRUCTION
+    op.drop_column("construction", "timestamp", schema="construction")
+    
+    # ADDITIONAL COLUMN FOR CONSTRUCTION
+    op.add_column(
+        "construction",
+        sa.Column("datetime_synced", sa.DateTime(timezone=True), nullable=True),
+        schema="construction"
+    )
+    
+    op.add_column(
+        "construction",
+        sa.Column("is_synced", sa.Boolean(), nullable=True, server_default=sa.false()),
+        schema="construction"
+    )
+    
+    op.add_column(
+        "construction", 
+        sa.Column("datetime_deleted", sa.DateTime(timezone=True), nullable=True),
+        schema="construction"
+        )
+    
+    op.add_column(
+        "construction",
+        sa.Column("deleted", sa.Boolean(), nullable=True, server_default=sa.false()),
+        schema="construction"
+    )
+    
+    
     
 
     # ADDITIONAL COLUMN FOR LINE CONSTRUCTION
@@ -142,9 +171,20 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_constraint("construction_pct_acc_check",
-                       "construction", schema="construction")
-    op.drop_column("construction", "pct_acc", schema="construction")
+    op.drop_column("construction", "datetime_synced", schema="construction", if_exists=True)
+    op.drop_column("construction", "is_synced", schema="construction", if_exists=True)
+    op.drop_column("construction", "datetime_deleted", schema="construction", if_exists=True)
+    op.drop_column("construction", "deleted", schema="construction", if_exists=True)
+    
+    op.drop_constraint("construction_pct_acc_check", "line_construction", schema="construction", if_exists=True)
+    op.drop_constraint("construction_pct_acc_check", "transformer_installation", schema="construction", if_exists=True)
+    
+    op.drop_column("transformer_installation", "date", schema="construction", if_exists=True)
+    op.drop_column("transformer_installation", "pct_acc", schema="construction", if_exists=True)
+    
+    op.drop_column("line_construction", "date", schema="construction", if_exists=True)
+    op.drop_column("line_construction", "pct_acc", schema="construction", if_exists=True)
+    
 
     op.drop_table("vehicle_report", schema="construction", if_exists=True)
     op.drop_table("man_power_status", schema="construction", if_exists=True)
