@@ -91,6 +91,9 @@ services:
   frontend:
     build: 
       context: ./frontend
+      args:
+        NEXT_PUBLIC_WEBSOCKET_URL: wss://biselco79.com/v1/socket/ws
+        NEXT_PUBLIC_BASESERVERURL: https://biselco79.com
     image: chaddevhub/nextjs_app
     container_name: nextjs_app
 
