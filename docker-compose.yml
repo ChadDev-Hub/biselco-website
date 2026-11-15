@@ -13,9 +13,8 @@ services:
     ports:
       - "${PORT}:5432"
     volumes:
-    
       - postgres_data_18:/var/lib/postgresql
-      
+      - ./database/postgresql.conf:/var/lib/postgresql/18/docker/postgresql.conf
     command: 
       - "postgres"
       - "-c"

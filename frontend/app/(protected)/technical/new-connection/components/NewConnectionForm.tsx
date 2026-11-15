@@ -3,14 +3,14 @@
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 
 import { newConnectionMeter } from "@/lib/private-api/actions/new-connection";
-import ElectricMeter from "../../components/electricMeterSvg";
 import { useEffect, useRef, useState } from "react";
 import { GetImageLocation } from "../../../../../lib/private-api/actions/imageGeolocation";
 import { CirclePlus, Camera } from "lucide-react";
 import ImageViewer from "../../change-meter/components/imageViewr";
 import {useAlert} from "@/app/context/alert";
 import {ApiError} from "@/types/api-error";
-import MapProvider from '../../../../(public)/distribution-map/components/MapProvider';
+import MapProvider from "@/app/context/MapProvider"
+
 
 type FormField = {
   date: string;
@@ -56,11 +56,11 @@ const NewConnectionForm = () => {
   const realTimeImage = useWatch({ control, name: "realtime_image" });
 
   const imageAttachment = realTimeImage?.[0] ?? attachment?.[0] ?? undefined;
-  const consumerName = useWatch({
-    control: control,
-    name: "consumer_name",
-    defaultValue: "",
-  });
+  // const consumerName = useWatch({
+  //   control: control,
+  //   name: "consumer_name",
+  //   defaultValue: "",
+  // });
   const lon = useWatch({
     control: control,
     name: "lon",

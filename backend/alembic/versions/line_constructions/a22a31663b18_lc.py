@@ -102,7 +102,7 @@ def upgrade() -> None:
     )
     
     # DROP TIMESTAMPED COLUMN FOR CONSTRUCTION
-    op.drop_column("construction", "timestamp", schema="construction")
+    op.drop_column("construction", "timestamp", schema="construction", if_exists=True)
     
     # ADDITIONAL COLUMN FOR CONSTRUCTION
     op.add_column(
@@ -168,9 +168,66 @@ def upgrade() -> None:
         schema="construction"
     )
     
-
+    # ALTER COLUMN AND CHANGE THE TYPE
+    
+    op.alter_column(
+        "transformer_installation",
+        "use_type",
+        existing_type=sa.Enum("Sole", "Distribution", name="use_type"),
+        type_=sa.String(),
+        nullable=True,
+        schema="construction"
+    )
+    
+    op.alter_column(
+        table_name="transformer_installation",
+        column_name="type",
+        existing_type=sa.Text(),
+        type_=sa.Integer(),
+        new_column_name="transformer_type_id",
+        nullable=True,
+        schema="construction",
+        postgresql_using="type::integer"
+    )
+    op.create_foreign_key(
+        "transformer_installation_transofmer_type_id_fkey",
+        source_table="transformer_installation",
+        referent_table="transformer_type",
+        local_cols=["transformer_type_id"],
+        remote_cols=["id"],
+        ondelete="CASCADE",
+        onupdate="CASCADE",
+        source_schema="construction",
+        referent_schema="gis",
+    )
+    op.drop_column(
+        "transformer_installation",
+        "kva_rating",
+        schema="construction",
+        if_exists=True
+    )
 def downgrade() -> None:
     """Downgrade schema."""
+    
+    op.add_column(
+        "transformer_installation",
+        sa.Column("kva_rating", sa.Numeric(precision=10, scale=2), nullable=True),
+        schema="construction",
+        if_not_exists=True
+    )
+    
+    op.drop_constraint("transformer_installation_transofmer_type_id_fkey", "transformer_installation", schema="construction", if_exists=True)
+    op.alter_column(
+        table_name="transformer_installation",
+        column_name="transformer_type_id",
+        existing_type=sa.Integer(),
+        type_=sa.Text(),
+        new_column_name="type",
+        nullable=True,
+        schema="construction",
+        postgresql_using="transformer_type_id::text"
+    )
+    
     op.drop_column("construction", "datetime_synced", schema="construction", if_exists=True)
     op.drop_column("construction", "is_synced", schema="construction", if_exists=True)
     op.drop_column("construction", "datetime_deleted", schema="construction", if_exists=True)

@@ -205,3 +205,12 @@ class GetServicesDT:
         except Exception as e:
             print(e.__cause__ or e) 
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong")
+    
+    
+    async def get_transformer_type(self):
+        try:
+            stmt = select(TransformerType.id, TransformerType.name)
+            data = (await self.session.execute(stmt)).mappings().all()
+            return data
+        except Exception as e:
+            print(e.__cause__ or e)

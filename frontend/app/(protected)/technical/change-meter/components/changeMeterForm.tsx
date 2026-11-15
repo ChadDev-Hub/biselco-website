@@ -14,7 +14,7 @@ import ImageViewer from "./imageViewr";
 import { Camera } from "lucide-react";
 import { Consumer } from "@/types/consumer-meter";
 import { ApiError } from "../../../../../types/api-error";
-import MapProvider from "../../../../(public)/distribution-map/components/MapProvider";
+import MapProvider from "@/app/context/MapProvider";
 type FormField = {
   dateAccomplished: string;
   accountNumber: string;
@@ -73,13 +73,7 @@ const ChangeMeterForm = () => {
     defaultValue: "",
   });
 
-  // WATH CONSUMER NAME
-  const consumerName = useWatch({
-    control: control,
-    name: "consumerName",
-    defaultValue: "",
-  });
-
+ 
   // WATCH IMAGE UPLOAD
   const attachment = useWatch({
     control: control,
