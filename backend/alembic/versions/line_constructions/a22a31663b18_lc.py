@@ -187,7 +187,8 @@ def upgrade() -> None:
         new_column_name="transformer_type_id",
         nullable=True,
         schema="construction",
-        postgresql_using="type::integer"
+        postgresql_using="type::integer",
+        if_exists=True
     )
     op.create_foreign_key(
         "transformer_installation_transofmer_type_id_fkey",
@@ -225,7 +226,8 @@ def downgrade() -> None:
         new_column_name="type",
         nullable=True,
         schema="construction",
-        postgresql_using="transformer_type_id::text"
+        postgresql_using="transformer_type_id::text",
+        if_exists=True
     )
     
     op.drop_column("construction", "datetime_synced", schema="construction", if_exists=True)
