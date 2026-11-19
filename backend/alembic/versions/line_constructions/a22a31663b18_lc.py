@@ -77,6 +77,7 @@ def upgrade() -> None:
     op.create_table(
         "man_power_status",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("uuid", sa.UUID(), nullable=True, unique=True),
         sa.Column("construction_id", sa.Integer(), sa.ForeignKey(
             "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True),
         sa.Column("assigned_personnel", sa.String(), nullable=True),
@@ -90,8 +91,10 @@ def upgrade() -> None:
     op.create_table(
         "vehicle_report",
         sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("uuid", sa.UUID(), nullable=True, unique=True),
         sa.Column("construction_id", sa.Integer(), sa.ForeignKey(
             "construction.construction.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True),
+    
         sa.Column("vehicle_name", sa.String(), nullable=True),
         sa.Column("mileage_start", sa.Float(), nullable=True),
         sa.Column("mileage_end", sa.Float(), nullable=True),
